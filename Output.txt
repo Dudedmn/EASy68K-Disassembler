@@ -1,0 +1,2 @@
+MOVE.L D4,D5
+ADD.B D0,D1
