@@ -26,15 +26,20 @@ START:
     *   (2) how to build a (Callee-Saved) method
     *   (3) how to call that method using JSR (return with RTS)
     ***********************************************************
-    LEA MSG1, A1        ; buffer of chars to write
-    JSR TrapTask13
     
-    LEA MSG2, A1        ; buffer of chars to write    
-    JSR TrapTask13
+    ;LEA DATACHECK,A1
+    ;JSR check_DATA
 
     **************************************************
     *Your disassembler code goes here
     **************************************************
+   
+    ;MOVE.W %0100111001110001, (A1)
+    ;LEA NOPCHECK,A1
+    ;JSR check_NOP
+
+    
+    
     
     ;Open config.cfg (trap subtasks 50-59) (this is an IO responsibility if 3 team members)
     ;load start and end address as longs
@@ -45,24 +50,26 @@ START:
     SIMHALT
 
 *********************************************************************************
-* Method Name: yourDisassemblerFirstMethodHere
-* Description: call this method from your code above; see the examples above on
-*   how to call methods and use them profusely as you build your final project
+* Method Name: Check for NOP Operation
+* Description: Looks for the Binary code of NOP or 0100111001110001 or $4E71 in hex
 *
-* Preconditions:  TBA
-* Postconditions: TBA
+* Preconditions:  D1 has the inputted value of NOP
+* Postconditions: NOP is printed
 *********************************************************************************
-method1:
-        NOP
+check_NOP:
+        CMPI #%0100111001110001, D1
+        BEQ PRINT_NOP
+        CMPI #$4E71, D1
+        BEQ PRINT_NOP
         RTS
 *********************************************************************************
-* Method Name: yourDisassemblerSecondMethodHere
-* Description:    TBA
+* Method Name: check_DATA
+* Description:    Checks the validity of a binary input
 *
 * Preconditions:  TBA
 * Postconditions: TBA
 *********************************************************************************
-method2:
+check_DATA:
         NOP
         RTS
 *********************************************************************************
@@ -88,6 +95,16 @@ method2:
 *  D5 holds number of bytes to write
 ********************************************************************************
 toSave REG D0-D5/A2-A3
+
+PRINT_NOP:
+    LEA PRINTNOP, A1        ; buffer of chars to write
+    JSR TrapTask13
+
+PRINT_DATA:
+    LEA PRINTDATA, A1        ; buffer of chars to write
+    JSR TrapTask13
+    
+
 TrapTask13:
     *******************************************************************
     * Method initialization, regsiter spilling, parameter saving, etc.
@@ -195,8 +212,10 @@ countDone:
 CR                  EQU $0D
 LF                  EQU $0A
 NEWLINE             DC.B CR,LF,0  
-MSG1                DC.B 'DATA',0
-MSG2                DC.B 'NOP',0
+PRINTDATA           DC.B 'DATA',0
+PRINTNOP            DC.B 'NOP',0
+NOPCHECK            DC.B  'Checking input for NOP',0
+DATACHECK           DC.B  'Checking input for valid data',0
 outFilename         DC.B 'Output.txt',0
 byteRead            DS.B 1
 
