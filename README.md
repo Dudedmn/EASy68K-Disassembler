@@ -3,7 +3,7 @@ EASy68K-Disassembler made for CSS 422
 
 ## Members
 + Daniel Yan
-+ Fahad Alsheri
++ Fahad Alshehri
 + Denny Park
 # Week 1 
 - [X] Make a meetup schedule
