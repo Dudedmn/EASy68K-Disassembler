@@ -1,0 +1,203 @@
+00000000 Starting Address
+Assembler used: EASy68K Editor/Assembler v5.16.01
+Created On: 3/1/2019 5:10:34 PM
+
+00000000                             1  *-----------------------------------------------------------
+00000000                             2  * Title      :
+00000000                             3  * Written by : Daniel Yan
+00000000                             4  * Date       : 2/28/2019
+00000000                             5  * Description: Op code determining process guide through branches/groupings
+00000000                             6  *-----------------------------------------------------------
+00000000                             7  *First Nibble Values (15-12)
+00000000                             8  *Value                  Operations
+00000000                             9  *$0                     GROUP_0: ORI,BCLR,CMPI
+00000000                            10  *$1                     MOVE.B                   
+00000000                            11  *$2                     GROUP_2: MOVE.L, MOVEA.L
+00000000                            12  *$3                     GROUP_3: MOVE.W, MOVEA.W
+00000000                            13  *$4                     GROUP_4: LEA,JSR,RTS,NEG
+00000000                            14  *$5                     Unknown
+00000000                            15  *$6                     GROUP_6: SUBQ,Bcc, BRA
+00000000                            16  *$7                     Unknown
+00000000                            17  *$8                     GROUP_8: DIVS, OR
+00000000                            18  *$9                     SUB
+00000000                            19  *$A                     Unknown
+00000000                            20  *$B                     EOR
+00000000                            21  *$C                     GROUP_C: CMP, MULS
+00000000                            22  *$D                     GROUP_D: ADD, ADDA
+00000000                            23  *$E                     GROUP_E: LSR, LSL, ASR, ASL, ROL, ROR
+00000000                            24  *$F                     Unknown
+00000000                            25  *%0001 001000010000
+00000000                            26  *%LEA <an> 111 <xn><mode> -> <an><xn><mode> -> binary
+00000000                            27  *Need to bitmask (AND, OR, XOR) or bitshift to determine subgroupings
+00000000                            28  *Reading a starting and ending address are on a word boundary, even passes
+00000000                            29  *Bit masking
+00000000                            30  
+00000000  4EF9 0000004E             31  Opcode_JMP_Table    JMP     GROUP_0     ;$0| ORI, BCLR, CMPI
+00000006  4EF9 0000004E             32                      JMP     OP_MOVE_B   ;$1| MOVE.B
+0000000C  4EF9 0000004E             33                      JMP     GROUP_2     ;$2|
+00000012  4EF9 0000004E             34                      JMP     GROUP_3     ;$3|
+00000018  4EF9 0000004E             35                      JMP     GROUP_4     ;$4|
+0000001E  4EF9 0000004E             36                      JMP     GROUP_6     ;$6|
+00000024  4EF9 0000004E             37                      JMP     GROUP_8     ;$8|
+0000002A  4EF9 0000004E             38                      JMP     OP_SUB      ;$9|
+00000030  4EF9 0000004E             39                      JMP     OP_EOR      ;$B|
+00000036  4EF9 0000004E             40                      JMP     GROUP_C     ;$C| CMP, MULS
+0000003C  4EF9 0000004E             41                      JMP     GROUP_D     ;$D| ADD. ADDA
+00000042  4EF9 0000004E             42                      JMP     GROUP_E     ;$E| LSR, LSL, ASR, ASL, ROL, ROR
+00000048  4EF9 0000004E             43                      JMP     INVALID_OP  ;$5, $7, $A, $F -- Display: DATA, $WXYZ
+0000004E                            44  GROUP_0
+0000004E                            45  
+0000004E                            46  OP_MOVE_B
+0000004E                            47  
+0000004E                            48  GROUP_2
+0000004E                            49  
+0000004E                            50  GROUP_3
+0000004E                            51  
+0000004E                            52  GROUP_4
+0000004E                            53  
+0000004E                            54  GROUP_6
+0000004E                            55  
+0000004E                            56  GROUP_8
+0000004E                            57  
+0000004E                            58  OP_SUB
+0000004E                            59  
+0000004E                            60  OP_EOR
+0000004E                            61  
+0000004E                            62  GROUP_C
+0000004E                            63  
+0000004E                            64  GROUP_D
+0000004E                            65  
+0000004E                            66  GROUP_E
+0000004E                            67  
+0000004E                            68  INVALID_OP   
+0000004E                            69  
+0000004E                            70  *Checking   0101
+0000004E                            71  *AND        0010
+0000004E                            72  *RESULT     0000
+0000004E                            73  
+0000004E                            74  
+0000004E                            75  *GROUP_0
+0000004E                            76  *Value                  Operations
+0000004E                            77  *$0                     ORI
+0000004E                            78  *$1                     
+0000004E                            79  *$2
+0000004E                            80  *$3
+0000004E                            81  *$4
+0000004E                            82  *$5
+0000004E                            83  *$6
+0000004E                            84  *$7
+0000004E                            85  *$8                     BCLR
+0000004E                            86  *$9
+0000004E                            87  *$A
+0000004E                            88  *$B
+0000004E                            89  *$C                     CMPI
+0000004E                            90  *$D
+0000004E                            91  *$E
+0000004E                            92  *$F
+0000004E                            93  
+0000004E                            94  
+0000004E                            95  *GROUP_2
+0000004E                            96  *Value                  Operations
+0000004E                            97  *8-6 bitmask address    MOVEA.L address mode:(001)
+0000004E                            98  *8-6 bitmask address    MOVE.L  
+0000004E                            99  *Everything else is DATA
+0000004E                           100  
+0000004E                           101  
+0000004E                           102  *GROUP_3
+0000004E                           103  *Value                  Operations
+0000004E                           104  
+0000004E                           105  
+0000004E                           106  
+0000004E                           107  *GROUP_4
+0000004E                           108  *Value                  Operations
+0000004E                           109  *GROUP_6
+0000004E                           110  *Value                  Operations
+0000004E                           111  *GROUP_7
+0000004E                           112  *Value                  Operations
+0000004E                           113  *GROUP_C
+0000004E                           114  *Value                  Operations
+0000004E                           115  *GROUP_D
+0000004E                           116  *Value                  Operations
+0000004E                           117  *GROUP_E
+0000004E                           118  *Value                  Operations
+0000004E                           119  
+0000004E                           120  
+0000004E                           121  *Second Nibble Values (11-8)
+0000004E                           122  *Value                  Operations
+0000004E                           123  *$0                     ORI
+0000004E                           124  *$1
+0000004E                           125  *$2
+0000004E                           126  *$3
+0000004E                           127  *$4
+0000004E                           128  *$5
+0000004E                           129  *$6
+0000004E                           130  *$7
+0000004E                           131  *$8                     BCLR
+0000004E                           132  *$9
+0000004E                           133  *$A
+0000004E                           134  *$B
+0000004E                           135  *$C                     CMPI
+0000004E                           136  *$D
+0000004E                           137  *$E
+0000004E                           138  *$F
+0000004E                           139  *Third Nibble Values (7-4)
+0000004E                           140  *Value                  Operations
+0000004E                           141  *$0
+0000004E                           142  *$1
+0000004E                           143  *$2
+0000004E                           144  *$3
+0000004E                           145  *$4
+0000004E                           146  *$5
+0000004E                           147  *$6
+0000004E                           148  *$7
+0000004E                           149  *$8
+0000004E                           150  *$9
+0000004E                           151  *$A
+0000004E                           152  *$B
+0000004E                           153  *$C
+0000004E                           154  *$D
+0000004E                           155  *$E
+0000004E                           156  *$F
+0000004E                           157  *Fourth Nibble Values (3-0)
+0000004E                           158  *Value                  Operations
+0000004E                           159  *$0
+0000004E                           160  *$1
+0000004E                           161  *$2
+0000004E                           162  *$3
+0000004E                           163  *$4
+0000004E                           164  *$5
+0000004E                           165  *$6
+0000004E                           166  *$7
+0000004E                           167  *$8
+0000004E                           168  *$9
+0000004E                           169  *$A
+0000004E                           170  *$B
+0000004E                           171  *$C
+0000004E                           172  *$D
+0000004E                           173  *$E
+0000004E                           174  *$F
+0000004E                           175  
+0000004E                           176  
+Line 177 WARNING: END directive missing, starting address not set
+
+No errors detected
+1 warning generated
+
+
+SYMBOL TABLE INFORMATION
+Symbol-name         Value
+-------------------------
+GROUP_0             4E
+GROUP_2             4E
+GROUP_3             4E
+GROUP_4             4E
+GROUP_6             4E
+GROUP_8             4E
+GROUP_C             4E
+GROUP_D             4E
+GROUP_E             4E
+INVALID_OP          4E
+OPCODE_JMP_TABLE    0
+OP_EOR              4E
+OP_MOVE_B           4E
+OP_SUB              4E

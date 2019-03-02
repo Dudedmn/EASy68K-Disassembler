@@ -14,7 +14,7 @@
 *$5                     Unknown
 *$6                     GROUP_6: SUBQ,Bcc, BRA
 *$7                     Unknown
-*$8                     GROUP_7: DIVS, OR
+*$8                     GROUP_8: DIVS, OR
 *$9                     SUB
 *$A                     Unknown
 *$B                     EOR
@@ -28,6 +28,54 @@
 *Reading a starting and ending address are on a word boundary, even passes
 *Bit masking
 
+********************JMP TABLE FOR OPERATIONS************************************
+Opcode_JMP_Table    JMP     GROUP_0     ;$0| ORI, BCLR, CMPI
+                    JMP     OP_MOVE_B   ;$1| MOVE.B
+                    JMP     GROUP_2     ;$2|
+                    JMP     GROUP_3     ;$3|
+                    JMP     GROUP_4     ;$4|
+                    JMP     GROUP_6     ;$6|
+                    JMP     GROUP_8     ;$8|
+                    JMP     OP_SUB      ;$9|
+                    JMP     OP_EOR      ;$B|
+                    JMP     GROUP_C     ;$C| CMP, MULS
+                    JMP     GROUP_D     ;$D| ADD. ADDA
+                    JMP     GROUP_E     ;$E| LSR, LSL, ASR, ASL, ROL, ROR
+                    JMP     INVALID_OP  ;$5, $7, $A, $F -- Display: DATA, $WXYZ
+********************************************************************************
+
+*******************JMP LABELS **************************************************                      
+*******
+* ORI - $00, Bits 7-6 size, Bits 5-3 EA Mode, 2-0 EA Reg
+* BCLR - $0, 11-9 Register, 8-6 %110, 5-3 EA Mode, 2-0 EA Reg
+* CMPI
+*******
+GROUP_0
+
+OP_MOVE_B
+
+GROUP_2
+
+GROUP_3
+
+GROUP_4
+
+GROUP_6
+
+GROUP_8
+
+OP_SUB
+
+OP_EOR
+
+GROUP_C
+
+GROUP_D
+
+GROUP_E
+
+INVALID_OP   
+*********************************************************************************
 *Checking   0101
 *AND        0010
 *RESULT     0000
@@ -133,6 +181,7 @@
 *$D
 *$E
 *$F
+
 
 
 *~Font name~Courier New~
