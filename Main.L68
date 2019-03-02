@@ -1,6 +1,6 @@
 00001000 Starting Address
 Assembler used: EASy68K Editor/Assembler v5.16.01
-Created On: 2/28/2019 4:32:43 PM
+Created On: 3/1/2019 4:41:50 PM
 
 00000000                             1  *--------------------------------------------------------------------------
 00000000                             2  * Title      : Disassembler Skeleton 
@@ -37,192 +37,195 @@ Created On: 2/28/2019 4:32:43 PM
 00001000                            33      **************************************************
 00001000                            34      *Your disassembler code goes here
 00001000                            35      **************************************************
-00001000  32B8 4E71                 36      MOVE.W %0100111001110001, (A1)
-00001004  43F9 000010E4             37      LEA NOPCHECK,A1
-0000100A  4EB9 00001014             38      JSR check_NOP
-00001010                            39  
-00001010                            40      
-00001010                            41      
-00001010                            42      
-00001010                            43      ;Open config.cfg (trap subtasks 50-59) (this is an IO responsibility if 3 team members)
-00001010                            44      ;load start and end address as longs
-00001010                            45      
-00001010                            46      ;loop from start to end, printing out the instruction or DATA if not recognized 
-00001010                            47      ;   use my method below (printStringToFileAndConsole) to print out the individual instruction (or DATA)
-00001010                            48  
-00001010  FFFF FFFF                 49      SIMHALT
-00001014                            50  
-00001014                            51  *********************************************************************************
-00001014                            52  * Method Name: Check for NOP Operation
-00001014                            53  * Description: Looks for the Binary code of NOP or 0100111001110001 or $4E71 in hex
-00001014                            54  *
-00001014                            55  * Preconditions:  D1 has the inputted value of NOP
-00001014                            56  * Postconditions: NOP is printed
-00001014                            57  *********************************************************************************
-00001014                            58  check_NOP:
-00001014  0C41 4E71                 59          CMPI #%0100111001110001, D1
-00001018  6700 0010                 60          BEQ PRINT_NOP
-0000101C  0C41 4E71                 61          CMPI #$4E71, D1
-00001020  6700 0008                 62          BEQ PRINT_NOP
-00001024  4E75                      63          RTS
-00001026                            64  *********************************************************************************
-00001026                            65  * Method Name: check_DATA
-00001026                            66  * Description:    Checks the validity of a binary input
-00001026                            67  *
-00001026                            68  * Preconditions:  TBA
-00001026                            69  * Postconditions: TBA
-00001026                            70  *********************************************************************************
-00001026                            71  check_DATA:
-00001026  4E71                      72          NOP
-00001028  4E75                      73          RTS
-0000102A                            74  *********************************************************************************
-0000102A                            75  * Method Name: TrapTask13
-0000102A                            76  * Description: Creates a file if none exists, and appends bytes to that file
-0000102A                            77  *   while also echoing the written bytes to the screen.  You shouldn't need to
-0000102A                            78  *   change this code.
-0000102A                            79  *
-0000102A                            80  * Calling Convention: Callee-Saved 
-0000102A                            81  *
-0000102A                            82  * Preconditions & Method Input:
-0000102A                            83  *   A1 points to the null-terminated buffer to write (newline will be added for you)
-0000102A                            84  *
-0000102A                            85  * Postconditions & Output:
-0000102A                            86  *   ALL files that were previously open will be CLOSED (FileIDs will be invalid)
-0000102A                            87  *   See 'Output.txt' in directory for the results, also piped to the console
-0000102A                            88  *
-0000102A                            89  *
-0000102A                            90  *  A2 holds a pointer to null terminated string to write (input)
-0000102A                            91  *  A3 points to the null-terminated file name
-0000102A                            92  *  D3 holds the number of bytes already in the file to write
-0000102A                            93  *
-0000102A                            94  *  D5 holds number of bytes to write
-0000102A                            95  ********************************************************************************
-0000102A                            96  toSave REG D0-D5/A2-A3
-0000102A                            97  
-0000102A                            98  PRINT_NOP:
-0000102A  43F9 000010E0             99      LEA PRINTNOP, A1        ; buffer of chars to write
-00001030  4EB9 00001042            100      JSR TrapTask13
-00001036                           101  
-00001036                           102  PRINT_DATA:
-00001036  43F9 000010DB            103      LEA PRINTDATA, A1        ; buffer of chars to write
-0000103C  4EB9 00001042            104      JSR TrapTask13
-00001042                           105      
-00001042                           106  
-00001042                           107  TrapTask13:
-00001042                           108      *******************************************************************
-00001042                           109      * Method initialization, regsiter spilling, parameter saving, etc.
-00001042                           110      *******************************************************************
-00001042  48E7 FC30                111      MOVEM.L toSave, -(SP)   ;  Callee-Saved, so save and restore     
-00001046                           112        
-00001046  2449                     113      MOVEA.L A1, A2 ; save this buffer to write
-00001048  47F9 00001119            114      LEA outFilename, A3  ; save this for later, too
-0000104E                           115        
-0000104E  303C 0032                116      move #50,d0   
-00001052  4E4F                     117      trap #15 ; close all files, suggested to begin any IO 
-00001054                           118      *******************************************************************
-00001054                           119      * End Method Init
-00001054                           120      *******************************************************************
-00001054                           121  
-00001054                           122      ******************************************************************************************
-00001054                           123      * Calculate the number of bytes to write by searching for the null in the target buffer A0
-00001054                           124      ******************************************************************************************
-00001054  4285                     125      CLR.L D5 *D5 is now the number of bytes to write
-00001056                           126  nullLoop:
-00001056  1019                     127      MOVE.B (A1)+, D0
-00001058  0C00 0000                128      CMPI.B #0,D0  * compare to null
-0000105C  6700 0006                129      BEQ findNullLoopDone
-00001060  5245                     130      ADDI.W #1, D5
-00001062  60F2                     131      BRA nullLoop
-00001064                           132      
-00001064                           133  findNullLoopDone:
-00001064  224B                     134      MOVEA.L A3, A1 * reset A1 so it points to the file to write to (to open, next)
-00001066                           135      
-00001066                           136      ;check if file exists, and open with task 51 if so, otherwise 52
-00001066                           137      ;(precondition here is A1 points to the null-terminated filename )
-00001066  103C 0033                138      MOVE.B #51, D0      ;open file (task 51 is existing, 52 is new)
-0000106A  4E4F                     139      trap #15
-0000106C                           140        
-0000106C                           141      if.w D0 <NE> #0 then.s         ; if file error (404, not found)
-00001072  103C 0034                142          MOVE.B #52, D0             ; open new file (52 is new)
-00001076  4E4F                     143          trap #15
-00001078                           144      endi
-00001078                           145      
-00001078                           146      ********************************************************************************************************* 
-00001078                           147      * Seek to END of FILE by counting the number of bytes, closing, reopening, then seeking.
-00001078                           148      *    (first, count number of bytes already in the file to obtain seek position)
-00001078                           149      *********************************************************************************************************
-00001078  4283                     150      Clr.L D3   ;TODO: reg save, D3 is now our count of bytes read
-0000107A  7401                     151      MOVE.L #1, D2 ; read one byte at a time
-0000107C  43F9 00001124            152      LEA byteRead, A1
-00001082                           153      
-00001082                           154  countLoop:
-00001082  103C 0035                155      MOVE.B #53, D0 ; try to read one byte (TODO: move out of loop)
-00001086  4E4F                     156      trap #15
-00001088                           157      
-00001088  0C40 0001                158      CMPI.W #1,D0  ;1 == EOF
-0000108C  6700 0006                159      BEQ countDone
-00001090  5243                     160      ADDI #1, D3
-00001092  60EE                     161      BRA countLoop
-00001094                           162      
-00001094                           163  countDone:    
-00001094                           164      * close this file
-00001094  303C 0038                165       move #56,d0  
-00001098  4E4F                     166       trap #15 
-0000109A                           167       
-0000109A                           168       * reopen the target file
-0000109A  224B                     169       MOVE.L A3,A1
-0000109C  303C 0033                170       MOVE #51, D0
-000010A0  4E4F                     171       trap #15
-000010A2                           172       
-000010A2                           173      * seek to right position, then continue with writing
-000010A2  2403                     174      MOVE.L D3, D2 ; move the number of bytes found in the file to D2
-000010A4  303C 0037                175      MOVE #55, D0  ; position file task
-000010A8  4E4F                     176      trap #15
-000010AA                           177  
-000010AA                           178      ******************************************************************************
-000010AA                           179      * Actually write the buffer to the file, after caculating the number of bytes 
-000010AA                           180      *  to write and after seeking to the right location in the file for append
-000010AA                           181      ******************************************************************************
-000010AA                           182  
-000010AA  2405                     183      MOVE.L D5, D2 ; restore this for the actually writing the buffer 
-000010AC                           184      ; assumes A0 hasnt changed since handed to this method      
-000010AC  224A                     185      MOVEA.L A2, A1 ; load the address of the buffer we want to write to disk
-000010AE                           186      ; assumes file ID is still stored in D1.L  
-000010AE  103C 0036                187      MOVE.B #54, D0 ; subtask 54 is write to open file (append, or?), assumes D2 holds # of bytes
-000010B2  4E4F                     188      trap #15
-000010B4                           189  
-000010B4                           190      ; add a newline to the file output
-000010B4  43F9 000010D8            191      LEA NEWLINE, A1
-000010BA  103C 0036                192      MOVE.B #54, D0 
-000010BE  143C 0002                193      MOVE.B #2,D2  ; kills # of bytes to write from input param
-000010C2  4E4F                     194      trap #15
-000010C4                           195      
-000010C4                           196      ; finally, close only this file
-000010C4  103C 0038                197      MOVE.B #56, D0 ; close file task
-000010C8  4E4F                     198      trap #15
-000010CA                           199    
-000010CA                           200      ; report to screen
-000010CA  224A                     201      MOVEA.L A2, A1 ; load the address of the buffer we want to write to disk & screen
-000010CC  103C 000D                202      MOVE.B #13, D0
-000010D0  4E4F                     203      trap #15
-000010D2                           204        
-000010D2                           205      ; restore context
-000010D2  4CDF 0C3F                206      MOVEM.L (SP)+, toSave
-000010D6                           207      
-000010D6  4E75                     208      RTS
-000010D8                           209      
-000010D8                           210  * Required variables and constants go here for your Disassembler
-000010D8  =0000000D                211  CR                  EQU $0D
-000010D8  =0000000A                212  LF                  EQU $0A
-000010D8= 0D 0A 00                 213  NEWLINE             DC.B CR,LF,0  
-000010DB= 44 41 54 41 00           214  PRINTDATA           DC.B 'DATA',0
-000010E0= 4E 4F 50 00              215  PRINTNOP            DC.B 'NOP',0
-000010E4= 43 68 65 63 6B 69 ...    216  NOPCHECK            DC.B  'Checking input for NOP',0
-000010FB= 43 68 65 63 6B 69 ...    217  DATACHECK           DC.B  'Checking input for valid data',0
-00001119= 4F 75 74 70 75 74 ...    218  outFilename         DC.B 'Output.txt',0
-00001124                           219  byteRead            DS.B 1
-00001125                           220  
-00001125                           221     END    START        ; last line of source
+00001000                            36  ***************TEST NOP   
+00001000  323C 4E71                 37      MOVE.W #%0100111001110001,D1
+00001004  43F9 000010F1             38      LEA NOPCHECK,A1
+0000100A  4EB9 00001024             39      JSR check_NOP
+00001010                            40  ***************TEST RTS
+00001010  323C 4E75                 41      MOVE.W #%0100111001110101,D1
+00001014  43F9 00001108             42      LEA RTSCHECK,A1
+0000101A  4EB9 0000102E             43      JSR check_RTS
+00001020                            44      
+00001020                            45      
+00001020  FFFF FFFF                 46      SIMHALT
+00001024                            47      ;Open config.cfg (trap subtasks 50-59) (this is an IO responsibility if 3 team members)
+00001024                            48      ;load start and end address as longs
+00001024                            49      
+00001024                            50      ;loop from start to end, printing out the instruction or DATA if not recognized 
+00001024                            51      ;   use my method below (printStringToFileAndConsole) to print out the individual instruction (or DATA)
+00001024                            52  
+00001024                            53  
+00001024                            54  *********************************************************************************
+00001024                            55  * Method Name: check_NOP
+00001024                            56  * Description: Looks for the Binary code of NOP or 0100111001110001 or $4E71 in hex.
+00001024                            57  * If the value is found, then print out NOP. Otherwise simply RTS.
+00001024                            58  * Preconditions:  D1 has some sort of binary input.
+00001024                            59  * Postconditions: 'NOP' is printed to console if NOP binary value is found.
+00001024                            60  *********************************************************************************
+00001024                            61  check_NOP:
+00001024  0C41 4E71                 62          CMPI #$4E71, D1
+00001028  6700 000E                 63          BEQ PRINT_NOP
+0000102C  4E75                      64          RTS
+0000102E                            65  *********************************************************************************
+0000102E                            66  * Method Name: check_RTS
+0000102E                            67  * Description: Looks for the binary value of RTS $4E75 from data register D1 and
+0000102E                            68  * compares the value of RTS to D1. If it equals it prints 'RTS' otherwise it will
+0000102E                            69  * only RTS.
+0000102E                            70  * Preconditions:  Some value in D1
+0000102E                            71  * Postconditions: Prints 'RTS' in the console if found, otherwise just RTS
+0000102E                            72  *********************************************************************************
+0000102E                            73  check_RTS:
+0000102E  0C41 4E75                 74          CMPI #$4E75, D1
+00001032  6700 0010                 75          BEQ  PRINT_RST
+00001036  4E75                      76          RTS
+00001038                            77  *********************************************************************************
+00001038                            78  * Method Name: TrapTask13
+00001038                            79  * Description: Creates a file if none exists, and appends bytes to that file
+00001038                            80  *   while also echoing the written bytes to the screen.  You shouldn't need to
+00001038                            81  *   change this code.
+00001038                            82  *
+00001038                            83  * Calling Convention: Callee-Saved 
+00001038                            84  *
+00001038                            85  * Preconditions & Method Input:
+00001038                            86  *   A1 points to the null-terminated buffer to write (newline will be added for you)
+00001038                            87  *
+00001038                            88  * Postconditions & Output:
+00001038                            89  *   ALL files that were previously open will be CLOSED (FileIDs will be invalid)
+00001038                            90  *   See 'Output.txt' in directory for the results, also piped to the console
+00001038                            91  *
+00001038                            92  *
+00001038                            93  *  A2 holds a pointer to null terminated string to write (input)
+00001038                            94  *  A3 points to the null-terminated file name
+00001038                            95  *  D3 holds the number of bytes already in the file to write
+00001038                            96  *
+00001038                            97  *  D5 holds number of bytes to write
+00001038                            98  ********************************************************************************
+00001038                            99  toSave REG D0-D5/A2-A3
+00001038                           100  
+00001038                           101  PRINT_NOP:
+00001038  43F9 000010ED            102      LEA PRINTNOP, A1        ; buffer of chars to write
+0000103E  4EB9 00001050            103      JSR TrapTask13
+00001044                           104  
+00001044                           105  PRINT_RST:
+00001044  43F9 000010E9            106      LEA PRINTRTS, A1        ; buffer of chars to write
+0000104A  4EB9 00001050            107      JSR TrapTask13
+00001050                           108      
+00001050                           109  
+00001050                           110  TrapTask13:
+00001050                           111      *******************************************************************
+00001050                           112      * Method initialization, regsiter spilling, parameter saving, etc.
+00001050                           113      *******************************************************************
+00001050  48E7 FC30                114      MOVEM.L toSave, -(SP)   ;  Callee-Saved, so save and restore     
+00001054                           115        
+00001054  2449                     116      MOVEA.L A1, A2 ; save this buffer to write
+00001056  47F9 0000111F            117      LEA outFilename, A3  ; save this for later, too
+0000105C                           118        
+0000105C  303C 0032                119      move #50,d0   
+00001060  4E4F                     120      trap #15 ; close all files, suggested to begin any IO 
+00001062                           121      *******************************************************************
+00001062                           122      * End Method Init
+00001062                           123      *******************************************************************
+00001062                           124  
+00001062                           125      ******************************************************************************************
+00001062                           126      * Calculate the number of bytes to write by searching for the null in the target buffer A0
+00001062                           127      ******************************************************************************************
+00001062  4285                     128      CLR.L D5 *D5 is now the number of bytes to write
+00001064                           129  nullLoop:
+00001064  1019                     130      MOVE.B (A1)+, D0
+00001066  0C00 0000                131      CMPI.B #0,D0  * compare to null
+0000106A  6700 0006                132      BEQ findNullLoopDone
+0000106E  5245                     133      ADDI.W #1, D5
+00001070  60F2                     134      BRA nullLoop
+00001072                           135      
+00001072                           136  findNullLoopDone:
+00001072  224B                     137      MOVEA.L A3, A1 * reset A1 so it points to the file to write to (to open, next)
+00001074                           138      
+00001074                           139      ;check if file exists, and open with task 51 if so, otherwise 52
+00001074                           140      ;(precondition here is A1 points to the null-terminated filename )
+00001074  103C 0033                141      MOVE.B #51, D0      ;open file (task 51 is existing, 52 is new)
+00001078  4E4F                     142      trap #15
+0000107A                           143        
+0000107A                           144      if.w D0 <NE> #0 then.s         ; if file error (404, not found)
+00001080  103C 0034                145          MOVE.B #52, D0             ; open new file (52 is new)
+00001084  4E4F                     146          trap #15
+00001086                           147      endi
+00001086                           148      
+00001086                           149      ********************************************************************************************************* 
+00001086                           150      * Seek to END of FILE by counting the number of bytes, closing, reopening, then seeking.
+00001086                           151      *    (first, count number of bytes already in the file to obtain seek position)
+00001086                           152      *********************************************************************************************************
+00001086  4283                     153      Clr.L D3   ;TODO: reg save, D3 is now our count of bytes read
+00001088  7401                     154      MOVE.L #1, D2 ; read one byte at a time
+0000108A  43F9 0000112A            155      LEA byteRead, A1
+00001090                           156      
+00001090                           157  countLoop:
+00001090  103C 0035                158      MOVE.B #53, D0 ; try to read one byte (TODO: move out of loop)
+00001094  4E4F                     159      trap #15
+00001096                           160      
+00001096  0C40 0001                161      CMPI.W #1,D0  ;1 == EOF
+0000109A  6700 0006                162      BEQ countDone
+0000109E  5243                     163      ADDI #1, D3
+000010A0  60EE                     164      BRA countLoop
+000010A2                           165      
+000010A2                           166  countDone:    
+000010A2                           167      * close this file
+000010A2  303C 0038                168       move #56,d0  
+000010A6  4E4F                     169       trap #15 
+000010A8                           170       
+000010A8                           171       * reopen the target file
+000010A8  224B                     172       MOVE.L A3,A1
+000010AA  303C 0033                173       MOVE #51, D0
+000010AE  4E4F                     174       trap #15
+000010B0                           175       
+000010B0                           176      * seek to right position, then continue with writing
+000010B0  2403                     177      MOVE.L D3, D2 ; move the number of bytes found in the file to D2
+000010B2  303C 0037                178      MOVE #55, D0  ; position file task
+000010B6  4E4F                     179      trap #15
+000010B8                           180  
+000010B8                           181      ******************************************************************************
+000010B8                           182      * Actually write the buffer to the file, after caculating the number of bytes 
+000010B8                           183      *  to write and after seeking to the right location in the file for append
+000010B8                           184      ******************************************************************************
+000010B8                           185  
+000010B8  2405                     186      MOVE.L D5, D2 ; restore this for the actually writing the buffer 
+000010BA                           187      ; assumes A0 hasnt changed since handed to this method      
+000010BA  224A                     188      MOVEA.L A2, A1 ; load the address of the buffer we want to write to disk
+000010BC                           189      ; assumes file ID is still stored in D1.L  
+000010BC  103C 0036                190      MOVE.B #54, D0 ; subtask 54 is write to open file (append, or?), assumes D2 holds # of bytes
+000010C0  4E4F                     191      trap #15
+000010C2                           192  
+000010C2                           193      ; add a newline to the file output
+000010C2  43F9 000010E6            194      LEA NEWLINE, A1
+000010C8  103C 0036                195      MOVE.B #54, D0 
+000010CC  143C 0002                196      MOVE.B #2,D2  ; kills # of bytes to write from input param
+000010D0  4E4F                     197      trap #15
+000010D2                           198      
+000010D2                           199      ; finally, close only this file
+000010D2  103C 0038                200      MOVE.B #56, D0 ; close file task
+000010D6  4E4F                     201      trap #15
+000010D8                           202    
+000010D8                           203      ; report to screen
+000010D8  224A                     204      MOVEA.L A2, A1 ; load the address of the buffer we want to write to disk & screen
+000010DA  103C 000D                205      MOVE.B #13, D0
+000010DE  4E4F                     206      trap #15
+000010E0                           207        
+000010E0                           208      ; restore context
+000010E0  4CDF 0C3F                209      MOVEM.L (SP)+, toSave
+000010E4                           210      
+000010E4  4E75                     211      RTS
+000010E6                           212      
+000010E6                           213  * Required variables and constants go here for your Disassembler
+000010E6  =0000000D                214  CR                  EQU $0D
+000010E6  =0000000A                215  LF                  EQU $0A
+000010E6= 0D 0A 00                 216  NEWLINE             DC.B CR,LF,0  
+000010E9= 52 54 53 00              217  PRINTRTS            DC.B 'RTS',0
+000010ED= 4E 4F 50 00              218  PRINTNOP            DC.B 'NOP',0
+000010F1= 43 68 65 63 6B 69 ...    219  NOPCHECK            DC.B  'Checking input for NOP',0
+00001108= 43 68 65 63 6B 69 ...    220  RTSCHECK            DC.B  'Checking input for RTS',0
+0000111F= 4F 75 74 70 75 74 ...    221  outFilename         DC.B 'Output.txt',0
+0000112A                           222  byteRead            DS.B 1
+0000112B                           223  
+0000112B                           224     END    START        ; last line of source
 
 No errors detected
 No warnings generated
@@ -231,24 +234,24 @@ No warnings generated
 SYMBOL TABLE INFORMATION
 Symbol-name         Value
 -------------------------
-BYTEREAD            1124
-CHECK_DATA          1026
-CHECK_NOP           1014
-COUNTDONE           1094
-COUNTLOOP           1082
+BYTEREAD            112A
+CHECK_NOP           1024
+CHECK_RTS           102E
+COUNTDONE           10A2
+COUNTLOOP           1090
 CR                  D
-DATACHECK           10FB
-FINDNULLLOOPDONE    1064
+FINDNULLLOOPDONE    1072
 LF                  A
-NEWLINE             10D8
-NOPCHECK            10E4
-NULLLOOP            1056
-OUTFILENAME         1119
-PRINTDATA           10DB
-PRINTNOP            10E0
-PRINT_DATA          1036
-PRINT_NOP           102A
+NEWLINE             10E6
+NOPCHECK            10F1
+NULLLOOP            1064
+OUTFILENAME         111F
+PRINTNOP            10ED
+PRINTRTS            10E9
+PRINT_NOP           1038
+PRINT_RST           1044
+RTSCHECK            1108
 START               1000
 TOSAVE              C3F
-TRAPTASK13          1042
-_00000000           1078
+TRAPTASK13          1050
+_00000000           1086

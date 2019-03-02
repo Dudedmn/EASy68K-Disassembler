@@ -1,6 +1,6 @@
 *--------------------------------------------------------------------------
-* Title      : Disassembler Skeleton 
-* Written by : You, and you should change all default comments
+* Title      : Disassembler for 422
+* Written by : Daniel, Denny, Fahad
 * Date       :
 * 
 * Description: This code contains a method for you to use
@@ -33,44 +33,46 @@ START:
     **************************************************
     *Your disassembler code goes here
     **************************************************
-   
-    ;MOVE.W %0100111001110001, (A1)
-    ;LEA NOPCHECK,A1
-    ;JSR check_NOP
-
+***************TEST NOP   
+    MOVE.W #%0100111001110001,D1
+    LEA NOPCHECK,A1
+    JSR check_NOP
+***************TEST RTS
+    MOVE.W #%0100111001110101,D1
+    LEA RTSCHECK,A1
+    JSR check_RTS
     
     
-    
+    SIMHALT
     ;Open config.cfg (trap subtasks 50-59) (this is an IO responsibility if 3 team members)
     ;load start and end address as longs
     
     ;loop from start to end, printing out the instruction or DATA if not recognized 
     ;   use my method below (printStringToFileAndConsole) to print out the individual instruction (or DATA)
 
-    SIMHALT
 
 *********************************************************************************
-* Method Name: Check for NOP Operation
-* Description: Looks for the Binary code of NOP or 0100111001110001 or $4E71 in hex
-*
-* Preconditions:  D1 has the inputted value of NOP
-* Postconditions: NOP is printed
+* Method Name: check_NOP
+* Description: Looks for the Binary code of NOP or 0100111001110001 or $4E71 in hex.
+* If the value is found, then print out NOP. Otherwise simply RTS.
+* Preconditions:  D1 has some sort of binary input.
+* Postconditions: 'NOP' is printed to console if NOP binary value is found.
 *********************************************************************************
 check_NOP:
-        CMPI #%0100111001110001, D1
-        BEQ PRINT_NOP
         CMPI #$4E71, D1
         BEQ PRINT_NOP
         RTS
 *********************************************************************************
-* Method Name: check_DATA
-* Description:    Checks the validity of a binary input
-*
-* Preconditions:  TBA
-* Postconditions: TBA
+* Method Name: check_RTS
+* Description: Looks for the binary value of RTS $4E75 from data register D1 and
+* compares the value of RTS to D1. If it equals it prints 'RTS' otherwise it will
+* only RTS.
+* Preconditions:  Some value in D1
+* Postconditions: Prints 'RTS' in the console if found, otherwise just RTS
 *********************************************************************************
-check_DATA:
-        NOP
+check_RTS:
+        CMPI #$4E75, D1
+        BEQ  PRINT_RST
         RTS
 *********************************************************************************
 * Method Name: TrapTask13
@@ -100,8 +102,8 @@ PRINT_NOP:
     LEA PRINTNOP, A1        ; buffer of chars to write
     JSR TrapTask13
 
-PRINT_DATA:
-    LEA PRINTDATA, A1        ; buffer of chars to write
+PRINT_RST:
+    LEA PRINTRTS, A1        ; buffer of chars to write
     JSR TrapTask13
     
 
@@ -212,10 +214,10 @@ countDone:
 CR                  EQU $0D
 LF                  EQU $0A
 NEWLINE             DC.B CR,LF,0  
-PRINTDATA           DC.B 'DATA',0
+PRINTRTS            DC.B 'RTS',0
 PRINTNOP            DC.B 'NOP',0
-NOPCHECK            DC.B  'Checking input for NOP',0
-DATACHECK           DC.B  'Checking input for valid data',0
+NOPCHECK            DC.B 'Checking input for NOP',0
+RTSCHECK            DC.B 'Checking input for RTS',0
 outFilename         DC.B 'Output.txt',0
 byteRead            DS.B 1
 
@@ -224,7 +226,3 @@ byteRead            DS.B 1
 
 
 
-*~Font name~Courier New~
-*~Font size~10~
-*~Tab type~1~
-*~Tab size~4~
