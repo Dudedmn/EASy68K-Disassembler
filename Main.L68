@@ -1,10 +1,10 @@
 00001000 Starting Address
 Assembler used: EASy68K Editor/Assembler v5.16.01
-Created On: 3/1/2019 4:41:50 PM
+Created On: 3/2/2019 4:24:45 PM
 
 00000000                             1  *--------------------------------------------------------------------------
-00000000                             2  * Title      : Disassembler Skeleton 
-00000000                             3  * Written by : You, and you should change all default comments
+00000000                             2  * Title      : Disassembler for 422
+00000000                             3  * Written by : Daniel, Denny, Fahad
 00000000                             4  * Date       :
 00000000                             5  * 
 00000000                             6  * Description: This code contains a method for you to use
@@ -39,11 +39,11 @@ Created On: 3/1/2019 4:41:50 PM
 00001000                            35      **************************************************
 00001000                            36  ***************TEST NOP   
 00001000  323C 4E71                 37      MOVE.W #%0100111001110001,D1
-00001004  43F9 000010F1             38      LEA NOPCHECK,A1
+00001004  43F9 000010F2             38      LEA NOPCHECK,A1
 0000100A  4EB9 00001024             39      JSR check_NOP
 00001010                            40  ***************TEST RTS
 00001010  323C 4E75                 41      MOVE.W #%0100111001110101,D1
-00001014  43F9 00001108             42      LEA RTSCHECK,A1
+00001014  43F9 00001109             42      LEA RTSCHECK,A1
 0000101A  4EB9 0000102E             43      JSR check_RTS
 00001020                            44      
 00001020                            45      
@@ -103,7 +103,7 @@ Created On: 3/1/2019 4:41:50 PM
 00001038                            99  toSave REG D0-D5/A2-A3
 00001038                           100  
 00001038                           101  PRINT_NOP:
-00001038  43F9 000010ED            102      LEA PRINTNOP, A1        ; buffer of chars to write
+00001038  43F9 000010EE            102      LEA PRINTNOP, A1        ; buffer of chars to write
 0000103E  4EB9 00001050            103      JSR TrapTask13
 00001044                           104  
 00001044                           105  PRINT_RST:
@@ -118,7 +118,7 @@ Created On: 3/1/2019 4:41:50 PM
 00001050  48E7 FC30                114      MOVEM.L toSave, -(SP)   ;  Callee-Saved, so save and restore     
 00001054                           115        
 00001054  2449                     116      MOVEA.L A1, A2 ; save this buffer to write
-00001056  47F9 0000111F            117      LEA outFilename, A3  ; save this for later, too
+00001056  47F9 00001120            117      LEA outFilename, A3  ; save this for later, too
 0000105C                           118        
 0000105C  303C 0032                119      move #50,d0   
 00001060  4E4F                     120      trap #15 ; close all files, suggested to begin any IO 
@@ -156,7 +156,7 @@ Created On: 3/1/2019 4:41:50 PM
 00001086                           152      *********************************************************************************************************
 00001086  4283                     153      Clr.L D3   ;TODO: reg save, D3 is now our count of bytes read
 00001088  7401                     154      MOVE.L #1, D2 ; read one byte at a time
-0000108A  43F9 0000112A            155      LEA byteRead, A1
+0000108A  43F9 0000112B            155      LEA byteRead, A1
 00001090                           156      
 00001090                           157  countLoop:
 00001090  103C 0035                158      MOVE.B #53, D0 ; try to read one byte (TODO: move out of loop)
@@ -218,14 +218,14 @@ Created On: 3/1/2019 4:41:50 PM
 000010E6  =0000000D                214  CR                  EQU $0D
 000010E6  =0000000A                215  LF                  EQU $0A
 000010E6= 0D 0A 00                 216  NEWLINE             DC.B CR,LF,0  
-000010E9= 52 54 53 00              217  PRINTRTS            DC.B 'RTS',0
-000010ED= 4E 4F 50 00              218  PRINTNOP            DC.B 'NOP',0
-000010F1= 43 68 65 63 6B 69 ...    219  NOPCHECK            DC.B  'Checking input for NOP',0
-00001108= 43 68 65 63 6B 69 ...    220  RTSCHECK            DC.B  'Checking input for RTS',0
-0000111F= 4F 75 74 70 75 74 ...    221  outFilename         DC.B 'Output.txt',0
-0000112A                           222  byteRead            DS.B 1
-0000112B                           223  
-0000112B                           224     END    START        ; last line of source
+000010E9= 44 41 54 41 00           217  PRINTRTS            DC.B 'DATA',0
+000010EE= 4E 4F 50 00              218  PRINTNOP            DC.B 'NOP',0
+000010F2= 43 68 65 63 6B 69 ...    219  NOPCHECK            DC.B 'Checking input for NOP',0
+00001109= 43 68 65 63 6B 69 ...    220  RTSCHECK            DC.B 'Checking input for RTS',0
+00001120= 4F 75 74 70 75 74 ...    221  outFilename         DC.B 'Output.txt',0
+0000112B                           222  byteRead            DS.B 1
+0000112C                           223  
+0000112C                           224     END    START        ; last line of source
 
 No errors detected
 No warnings generated
@@ -234,7 +234,7 @@ No warnings generated
 SYMBOL TABLE INFORMATION
 Symbol-name         Value
 -------------------------
-BYTEREAD            112A
+BYTEREAD            112B
 CHECK_NOP           1024
 CHECK_RTS           102E
 COUNTDONE           10A2
@@ -243,14 +243,14 @@ CR                  D
 FINDNULLLOOPDONE    1072
 LF                  A
 NEWLINE             10E6
-NOPCHECK            10F1
+NOPCHECK            10F2
 NULLLOOP            1064
-OUTFILENAME         111F
-PRINTNOP            10ED
+OUTFILENAME         1120
+PRINTNOP            10EE
 PRINTRTS            10E9
 PRINT_NOP           1038
 PRINT_RST           1044
-RTSCHECK            1108
+RTSCHECK            1109
 START               1000
 TOSAVE              C3F
 TRAPTASK13          1050

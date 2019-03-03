@@ -226,3 +226,8 @@ byteRead            DS.B 1
 
 
 
+
+*~Font name~Courier New~
+*~Font size~15~
+*~Tab type~1~
+*~Tab size~4~
