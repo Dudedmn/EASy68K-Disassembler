@@ -1,6 +1,6 @@
 00000000 Starting Address
 Assembler used: EASy68K Editor/Assembler v5.16.01
-Created On: 3/1/2019 5:10:34 PM
+Created On: 3/2/2019 3:42:39 PM
 
 00000000                             1  *-----------------------------------------------------------
 00000000                             2  * Title      :
@@ -15,170 +15,193 @@ Created On: 3/1/2019 5:10:34 PM
 00000000                            11  *$2                     GROUP_2: MOVE.L, MOVEA.L
 00000000                            12  *$3                     GROUP_3: MOVE.W, MOVEA.W
 00000000                            13  *$4                     GROUP_4: LEA,JSR,RTS,NEG
-00000000                            14  *$5                     Unknown
+00000000                            14  *$5                     INVALID_OP
 00000000                            15  *$6                     GROUP_6: SUBQ,Bcc, BRA
-00000000                            16  *$7                     Unknown
+00000000                            16  *$7                     INVALID_OP
 00000000                            17  *$8                     GROUP_8: DIVS, OR
 00000000                            18  *$9                     SUB
-00000000                            19  *$A                     Unknown
-00000000                            20  *$B                     EOR
-00000000                            21  *$C                     GROUP_C: CMP, MULS
+00000000                            19  *$A                     INVALID_OP
+00000000                            20  *$B                     GROUP_B: EOR, CMP
+00000000                            21  *$C                     GROUP_C: MULS
 00000000                            22  *$D                     GROUP_D: ADD, ADDA
 00000000                            23  *$E                     GROUP_E: LSR, LSL, ASR, ASL, ROL, ROR
-00000000                            24  *$F                     Unknown
-00000000                            25  *%0001 001000010000
-00000000                            26  *%LEA <an> 111 <xn><mode> -> <an><xn><mode> -> binary
-00000000                            27  *Need to bitmask (AND, OR, XOR) or bitshift to determine subgroupings
-00000000                            28  *Reading a starting and ending address are on a word boundary, even passes
-00000000                            29  *Bit masking
-00000000                            30  
-00000000  4EF9 0000004E             31  Opcode_JMP_Table    JMP     GROUP_0     ;$0| ORI, BCLR, CMPI
-00000006  4EF9 0000004E             32                      JMP     OP_MOVE_B   ;$1| MOVE.B
-0000000C  4EF9 0000004E             33                      JMP     GROUP_2     ;$2|
-00000012  4EF9 0000004E             34                      JMP     GROUP_3     ;$3|
-00000018  4EF9 0000004E             35                      JMP     GROUP_4     ;$4|
-0000001E  4EF9 0000004E             36                      JMP     GROUP_6     ;$6|
-00000024  4EF9 0000004E             37                      JMP     GROUP_8     ;$8|
-0000002A  4EF9 0000004E             38                      JMP     OP_SUB      ;$9|
-00000030  4EF9 0000004E             39                      JMP     OP_EOR      ;$B|
-00000036  4EF9 0000004E             40                      JMP     GROUP_C     ;$C| CMP, MULS
-0000003C  4EF9 0000004E             41                      JMP     GROUP_D     ;$D| ADD. ADDA
-00000042  4EF9 0000004E             42                      JMP     GROUP_E     ;$E| LSR, LSL, ASR, ASL, ROL, ROR
-00000048  4EF9 0000004E             43                      JMP     INVALID_OP  ;$5, $7, $A, $F -- Display: DATA, $WXYZ
-0000004E                            44  GROUP_0
-0000004E                            45  
-0000004E                            46  OP_MOVE_B
-0000004E                            47  
-0000004E                            48  GROUP_2
-0000004E                            49  
-0000004E                            50  GROUP_3
-0000004E                            51  
-0000004E                            52  GROUP_4
-0000004E                            53  
-0000004E                            54  GROUP_6
-0000004E                            55  
-0000004E                            56  GROUP_8
-0000004E                            57  
-0000004E                            58  OP_SUB
-0000004E                            59  
-0000004E                            60  OP_EOR
-0000004E                            61  
-0000004E                            62  GROUP_C
-0000004E                            63  
-0000004E                            64  GROUP_D
-0000004E                            65  
-0000004E                            66  GROUP_E
-0000004E                            67  
-0000004E                            68  INVALID_OP   
-0000004E                            69  
-0000004E                            70  *Checking   0101
-0000004E                            71  *AND        0010
-0000004E                            72  *RESULT     0000
-0000004E                            73  
-0000004E                            74  
-0000004E                            75  *GROUP_0
-0000004E                            76  *Value                  Operations
-0000004E                            77  *$0                     ORI
-0000004E                            78  *$1                     
-0000004E                            79  *$2
-0000004E                            80  *$3
-0000004E                            81  *$4
-0000004E                            82  *$5
-0000004E                            83  *$6
-0000004E                            84  *$7
-0000004E                            85  *$8                     BCLR
-0000004E                            86  *$9
-0000004E                            87  *$A
-0000004E                            88  *$B
-0000004E                            89  *$C                     CMPI
-0000004E                            90  *$D
-0000004E                            91  *$E
-0000004E                            92  *$F
-0000004E                            93  
-0000004E                            94  
-0000004E                            95  *GROUP_2
-0000004E                            96  *Value                  Operations
-0000004E                            97  *8-6 bitmask address    MOVEA.L address mode:(001)
-0000004E                            98  *8-6 bitmask address    MOVE.L  
-0000004E                            99  *Everything else is DATA
-0000004E                           100  
-0000004E                           101  
-0000004E                           102  *GROUP_3
-0000004E                           103  *Value                  Operations
-0000004E                           104  
-0000004E                           105  
-0000004E                           106  
-0000004E                           107  *GROUP_4
-0000004E                           108  *Value                  Operations
-0000004E                           109  *GROUP_6
-0000004E                           110  *Value                  Operations
-0000004E                           111  *GROUP_7
-0000004E                           112  *Value                  Operations
-0000004E                           113  *GROUP_C
-0000004E                           114  *Value                  Operations
-0000004E                           115  *GROUP_D
-0000004E                           116  *Value                  Operations
-0000004E                           117  *GROUP_E
-0000004E                           118  *Value                  Operations
-0000004E                           119  
-0000004E                           120  
-0000004E                           121  *Second Nibble Values (11-8)
-0000004E                           122  *Value                  Operations
-0000004E                           123  *$0                     ORI
-0000004E                           124  *$1
-0000004E                           125  *$2
-0000004E                           126  *$3
-0000004E                           127  *$4
-0000004E                           128  *$5
-0000004E                           129  *$6
-0000004E                           130  *$7
-0000004E                           131  *$8                     BCLR
-0000004E                           132  *$9
-0000004E                           133  *$A
-0000004E                           134  *$B
-0000004E                           135  *$C                     CMPI
-0000004E                           136  *$D
-0000004E                           137  *$E
-0000004E                           138  *$F
-0000004E                           139  *Third Nibble Values (7-4)
-0000004E                           140  *Value                  Operations
-0000004E                           141  *$0
-0000004E                           142  *$1
-0000004E                           143  *$2
-0000004E                           144  *$3
-0000004E                           145  *$4
-0000004E                           146  *$5
-0000004E                           147  *$6
-0000004E                           148  *$7
-0000004E                           149  *$8
-0000004E                           150  *$9
-0000004E                           151  *$A
-0000004E                           152  *$B
-0000004E                           153  *$C
-0000004E                           154  *$D
-0000004E                           155  *$E
-0000004E                           156  *$F
-0000004E                           157  *Fourth Nibble Values (3-0)
-0000004E                           158  *Value                  Operations
-0000004E                           159  *$0
-0000004E                           160  *$1
-0000004E                           161  *$2
-0000004E                           162  *$3
-0000004E                           163  *$4
-0000004E                           164  *$5
-0000004E                           165  *$6
-0000004E                           166  *$7
-0000004E                           167  *$8
-0000004E                           168  *$9
-0000004E                           169  *$A
-0000004E                           170  *$B
-0000004E                           171  *$C
-0000004E                           172  *$D
-0000004E                           173  *$E
-0000004E                           174  *$F
-0000004E                           175  
-0000004E                           176  
-Line 177 WARNING: END directive missing, starting address not set
+00000000                            24  *$F                     INVALID_OP
+00000000                            25  
+00000000                            26  *%0001 001000010000
+00000000                            27  *%LEA <an> 111 <xn><mode> -> <an><xn><mode> -> binary
+00000000                            28  *Need to bitmask (AND, OR, XOR) or bitshift to determine subgroupings
+00000000                            29  *Reading a starting and ending address are on a word boundary, even passes
+00000000                            30  *Bit masking
+00000000                            31  
+00000000                            32  ********************JMP TABLE FOR OPERATIONS************************************
+00000000                            33  * These valid operand codes refer to the basic supported operand codes
+00000000                            34  * Groups refer to the first nibble value that is supported by the operand
+00000000  4EF9 00000054             35  Opcode_JMP_Table    JMP     GROUP_0     ;$0| ORI, BCLR, CMPI
+00000006  4EF9 00000054             36                      JMP     OP_MOVE_B   ;$1| MOVE.B
+0000000C  4EF9 00000054             37                      JMP     GROUP_2     ;$2| MOVE.L, MOVEA.L
+00000012  4EF9 00000054             38                      JMP     GROUP_3     ;$3| MOVE.W, MOVEA.W
+00000018  4EF9 00000054             39                      JMP     GROUP_4     ;$4| LEA, JSR, RTS, NEG
+0000001E  4EF9 00000054             40                      JMP     OP_SUBQ     ;$5| SUBQ
+00000024  4EF9 00000054             41                      JMP     GROUP_6     ;$6| Bcc, BRA
+0000002A  4EF9 00000054             42                      JMP     GROUP_8     ;$8| DIVS, OR
+00000030  4EF9 00000054             43                      JMP     OP_SUB      ;$9| SUB
+00000036  4EF9 00000054             44                      JMP     GROUP_B     ;$B| EOR, CMP
+0000003C  4EF9 00000054             45                      JMP     GROUP_C     ;$C| MULS
+00000042  4EF9 00000054             46                      JMP     GROUP_D     ;$D| ADD, ADDA
+00000048  4EF9 00000054             47                      JMP     GROUP_E     ;$E| LSR, LSL, ASR, ASL, ROL, ROR
+0000004E  4EF9 00000054             48                      JMP     INVALID_OP  ;$7, $A, $F -- Display: DATA, $WXYZ
+00000054                            49  ********************************************************************************
+00000054                            50  
+00000054                            51  ***
+00000054                            52  * 1290318203981209 by default is decimal
+00000054                            53  * # = IMMEDIATE VALUE
+00000054                            54  * #$ = IMMEDIATE HEX VALUE
+00000054                            55  * #% = IMMEDIATE BINARY VALUE
+00000054                            56  * #%100001010 = $20A ->D2
+00000054                            57  * #$20A -> D1
+00000054                            58  * CMPI D1,D2 (true)
+00000054                            59  *******************************
+00000054                            60  * ACA0101
+00000054                            61  * 1231312
+00000054                            62  * %12312321
+00000054                            63  * $12309139012
+00000054                            64  * #102941204
+00000054                            65  * #%10100101
+00000054                            66  * #$abasd1
+00000054                            67  ********************************
+00000054                            68  *******************JMP LABELS **************************************************
+00000054                            69  * Labelling for group codes will be in the following format
+00000054                            70  
+00000054                            71  * <JMP Labelname>
+00000054                            72  ********************************************************************************
+00000054                            73  * Checking List Order (If more than one value)
+00000054                            74  * Operand1 - $<nibble value>, a-b <specifier>, c-d <specifier> ...
+00000054                            75  * Operand2 - $<nibble value>, a-b <specifier>, c-d <specifier> ...
+00000054                            76  
+00000054                            77  * Where a-b will refer to the bit corresponding bit value in the instruction
+00000054                            78  * format, and a specifier will be attached such as Size, EA Mode, SRC Reg, etc
+00000054                            79  * to clarify what a specific bit range means.
+00000054                            80  * Checking order refers to what order the checks will be performed in. 
+00000054                            81  * Any other code outside of the listed ones will be INVALID_OP.
+00000054                            82  ********************************************************************************
+00000054                            83  
+00000054                            84  ********************************************************************************
+00000054                            85  * Global Field Descriptions
+00000054                            86  * Size Field: Byte = 00 Word = 01 Long = 10
+00000054                            87  * EA Mode: Refer to EA Address Modes
+00000054                            88  * EA Reg: 3-bit input that is mapped to the respective binary value
+00000054                            89  ********************************************************************************
+00000054                            90  
+00000054                            91  * GROUP_0                      
+00000054                            92  ********************************************************************************
+00000054                            93  * ORI: $00, 7-6 Size, 5-3 EA Mode, 2-0 EA Reg
+00000054                            94  * CMPI: $0C, 7-6 Size, 5-3 EA Mode, 2-0 EA Reg
+00000054                            95  * BCLR: $0, 11-9 Register, 8-6 %110, 5-3 EA Mode, 2-0 EA Reg
+00000054                            96  ********************************************************************************
+00000054                            97  GROUP_0
+00000054                            98  
+00000054                            99  * OP_MOVE_B                      
+00000054                           100  ********************************************************************************
+00000054                           101  * MOVE.B: $1, 11-9 DST Reg, 8-6 DST Mode, 5-3 SRC Mode, 2-0 SRC Reg
+00000054                           102  ********************************************************************************
+00000054                           103  OP_MOVE_B
+00000054                           104  
+00000054                           105  * GROUP_2
+00000054                           106  ********************************************************************************
+00000054                           107  * MOVEA.L: $2, 11-9 DST Reg, 8-6 %001, 5-3 SRC Mode, 2-0 SRC Reg
+00000054                           108  * MOVE.L: $2, 11-9 DST Reg, 8-6 DST Mode, 5-3 SRC Mode, 2-0 SRC Reg
+00000054                           109  ********************************************************************************
+00000054                           110  GROUP_2
+00000054                           111  
+00000054                           112  * GROUP_3
+00000054                           113  ********************************************************************************
+00000054                           114  * MOVEA.W: $3, 11-9 DST Reg, 8-6 %001, 5-3 SRC Mode, 2-0 SRC Reg
+00000054                           115  * MOVE.W: $3, 11-9 DST Reg, 8-6 DST Mode, 5-3 SRC Mode, 2-0 SRC Reg
+00000054                           116  ********************************************************************************
+00000054                           117  GROUP_3
+00000054                           118  
+00000054                           119  * GROUP_4
+00000054                           120  ********************************************************************************
+00000054                           121  * LEA: $4, 11-9 Reg, 8-6 %111, 5-3 EA Mode, 2-0 EA Reg
+00000054                           122  * JSR: $4E, 7-6 %10, 5-3 EA Mode, 2-0 EA Reg 
+00000054                           123  * RTS: $4E75
+00000054                           124  * NEG: $44, 7-6 Size, 5-3 EA Mode, 2-0 EA Reg
+00000054                           125  ********************************************************************************
+00000054                           126  GROUP_4
+00000054                           127  
+00000054                           128  OP_SUBQ
+00000054                           129  ********************************************************************************
+00000054                           130  * SUBQ: $5, 11-9 DATA, 8 %1, 7-6 Size, 5-3 EA Mode, 2-0 EA Reg
+00000054                           131  ********************************************************************************
+00000054                           132  
+00000054                           133  * GROUP_6
+00000054                           134  ********************************************************************************
+00000054                           135  * BRA: $60, 7-0 8-Bit Displacement
+00000054                           136  * Bcc: $6, 11-8 Condition, 7-0 8-Bit Displacement
+00000054                           137  ********************************************************************************
+00000054                           138  GROUP_6
+00000054                           139  
+00000054                           140  * GROUP_8
+00000054                           141  ********************************************************************************
+00000054                           142  * DIVS: $8, 11-9 Reg, 8-6 %111, 5-3 EA Mode, 2-0 EA Reg
+00000054                           143  * OR: $80, 7-6 Size, 5-3 EA Mode, 2-0 EA Register
+00000054                           144  ********************************************************************************
+00000054                           145  GROUP_8
+00000054                           146  
+00000054                           147  * OP_SUB                      
+00000054                           148  ********************************************************************************
+00000054                           149  * SUB: $9, 11-9 Reg, 8-6 OPMODE, 5-3 EA Mode, 2-0 EA Reg
+00000054                           150  ********************************************************************************
+00000054                           151  OP_SUB
+00000054                           152  
+00000054                           153  * GROUP_B                     
+00000054                           154  ********************************************************************************
+00000054                           155  * EOR: $B, 11-9 Reg, 8 %1, 8-6 OPMODE, 5-3 EA Mode, 2-0 EA Reg
+00000054                           156  * CMP: $B, 11-9 Reg, 8 %0, 8-6 OPMODE, 5-3 EA Mode, 2-0 EA Reg
+00000054                           157  * The specific bit difference is listed 
+00000054                           158  ********************************************************************************
+00000054                           159  GROUP_B
+00000054                           160  
+00000054                           161  * GROUP_C                     
+00000054                           162  ********************************************************************************
+00000054                           163  * MULS: $C, 11-8 Reg, 8-6 %111, 5-3 EA Mode, 2-0 EA Reg
+00000054                           164  ********************************************************************************
+00000054                           165  GROUP_C
+00000054                           166  
+00000054                           167  
+00000054                           168  * GROUP_D                     
+00000054                           169  ********************************************************************************
+00000054                           170  * ADD: $D, 11-9 Reg, 8-6 OPMODE, 5-3 EA Mode, 2-0 EA Reg
+00000054                           171  * ADDA: $D, 11- 9 Reg, 8-6 OPMODE, 7-6 %11, 5-3 EA Mode, 2-0 EA Reg
+00000054                           172  * The specific bit difference is listed out in the OPMODE field.
+00000054                           173  ********************************************************************************
+00000054                           174  GROUP_D
+00000054                           175  
+00000054                           176  * GROUP_E                     
+00000054                           177  ********************************************************************************
+00000054                           178  * LSR: $E, 11-9 Count/Reg, 8 %0, 7-6 Size, 5 i/r, 4-3 %01, 2-0 Reg
+00000054                           179  * LSL: $E, 11-9 Count/Reg, 8 %1, 7-6 Size, 5 i/r, 4-3 %01, 2-0 Reg
+00000054                           180  * ASR: $E, $0, 8 %0, 7-6 %11, 5-3 EA Mode, 2-0 EA reg
+00000054                           181  * ASL: 
+00000054                           182  * ROL: 
+00000054                           183  * ROR: 
+00000054                           184  * Count/Reg refers to shift count, where 0 = shift count of 8, 1-7 refers to the
+00000054                           185  * respective value when i/r = 0. If i/r = 1, data register in the Count/Reg field
+00000054                           186  * specifies the shift count.  
+00000054                           187  ********************************************************************************
+00000054                           188  GROUP_E
+00000054                           189  
+00000054                           190  
+00000054                           191  * INVALID_OP                     
+00000054                           192  ********************************************************************************
+00000054                           193  * Any value that is not covered in the above groups would be considered invalid, 
+00000054                           194  * the following values in the first nibble would also indicate that the operand 
+00000054                           195  * codes is already invalid.
+00000054                           196  * $7, $A, $F -- Display DATA $WXYZ   
+00000054                           197  ********************************************************************************
+00000054                           198  INVALID_OP  
+00000054                           199  ******************* END OF JMP LABELS ******************************************
+Line 200 WARNING: END directive missing, starting address not set
 
 No errors detected
 1 warning generated
@@ -187,17 +210,18 @@ No errors detected
 SYMBOL TABLE INFORMATION
 Symbol-name         Value
 -------------------------
-GROUP_0             4E
-GROUP_2             4E
-GROUP_3             4E
-GROUP_4             4E
-GROUP_6             4E
-GROUP_8             4E
-GROUP_C             4E
-GROUP_D             4E
-GROUP_E             4E
-INVALID_OP          4E
+GROUP_0             54
+GROUP_2             54
+GROUP_3             54
+GROUP_4             54
+GROUP_6             54
+GROUP_8             54
+GROUP_B             54
+GROUP_C             54
+GROUP_D             54
+GROUP_E             54
+INVALID_OP          54
 OPCODE_JMP_TABLE    0
-OP_EOR              4E
-OP_MOVE_B           4E
-OP_SUB              4E
+OP_MOVE_B           54
+OP_SUB              54
+OP_SUBQ             54
