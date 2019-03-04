@@ -9,8 +9,9 @@
 START ; Start the op code routine
 
 
-    MOVE.L #$08, D1
-    JSR OP_JSR_Routine
+    MOVE.L #$ADDD0080,D0    ;Input data into D0
+    MOVE.L  D0,D1           ;Copy data to D1 for mask checking
+    JSR OP_JSR_Routine      ;Use the JSR routine to identify the op code
 *-----------------------------------------------------------
 *First Nibble Values (15-12)
 *Value                  Operations
@@ -20,7 +21,7 @@ START ; Start the op code routine
 *$3                     GROUP_3: MOVE.W, MOVEA.W
 *$4                     GROUP_4: LEA,JSR,RTS,NEG
 *$5                     GROUP_4: INVALID_OP
-*$6                     GROUP_6: SUBQ,Bcc, BRA
+*$6                     GROUP_6: SUBQ, Bcc(BCS,BGE,BLT,BVC), BRA
 *$7                     GROUP_7: INVALID_OP
 *$8                     GROUP_8: DIVS, OR
 *$9                     GROUP_7: SUB
@@ -37,66 +38,76 @@ START ; Start the op code routine
 OP_JSR_Routine:
     MOVEM.L D0, -(SP) ;Backup register D0
 
-GROUP_0:     ;$0| ORI, BCLR, CMPI                    
-    CMP.B   #$0,D0
+GROUP_0:     ;$0| ORI, BCLR, CMPI                  
+    ANDI.B  #$0,D1
+    CMP.B   #$0,D1
     BNE     GROUP_1
     JSR     C_GROUP_0
     BRA     OP_JSR_DONE
     
 GROUP_1:     ;$1| MOVE.B
-    CMP.B   #$1,D0
+    ANDI.B  #$1,D1
+    CMP.B   #$1,D1
     BNE     GROUP_2
     JSR     C_GROUP_1
     BRA     OP_JSR_DONE
 
 GROUP_2:     ;$2| MOVE.L, MOVEA.L
-    CMP.B   #$2,D0
+    ANDI.B  #$2,D1
+    CMP.B   #$2,D1
     BNE     GROUP_3
     JSR     C_GROUP_2
     BRA     OP_JSR_DONE
 
 GROUP_3:     ;$3| MOVE.W, MOVEA.W
-    CMP.B   #$3,D0
+    ANDI.B  #$3,D1
+    CMP.B   #$3,D1
     BNE     GROUP_4
     JSR     C_GROUP_3
     BRA     OP_JSR_DONE
 
 GROUP_4:     ;$4| LEA, JSR, RTS, NEG
-    CMP.B   #$4,D0
+    ANDI.B  #$4,D1
+    CMP.B   #$4,D1
     BNE     GROUP_5
     JSR     C_GROUP_4
     BRA     OP_JSR_DONE
 
 
 GROUP_5:     ;$5| SUBQ
-    CMP.B   #$5,D0
+    ANDI.B  #$5,D1
+    CMP.B   #$5,D1
     BNE     GROUP_6
     JSR     C_GROUP_5
     BRA     OP_JSR_DONE
 
 
 GROUP_6:     ;$6| Bcc, BRA
-    CMP.B   #$6,D0
+    ANDI.B  #$6,D1
+    CMP.B   #$6,D1
     BNE     GROUP_7
     JSR     C_GROUP_6
     BRA     OP_JSR_DONE
 
 
 GROUP_7:     ;$7| Display: DATA, $WXYZ (Unsupported)
-    CMP.B   #$7,D0
+    ANDI.B  #$7,D1
+    CMP.B   #$7,D1
     BNE     GROUP_8
     JSR     C_GROUP_7
     BRA     OP_JSR_DONE
 
 
 GROUP_8:     ;$8| DIVS, OR
-    CMP.B   #$8,D0
+    ANDI.B  #$8,D1
+    CMP.B   #$8,D1
     BNE     GROUP_9
     JSR     C_GROUP_8
     BRA     OP_JSR_DONE
 
 
 GROUP_9:     ;$9| SUB
+    ANDI.B  #$9,D1
     CMP.B   #$9,D0
     BNE     GROUP_A
     JSR     C_GROUP_9
@@ -104,6 +115,7 @@ GROUP_9:     ;$9| SUB
 
 
 GROUP_A:     ;$A| Display: DATA, $WXYZ (Unsupported)
+    ANDI.B  #$A,D1
     CMP.B   #$A,D0
     BNE     GROUP_B
     JSR     C_GROUP_A
@@ -111,6 +123,7 @@ GROUP_A:     ;$A| Display: DATA, $WXYZ (Unsupported)
 
 
 GROUP_B:     ;$B| EOR, CMP
+    ANDI.B  #$B,D1
     CMP.B   #$B,D0
     BNE     GROUP_C
     JSR     C_GROUP_B
@@ -118,6 +131,7 @@ GROUP_B:     ;$B| EOR, CMP
 
 
 GROUP_C:     ;$C| MULS
+    ANDI.B  #$C,D1
     CMP.B   #$C,D0
     BNE     GROUP_D
     JSR     C_GROUP_C
@@ -125,6 +139,7 @@ GROUP_C:     ;$C| MULS
 
 
 GROUP_D:     ;$D| ADD, ADDA
+    ANDI.B  #$D,D1
     CMP.B   #$D,D0
     BNE     GROUP_E
     JSR     C_GROUP_D
@@ -132,6 +147,7 @@ GROUP_D:     ;$D| ADD, ADDA
 
 
 GROUP_E:     ;$E| LSR, LSL, ASR, ASL, ROL, ROR
+    ANDI.B  #$E,D1
     CMP.B   #$E,D0
     BNE     GROUP_F
     JSR     C_GROUP_E
@@ -139,6 +155,7 @@ GROUP_E:     ;$E| LSR, LSL, ASR, ASL, ROL, ROR
 
 
 GROUP_F:     ;$F| Display: DATA, $WXYZ (Unsupported)
+    ANDI.B  #$F,D1
     CMP.B   #$F,D0
     JSR     C_GROUP_F
     BRA     OP_JSR_DONE
@@ -179,28 +196,25 @@ OP_JSR_DONE:
 * BCLR: $0, 11-9 Register, 8-6 %110, 5-3 EA Mode, 2-0 EA Reg
 ********************************************************************************
 C_GROUP_0:
-    MOVEM.L D0-D1, -(SP) ; Backup registers
+    MOVEM.L D0-D1, -(A7) ; Backup registers
     
 check_OP_ORI:
-    MOVE.W D1,D0   ;Move current op code to D0
-    CMP.W #$00, D0          ;Compare the current op code to ORI
+    CMP.B #$00, D1          ;Compare the current op code to ORI
     BNE check_OP_CMPI
-    BEQ   PRINT_OP          ;[IN PROG] Print ORI
+    BEQ   PRINT_OP_ORI          ;[IN PROG] Print ORI
 check_OP_CMPI:
-    MOVE.W D1,D0
-    CMP.W #$0C, D0   
+    CMP.B #$C0, D1   
     BNE check_OP_BCLR       
-    BEQ   PRINT_OP
+    BEQ   PRINT_OP_CMPI
 check_OP_BCLR:
-    MOVE.W D1,D0
-    CMP.W #$08,D0
-    BEQ PRINT_OP
+    CMP.B #$80,D1
+    BEQ PRINT_OP_BCLR
     BNE CG0_F
     BRA CG0_C
 CG0_F:    
     BRA INVALID_OP    
 CG0_C:
-    MOVEM.L (SP)+,D0-D1 ; Restore registers
+    MOVEM.L (A7)+,D0-D1 ; Restore registers
     RTS
 * GROUP_1                      
 ********************************************************************************
@@ -208,6 +222,11 @@ CG0_C:
 ********************************************************************************
 C_GROUP_1:
 
+check_OP_MOVE_B:
+    CMP.B #$01,D0
+    BNE INVALID_OP
+    BEQ PRINT_OP_MOVEB
+    RTS
 * GROUP_2
 ********************************************************************************
 * MOVEA.L: $2, 11-9 DST Reg, 8-6 %001, 5-3 SRC Mode, 2-0 SRC Reg
@@ -215,12 +234,20 @@ C_GROUP_1:
 ********************************************************************************
 C_GROUP_2:
 
+check_OP_MOVEA_L:
+
+check_OP_MOVE_L:
+
 * GROUP_3
 ********************************************************************************
 * MOVEA.W: $3, 11-9 DST Reg, 8-6 %001, 5-3 SRC Mode, 2-0 SRC Reg
 * MOVE.W: $3, 11-9 DST Reg, 8-6 DST Mode, 5-3 SRC Mode, 2-0 SRC Reg
 ********************************************************************************
 C_GROUP_3:
+
+check_OP_MOVEA_W:
+
+check_OP_MOVEB_W:
 
 * GROUP_4
 ********************************************************************************
@@ -231,18 +258,44 @@ C_GROUP_3:
 ********************************************************************************
 C_GROUP_4:
 
+check_OP_LEA:
+
+check_OP_JSR:
+
+check_OP_RTS:
+
+check_OP_NEG:
+
 * GROUP_5
 ********************************************************************************
 * SUBQ: $5, 11-9 DATA, 8 %1, 7-6 Size, 5-3 EA Mode, 2-0 EA Reg
 ********************************************************************************
 C_GROUP_5:
 
+check_OP_SUBQ:
+
 * GROUP_6
 ********************************************************************************
 * BRA: $60, 7-0 8-Bit Displacement
 * Bcc: $6, 11-8 Condition, 7-0 8-Bit Displacement
+*   Branch: <Condition>   
+*   BCS: %0101  		
+*   BGE: %1100		
+*   BLT: %1101	
+*   BVC: %1000
+
 ********************************************************************************
 C_GROUP_6:
+
+check_OP_BRA:
+
+check_OP_BCS:
+
+check_OP_BGE:
+
+check_OP_BLT:
+
+check_OP_BVC:
 
 *GROUP_7
 ********************************************************************************
@@ -258,11 +311,17 @@ C_GROUP_7:
 ********************************************************************************
 C_GROUP_8:
 
+check_OP_DIVS:
+
+check_OP_OR:
+
 * GROUP_9                      
 ********************************************************************************
 * SUB: $9, 11-9 Reg, 8-6 OPMODE, 5-3 EA Mode, 2-0 EA Reg
 ********************************************************************************
 C_GROUP_9:
+
+check_OP_SUB:
 
 *GROUP_A
 ********************************************************************************
@@ -279,12 +338,17 @@ C_GROUP_A:
 ********************************************************************************
 C_GROUP_B:
 
+check_OP_EOR:
+
+check_OP_CMP:
+
 * GROUP_C                     
 ********************************************************************************
 * MULS: $C, 11-8 Reg, 8-6 %111, 5-3 EA Mode, 2-0 EA Reg
 ********************************************************************************
 C_GROUP_C:
 
+check_OP_MULS:
 
 * GROUP_D                     
 ********************************************************************************
@@ -293,6 +357,10 @@ C_GROUP_C:
 * The specific bit difference is listed out in the OPMODE field.
 ********************************************************************************
 C_GROUP_D:
+
+check_OP_ADDA:
+
+check_OP_ADD:
 
 * GROUP_E                     
 ********************************************************************************
@@ -310,6 +378,18 @@ C_GROUP_D:
 ********************************************************************************
 C_GROUP_E:
 
+check_OP_LSR:
+
+check_OP_LSL:
+
+check_OP_ASL:
+
+check_OP_ASR:
+
+check_OP_ROL:
+
+check_OP_ROR:
+
 *GROUP_F
 ********************************************************************************
 * Currently no OP codes here are supported.
@@ -323,26 +403,79 @@ C_GROUP_F:
 * The following values in the first nibble would also indicate that the 
 * operand codes is already invalid: $7, $A, $F.
 * For unsupported OP codes, display DATA $WXYZ   
+* THIS WILL NEED TO BE CHANGED TO DISPLAY: 1000 DATA $WXYZ IN THE FUTURE
 ********************************************************************************
 INVALID_OP:  ; Prints DATA for invalid op
     LEA P_INVALID_OP,A1
     MOVE.B #13,D0
     TRAP #15
     SIMHALT
+    
+    
+********************** PRINTING ROUTINES ****************************************
+PRINT_OP_ORI:
+    LEA P_OP_ORI,A1
+    JSR PRINT_OP
+    RTS
+PRINT_OP_CMPI:
+    LEA P_OP_CMPI,A1
+    JSR PRINT_OP
+    RTS
+PRINT_OP_BCLR:
+    LEA P_OP_BCLR,A1
+    JSR PRINT_OP
+    RTS
+PRINT_OP_MOVEB:
+    LEA P_OP_MOVEB,A1
+    JSR PRINT_OP
+    RTS
 PRINT_OP:   ;Prints current op code byte
-    LEA OP_FOUND,A1
     MOVE.B #13,D0
     TRAP #15
     RTS
-    
+******************* END OF PRINTING ROUTINES ***********************************
+
 ******************* END OF JMP LABELS ******************************************
+
+******************* DATA CONSTANT PRINTS ***************************************
 P_INVALID_OP    DC.B    'DATA',0
 OP_FOUND        DC.B    'Found OP',0 ; this should be taken out later
 P_OP_ORI        DC.B    'ORI',0
 P_OP_CMPI       DC.B    'CMPI',0
 P_OP_BCLR       DC.B    'BCLR',0
-
+P_OP_MOVEB      DC.B    'MOVE.B',0
+P_OP_MOVEA_L    DC.B    'MOVEA.L',0
+P_OP_MOVE_L     DC.B    'MOVE.L',0
+P_OP_MOVEA_W    DC.B    'MOVEA.W',0
+P_OP_MOVE_W     DC.B    'MOVE.W',0
+P_OP_LEA        DC.B    'LEA',0
+P_OP_JSR        DC.B    'JSR',0
+P_OP_RTS        DC.B    'RTS',0
+P_OP_NEG        DC.B    'NEG',0
+P_OP_SUBQ       DC.B    'SUBQ',0
+P_OP_BRA        DC.B    'BRA',0
+P_OP_BCS        DC.B    'BCS',0
+P_OP_BGE        DC.B    'BGE',0
+P_OP_BLT        DC.B    'BLT',0
+P_OP_BVC        DC.B    'BVC',0
+P_OP_DIVS       DC.B    'DIVS',0
+P_OP_OR         DC.B    'OR',0
+P_OP_SUB        DC.B    'SUB',0
+P_OP_EOR        DC.B    'EOR',0
+P_OP_CMP        DC.B    'CMP',0
+P_OP_MULS       DC.B    'MULS',0
+P_OP_ADDA       DC.B    'ADDA',0
+P_OP_ADD        DC.B    'ADD',0
+P_OP_LSR        DC.B    'LSR',0
+P_OP_LSL        DC.B    'LSL',0
+P_OP_ASR        DC.B    'ASR',0
+P_OP_ASL        DC.B    'ASL',0
+P_OP_ROR        DC.B    'ROR',0
+P_OP_ROL        DC.B    'ROL',0
+***************** END OF DATA CONSTANT PRINTS ***********************************
     END START
+
+
 
 
 

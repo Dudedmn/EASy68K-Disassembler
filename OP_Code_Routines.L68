@@ -1,6 +1,6 @@
 00001000 Starting Address
 Assembler used: EASy68K Editor/Assembler v5.16.01
-Created On: 3/2/2019 7:58:43 PM
+Created On: 3/3/2019 8:49:46 PM
 
 00000000                             1  *-----------------------------------------------------------
 00000000                             2  * Title      :
@@ -13,340 +13,481 @@ Created On: 3/2/2019 7:58:43 PM
 00001000                             9  START ; Start the op code routine
 00001000                            10  
 00001000                            11  
-00001000  7208                      12      MOVE.L #$08, D1
-00001002  4EB9 00001008             13      JSR OP_JSR_Routine
-00001008                            14  *-----------------------------------------------------------
-00001008                            15  *First Nibble Values (15-12)
-00001008                            16  *Value                  Operations
-00001008                            17  *$0                     GROUP_0: ORI,BCLR,CMPI
-00001008                            18  *$1                     GROUP_1: MOVE.B                   
-00001008                            19  *$2                     GROUP_2: MOVE.L, MOVEA.L
-00001008                            20  *$3                     GROUP_3: MOVE.W, MOVEA.W
-00001008                            21  *$4                     GROUP_4: LEA,JSR,RTS,NEG
-00001008                            22  *$5                     GROUP_4: INVALID_OP
-00001008                            23  *$6                     GROUP_6: SUBQ,Bcc, BRA
-00001008                            24  *$7                     GROUP_7: INVALID_OP
-00001008                            25  *$8                     GROUP_8: DIVS, OR
-00001008                            26  *$9                     GROUP_7: SUB
-00001008                            27  *$A                     GROUP_A: INVALID_OP
-00001008                            28  *$B                     GROUP_B: EOR, CMP
-00001008                            29  *$C                     GROUP_C: MULS
-00001008                            30  *$D                     GROUP_D: ADD, ADDA
-00001008                            31  *$E                     GROUP_E: LSR, LSL, ASR, ASL, ROL, ROR
-00001008                            32  *$F                     GROUP_F: INVALID_OP
-00001008                            33  
-00001008                            34  ********************OPCode JSR Routines***************************************
-00001008                            35  * These valid operand codes refer to the basic supported operand codes
-00001008                            36  * Groups refer to the first nibble value that is supported by the operand
-00001008                            37  OP_JSR_Routine:
-00001008  48E7 8000                 38      MOVEM.L D0, -(SP) ;Backup register D0
-0000100C                            39  
-0000100C                            40  GROUP_0:     ;$0| ORI, BCLR, CMPI                    
-0000100C  B03C 0000                 41      CMP.B   #$0,D0
-00001010  6600 000C                 42      BNE     GROUP_1
-00001014  4EB9 0000112E             43      JSR     C_GROUP_0
-0000101A  6000 010C                 44      BRA     OP_JSR_DONE
-0000101E                            45      
-0000101E                            46  GROUP_1:     ;$1| MOVE.B
-0000101E  B03C 0001                 47      CMP.B   #$1,D0
-00001022  6600 000C                 48      BNE     GROUP_2
-00001026  4EB9 0000116A             49      JSR     C_GROUP_1
-0000102C  6000 00FA                 50      BRA     OP_JSR_DONE
-00001030                            51  
-00001030                            52  GROUP_2:     ;$2| MOVE.L, MOVEA.L
-00001030  B03C 0002                 53      CMP.B   #$2,D0
-00001034  6600 000C                 54      BNE     GROUP_3
-00001038  4EB9 0000116A             55      JSR     C_GROUP_2
-0000103E  6000 00E8                 56      BRA     OP_JSR_DONE
-00001042                            57  
-00001042                            58  GROUP_3:     ;$3| MOVE.W, MOVEA.W
-00001042  B03C 0003                 59      CMP.B   #$3,D0
-00001046  6600 000C                 60      BNE     GROUP_4
-0000104A  4EB9 0000116A             61      JSR     C_GROUP_3
-00001050  6000 00D6                 62      BRA     OP_JSR_DONE
-00001054                            63  
-00001054                            64  GROUP_4:     ;$4| LEA, JSR, RTS, NEG
-00001054  B03C 0004                 65      CMP.B   #$4,D0
-00001058  6600 000C                 66      BNE     GROUP_5
-0000105C  4EB9 0000116A             67      JSR     C_GROUP_4
-00001062  6000 00C4                 68      BRA     OP_JSR_DONE
-00001066                            69  
-00001066                            70  
-00001066                            71  GROUP_5:     ;$5| SUBQ
-00001066  B03C 0005                 72      CMP.B   #$5,D0
-0000106A  6600 000C                 73      BNE     GROUP_6
-0000106E  4EB9 0000116A             74      JSR     C_GROUP_5
-00001074  6000 00B2                 75      BRA     OP_JSR_DONE
-00001078                            76  
-00001078                            77  
-00001078                            78  GROUP_6:     ;$6| Bcc, BRA
-00001078  B03C 0006                 79      CMP.B   #$6,D0
-0000107C  6600 000C                 80      BNE     GROUP_7
-00001080  4EB9 0000116A             81      JSR     C_GROUP_6
-00001086  6000 00A0                 82      BRA     OP_JSR_DONE
-0000108A                            83  
-0000108A                            84  
-0000108A                            85  GROUP_7:     ;$7| Display: DATA, $WXYZ (Unsupported)
-0000108A  B03C 0007                 86      CMP.B   #$7,D0
-0000108E  6600 000C                 87      BNE     GROUP_8
-00001092  4EB9 0000116A             88      JSR     C_GROUP_7
-00001098  6000 008E                 89      BRA     OP_JSR_DONE
-0000109C                            90  
-0000109C                            91  
-0000109C                            92  GROUP_8:     ;$8| DIVS, OR
-0000109C  B03C 0008                 93      CMP.B   #$8,D0
-000010A0  6600 000C                 94      BNE     GROUP_9
-000010A4  4EB9 00001170             95      JSR     C_GROUP_8
-000010AA  6000 007C                 96      BRA     OP_JSR_DONE
-000010AE                            97  
-000010AE                            98  
-000010AE                            99  GROUP_9:     ;$9| SUB
-000010AE  B03C 0009                100      CMP.B   #$9,D0
-000010B2  6600 000C                101      BNE     GROUP_A
-000010B6  4EB9 00001170            102      JSR     C_GROUP_9
-000010BC  6000 006A                103      BRA     OP_JSR_DONE
-000010C0                           104  
-000010C0                           105  
-000010C0                           106  GROUP_A:     ;$A| Display: DATA, $WXYZ (Unsupported)
-000010C0  B03C 000A                107      CMP.B   #$A,D0
-000010C4  6600 000C                108      BNE     GROUP_B
-000010C8  4EB9 00001170            109      JSR     C_GROUP_A
-000010CE  6000 0058                110      BRA     OP_JSR_DONE
-000010D2                           111  
-000010D2                           112  
-000010D2                           113  GROUP_B:     ;$B| EOR, CMP
-000010D2  B03C 000B                114      CMP.B   #$B,D0
-000010D6  6600 000C                115      BNE     GROUP_C
-000010DA  4EB9 00001176            116      JSR     C_GROUP_B
-000010E0  6000 0046                117      BRA     OP_JSR_DONE
-000010E4                           118  
-000010E4                           119  
-000010E4                           120  GROUP_C:     ;$C| MULS
-000010E4  B03C 000C                121      CMP.B   #$C,D0
-000010E8  6600 000C                122      BNE     GROUP_D
-000010EC  4EB9 00001176            123      JSR     C_GROUP_C
-000010F2  6000 0034                124      BRA     OP_JSR_DONE
-000010F6                           125  
-000010F6                           126  
-000010F6                           127  GROUP_D:     ;$D| ADD, ADDA
-000010F6  B03C 000D                128      CMP.B   #$D,D0
-000010FA  6600 000C                129      BNE     GROUP_E
-000010FE  4EB9 00001176            130      JSR     C_GROUP_D
-00001104  6000 0022                131      BRA     OP_JSR_DONE
-00001108                           132  
-00001108                           133  
-00001108                           134  GROUP_E:     ;$E| LSR, LSL, ASR, ASL, ROL, ROR
-00001108  B03C 000E                135      CMP.B   #$E,D0
-0000110C  6600 000C                136      BNE     GROUP_F
-00001110  4EB9 00001176            137      JSR     C_GROUP_E
-00001116  6000 0010                138      BRA     OP_JSR_DONE
-0000111A                           139  
-0000111A                           140  
-0000111A                           141  GROUP_F:     ;$F| Display: DATA, $WXYZ (Unsupported)
-0000111A  B03C 000F                142      CMP.B   #$F,D0
-0000111E  4EB9 00001176            143      JSR     C_GROUP_F
-00001124  6000 0002                144      BRA     OP_JSR_DONE
-00001128                           145  
-00001128                           146  
-00001128                           147  OP_JSR_DONE:
-00001128  4CDF 0001                148           MOVEM.L (SP)+,D0 ;Recover register D0
-0000112C  4E75                     149           RTS             ;Return to stack
-0000112E                           150  ********************************************************************************
-0000112E                           151  
-0000112E                           152  *******************JMP LABELS **************************************************
-0000112E                           153  * Labelling for group codes will be in the following format
-0000112E                           154  
-0000112E                           155  * <JMP Labelname>
-0000112E                           156  ********************************************************************************
-0000112E                           157  * Checking List Order (If more than one value)
-0000112E                           158  * Operand1 - $<nibble value>, a-b <specifier>, c-d <specifier> ...
-0000112E                           159  * Operand2 - $<nibble value>, a-b <specifier>, c-d <specifier> ...
-0000112E                           160  
-0000112E                           161  * Where a-b will refer to the bit corresponding bit value in the instruction
-0000112E                           162  * format, and a specifier will be attached such as Size, EA Mode, SRC Reg, etc
-0000112E                           163  * to clarify what a specific bit range means.
-0000112E                           164  * Checking order refers to what order the checks will be performed in. 
-0000112E                           165  * Any other code outside of the listed ones will be INVALID_OP.
-0000112E                           166  ********************************************************************************
-0000112E                           167  
-0000112E                           168  ********************************************************************************
-0000112E                           169  * Global Field Descriptions
-0000112E                           170  * Size Field: Byte = 00 Word = 01 Long = 10
-0000112E                           171  * EA Mode: Refer to EA Address Modes
-0000112E                           172  * EA Reg: 3-bit input that is mapped to the respective binary value
-0000112E                           173  ********************************************************************************
-0000112E                           174  
-0000112E                           175  * GROUP_0                      
-0000112E                           176  ********************************************************************************
-0000112E                           177  * ORI: $00, 7-6 Size, 5-3 EA Mode, 2-0 EA Reg
-0000112E                           178  * CMPI: $0C, 7-6 Size, 5-3 EA Mode, 2-0 EA Reg
-0000112E                           179  * BCLR: $0, 11-9 Register, 8-6 %110, 5-3 EA Mode, 2-0 EA Reg
-0000112E                           180  ********************************************************************************
-0000112E                           181  C_GROUP_0:
-0000112E  48E7 C000                182      MOVEM.L D0-D1, -(SP) ; Backup registers
-00001132                           183      
-00001132                           184  check_OP_ORI:
-00001132  3001                     185      MOVE.W D1,D0   ;Move current op code to D0
-00001134  B07C 0000                186      CMP.W #$00, D0          ;Compare the current op code to ORI
-00001138  6600 0006                187      BNE check_OP_CMPI
-0000113C  6700 004E                188      BEQ   PRINT_OP          ;[IN PROG] Print ORI
-00001140                           189  check_OP_CMPI:
-00001140  3001                     190      MOVE.W D1,D0
-00001142  B07C 000C                191      CMP.W #$0C, D0   
-00001146  6600 0006                192      BNE check_OP_BCLR       
-0000114A  6700 0040                193      BEQ   PRINT_OP
-0000114E                           194  check_OP_BCLR:
-0000114E  3001                     195      MOVE.W D1,D0
-00001150  B07C 0008                196      CMP.W #$08,D0
-00001154  6700 0036                197      BEQ PRINT_OP
-00001158  6600 0006                198      BNE CG0_F
-0000115C  6000 0006                199      BRA CG0_C
-00001160                           200  CG0_F:    
-00001160  6000 001A                201      BRA INVALID_OP    
-00001164                           202  CG0_C:
-00001164  4CDF 0003                203      MOVEM.L (SP)+,D0-D1 ; Restore registers
-00001168  4E75                     204      RTS
-0000116A                           205  * GROUP_1                      
-0000116A                           206  ********************************************************************************
-0000116A                           207  * MOVE.B: $1, 11-9 DST Reg, 8-6 DST Mode, 5-3 SRC Mode, 2-0 SRC Reg
-0000116A                           208  ********************************************************************************
-0000116A                           209  C_GROUP_1:
-0000116A                           210  
-0000116A                           211  * GROUP_2
-0000116A                           212  ********************************************************************************
-0000116A                           213  * MOVEA.L: $2, 11-9 DST Reg, 8-6 %001, 5-3 SRC Mode, 2-0 SRC Reg
-0000116A                           214  * MOVE.L: $2, 11-9 DST Reg, 8-6 DST Mode, 5-3 SRC Mode, 2-0 SRC Reg
-0000116A                           215  ********************************************************************************
-0000116A                           216  C_GROUP_2:
-0000116A                           217  
-0000116A                           218  * GROUP_3
-0000116A                           219  ********************************************************************************
-0000116A                           220  * MOVEA.W: $3, 11-9 DST Reg, 8-6 %001, 5-3 SRC Mode, 2-0 SRC Reg
-0000116A                           221  * MOVE.W: $3, 11-9 DST Reg, 8-6 DST Mode, 5-3 SRC Mode, 2-0 SRC Reg
-0000116A                           222  ********************************************************************************
-0000116A                           223  C_GROUP_3:
-0000116A                           224  
-0000116A                           225  * GROUP_4
-0000116A                           226  ********************************************************************************
-0000116A                           227  * LEA: $4, 11-9 Reg, 8-6 %111, 5-3 EA Mode, 2-0 EA Reg
-0000116A                           228  * JSR: $4E, 7-6 %10, 5-3 EA Mode, 2-0 EA Reg 
-0000116A                           229  * RTS: $4E75
-0000116A                           230  * NEG: $44, 7-6 Size, 5-3 EA Mode, 2-0 EA Reg
-0000116A                           231  ********************************************************************************
-0000116A                           232  C_GROUP_4:
-0000116A                           233  
-0000116A                           234  * GROUP_5
-0000116A                           235  ********************************************************************************
-0000116A                           236  * SUBQ: $5, 11-9 DATA, 8 %1, 7-6 Size, 5-3 EA Mode, 2-0 EA Reg
-0000116A                           237  ********************************************************************************
-0000116A                           238  C_GROUP_5:
-0000116A                           239  
-0000116A                           240  * GROUP_6
-0000116A                           241  ********************************************************************************
-0000116A                           242  * BRA: $60, 7-0 8-Bit Displacement
-0000116A                           243  * Bcc: $6, 11-8 Condition, 7-0 8-Bit Displacement
-0000116A                           244  ********************************************************************************
-0000116A                           245  C_GROUP_6:
-0000116A                           246  
-0000116A                           247  *GROUP_7
-0000116A                           248  ********************************************************************************
-0000116A                           249  * Currently no OP codes here are supported.
-0000116A                           250  ********************************************************************************
-0000116A                           251  C_GROUP_7:
-0000116A  4EB9 0000117C            252      JSR INVALID_OP
-00001170                           253  
-00001170                           254  * GROUP_8
-00001170                           255  ********************************************************************************
-00001170                           256  * DIVS: $8, 11-9 Reg, 8-6 %111, 5-3 EA Mode, 2-0 EA Reg
-00001170                           257  * OR: $80, 7-6 Size, 5-3 EA Mode, 2-0 EA Register
-00001170                           258  ********************************************************************************
-00001170                           259  C_GROUP_8:
-00001170                           260  
-00001170                           261  * GROUP_9                      
-00001170                           262  ********************************************************************************
-00001170                           263  * SUB: $9, 11-9 Reg, 8-6 OPMODE, 5-3 EA Mode, 2-0 EA Reg
-00001170                           264  ********************************************************************************
-00001170                           265  C_GROUP_9:
-00001170                           266  
-00001170                           267  *GROUP_A
-00001170                           268  ********************************************************************************
-00001170                           269  * Currently no OP codes here are supported.
-00001170                           270  ********************************************************************************
-00001170                           271  C_GROUP_A:
-00001170  4EB9 0000117C            272      JSR INVALID_OP
-00001176                           273  
-00001176                           274  * GROUP_B                     
-00001176                           275  ********************************************************************************
-00001176                           276  * EOR: $B, 11-9 Reg, 8 %1, 8-6 OPMODE, 5-3 EA Mode, 2-0 EA Reg
-00001176                           277  * CMP: $B, 11-9 Reg, 8 %0, 8-6 OPMODE, 5-3 EA Mode, 2-0 EA Reg
-00001176                           278  * The specific bit difference is listed 
-00001176                           279  ********************************************************************************
-00001176                           280  C_GROUP_B:
-00001176                           281  
-00001176                           282  * GROUP_C                     
-00001176                           283  ********************************************************************************
-00001176                           284  * MULS: $C, 11-8 Reg, 8-6 %111, 5-3 EA Mode, 2-0 EA Reg
-00001176                           285  ********************************************************************************
-00001176                           286  C_GROUP_C:
-00001176                           287  
-00001176                           288  
-00001176                           289  * GROUP_D                     
-00001176                           290  ********************************************************************************
-00001176                           291  * ADD: $D, 11-9 Reg, 8-6 OPMODE, 5-3 EA Mode, 2-0 EA Reg
-00001176                           292  * ADDA: $D, 11- 9 Reg, 8-6 OPMODE, 7-6 %11, 5-3 EA Mode, 2-0 EA Reg
-00001176                           293  * The specific bit difference is listed out in the OPMODE field.
-00001176                           294  ********************************************************************************
-00001176                           295  C_GROUP_D:
-00001176                           296  
-00001176                           297  * GROUP_E                     
-00001176                           298  ********************************************************************************
-00001176                           299  * LSR: $E, 11-9 Count/Reg, 8 %0, 7-6 Size, 5 i/r, 4-3 %01, 2-0 Reg
-00001176                           300  * LSL: $E, 11-9 Count/Reg, 8 %1, 7-6 Size, 5 i/r, 4-3 %01, 2-0 Reg
-00001176                           301  * ASR: $E, $0, 8 %0, 7-6 %11, 5-3 EA Mode, 2-0 EA reg
-00001176                           302  * ASL: $E, $0, 8 %1, 7-6 %11, 5-3 EA Mode, 2-0 EA reg
-00001176                           303  * ROR: $E, 11-9 Count/Reg, 8 %0, 7-6 Size, 5 i/r, 4-3 %11, 2-0 Reg
-00001176                           304  * ROL: $E, 11-9 Count/Reg, 8 %1, 7-6 Size, 5 i/r, 4-3 %11, 2-0 Reg
-00001176                           305  * Count/Reg for LSR/LSL refers to shift count, where 0 = shift count of 8, 1-7 
-00001176                           306  * refers to the respective value when i/r = 0. If i/r = 1, data register in the 
-00001176                           307  * Count/Reg field specifies the shift count.  
-00001176                           308  * 
-00001176                           309  * Count/Reg for ROR/ROL specifies rotate count instead of shift count.
-00001176                           310  ********************************************************************************
-00001176                           311  C_GROUP_E:
-00001176                           312  
-00001176                           313  *GROUP_F
-00001176                           314  ********************************************************************************
-00001176                           315  * Currently no OP codes here are supported.
-00001176                           316  ********************************************************************************
-00001176                           317  C_GROUP_F:
-00001176  4EB9 0000117C            318      JSR INVALID_OP
-0000117C                           319      
-0000117C                           320  * INVALID_OP                     
-0000117C                           321  ********************************************************************************
-0000117C                           322  * Any value that is not covered in the above groups would be considered invalid. 
-0000117C                           323  * The following values in the first nibble would also indicate that the 
-0000117C                           324  * operand codes is already invalid: $7, $A, $F.
-0000117C                           325  * For unsupported OP codes, display DATA $WXYZ   
-0000117C                           326  ********************************************************************************
-0000117C                           327  INVALID_OP:  ; Prints DATA for invalid op
-0000117C  43F9 0000119A            328      LEA P_INVALID_OP,A1
-00001182  103C 000D                329      MOVE.B #13,D0
-00001186  4E4F                     330      TRAP #15
-00001188  FFFF FFFF                331      SIMHALT
-0000118C                           332  PRINT_OP:   ;Prints current op code byte
-0000118C  43F9 0000119F            333      LEA OP_FOUND,A1
-00001192  103C 000D                334      MOVE.B #13,D0
-00001196  4E4F                     335      TRAP #15
-00001198  4E75                     336      RTS
-0000119A                           337      
-0000119A                           338  ******************* END OF JMP LABELS ******************************************
-0000119A= 44 41 54 41 00           339  P_INVALID_OP    DC.B    'DATA',0
-0000119F= 46 6F 75 6E 64 20 ...    340  OP_FOUND        DC.B    'Found OP',0 ; this should be taken out later
-000011A8= 4F 52 49 00              341  P_OP_ORI        DC.B    'ORI',0
-000011AC= 43 4D 50 49 00           342  P_OP_CMPI       DC.B    'CMPI',0
-000011B1= 42 43 4C 52 00           343  P_OP_BCLR       DC.B    'BCLR',0
-000011B6                           344  
-000011B6                           345      END START
+00001000  203C ADDD0080             12      MOVE.L #$ADDD0080,D0    ;Input data into D0
+00001006  2200                      13      MOVE.L  D0,D1           ;Copy data to D1 for mask checking
+00001008  4EB9 0000100E             14      JSR OP_JSR_Routine      ;Use the JSR routine to identify the op code
+0000100E                            15  *-----------------------------------------------------------
+0000100E                            16  *First Nibble Values (15-12)
+0000100E                            17  *Value                  Operations
+0000100E                            18  *$0                     GROUP_0: ORI,BCLR,CMPI
+0000100E                            19  *$1                     GROUP_1: MOVE.B                   
+0000100E                            20  *$2                     GROUP_2: MOVE.L, MOVEA.L
+0000100E                            21  *$3                     GROUP_3: MOVE.W, MOVEA.W
+0000100E                            22  *$4                     GROUP_4: LEA,JSR,RTS,NEG
+0000100E                            23  *$5                     GROUP_4: INVALID_OP
+0000100E                            24  *$6                     GROUP_6: SUBQ,Bcc, BRA
+0000100E                            25  *$7                     GROUP_7: INVALID_OP
+0000100E                            26  *$8                     GROUP_8: DIVS, OR
+0000100E                            27  *$9                     GROUP_7: SUB
+0000100E                            28  *$A                     GROUP_A: INVALID_OP
+0000100E                            29  *$B                     GROUP_B: EOR, CMP
+0000100E                            30  *$C                     GROUP_C: MULS
+0000100E                            31  *$D                     GROUP_D: ADD, ADDA
+0000100E                            32  *$E                     GROUP_E: LSR, LSL, ASR, ASL, ROL, ROR
+0000100E                            33  *$F                     GROUP_F: INVALID_OP
+0000100E                            34  
+0000100E                            35  ********************OPCode JSR Routines***************************************
+0000100E                            36  * These valid operand codes refer to the basic supported operand codes
+0000100E                            37  * Groups refer to the first nibble value that is supported by the operand
+0000100E                            38  OP_JSR_Routine:
+0000100E  48E7 8000                 39      MOVEM.L D0, -(SP) ;Backup register D0
+00001012                            40  
+00001012                            41  GROUP_0:     ;$0| ORI, BCLR, CMPI                  
+00001012  0201 0000                 42      ANDI.B  #$0,D1
+00001016  B23C 0000                 43      CMP.B   #$0,D1
+0000101A  6600 000C                 44      BNE     GROUP_1
+0000101E  4EB9 00001174             45      JSR     C_GROUP_0
+00001024  6000 0148                 46      BRA     OP_JSR_DONE
+00001028                            47      
+00001028                            48  GROUP_1:     ;$1| MOVE.B
+00001028  0201 0001                 49      ANDI.B  #$1,D1
+0000102C  B23C 0001                 50      CMP.B   #$1,D1
+00001030  6600 000C                 51      BNE     GROUP_2
+00001034  4EB9 000011AA             52      JSR     C_GROUP_1
+0000103A  6000 0132                 53      BRA     OP_JSR_DONE
+0000103E                            54  
+0000103E                            55  GROUP_2:     ;$2| MOVE.L, MOVEA.L
+0000103E  0201 0002                 56      ANDI.B  #$2,D1
+00001042  B23C 0002                 57      CMP.B   #$2,D1
+00001046  6600 000C                 58      BNE     GROUP_3
+0000104A  4EB9 000011B8             59      JSR     C_GROUP_2
+00001050  6000 011C                 60      BRA     OP_JSR_DONE
+00001054                            61  
+00001054                            62  GROUP_3:     ;$3| MOVE.W, MOVEA.W
+00001054  0201 0003                 63      ANDI.B  #$3,D1
+00001058  B23C 0003                 64      CMP.B   #$3,D1
+0000105C  6600 000C                 65      BNE     GROUP_4
+00001060  4EB9 000011B8             66      JSR     C_GROUP_3
+00001066  6000 0106                 67      BRA     OP_JSR_DONE
+0000106A                            68  
+0000106A                            69  GROUP_4:     ;$4| LEA, JSR, RTS, NEG
+0000106A  0201 0004                 70      ANDI.B  #$4,D1
+0000106E  B23C 0004                 71      CMP.B   #$4,D1
+00001072  6600 000C                 72      BNE     GROUP_5
+00001076  4EB9 000011B8             73      JSR     C_GROUP_4
+0000107C  6000 00F0                 74      BRA     OP_JSR_DONE
+00001080                            75  
+00001080                            76  
+00001080                            77  GROUP_5:     ;$5| SUBQ
+00001080  0201 0005                 78      ANDI.B  #$5,D1
+00001084  B23C 0005                 79      CMP.B   #$5,D1
+00001088  6600 000C                 80      BNE     GROUP_6
+0000108C  4EB9 000011B8             81      JSR     C_GROUP_5
+00001092  6000 00DA                 82      BRA     OP_JSR_DONE
+00001096                            83  
+00001096                            84  
+00001096                            85  GROUP_6:     ;$6| Bcc, BRA
+00001096  0201 0006                 86      ANDI.B  #$6,D1
+0000109A  B23C 0006                 87      CMP.B   #$6,D1
+0000109E  6600 000C                 88      BNE     GROUP_7
+000010A2  4EB9 000011B8             89      JSR     C_GROUP_6
+000010A8  6000 00C4                 90      BRA     OP_JSR_DONE
+000010AC                            91  
+000010AC                            92  
+000010AC                            93  GROUP_7:     ;$7| Display: DATA, $WXYZ (Unsupported)
+000010AC  0201 0007                 94      ANDI.B  #$7,D1
+000010B0  B23C 0007                 95      CMP.B   #$7,D1
+000010B4  6600 000C                 96      BNE     GROUP_8
+000010B8  4EB9 000011B8             97      JSR     C_GROUP_7
+000010BE  6000 00AE                 98      BRA     OP_JSR_DONE
+000010C2                            99  
+000010C2                           100  
+000010C2                           101  GROUP_8:     ;$8| DIVS, OR
+000010C2  0201 0008                102      ANDI.B  #$8,D1
+000010C6  B23C 0008                103      CMP.B   #$8,D1
+000010CA  6600 000C                104      BNE     GROUP_9
+000010CE  4EB9 000011BE            105      JSR     C_GROUP_8
+000010D4  6000 0098                106      BRA     OP_JSR_DONE
+000010D8                           107  
+000010D8                           108  
+000010D8                           109  GROUP_9:     ;$9| SUB
+000010D8  0201 0009                110      ANDI.B  #$9,D1
+000010DC  B03C 0009                111      CMP.B   #$9,D0
+000010E0  6600 000C                112      BNE     GROUP_A
+000010E4  4EB9 000011BE            113      JSR     C_GROUP_9
+000010EA  6000 0082                114      BRA     OP_JSR_DONE
+000010EE                           115  
+000010EE                           116  
+000010EE                           117  GROUP_A:     ;$A| Display: DATA, $WXYZ (Unsupported)
+000010EE  0201 000A                118      ANDI.B  #$A,D1
+000010F2  B03C 000A                119      CMP.B   #$A,D0
+000010F6  6600 000C                120      BNE     GROUP_B
+000010FA  4EB9 000011BE            121      JSR     C_GROUP_A
+00001100  6000 006C                122      BRA     OP_JSR_DONE
+00001104                           123  
+00001104                           124  
+00001104                           125  GROUP_B:     ;$B| EOR, CMP
+00001104  0201 000B                126      ANDI.B  #$B,D1
+00001108  B03C 000B                127      CMP.B   #$B,D0
+0000110C  6600 000C                128      BNE     GROUP_C
+00001110  4EB9 000011C4            129      JSR     C_GROUP_B
+00001116  6000 0056                130      BRA     OP_JSR_DONE
+0000111A                           131  
+0000111A                           132  
+0000111A                           133  GROUP_C:     ;$C| MULS
+0000111A  0201 000C                134      ANDI.B  #$C,D1
+0000111E  B03C 000C                135      CMP.B   #$C,D0
+00001122  6600 000C                136      BNE     GROUP_D
+00001126  4EB9 000011C4            137      JSR     C_GROUP_C
+0000112C  6000 0040                138      BRA     OP_JSR_DONE
+00001130                           139  
+00001130                           140  
+00001130                           141  GROUP_D:     ;$D| ADD, ADDA
+00001130  0201 000D                142      ANDI.B  #$D,D1
+00001134  B03C 000D                143      CMP.B   #$D,D0
+00001138  6600 000C                144      BNE     GROUP_E
+0000113C  4EB9 000011C4            145      JSR     C_GROUP_D
+00001142  6000 002A                146      BRA     OP_JSR_DONE
+00001146                           147  
+00001146                           148  
+00001146                           149  GROUP_E:     ;$E| LSR, LSL, ASR, ASL, ROL, ROR
+00001146  0201 000E                150      ANDI.B  #$E,D1
+0000114A  B03C 000E                151      CMP.B   #$E,D0
+0000114E  6600 000C                152      BNE     GROUP_F
+00001152  4EB9 000011C4            153      JSR     C_GROUP_E
+00001158  6000 0014                154      BRA     OP_JSR_DONE
+0000115C                           155  
+0000115C                           156  
+0000115C                           157  GROUP_F:     ;$F| Display: DATA, $WXYZ (Unsupported)
+0000115C  0201 000F                158      ANDI.B  #$F,D1
+00001160  B03C 000F                159      CMP.B   #$F,D0
+00001164  4EB9 000011C4            160      JSR     C_GROUP_F
+0000116A  6000 0002                161      BRA     OP_JSR_DONE
+0000116E                           162  
+0000116E                           163  
+0000116E                           164  OP_JSR_DONE:
+0000116E  4CDF 0001                165           MOVEM.L (SP)+,D0 ;Recover register D0
+00001172  4E75                     166           RTS             ;Return to stack
+00001174                           167  ********************************************************************************
+00001174                           168  
+00001174                           169  *******************JMP LABELS **************************************************
+00001174                           170  * Labelling for group codes will be in the following format
+00001174                           171  
+00001174                           172  * <JMP Labelname>
+00001174                           173  ********************************************************************************
+00001174                           174  * Checking List Order (If more than one value)
+00001174                           175  * Operand1 - $<nibble value>, a-b <specifier>, c-d <specifier> ...
+00001174                           176  * Operand2 - $<nibble value>, a-b <specifier>, c-d <specifier> ...
+00001174                           177  
+00001174                           178  * Where a-b will refer to the bit corresponding bit value in the instruction
+00001174                           179  * format, and a specifier will be attached such as Size, EA Mode, SRC Reg, etc
+00001174                           180  * to clarify what a specific bit range means.
+00001174                           181  * Checking order refers to what order the checks will be performed in. 
+00001174                           182  * Any other code outside of the listed ones will be INVALID_OP.
+00001174                           183  ********************************************************************************
+00001174                           184  
+00001174                           185  ********************************************************************************
+00001174                           186  * Global Field Descriptions
+00001174                           187  * Size Field: Byte = 00 Word = 01 Long = 10
+00001174                           188  * EA Mode: Refer to EA Address Modes
+00001174                           189  * EA Reg: 3-bit input that is mapped to the respective binary value
+00001174                           190  ********************************************************************************
+00001174                           191  
+00001174                           192  * GROUP_0                      
+00001174                           193  ********************************************************************************
+00001174                           194  * ORI: $00, 7-6 Size, 5-3 EA Mode, 2-0 EA Reg
+00001174                           195  * CMPI: $0C, 7-6 Size, 5-3 EA Mode, 2-0 EA Reg
+00001174                           196  * BCLR: $0, 11-9 Register, 8-6 %110, 5-3 EA Mode, 2-0 EA Reg
+00001174                           197  ********************************************************************************
+00001174                           198  C_GROUP_0:
+00001174  48E7 C000                199      MOVEM.L D0-D1, -(A7) ; Backup registers
+00001178                           200      
+00001178                           201  check_OP_ORI:
+00001178  B23C 0000                202      CMP.B #$00, D1          ;Compare the current op code to ORI
+0000117C  6600 0006                203      BNE check_OP_CMPI
+00001180  6700 0058                204      BEQ   PRINT_OP_ORI          ;[IN PROG] Print ORI
+00001184                           205  check_OP_CMPI:
+00001184  B23C 00C0                206      CMP.B #$C0, D1   
+00001188  6600 0006                207      BNE check_OP_BCLR       
+0000118C  6700 005A                208      BEQ   PRINT_OP_CMPI
+00001190                           209  check_OP_BCLR:
+00001190  B23C 0080                210      CMP.B #$80,D1
+00001194  6700 0060                211      BEQ PRINT_OP_BCLR
+00001198  6600 0006                212      BNE CG0_F
+0000119C  6000 0006                213      BRA CG0_C
+000011A0                           214  CG0_F:    
+000011A0  6000 0028                215      BRA INVALID_OP    
+000011A4                           216  CG0_C:
+000011A4  4CDF 0003                217      MOVEM.L (A7)+,D0-D1 ; Restore registers
+000011A8  4E75                     218      RTS
+000011AA                           219  * GROUP_1                      
+000011AA                           220  ********************************************************************************
+000011AA                           221  * MOVE.B: $1, 11-9 DST Reg, 8-6 DST Mode, 5-3 SRC Mode, 2-0 SRC Reg
+000011AA                           222  ********************************************************************************
+000011AA                           223  C_GROUP_1:
+000011AA                           224  
+000011AA                           225  check_OP_MOVE_B:
+000011AA  B03C 0001                226      CMP.B #$01,D0
+000011AE  6600 001A                227      BNE INVALID_OP
+000011B2  6700 0050                228      BEQ PRINT_OP_MOVEB
+000011B6  4E75                     229      RTS
+000011B8                           230  * GROUP_2
+000011B8                           231  ********************************************************************************
+000011B8                           232  * MOVEA.L: $2, 11-9 DST Reg, 8-6 %001, 5-3 SRC Mode, 2-0 SRC Reg
+000011B8                           233  * MOVE.L: $2, 11-9 DST Reg, 8-6 DST Mode, 5-3 SRC Mode, 2-0 SRC Reg
+000011B8                           234  ********************************************************************************
+000011B8                           235  C_GROUP_2:
+000011B8                           236  
+000011B8                           237  check_OP_MOVEA_L:
+000011B8                           238  
+000011B8                           239  check_OP_MOVE_L:
+000011B8                           240  
+000011B8                           241  * GROUP_3
+000011B8                           242  ********************************************************************************
+000011B8                           243  * MOVEA.W: $3, 11-9 DST Reg, 8-6 %001, 5-3 SRC Mode, 2-0 SRC Reg
+000011B8                           244  * MOVE.W: $3, 11-9 DST Reg, 8-6 DST Mode, 5-3 SRC Mode, 2-0 SRC Reg
+000011B8                           245  ********************************************************************************
+000011B8                           246  C_GROUP_3:
+000011B8                           247  
+000011B8                           248  check_OP_MOVEA_W:
+000011B8                           249  
+000011B8                           250  check_OP_MOVEB_W:
+000011B8                           251  
+000011B8                           252  * GROUP_4
+000011B8                           253  ********************************************************************************
+000011B8                           254  * LEA: $4, 11-9 Reg, 8-6 %111, 5-3 EA Mode, 2-0 EA Reg
+000011B8                           255  * JSR: $4E, 7-6 %10, 5-3 EA Mode, 2-0 EA Reg 
+000011B8                           256  * RTS: $4E75
+000011B8                           257  * NEG: $44, 7-6 Size, 5-3 EA Mode, 2-0 EA Reg
+000011B8                           258  ********************************************************************************
+000011B8                           259  C_GROUP_4:
+000011B8                           260  
+000011B8                           261  check_OP_LEA:
+000011B8                           262  
+000011B8                           263  check_OP_JSR:
+000011B8                           264  
+000011B8                           265  check_OP_RTS:
+000011B8                           266  
+000011B8                           267  check_OP_NEG:
+000011B8                           268  
+000011B8                           269  * GROUP_5
+000011B8                           270  ********************************************************************************
+000011B8                           271  * SUBQ: $5, 11-9 DATA, 8 %1, 7-6 Size, 5-3 EA Mode, 2-0 EA Reg
+000011B8                           272  ********************************************************************************
+000011B8                           273  C_GROUP_5:
+000011B8                           274  
+000011B8                           275  check_OP_SUBQ:
+000011B8                           276  
+000011B8                           277  * GROUP_6
+000011B8                           278  ********************************************************************************
+000011B8                           279  * BRA: $60, 7-0 8-Bit Displacement
+000011B8                           280  * Bcc: $6, 11-8 Condition, 7-0 8-Bit Displacement
+000011B8                           281  *   Branch: <Condition>   
+000011B8                           282  *   BCS: 0101       
+000011B8                           283  *   BGE: 1100       
+000011B8                           284  *   BLT: 1101   
+000011B8                           285  *   BVC: 1000
+000011B8                           286  
+000011B8                           287  ********************************************************************************
+000011B8                           288  C_GROUP_6:
+000011B8                           289  
+000011B8                           290  check_OP_BRA:
+000011B8                           291  
+000011B8                           292  check_OP_BCS:
+000011B8                           293  
+000011B8                           294  check_OP_BGE:
+000011B8                           295  
+000011B8                           296  check_OP_BLT:
+000011B8                           297  
+000011B8                           298  check_OP_BVC:
+000011B8                           299  
+000011B8                           300  *GROUP_7
+000011B8                           301  ********************************************************************************
+000011B8                           302  * Currently no OP codes here are supported.
+000011B8                           303  ********************************************************************************
+000011B8                           304  C_GROUP_7:
+000011B8  4EB9 000011CA            305      JSR INVALID_OP
+000011BE                           306  
+000011BE                           307  * GROUP_8
+000011BE                           308  ********************************************************************************
+000011BE                           309  * DIVS: $8, 11-9 Reg, 8-6 %111, 5-3 EA Mode, 2-0 EA Reg
+000011BE                           310  * OR: $80, 7-6 Size, 5-3 EA Mode, 2-0 EA Register
+000011BE                           311  ********************************************************************************
+000011BE                           312  C_GROUP_8:
+000011BE                           313  
+000011BE                           314  check_OP_DIVS:
+000011BE                           315  
+000011BE                           316  check_OP_OR:
+000011BE                           317  
+000011BE                           318  * GROUP_9                      
+000011BE                           319  ********************************************************************************
+000011BE                           320  * SUB: $9, 11-9 Reg, 8-6 OPMODE, 5-3 EA Mode, 2-0 EA Reg
+000011BE                           321  ********************************************************************************
+000011BE                           322  C_GROUP_9:
+000011BE                           323  
+000011BE                           324  check_OP_SUB:
+000011BE                           325  
+000011BE                           326  *GROUP_A
+000011BE                           327  ********************************************************************************
+000011BE                           328  * Currently no OP codes here are supported.
+000011BE                           329  ********************************************************************************
+000011BE                           330  C_GROUP_A:
+000011BE  4EB9 000011CA            331      JSR INVALID_OP
+000011C4                           332  
+000011C4                           333  * GROUP_B                     
+000011C4                           334  ********************************************************************************
+000011C4                           335  * EOR: $B, 11-9 Reg, 8 %1, 8-6 OPMODE, 5-3 EA Mode, 2-0 EA Reg
+000011C4                           336  * CMP: $B, 11-9 Reg, 8 %0, 8-6 OPMODE, 5-3 EA Mode, 2-0 EA Reg
+000011C4                           337  * The specific bit difference is listed 
+000011C4                           338  ********************************************************************************
+000011C4                           339  C_GROUP_B:
+000011C4                           340  
+000011C4                           341  check_OP_EOR:
+000011C4                           342  
+000011C4                           343  check_OP_CMP:
+000011C4                           344  
+000011C4                           345  * GROUP_C                     
+000011C4                           346  ********************************************************************************
+000011C4                           347  * MULS: $C, 11-8 Reg, 8-6 %111, 5-3 EA Mode, 2-0 EA Reg
+000011C4                           348  ********************************************************************************
+000011C4                           349  C_GROUP_C:
+000011C4                           350  
+000011C4                           351  check_OP_MULS:
+000011C4                           352  
+000011C4                           353  * GROUP_D                     
+000011C4                           354  ********************************************************************************
+000011C4                           355  * ADD: $D, 11-9 Reg, 8-6 OPMODE, 5-3 EA Mode, 2-0 EA Reg
+000011C4                           356  * ADDA: $D, 11- 9 Reg, 8-6 OPMODE, 7-6 %11, 5-3 EA Mode, 2-0 EA Reg
+000011C4                           357  * The specific bit difference is listed out in the OPMODE field.
+000011C4                           358  ********************************************************************************
+000011C4                           359  C_GROUP_D:
+000011C4                           360  
+000011C4                           361  check_OP_ADDA:
+000011C4                           362  
+000011C4                           363  check_OP_ADD:
+000011C4                           364  
+000011C4                           365  * GROUP_E                     
+000011C4                           366  ********************************************************************************
+000011C4                           367  * LSR: $E, 11-9 Count/Reg, 8 %0, 7-6 Size, 5 i/r, 4-3 %01, 2-0 Reg
+000011C4                           368  * LSL: $E, 11-9 Count/Reg, 8 %1, 7-6 Size, 5 i/r, 4-3 %01, 2-0 Reg
+000011C4                           369  * ASR: $E, $0, 8 %0, 7-6 %11, 5-3 EA Mode, 2-0 EA reg
+000011C4                           370  * ASL: $E, $0, 8 %1, 7-6 %11, 5-3 EA Mode, 2-0 EA reg
+000011C4                           371  * ROR: $E, 11-9 Count/Reg, 8 %0, 7-6 Size, 5 i/r, 4-3 %11, 2-0 Reg
+000011C4                           372  * ROL: $E, 11-9 Count/Reg, 8 %1, 7-6 Size, 5 i/r, 4-3 %11, 2-0 Reg
+000011C4                           373  * Count/Reg for LSR/LSL refers to shift count, where 0 = shift count of 8, 1-7 
+000011C4                           374  * refers to the respective value when i/r = 0. If i/r = 1, data register in the 
+000011C4                           375  * Count/Reg field specifies the shift count.  
+000011C4                           376  * 
+000011C4                           377  * Count/Reg for ROR/ROL specifies rotate count instead of shift count.
+000011C4                           378  ********************************************************************************
+000011C4                           379  C_GROUP_E:
+000011C4                           380  
+000011C4                           381  check_OP_LSR:
+000011C4                           382  
+000011C4                           383  check_OP_LSL:
+000011C4                           384  
+000011C4                           385  check_OP_ASL:
+000011C4                           386  
+000011C4                           387  check_OP_ASR:
+000011C4                           388  
+000011C4                           389  check_OP_ROL:
+000011C4                           390  
+000011C4                           391  check_OP_ROR:
+000011C4                           392  
+000011C4                           393  *GROUP_F
+000011C4                           394  ********************************************************************************
+000011C4                           395  * Currently no OP codes here are supported.
+000011C4                           396  ********************************************************************************
+000011C4                           397  C_GROUP_F:
+000011C4  4EB9 000011CA            398      JSR INVALID_OP
+000011CA                           399      
+000011CA                           400  * INVALID_OP                     
+000011CA                           401  ********************************************************************************
+000011CA                           402  * Any value that is not covered in the above groups would be considered invalid. 
+000011CA                           403  * The following values in the first nibble would also indicate that the 
+000011CA                           404  * operand codes is already invalid: $7, $A, $F.
+000011CA                           405  * For unsupported OP codes, display DATA $WXYZ   
+000011CA                           406  * THIS WILL NEED TO BE CHANGED TO DISPLAY: 1000 DATA $WXYZ IN THE FUTURE
+000011CA                           407  ********************************************************************************
+000011CA                           408  INVALID_OP:  ; Prints DATA for invalid op
+000011CA  43F9 0000121A            409      LEA P_INVALID_OP,A1
+000011D0  103C 000D                410      MOVE.B #13,D0
+000011D4  4E4F                     411      TRAP #15
+000011D6  FFFF FFFF                412      SIMHALT
+000011DA                           413  PRINT_OP_ORI:
+000011DA  43F9 00001228            414      LEA P_OP_ORI,A1
+000011E0  4EB9 00001212            415      JSR PRINT_OP
+000011E6  4E75                     416      RTS
+000011E8                           417  PRINT_OP_CMPI:
+000011E8  43F9 0000122C            418      LEA P_OP_CMPI,A1
+000011EE  4EB9 00001212            419      JSR PRINT_OP
+000011F4  4E75                     420      RTS
+000011F6                           421  PRINT_OP_BCLR:
+000011F6  43F9 00001231            422      LEA P_OP_BCLR,A1
+000011FC  4EB9 00001212            423      JSR PRINT_OP
+00001202  4E75                     424      RTS
+00001204                           425  PRINT_OP_MOVEB:
+00001204  43F9 00001236            426      LEA P_OP_MOVEB,A1
+0000120A  4EB9 00001212            427      JSR PRINT_OP
+00001210  4E75                     428      RTS
+00001212                           429  PRINT_OP:   ;Prints current op code byte
+00001212  103C 000D                430      MOVE.B #13,D0
+00001216  4E4F                     431      TRAP #15
+00001218  4E75                     432      RTS
+0000121A                           433      
+0000121A                           434     *$0                     GROUP_0: ORI,BCLR,CMPI
+0000121A                           435  *$1                     GROUP_1: MOVE.B                   
+0000121A                           436  *$2                     GROUP_2: MOVE.L, MOVEA.L
+0000121A                           437  *$3                     GROUP_3: MOVE.W, MOVEA.W
+0000121A                           438  *$4                     GROUP_4: LEA,JSR,RTS,NEG
+0000121A                           439  *$5                     GROUP_4: INVALID_OP
+0000121A                           440  *$6                     GROUP_6: SUBQ,Bcc, BRA
+0000121A                           441  *$7                     GROUP_7: INVALID_OP
+0000121A                           442  *$8                     GROUP_8: DIVS, OR
+0000121A                           443  *$9                     GROUP_7: SUB
+0000121A                           444  *$A                     GROUP_A: INVALID_OP
+0000121A                           445  *$B                     GROUP_B: EOR, CMP
+0000121A                           446  *$C                     GROUP_C: MULS
+0000121A                           447  *$D                     GROUP_D: ADD, ADDA
+0000121A                           448  *$E                     GROUP_E: LSR, LSL, ASR, ASL, ROL, ROR
+0000121A                           449  *$F                     GROUP_F: INVALID_OP 
+0000121A                           450  ******************* END OF JMP LABELS ******************************************
+0000121A= 44 41 54 41 00           451  P_INVALID_OP    DC.B    'DATA',0
+0000121F= 46 6F 75 6E 64 20 ...    452  OP_FOUND        DC.B    'Found OP',0 ; this should be taken out later
+00001228= 4F 52 49 00              453  P_OP_ORI        DC.B    'ORI',0
+0000122C= 43 4D 50 49 00           454  P_OP_CMPI       DC.B    'CMPI',0
+00001231= 42 43 4C 52 00           455  P_OP_BCLR       DC.B    'BCLR',0
+00001236= 4D 4F 56 45 2E 42 00     456  P_OP_MOVEB      DC.B    'MOVE.B',0
+0000123D                           457  P_OP_MOVEA_L
+0000123D                           458  P_OP_MOVE_L
+0000123D                           459  P_OP_MOVEA_W
+0000123D                           460  P_OP_MOVE_W
+0000123D                           461  P_OP_LEA
+0000123D                           462  P_OP_JSR
+0000123D                           463  P_OP_RTS
+0000123D                           464  P_OP_NEG
+0000123D                           465  P_OP_SUBQ
+0000123D                           466  P_OP_BRA
+0000123D                           467  P_OP_BCS
+0000123D                           468  P_OP_BGE
+0000123D                           469  P_OP_BLT
+0000123D                           470  P_OP_BVC
+0000123D                           471  P_OP_DIVS
+0000123D                           472  P_OP_OR
+0000123D                           473  P_OP_SUB
+0000123D                           474  P_OP_EOR
+0000123D                           475  P_OP_CMP
+0000123D                           476  P_OP_MULS
+0000123D                           477  P_OP_ADDA
+0000123D                           478  P_OP_ADD
+0000123D                           479  P_OP_LSR
+0000123D                           480  P_OP_LSL
+0000123D                           481  P_OP_ASR
+0000123D                           482  P_OP_ASL
+0000123D                           483  P_OP_ROR
+0000123D                           484  P_OP_ROL
+0000123D                           485  
+0000123D                           486      END START
 
 No errors detected
 No warnings generated
@@ -355,50 +496,112 @@ No warnings generated
 SYMBOL TABLE INFORMATION
 Symbol-name         Value
 -------------------------
-CG0_C               1164
-CG0_F               1160
-CHECK_OP_BCLR       114E
-CHECK_OP_CMPI       1140
-CHECK_OP_ORI        1132
-C_GROUP_0           112E
-C_GROUP_1           116A
-C_GROUP_2           116A
-C_GROUP_3           116A
-C_GROUP_4           116A
-C_GROUP_5           116A
-C_GROUP_6           116A
-C_GROUP_7           116A
-C_GROUP_8           1170
-C_GROUP_9           1170
-C_GROUP_A           1170
-C_GROUP_B           1176
-C_GROUP_C           1176
-C_GROUP_D           1176
-C_GROUP_E           1176
-C_GROUP_F           1176
-GROUP_0             100C
-GROUP_1             101E
-GROUP_2             1030
-GROUP_3             1042
-GROUP_4             1054
-GROUP_5             1066
-GROUP_6             1078
-GROUP_7             108A
-GROUP_8             109C
-GROUP_9             10AE
-GROUP_A             10C0
-GROUP_B             10D2
-GROUP_C             10E4
-GROUP_D             10F6
-GROUP_E             1108
-GROUP_F             111A
-INVALID_OP          117C
-OP_FOUND            119F
-OP_JSR_DONE         1128
-OP_JSR_ROUTINE      1008
-PRINT_OP            118C
-P_INVALID_OP        119A
-P_OP_BCLR           11B1
-P_OP_CMPI           11AC
-P_OP_ORI            11A8
+CG0_C               11A4
+CG0_F               11A0
+CHECK_OP_ADD        11C4
+CHECK_OP_ADDA       11C4
+CHECK_OP_ASL        11C4
+CHECK_OP_ASR        11C4
+CHECK_OP_BCLR       1190
+CHECK_OP_BCS        11B8
+CHECK_OP_BGE        11B8
+CHECK_OP_BLT        11B8
+CHECK_OP_BRA        11B8
+CHECK_OP_BVC        11B8
+CHECK_OP_CMP        11C4
+CHECK_OP_CMPI       1184
+CHECK_OP_DIVS       11BE
+CHECK_OP_EOR        11C4
+CHECK_OP_JSR        11B8
+CHECK_OP_LEA        11B8
+CHECK_OP_LSL        11C4
+CHECK_OP_LSR        11C4
+CHECK_OP_MOVEA_L    11B8
+CHECK_OP_MOVEA_W    11B8
+CHECK_OP_MOVEB_W    11B8
+CHECK_OP_MOVE_B     11AA
+CHECK_OP_MOVE_L     11B8
+CHECK_OP_MULS       11C4
+CHECK_OP_NEG        11B8
+CHECK_OP_OR         11BE
+CHECK_OP_ORI        1178
+CHECK_OP_ROL        11C4
+CHECK_OP_ROR        11C4
+CHECK_OP_RTS        11B8
+CHECK_OP_SUB        11BE
+CHECK_OP_SUBQ       11B8
+C_GROUP_0           1174
+C_GROUP_1           11AA
+C_GROUP_2           11B8
+C_GROUP_3           11B8
+C_GROUP_4           11B8
+C_GROUP_5           11B8
+C_GROUP_6           11B8
+C_GROUP_7           11B8
+C_GROUP_8           11BE
+C_GROUP_9           11BE
+C_GROUP_A           11BE
+C_GROUP_B           11C4
+C_GROUP_C           11C4
+C_GROUP_D           11C4
+C_GROUP_E           11C4
+C_GROUP_F           11C4
+GROUP_0             1012
+GROUP_1             1028
+GROUP_2             103E
+GROUP_3             1054
+GROUP_4             106A
+GROUP_5             1080
+GROUP_6             1096
+GROUP_7             10AC
+GROUP_8             10C2
+GROUP_9             10D8
+GROUP_A             10EE
+GROUP_B             1104
+GROUP_C             111A
+GROUP_D             1130
+GROUP_E             1146
+GROUP_F             115C
+INVALID_OP          11CA
+OP_FOUND            121F
+OP_JSR_DONE         116E
+OP_JSR_ROUTINE      100E
+PRINT_OP            1212
+PRINT_OP_BCLR       11F6
+PRINT_OP_CMPI       11E8
+PRINT_OP_MOVEB      1204
+PRINT_OP_ORI        11DA
+P_INVALID_OP        121A
+P_OP_ADD            123D
+P_OP_ADDA           123D
+P_OP_ASL            123D
+P_OP_ASR            123D
+P_OP_BCLR           1231
+P_OP_BCS            123D
+P_OP_BGE            123D
+P_OP_BLT            123D
+P_OP_BRA            123D
+P_OP_BVC            123D
+P_OP_CMP            123D
+P_OP_CMPI           122C
+P_OP_DIVS           123D
+P_OP_EOR            123D
+P_OP_JSR            123D
+P_OP_LEA            123D
+P_OP_LSL            123D
+P_OP_LSR            123D
+P_OP_MOVEA_L        123D
+P_OP_MOVEA_W        123D
+P_OP_MOVEB          1236
+P_OP_MOVE_L         123D
+P_OP_MOVE_W         123D
+P_OP_MULS           123D
+P_OP_NEG            123D
+P_OP_OR             123D
+P_OP_ORI            1228
+P_OP_ROL            123D
+P_OP_ROR            123D
+P_OP_RTS            123D
+P_OP_SUB            123D
+P_OP_SUBQ           123D
 START               1000
