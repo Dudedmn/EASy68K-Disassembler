@@ -1,7 +1,8 @@
 *--------------------------------------------------------------------------
 * Title      : Disassembler Skeleton 
 * Written by : You, and you should change all default comments
-* Date       :
+* Date       : 3/9/2019 
+* TEAM REEE Denny, Daniel, Fahad
 * 
 * Description: This code contains a method for you to use
 * with your Disassembler project IO, and a short demo of 
@@ -34,6 +35,17 @@ START:
    
     LEA MAIN_CONSOLE, A1
     JSR TrapTask13
+    
+    MOVE.B #50, D0
+    TRAP #15       * close all files
+    
+    MOVE #51,D0    * opems existing files
+    LEA filename, A1
+    TRAP #15
+    
+    LEA buffer, A1
+    MOVE.W #2, D2  *reading a word from a file which is equal to reading two bytes
+    
     
     LEA MSG1, A1        ; buffer of chars to write
     JSR TrapTask13
@@ -303,12 +315,6 @@ outFilename         DC.B 'Output.txt',0
 byteRead            DS.B 1
 ascii_val           DC.B $31,$41,$30,$30,$31,$41,$30,$30 * Test value $1A001A00
 
-Welcome_Message01  DC.B ''
-Welcome_Message02  DC.B ''
-Welcome_Message03  DC.B ''
-Welcome_Message04  DC.B ''
-Welcome_Message05  DC.B ''
-Welcome_Message06  DC.B ''
 
 
    END    START        ; last line of source
