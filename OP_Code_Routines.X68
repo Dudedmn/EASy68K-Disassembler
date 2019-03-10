@@ -3,23 +3,28 @@
 * Written by : Daniel Yan
 * Date       : 2/28/2019
 * Description: Op code determining process guide through branches/groupings
+
+  ORG $2000
+CUR_OP_CODE DS.W 1  ; Current OP Code Word   
   ORG $1000 ; Start at Address $1000
-*CUR_OP_CODE DS.W 1  ; Current OP Code Word
 
 START ; Start the op code routine
-
-
-    MOVE.L #$ADDD0080,D0    ;Input data into D0
-    MOVE.L  D0,D1           ;Copy data to D1 for mask checking
+    ;MOVE.W #%0000100010000010,CUR_OP_CODE   ;Static BCLR
+    MOVE.W #%0000111110001110,CUR_OP_CODE    ; Dymanic BCLR
+    MOVE.W CUR_OP_CODE,A6
+    MOVE.W CUR_OP_CODE,(A6)
+    MOVE.W (A6),D0
+    ;MOVE.W #$0800,D0          ;ORI.B #$5, D2
+    
     JSR OP_JSR_Routine      ;Use the JSR routine to identify the op code
 *-----------------------------------------------------------
 *First Nibble Values (15-12)
 *Value                  Operations
-*$0                     GROUP_0: ORI,BCLR,CMPI
+*$0                     GROUP_0: ORI,BCLR (static and dynamic),CMPI
 *$1                     GROUP_1: MOVE.B                   
 *$2                     GROUP_2: MOVE.L, MOVEA.L
 *$3                     GROUP_3: MOVE.W, MOVEA.W
-*$4                     GROUP_4: LEA,JSR,RTS,NEG
+*$4                     GROUP_4: LEA,JSR,RTS,NEG,MOVEM
 *$5                     GROUP_4: INVALID_OP
 *$6                     GROUP_6: SUBQ, Bcc(BCS,BGE,BLT,BVC), BRA
 *$7                     GROUP_7: INVALID_OP
@@ -36,78 +41,70 @@ START ; Start the op code routine
 * These valid operand codes refer to the basic supported operand codes
 * Groups refer to the first nibble value that is supported by the operand
 OP_JSR_Routine:
-    MOVEM.L D0, -(SP) ;Backup register D0
+    MOVEM.L D0-D1, -(SP)              ;Backup register D0 by pushing it on the Stack
+    MOVE.L #12, D1                 ; Prepare bit shift left for D1   
+    LSR.L   D1,D0                  ; Shift 12 bits to only get first 4 bits for D0
 
-GROUP_0:     ;$0| ORI, BCLR, CMPI                  
-    ANDI.B  #$0,D1
-    CMP.B   #$0,D1
-    BNE     GROUP_1
+GROUP_0:     ;$0| ORI, BCLR (static and dynamic), CMPI                  
+    CMP.B   #$0,D0          ; Compare first nibble
+    BNE     GROUP_1         ; If first nibble isn't 0, branch to second next group
     JSR     C_GROUP_0
     BRA     OP_JSR_DONE
     
 GROUP_1:     ;$1| MOVE.B
-    ANDI.B  #$1,D1
-    CMP.B   #$1,D1
+    CMP.B   #$1,D0
     BNE     GROUP_2
     JSR     C_GROUP_1
     BRA     OP_JSR_DONE
 
 GROUP_2:     ;$2| MOVE.L, MOVEA.L
-    ANDI.B  #$2,D1
-    CMP.B   #$2,D1
+    CMP.B   #$2,D0
     BNE     GROUP_3
     JSR     C_GROUP_2
     BRA     OP_JSR_DONE
 
 GROUP_3:     ;$3| MOVE.W, MOVEA.W
-    ANDI.B  #$3,D1
-    CMP.B   #$3,D1
+    CMP.B   #$3,D0
     BNE     GROUP_4
     JSR     C_GROUP_3
     BRA     OP_JSR_DONE
 
-GROUP_4:     ;$4| LEA, JSR, RTS, NEG
-    ANDI.B  #$4,D1
-    CMP.B   #$4,D1
+GROUP_4:     ;$4| LEA, JSR, RTS, NEG, MOVEM
+    CMP.B   #$4,D0
     BNE     GROUP_5
     JSR     C_GROUP_4
     BRA     OP_JSR_DONE
 
 
 GROUP_5:     ;$5| SUBQ
-    ANDI.B  #$5,D1
-    CMP.B   #$5,D1
+    CMP.B   #$5,D0
     BNE     GROUP_6
     JSR     C_GROUP_5
     BRA     OP_JSR_DONE
 
 
 GROUP_6:     ;$6| Bcc, BRA
-    ANDI.B  #$6,D1
-    CMP.B   #$6,D1
+    CMP.B   #$6,D0
     BNE     GROUP_7
     JSR     C_GROUP_6
     BRA     OP_JSR_DONE
 
 
 GROUP_7:     ;$7| Display: DATA, $WXYZ (Unsupported)
-    ANDI.B  #$7,D1
-    CMP.B   #$7,D1
+    CMP.B   #$7,D0
     BNE     GROUP_8
     JSR     C_GROUP_7
     BRA     OP_JSR_DONE
 
 
 GROUP_8:     ;$8| DIVS, OR
-    ANDI.B  #$8,D1
-    CMP.B   #$8,D1
+    CMP.B   #$8,D0
     BNE     GROUP_9
     JSR     C_GROUP_8
     BRA     OP_JSR_DONE
 
 
 GROUP_9:     ;$9| SUB
-    ANDI.B  #$9,D1
     CMP.B   #$9,D0
     BNE     GROUP_A
     JSR     C_GROUP_9
@@ -115,7 +112,6 @@ GROUP_9:     ;$9| SUB
 
 
 GROUP_A:     ;$A| Display: DATA, $WXYZ (Unsupported)
-    ANDI.B  #$A,D1
     CMP.B   #$A,D0
     BNE     GROUP_B
     JSR     C_GROUP_A
@@ -123,7 +119,6 @@ GROUP_A:     ;$A| Display: DATA, $WXYZ (Unsupported)
 
 
 GROUP_B:     ;$B| EOR, CMP
-    ANDI.B  #$B,D1
     CMP.B   #$B,D0
     BNE     GROUP_C
     JSR     C_GROUP_B
@@ -131,7 +126,6 @@ GROUP_B:     ;$B| EOR, CMP
 
 
 GROUP_C:     ;$C| MULS
-    ANDI.B  #$C,D1
     CMP.B   #$C,D0
     BNE     GROUP_D
     JSR     C_GROUP_C
@@ -139,7 +133,6 @@ GROUP_C:     ;$C| MULS
 
 
 GROUP_D:     ;$D| ADD, ADDA
-    ANDI.B  #$D,D1
     CMP.B   #$D,D0
     BNE     GROUP_E
     JSR     C_GROUP_D
@@ -147,7 +140,6 @@ GROUP_D:     ;$D| ADD, ADDA
 
 
 GROUP_E:     ;$E| LSR, LSL, ASR, ASL, ROL, ROR
-    ANDI.B  #$E,D1
     CMP.B   #$E,D0
     BNE     GROUP_F
     JSR     C_GROUP_E
@@ -155,14 +147,13 @@ GROUP_E:     ;$E| LSR, LSL, ASR, ASL, ROL, ROR
 
 
 GROUP_F:     ;$F| Display: DATA, $WXYZ (Unsupported)
-    ANDI.B  #$F,D1
     CMP.B   #$F,D0
     JSR     C_GROUP_F
     BRA     OP_JSR_DONE
 
 
 OP_JSR_DONE:
-         MOVEM.L (SP)+,D0 ;Recover register D0
+         MOVEM.L (SP)+,D0-D1 ;Recover register D0
          RTS             ;Return to stack
 ********************************************************************************
 
@@ -193,28 +184,57 @@ OP_JSR_DONE:
 ********************************************************************************
 * ORI: $00, 7-6 Size, 5-3 EA Mode, 2-0 EA Reg
 * CMPI: $0C, 7-6 Size, 5-3 EA Mode, 2-0 EA Reg
-* BCLR: $0, 11-9 Register, 8-6 %110, 5-3 EA Mode, 2-0 EA Reg
+* Dynamic BCLR: $0, 11-9 Register, 8-6 %110, 5-3 EA Mode, 2-0 EA Reg
+* Static BCLR: $01, 7-6 10, 5-3 EA Mode, 2-0 EA Reg
 ********************************************************************************
 C_GROUP_0:
-    MOVEM.L D0-D1, -(A7) ; Backup registers
+    MOVEM.L D0-D1, -(SP) ; Backup registers
     
 check_OP_ORI:
-    CMP.B #$00, D1          ;Compare the current op code to ORI
-    BNE check_OP_CMPI
-    BEQ   PRINT_OP_ORI          ;[IN PROG] Print ORI
+    MOVE.W  (A6),D0         ;Move current OP code into D0
+    ANDI.W  #$FF00,D0       ;Mask relevant bits to D0
+    CMP.W   #$0000,D0       ;Compare the appropriate masked bits     
+    BNE     check_OP_CMPI   ;Branch to next comparison if not equal
+    JSR     PRINT_OP_ORI    ;Print the OP code if equal         
+    BRA     CG0_C           ;Finish routine
 check_OP_CMPI:
-    CMP.B #$C0, D1   
-    BNE check_OP_BCLR       
-    BEQ   PRINT_OP_CMPI
-check_OP_BCLR:
-    CMP.B #$80,D1
-    BEQ PRINT_OP_BCLR
-    BNE CG0_F
-    BRA CG0_C
-CG0_F:    
+    MOVE.W  (A6),D0         ;Move current OP code into D0
+    ANDI.W  #$FF00,D0       ;Mask relevant bits to D0
+    CMP.W   #$0C00,D0       ;Compare the appropriate masked bits   
+    BNE     check_OP_S_BCLR ;Branch to next comparison if not equal       
+    JSR     PRINT_OP_CMPI   ;Print the OP code if equal
+    BRA     CG0_C           ;Finish routine
+check_OP_S_BCLR:
+    MOVE.W  (A6),D0         ;Move current OP code into D0
+    ANDI.W  #$FF00,D0       ;Mask relevant bits to D0
+    CMP.W   #$0800,D0       ;Compare the appropriate masked bits
+    BNE     check_OP_D_BCLR ;Branch to next comparison if not equal
+    JSR     PRINT_OP_S_BCLR ;Print the OP code if equal
+    BRA     CG0_C           ;Finish routine
+check_OP_D_BCLR:
+    MOVE.W (A6),D0          ;Move current OP code into D0
+    ANDI.W #%0000000110000000,D0 ;Do a direct binary bitmask to see which bits are needed
+    CMP.W  #%0000000110000000,D0 ;Compare the expected binary value
+    BNE CG0_F                ;If not equal this must be an invalid OP code
+    JSR PRINT_OP_D_BCLR      ;Print the OP code if equal
+    BRA CG0_C                ;Finish routine
+CG0_F:                       ;Checks have been finished, invalid OP code has been found
     BRA INVALID_OP    
-CG0_C:
-    MOVEM.L (A7)+,D0-D1 ; Restore registers
+CG0_C:                       ;Checks have been finished,a valid OP code has been found
+move_Last_6_Bits_To_EA:      ;Move last 6 bits from EA field to relevant registers
+    MOVE.W (A6),D0           ;Move current OP code into D0
+    MOVE.W  #10,D1           ;Prepare 10 bit shift to D1
+    LSL.W   D1,D0            ;Truncate to find the last 6 bits
+    LSR.W   D1,D0            ;Shift back to get the proper 6 bits
+    MOVE.W D0,D7             ;Move last 6 bits into D7
+    MOVE.W  #3,D1
+    LSR.W   D1,D7
+    MOVE.W  D7,D6             ;Move the 'upper' 3 bits into D6
+    MOVE.W  #12,D1
+    LSL.W   D1,D0
+    LSR.W   D1,D0
+    MOVE.W  D0,D7              ;Move the 'lower' 3 bits into D7
+    MOVEM.L (SP)+,D0-D1 ; Restore registers
     RTS
 * GROUP_1                      
 ********************************************************************************
@@ -255,6 +275,8 @@ check_OP_MOVEB_W:
 * JSR: $4E, 7-6 %10, 5-3 EA Mode, 2-0 EA Reg 
 * RTS: $4E75
 * NEG: $44, 7-6 Size, 5-3 EA Mode, 2-0 EA Reg
+* MOVEM: $4, 11 %1, 10 %D, 9-7 %001, 6 S, 5-3 EA Mode, 2-0 EA Reg
+* %D = 0 , Register to Memory, 1 Memory to Register
 ********************************************************************************
 C_GROUP_4:
 
@@ -390,7 +412,7 @@ check_OP_ROL:
 
 check_OP_ROR:
 
-*GROUP_F
+* GROUP_F
 ********************************************************************************
 * Currently no OP codes here are supported.
 ********************************************************************************
@@ -421,10 +443,14 @@ PRINT_OP_CMPI:
     LEA P_OP_CMPI,A1
     JSR PRINT_OP
     RTS
-PRINT_OP_BCLR:
-    LEA P_OP_BCLR,A1
+PRINT_OP_S_BCLR:
+    LEA P_OP_S_BCLR,A1
     JSR PRINT_OP
     RTS
+PRINT_OP_D_BCLR:
+    LEA P_OP_D_BCLR,A1
+    JSR PRINT_OP
+    RTS    
 PRINT_OP_MOVEB:
     LEA P_OP_MOVEB,A1
     JSR PRINT_OP
@@ -438,16 +464,22 @@ PRINT_OP:   ;Prints current op code byte
 ******************* END OF JMP LABELS ******************************************
 
 ******************* DATA CONSTANT PRINTS ***************************************
+* Formatting is as follows: P_OP_<OPCODE>, where P = Print, OP = Operation,
+* <OPCODE> is any valid operand
+
 P_INVALID_OP    DC.B    'DATA',0
 OP_FOUND        DC.B    'Found OP',0 ; this should be taken out later
 P_OP_ORI        DC.B    'ORI',0
 P_OP_CMPI       DC.B    'CMPI',0
-P_OP_BCLR       DC.B    'BCLR',0
+P_OP_S_BCLR       DC.B    'BCLR',0
+P_OP_D_BCLR       DC.B    'BCLR',0
 P_OP_MOVEB      DC.B    'MOVE.B',0
 P_OP_MOVEA_L    DC.B    'MOVEA.L',0
 P_OP_MOVE_L     DC.B    'MOVE.L',0
 P_OP_MOVEA_W    DC.B    'MOVEA.W',0
 P_OP_MOVE_W     DC.B    'MOVE.W',0
+P_OP_MOVEM_W     DC.B    'MOVEM.W',0
+P_OP_MOVEM_L    DC.B    'MOVEM.L',0
 P_OP_LEA        DC.B    'LEA',0
 P_OP_JSR        DC.B    'JSR',0
 P_OP_RTS        DC.B    'RTS',0
@@ -474,6 +506,8 @@ P_OP_ROR        DC.B    'ROR',0
 P_OP_ROL        DC.B    'ROL',0
 ***************** END OF DATA CONSTANT PRINTS ***********************************
     END START
+
+
 
 
 
