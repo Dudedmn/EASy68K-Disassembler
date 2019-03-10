@@ -1,21 +1,31 @@
 *-----------------------------------------------------------
-* Title      :
+* Title      : OP Code routines for Disassembler
 * Written by : Daniel Yan
-* Date       : 2/28/2019
-* Description: Op code determining process guide through branches/groupings
+* Date       : 2/28/2019, Updated 3/9/2019
+
+* Description: Op code determining to identify values
 
   ORG $2000
-CUR_OP_CODE DS.W 1  ; Current OP Code Word   
+CUR_OP_CODE DS.W 1  ; Current OP Code Word 
+EA_SIZE     DS.W 1
   ORG $1000 ; Start at Address $1000
 
 START ; Start the op code routine
-    ;MOVE.W #%0000100010000010,CUR_OP_CODE   ;Static BCLR
-    MOVE.W #%0000111110001110,CUR_OP_CODE    ; Dymanic BCLR
-    MOVE.W CUR_OP_CODE,A6
-    MOVE.W CUR_OP_CODE,(A6)
-    MOVE.W (A6),D0
-    ;MOVE.W #$0800,D0          ;ORI.B #$5, D2
     
+***************************** Inputs **********************************************
+    ;MOVE.W #%0000100010000010,CUR_OP_CODE       ;Static BCLR
+    ;MOVE.W #%0000111110001110,CUR_OP_CODE       ;Dynamic BCLR
+    ;MOVE.W #%0000000001000001,CUR_OP_CODE       ;ORI.W D1
+    ;MOVE.W #%0000111110001110,(A6)              ;Dynamic BCLR
+    ;MOVE.W #%0010001001001101,(A6)              ;MOVEA.L A5,A1
+    ;MOVE.W #%0010000000001101,(A6)              ;MOVE.L A5,A1
+    MOVE.W #%0011001001001101,(A6)              ;MOVEA.W A5,A1
+    ;MOVE.W #%0011000000001101,(A6)              ;MOVE.W A5,A1
+    ;MOVE.W #%0000000001000001,(A6)              ;ORI.W D1
+    ;MOVE.W CUR_OP_CODE,A6                       ;Loading memory space to address register
+    ;MOVE.W CUR_OP_CODE,(A6)                     ;Loading memory value to address value
+************************************************************************************
+    MOVE.W (A6),D0  
     JSR OP_JSR_Routine      ;Use the JSR routine to identify the op code
 *-----------------------------------------------------------
 *First Nibble Values (15-12)
@@ -170,23 +180,24 @@ GROUP_F:                ;$F| Display: DATA, $WXYZ (Unsupported)
 
 OP_JSR_DONE:
          MOVEM.L (SP)+,D0-D1       ;Recover register D0
-         RTS                       ;Return to stack
+         JMP READ_NEXT_INSTRUCTION
 **********************************************************************************
-
 ********** EA Parsing ************************************************************
 
-* move_Last_6_Bits_To_EA
+* MOVE_LAST_6_BITS_TO_EA
 **********************************************************************************
-* Description: For OP codes with only the last 6 bits specified as EA Mode and EA
-* Reg, the last 6 bits will be parsed and moved into the appropriate registers.
+* Description: For OP codes with the last 6 bits specified as EA Mode and EA Reg,
+* the last 6 bits will be parsed and moved into the appropriate registers.
 *
 * Registers used: A6,D0,D1,D6,D7 
+
 * Precondition: OP code has been identified with only the last 6 bits for EA,
 * current instruction set is stored into A6.
+
 * Postcondition: Last 6 bits of instruction bit has been isolated and stored. Bits
-* for EA Mode have been stored in D7, Bits for EA Reve been stored in D6.
+* for EA Mode have been stored in D7, Bits for EA Reg been stored in D6.
 **********************************************************************************
-move_Last_6_Bits_To_EA:      ;Move last 6 bits from EA field to relevant registers
+MOVE_LAST_6_BITS_TO_EA:      ;Move last 6 bits from EA field to relevant registers
     MOVEM.L D0-D7/A6, -(SP)  ;Save all changed registers
     MOVE.W (A6),D0           ;Move current OP code into D0
     MOVE.W  #10,D1           ;Prepare 10 bit shift to D1
@@ -202,9 +213,61 @@ move_Last_6_Bits_To_EA:      ;Move last 6 bits from EA field to relevant registe
     MOVE.W  D0,D7            ;Move the 'lower' 3 bits into D7
     MOVEM.L (SP)+,D0-D7/A6   ;Restore registers
     RTS                      ;Return to stack
-********** End of EA Parsing ***************************************************
+    
+* FIND_2_BIT_SIZE_TO_EA
+**********************************************************************************
+* Description: For OP codes with 2 bit size fields, the 2 relevant bits (7-6) will 
+* be parsed and moved to the appropriate registers.
+*
+* Registers used: A6,D0,D1,D5
+*
+* Precondition: OP code has been identified with 2 size bit field for EA, current
+* instruction set for OP code is stored in to A6.
+*
+* Postcondition: 2 bit size field has been isolated and stored into D5.
+**********************************************************************************
+FIND_2_BIT_SIZE_TO_EA:      ;Move the 2 bit size field relevant register
+    MOVEM.L  D0-D5/A6,-(SP) ;Save all changed registers
+    MOVE.W   (A6),D0        ;Move current OP code into D0
+    MOVE.W   #8,D1          ;Prepare 8 bit shift to D1
+    LSL.W    D1,D0          ;Truncate to find the 2 size bits
+    LSR.W    D1,D0          ;Reposition the bits
+    MOVE.W   #6,D1          ;Prepare 6 bit shift to D1
+    LSR.W    D1,D0          ;Truncate to shift 2 bits to a byte
+    MOVE.W   D0,D5          ;Move 2 size bits into D5
+    MOVEM.L (SP)+,D0-D5/A6  ;Restore registers
+    RTS                     ;Return to stack
+**********************************************************************************
 
-*******************JMP LABELS **************************************************
+* FIND_3_BIT_REG_TO_EA
+**********************************************************************************
+* Description: OP codes with a dynamic 3 bit register in bits 11-9 will be parsed
+* and have those 3 bits isolated and moved to the appropriate registers.
+*
+* Registers used: A6,D0,D1,D5
+*
+* Precondition: OP code has been identified with a dynamic 3 bit register in bits
+* 11-9.
+*
+* Postcondition: 3 bit dynamic register has been isolated and stored into D4.
+**********************************************************************************
+FIND_3_BIT_REG_TO_EA:       ;Move the 3 bit dynamic register bits to proper register
+    MOVEM.L  D0-D5/A6,-(SP) ;Save all changed registers
+    MOVE.W   (A6),D0        ;Move current OP code into D0
+    MOVE.W   #4,D1          ;Prepare 4 bit shift to D1
+    LSL.W    D1,D0          ;Truncate to find the 2 size bits
+    LSR.W    D1,D0          ;Reposition the bits
+    MOVE.W   #9,D1          ;Prepare 9 bit shift to D1
+    LSR.W    D1,D0          ;Truncate to shift 3 bits to a byte
+    MOVE.W   D0,D4          ;Move 3 register bits into D4
+    MOVEM.L (SP)+,D0-D5/A6  ;Restore registers
+    RTS                     ;Return to stack
+**********************************************************************************
+
+
+********** End of EA Parsing *****************************************************
+
+*******************JMP LABELS ****************************************************
 * Labelling for group codes will be in the following format
 
 * <JMP Labelname>
@@ -229,47 +292,58 @@ move_Last_6_Bits_To_EA:      ;Move last 6 bits from EA field to relevant registe
 
 * GROUP_0                      
 ********************************************************************************
+* Description: Checks for the following listed OP codes to be present or not
+*
 * ORI: $00, 7-6 Size, 5-3 EA Mode, 2-0 EA Reg
 * CMPI: $0C, 7-6 Size, 5-3 EA Mode, 2-0 EA Reg
 * Dynamic BCLR: $0, 11-9 Register, 8-6 %110, 5-3 EA Mode, 2-0 EA Reg
 * Static BCLR: $01, 7-6 10, 5-3 EA Mode, 2-0 EA Reg
+*
+* Precondition: First nibble has been identified as $0
+* Postcondition: Parses proper OP code with a nibble value of $0 or finds an
+* invalid OP code. After a successful parse loading for EA values will be done
+* through a subroutine.
 ********************************************************************************
 C_GROUP_0:
     MOVEM.L D0-D1, -(SP) ; Backup registers
     
-check_OP_ORI:
-    MOVE.W  (A6),D0         ;Move current OP code into D0
+CHECK_OP_ORI:
+    MOVE.W  (A6),D0         ;Move current instruction set into D
     ANDI.W  #$FF00,D0       ;Mask relevant bits to D0
     CMP.W   #$0000,D0       ;Compare the appropriate masked bits     
-    BNE     check_OP_CMPI   ;Branch to next comparison if not equal
-    JSR     PRINT_OP_ORI    ;Print the OP code if equal         
+    BNE     CHECK_OP_CMPI   ;Branch to next comparison if not equal
+    JSR     PRINT_OP_ORI    ;Print the OP code if equal
+    JSR     FIND_2_BIT_SIZE_TO_EA         
     BRA     CG0_C           ;Finish routine
-check_OP_CMPI:
-    MOVE.W  (A6),D0         ;Move current OP code into D0
+CHECK_OP_CMPI:
+    MOVE.W  (A6),D0         ;Move current instruction set into D
     ANDI.W  #$FF00,D0       ;Mask relevant bits to D0
     CMP.W   #$0C00,D0       ;Compare the appropriate masked bits   
-    BNE     check_OP_S_BCLR ;Branch to next comparison if not equal       
+    BNE     CHECK_OP_S_BCLR ;Branch to next comparison if not equal       
     JSR     PRINT_OP_CMPI   ;Print the OP code if equal
     BRA     CG0_C           ;Finish routine
-check_OP_S_BCLR:
-    MOVE.W  (A6),D0         ;Move current OP code into D0
+CHECK_OP_S_BCLR:
+    MOVE.W  (A6),D0         ;Move current instruction set into D
     ANDI.W  #$FF00,D0       ;Mask relevant bits to D0
     CMP.W   #$0800,D0       ;Compare the appropriate masked bits
-    BNE     check_OP_D_BCLR ;Branch to next comparison if not equal
+    BNE     CHECK_OP_D_BCLR ;Branch to next comparison if not equal
     JSR     PRINT_OP_S_BCLR ;Print the OP code if equal
+    JSR     MOVE_LAST_6_BITS_TO_EA
+    MOVEM.L (SP)+,D6-D7     ;POP STACK
     BRA     CG0_C           ;Finish routine
-check_OP_D_BCLR:
-    MOVE.W (A6),D0          ;Move current OP code into D0
-    ANDI.W #%0000000110000000,D0 ;Do a direct binary bitmask to see which bits are needed
-    CMP.W  #%0000000110000000,D0 ;Compare the expected binary value
-    BNE CG0_F                ;If not equal this must be an invalid OP code
-    JSR PRINT_OP_D_BCLR      ;Print the OP code if equal
-    BRA CG0_C                ;Finish routine
+CHECK_OP_D_BCLR:
+    MOVE.W (A6),D0                ;Move current instruction set into D
+    ANDI.W  #%0000000110000000,D0 ;Do a direct binary bitmask to see which bits are needed
+    CMP.W   #%0000000110000000,D0 ;Compare the expected binary value
+    BNE     CG0_F                 ;If not equal this must be an invalid OP code
+    JSR     PRINT_OP_D_BCLR       ;Print the OP code if equal
+    JSR     MOVE_LAST_6_BITS_TO_EA
+    JSR     FIND_3_BIT_REG_TO_EA
+    BRA     CG0_C                ;Finish routine
 CG0_F:                       ;Checks have been finished, invalid OP code has been found
     BRA INVALID_OP    
 CG0_C:                       ;Checks have been finished,a valid OP code has been found
-
-    RTS
+    RTS                      ;Return to stack
     
 * GROUP_1                      
 ********************************************************************************
@@ -277,11 +351,13 @@ CG0_C:                       ;Checks have been finished,a valid OP code has been
 ********************************************************************************
 C_GROUP_1:
 
-check_OP_MOVE_B:
-    CMP.B #$01,D0
-    BNE INVALID_OP
-    BEQ PRINT_OP_MOVEB
-    RTS
+CHECK_OP_MOVE_B:
+    MOVE.W (A6),D0                  ;Move current instruction set into D0          
+    ANDI.W  #$FF00,D0               ;Mask relevant bits to D0
+    CMP.W #$1000,D0                 ;Compare the appropriate masked bits 
+    BNE INVALID_OP                  ;Invalid OP code has been found
+    BEQ PRINT_OP_MOVEB              ;Print the OP code if equal
+    RTS                             ;Return to stack
 * GROUP_2
 ********************************************************************************
 * MOVEA.L: $2, 11-9 DST Reg, 8-6 %001, 5-3 SRC Mode, 2-0 SRC Reg
@@ -289,10 +365,33 @@ check_OP_MOVE_B:
 ********************************************************************************
 C_GROUP_2:
 
-check_OP_MOVEA_L:
+CHECK_OP_MOVEA_L:
+    MOVE.W (A6),D0
+    ANDI.W #$FF00,D0
+    CMP.W #$2000,D0
+    BRA FIND_MOVEA_L_DIFFERENCE
 
-check_OP_MOVE_L:
-
+    
+FIND_MOVEA_L_DIFFERENCE:    ;Finds difference between MOVEA and MOVE
+    MOVE.W   (A6),D0        ;Move current OP code into D0
+    MOVE.W   #7,D1          ;Prepare 7 bit shift to D1
+    LSL.W    D1,D0          ;Truncate to find the 3 address mode bits
+    LSR.W    D1,D0          ;Reposition the bits
+    MOVE.W   #6,D1          ;Prepare 6 bit shift to D1
+    LSR.W    D1,D0          ;Truncate to shift 3 bits to a register
+    MOVE.W   D0,D6          ;Move 3 address mode bits into D6
+    CMP.W   #$1,D6          ;Check if the address mode value is MOVEA
+    BNE     CHECK_OP_MOVE_L 
+    BEQ     PRINT_OP_MOVEA_L  
+    
+CHECK_OP_MOVE_L:
+    MOVE.W (A6),D0
+    ANDI.W #$FF00,D0
+    CMP.W #$2000,D0
+    BNE INVALID_OP
+    BEQ PRINT_OP_MOVE_L
+    RTS
+    
 * GROUP_3
 ********************************************************************************
 * MOVEA.W: $3, 11-9 DST Reg, 8-6 %001, 5-3 SRC Mode, 2-0 SRC Reg
@@ -300,9 +399,32 @@ check_OP_MOVE_L:
 ********************************************************************************
 C_GROUP_3:
 
-check_OP_MOVEA_W:
+CHECK_OP_MOVEA_W:
+    MOVE.W (A6),D0
+    ANDI.W #$FF00,D0
+    CMP.W #$3000,D0
+    BRA FIND_MOVEA_W_DIFFERENCE
 
-check_OP_MOVEB_W:
+    
+FIND_MOVEA_W_DIFFERENCE:      ;Finds difference between MOVEA and MOVE
+    MOVE.W   (A6),D0        ;Move current OP code into D0
+    MOVE.W   #7,D1          ;Prepare 7 bit shift to D1
+    LSL.W    D1,D0          ;Truncate to find the 3 address mode bits
+    LSR.W    D1,D0          ;Reposition the bits
+    MOVE.W   #6,D1          ;Prepare 6 bit shift to D1
+    LSR.W    D1,D0          ;Truncate to shift 3 bits to a register
+    MOVE.W   D0,D6          ;Move 3 address mode bits into D6
+    CMP.W   #$1,D6          ;Check if the address mode value is MOVEA
+    BNE     CHECK_OP_MOVE_W 
+    BEQ     PRINT_OP_MOVEA_W  
+    
+CHECK_OP_MOVE_W:
+    MOVE.W (A6),D0
+    ANDI.W #$FF00,D0
+    CMP.W #$3000,D0
+    BNE INVALID_OP
+    BEQ PRINT_OP_MOVE_W
+    RTS
 
 * GROUP_4
 ********************************************************************************
@@ -315,13 +437,13 @@ check_OP_MOVEB_W:
 ********************************************************************************
 C_GROUP_4:
 
-check_OP_LEA:
+CHECK_OP_LEA:
 
-check_OP_JSR:
+CHECK_OP_JSR:
 
-check_OP_RTS:
+CHECK_OP_RTS:
 
-check_OP_NEG:
+CHECK_OP_NEG:
 
 * GROUP_5
 ********************************************************************************
@@ -329,7 +451,7 @@ check_OP_NEG:
 ********************************************************************************
 C_GROUP_5:
 
-check_OP_SUBQ:
+CHECK_OP_SUBQ:
 
 * GROUP_6
 ********************************************************************************
@@ -344,15 +466,15 @@ check_OP_SUBQ:
 ********************************************************************************
 C_GROUP_6:
 
-check_OP_BRA:
+CHECK_OP_BRA:
 
-check_OP_BCS:
+CHECK_OP_BCS:
 
-check_OP_BGE:
+CHECK_OP_BGE:
 
-check_OP_BLT:
+CHECK_OP_BLT:
 
-check_OP_BVC:
+CHECK_OP_BVC:
 
 *GROUP_7
 ********************************************************************************
@@ -368,9 +490,9 @@ C_GROUP_7:
 ********************************************************************************
 C_GROUP_8:
 
-check_OP_DIVS:
+CHECK_OP_DIVS:
 
-check_OP_OR:
+CHECK_OP_OR:
 
 * GROUP_9                      
 ********************************************************************************
@@ -378,7 +500,7 @@ check_OP_OR:
 ********************************************************************************
 C_GROUP_9:
 
-check_OP_SUB:
+CHECK_OP_SUB:
 
 *GROUP_A
 ********************************************************************************
@@ -395,9 +517,9 @@ C_GROUP_A:
 ********************************************************************************
 C_GROUP_B:
 
-check_OP_EOR:
+CHECK_OP_EOR:
 
-check_OP_CMP:
+CHECK_OP_CMP:
 
 * GROUP_C                     
 ********************************************************************************
@@ -405,7 +527,7 @@ check_OP_CMP:
 ********************************************************************************
 C_GROUP_C:
 
-check_OP_MULS:
+CHECK_OP_MULS:
 
 * GROUP_D                     
 ********************************************************************************
@@ -415,9 +537,9 @@ check_OP_MULS:
 ********************************************************************************
 C_GROUP_D:
 
-check_OP_ADDA:
+CHECK_OP_ADDA:
 
-check_OP_ADD:
+CHECK_OP_ADD:
 
 * GROUP_E                     
 ********************************************************************************
@@ -435,17 +557,17 @@ check_OP_ADD:
 ********************************************************************************
 C_GROUP_E:
 
-check_OP_LSR:
+CHECK_OP_LSR:
 
-check_OP_LSL:
+CHECK_OP_LSL:
 
-check_OP_ASL:
+CHECK_OP_ASL:
 
-check_OP_ASR:
+CHECK_OP_ASR:
 
-check_OP_ROL:
+CHECK_OP_ROL:
 
-check_OP_ROR:
+CHECK_OP_ROR:
 
 * GROUP_F
 ********************************************************************************
@@ -467,7 +589,8 @@ INVALID_OP:  ; Prints DATA for invalid op
     MOVE.B #13,D0
     TRAP #15
     SIMHALT
-    
+READ_NEXT_INSTRUCTION: ; Needs to read next instruction set {PLACEHOLDER}
+    SIMHALT
     
 ********************** PRINTING ROUTINES ****************************************
 PRINT_OP_ORI:
@@ -490,6 +613,22 @@ PRINT_OP_MOVEB:
     LEA P_OP_MOVEB,A1
     JSR PRINT_OP
     RTS
+PRINT_OP_MOVEA_L:
+    LEA P_OP_MOVEA_L,A1
+    JSR PRINT_OP
+    RTS
+PRINT_OP_MOVE_L:
+    LEA P_OP_MOVE_L,A1
+    JSR PRINT_OP
+    RTS
+PRINT_OP_MOVEA_W:
+    LEA P_OP_MOVEA_W,A1
+    JSR PRINT_OP
+    RTS
+PRINT_OP_MOVE_W:
+    LEA P_OP_MOVE_W,A1
+    JSR PRINT_OP
+    RTS    
 PRINT_OP:   ;Prints current op code byte
     MOVE.B #13,D0
     TRAP #15
@@ -506,14 +645,14 @@ P_INVALID_OP    DC.B    'DATA',0
 OP_FOUND        DC.B    'Found OP',0 ; this should be taken out later
 P_OP_ORI        DC.B    'ORI',0
 P_OP_CMPI       DC.B    'CMPI',0
-P_OP_S_BCLR       DC.B    'BCLR',0
-P_OP_D_BCLR       DC.B    'BCLR',0
+P_OP_S_BCLR     DC.B    'BCLR',0
+P_OP_D_BCLR     DC.B    'BCLR',0
 P_OP_MOVEB      DC.B    'MOVE.B',0
 P_OP_MOVEA_L    DC.B    'MOVEA.L',0
 P_OP_MOVE_L     DC.B    'MOVE.L',0
 P_OP_MOVEA_W    DC.B    'MOVEA.W',0
 P_OP_MOVE_W     DC.B    'MOVE.W',0
-P_OP_MOVEM_W     DC.B    'MOVEM.W',0
+P_OP_MOVEM_W    DC.B    'MOVEM.W',0
 P_OP_MOVEM_L    DC.B    'MOVEM.L',0
 P_OP_LEA        DC.B    'LEA',0
 P_OP_JSR        DC.B    'JSR',0
@@ -541,6 +680,9 @@ P_OP_ROR        DC.B    'ROR',0
 P_OP_ROL        DC.B    'ROL',0
 ***************** END OF DATA CONSTANT PRINTS ***********************************
     END START
+
+
+
 
 
 
