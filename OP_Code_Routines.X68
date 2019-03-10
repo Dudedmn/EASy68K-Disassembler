@@ -25,8 +25,8 @@ START ; Start the op code routine
 *$2                     GROUP_2: MOVE.L, MOVEA.L
 *$3                     GROUP_3: MOVE.W, MOVEA.W
 *$4                     GROUP_4: LEA,JSR,RTS,NEG,MOVEM
-*$5                     GROUP_4: INVALID_OP
-*$6                     GROUP_6: SUBQ, Bcc(BCS,BGE,BLT,BVC), BRA
+*$5                     GROUP_5: SUBQ
+*$6                     GROUP_6: Bcc(BCS,BGE,BLT,BVC), BRA
 *$7                     GROUP_7: INVALID_OP
 *$8                     GROUP_8: DIVS, OR
 *$9                     GROUP_7: SUB
@@ -37,125 +37,172 @@ START ; Start the op code routine
 *$E                     GROUP_E: LSR, LSL, ASR, ASL, ROL, ROR
 *$F                     GROUP_F: INVALID_OP
 
-********************OPCode JSR Routines***************************************
+
+* OP_JSR_Routine
+**********************************************************************************
+* Description: Catalog all supported OP codes into groupings based on their hex
+* values. Sort the supported OP codes by looking at the first nibble for their
+* grouping value. Call underlying subroutines for further identification of the
+* op code.
+*
+* Registers used: A6,D0,D1 
+*
+* Precondition: Instruction set (size Word) has been loaded in the appropriate
+* address to be parsed and read.
+
+* Postcondition: OP code has been identified as either valid or invalid. If it is
+* valid, it is stored into A6 and EA parsing methods are called to pass needed
+* information to EA. If invalid, DATA output will be utilized to indicate so.
+**********************************************************************************
 * These valid operand codes refer to the basic supported operand codes
 * Groups refer to the first nibble value that is supported by the operand
 OP_JSR_Routine:
-    MOVEM.L D0-D1, -(SP)              ;Backup register D0 by pushing it on the Stack
-    MOVE.L #12, D1                 ; Prepare bit shift left for D1   
-    LSR.L   D1,D0                  ; Shift 12 bits to only get first 4 bits for D0
+    MOVEM.L D0-D1, -(SP)           ;Backup registers D0 and D1 by pushing it on the Stack
+    MOVE.L #12, D1                 ;Prepare bit shift left for D1   
+    LSR.L   D1,D0                  ;Shift 12 bits to only get first 4 bits for D0
 
-GROUP_0:     ;$0| ORI, BCLR (static and dynamic), CMPI                  
-    CMP.B   #$0,D0          ; Compare first nibble
-    BNE     GROUP_1         ; If first nibble isn't 0, branch to second next group
-    JSR     C_GROUP_0
-    BRA     OP_JSR_DONE
+GROUP_0:                ;$0| ORI, BCLR (static and dynamic), CMPI                  
+    CMP.B   #$0,D0                 ;Compare first nibble
+    BNE     GROUP_1                ;If first nibble value isn't $0, branch to next
+    JSR     C_GROUP_0              ;Jump to group 0 checking if nibble value is $0
+    BRA     OP_JSR_DONE            ;Finish subroutine once checking is finished
     
-GROUP_1:     ;$1| MOVE.B
-    CMP.B   #$1,D0
-    BNE     GROUP_2
-    JSR     C_GROUP_1
-    BRA     OP_JSR_DONE
+GROUP_1:                ;$1| MOVE.B
+    CMP.B   #$1,D0                 ;Compare first nibble
+    BNE     GROUP_2                ;If first nibble value isn't $1, branch to next
+    JSR     C_GROUP_1              ;Jump to group 1 checking if nibble value is $1
+    BRA     OP_JSR_DONE            ;Finish subroutine once checking is finished
 
-GROUP_2:     ;$2| MOVE.L, MOVEA.L
-    CMP.B   #$2,D0
-    BNE     GROUP_3
-    JSR     C_GROUP_2
-    BRA     OP_JSR_DONE
+GROUP_2:                ;$2| MOVE.L, MOVEA.L
+    CMP.B   #$2,D0                 ;Compare first nibble
+    BNE     GROUP_3                ;If first nibble value isn't $2, branch to next
+    JSR     C_GROUP_2              ;Jump to group 2 checking if nibble value is $2
+    BRA     OP_JSR_DONE            ;Finish subroutine once checking is finished
 
-GROUP_3:     ;$3| MOVE.W, MOVEA.W
-    CMP.B   #$3,D0
-    BNE     GROUP_4
-    JSR     C_GROUP_3
-    BRA     OP_JSR_DONE
+GROUP_3:                ;$3| MOVE.W, MOVEA.W
+    CMP.B   #$3,D0                 ;Compare first nibble
+    BNE     GROUP_4                ;If first nibble value isn't $3, branch to next
+    JSR     C_GROUP_3              ;Jump to group 3 checking if nibble value is $3
+    BRA     OP_JSR_DONE            ;Finish subroutine once checking is finished
 
-GROUP_4:     ;$4| LEA, JSR, RTS, NEG, MOVEM
-    CMP.B   #$4,D0
-    BNE     GROUP_5
-    JSR     C_GROUP_4
-    BRA     OP_JSR_DONE
-
-
-GROUP_5:     ;$5| SUBQ
-    CMP.B   #$5,D0
-    BNE     GROUP_6
-    JSR     C_GROUP_5
-    BRA     OP_JSR_DONE
+GROUP_4:                ;$4| LEA, JSR, RTS, NEG, MOVEM
+    CMP.B   #$4,D0                 ;Compare first nibble
+    BNE     GROUP_5                ;If first nibble value isn't $4, branch to next
+    JSR     C_GROUP_4              ;Jump to group 4 checking if nibble value is $4
+    BRA     OP_JSR_DONE            ;Finish subroutine once checking is finished
 
 
-GROUP_6:     ;$6| Bcc, BRA
-    CMP.B   #$6,D0
-    BNE     GROUP_7
-    JSR     C_GROUP_6
-    BRA     OP_JSR_DONE
+GROUP_5:                ;$5| SUBQ
+    CMP.B   #$5,D0                 ;Compare first nibble
+    BNE     GROUP_6                ;If first nibble value isn't $5, branch to next
+    JSR     C_GROUP_5              ;Jump to group 5 checking if nibble value is $5
+    BRA     OP_JSR_DONE            ;Finish subroutine once checking is finished
 
 
-GROUP_7:     ;$7| Display: DATA, $WXYZ (Unsupported)
-    CMP.B   #$7,D0
-    BNE     GROUP_8
-    JSR     C_GROUP_7
-    BRA     OP_JSR_DONE
+GROUP_6:                ;$6| Bcc (BCS,BGE,BLT,BVC) BRA
+    CMP.B   #$6,D0                 ;Compare first nibble
+    BNE     GROUP_7                ;If first nibble value isn't $6, branch to next
+    JSR     C_GROUP_6              ;Jump to group 6 checking if nibble value is $6
+    BRA     OP_JSR_DONE            ;Finish subroutine once checking is finished
 
 
-GROUP_8:     ;$8| DIVS, OR
-    CMP.B   #$8,D0
-    BNE     GROUP_9
-    JSR     C_GROUP_8
-    BRA     OP_JSR_DONE
+GROUP_7:                ;$7| Display: DATA, $WXYZ (Unsupported)
+    CMP.B   #$7,D0                 ;Compare first nibble
+    BNE     GROUP_8                ;If first nibble value isn't $7, branch to next
+    JSR     C_GROUP_7              ;Jump to group 7 checking if nibble value is $7
+    BRA     OP_JSR_DONE            ;Finish subroutine once checking is finished
 
 
-GROUP_9:     ;$9| SUB
-    CMP.B   #$9,D0
-    BNE     GROUP_A
-    JSR     C_GROUP_9
-    BRA     OP_JSR_DONE
+GROUP_8:                ;$8| DIVS, OR
+    CMP.B   #$8,D0                 ;Compare first nibble
+    BNE     GROUP_9                ;If first nibble value isn't $8, branch to next
+    JSR     C_GROUP_8              ;Jump to group 8 checking if nibble value is $8
+    BRA     OP_JSR_DONE            ;Finish subroutine once checking is finished
 
 
-GROUP_A:     ;$A| Display: DATA, $WXYZ (Unsupported)
-    CMP.B   #$A,D0
-    BNE     GROUP_B
-    JSR     C_GROUP_A
-    BRA     OP_JSR_DONE
+GROUP_9:                ;$9| SUB
+    CMP.B   #$9,D0                 ;Compare first nibble
+    BNE     GROUP_A                ;If first nibble value isn't $9, branch to next
+    JSR     C_GROUP_9              ;Jump to group 9 checking if nibble value is $9
+    BRA     OP_JSR_DONE            ;Finish subroutine once checking is finished
 
 
-GROUP_B:     ;$B| EOR, CMP
-    CMP.B   #$B,D0
-    BNE     GROUP_C
-    JSR     C_GROUP_B
-    BRA     OP_JSR_DONE
+GROUP_A:                ;$A| Display: DATA, $WXYZ (Unsupported)
+    CMP.B   #$A,D0                 ;Compare first nibble
+    BNE     GROUP_B                ;If first nibble value isn't $A, branch to next
+    JSR     C_GROUP_A              ;Jump to group A checking if nibble value is $A
+    BRA     OP_JSR_DONE            ;Finish subroutine once checking is finished
 
 
-GROUP_C:     ;$C| MULS
-    CMP.B   #$C,D0
-    BNE     GROUP_D
-    JSR     C_GROUP_C
-    BRA     OP_JSR_DONE
+GROUP_B:                ;$B| EOR, CMP
+    CMP.B   #$B,D0                 ;Compare first nibble
+    BNE     GROUP_C                ;If first nibble value isn't $B, branch to next
+    JSR     C_GROUP_B              ;Jump to group B checking if nibble value is $B
+    BRA     OP_JSR_DONE            ;Finish subroutine once checking is finished
 
 
-GROUP_D:     ;$D| ADD, ADDA
-    CMP.B   #$D,D0
-    BNE     GROUP_E
-    JSR     C_GROUP_D
-    BRA     OP_JSR_DONE
+GROUP_C:                ;$C| MULS
+    CMP.B   #$C,D0                 ;Compare first nibble
+    BNE     GROUP_D                ;If first nibble value isn't $C, branch to next
+    JSR     C_GROUP_C              ;Jump to group C checking if nibble value is $C
+    BRA     OP_JSR_DONE            ;Finish subroutine once checking is finished
 
 
-GROUP_E:     ;$E| LSR, LSL, ASR, ASL, ROL, ROR
-    CMP.B   #$E,D0
-    BNE     GROUP_F
-    JSR     C_GROUP_E
-    BRA     OP_JSR_DONE
+GROUP_D:                 ;$D| ADD, ADDA
+    CMP.B   #$D,D0                 ;Compare first nibble
+    BNE     GROUP_E                ;If first nibble value isn't $D, branch to next
+    JSR     C_GROUP_D              ;Jump to group D checking if nibble value is $D
+    BRA     OP_JSR_DONE            ;Finish subroutine once checking is finished
 
 
-GROUP_F:     ;$F| Display: DATA, $WXYZ (Unsupported)
-    CMP.B   #$F,D0
-    JSR     C_GROUP_F
-    BRA     OP_JSR_DONE
+GROUP_E:                ;$E| LSR, LSL, ASR, ASL, ROL, ROR
+    CMP.B   #$E,D0                 ;Compare first nibble
+    BNE     GROUP_F                ;If first nibble value isn't $E, branch to next
+    JSR     C_GROUP_E              ;Jump to group E checking if nibble value is $E
+    BRA     OP_JSR_DONE            ;Finish subroutine once checking is finished
+
+
+GROUP_F:                ;$F| Display: DATA, $WXYZ (Unsupported)
+    CMP.B   #$F,D0                 ;Compare first nibble
+    JSR     C_GROUP_F              ;Jump to group F checking if nibble value is $F
+    BRA     OP_JSR_DONE            ;Finish subroutine once checking is finished
 
 
 OP_JSR_DONE:
-         MOVEM.L (SP)+,D0-D1 ;Recover register D0
-         RTS             ;Return to stack
-********************************************************************************
+         MOVEM.L (SP)+,D0-D1       ;Recover register D0
+         RTS                       ;Return to stack
+**********************************************************************************
+
+********** EA Parsing ************************************************************
+
+* move_Last_6_Bits_To_EA
+**********************************************************************************
+* Description: For OP codes with only the last 6 bits specified as EA Mode and EA
+* Reg, the last 6 bits will be parsed and moved into the appropriate registers.
+*
+* Registers used: A6,D0,D1,D6,D7 
+* Precondition: OP code has been identified with only the last 6 bits for EA,
+* current instruction set is stored into A6.
+* Postcondition: Last 6 bits of instruction bit has been isolated and stored. Bits
+* for EA Mode have been stored in D7, Bits for EA Reve been stored in D6.
+**********************************************************************************
+move_Last_6_Bits_To_EA:      ;Move last 6 bits from EA field to relevant registers
+    MOVEM.L D0-D7/A6, -(SP)  ;Save all changed registers
+    MOVE.W (A6),D0           ;Move current OP code into D0
+    MOVE.W  #10,D1           ;Prepare 10 bit shift to D1
+    LSL.W   D1,D0            ;Truncate to find the last 6 bits
+    LSR.W   D1,D0            ;Shift back to get the proper 6 bits
+    MOVE.W  D0,D7            ;Move last 6 bits into D7
+    MOVE.W  #3,D1            ;Prepare 3 bit shift into D1
+    LSR.W   D1,D7            ;Shift 3 bits off D7 to obtain EA Mode
+    MOVE.W  D7,D6            ;Move the 'upper' 3 bits into D6
+    MOVE.W  #13,D1           ;Prepare 13 bit shift into D1
+    LSL.W   D1,D0            ;Shift D0 left 13 bits to reposition current 3 bits
+    LSR.W   D1,D0            ;Shift D0 right 13 bits to reposition current 3 bits
+    MOVE.W  D0,D7            ;Move the 'lower' 3 bits into D7
+    MOVEM.L (SP)+,D0-D7/A6   ;Restore registers
+    RTS                      ;Return to stack
+********** End of EA Parsing ***************************************************
 
 *******************JMP LABELS **************************************************
 * Labelling for group codes will be in the following format
@@ -221,21 +268,9 @@ check_OP_D_BCLR:
 CG0_F:                       ;Checks have been finished, invalid OP code has been found
     BRA INVALID_OP    
 CG0_C:                       ;Checks have been finished,a valid OP code has been found
-move_Last_6_Bits_To_EA:      ;Move last 6 bits from EA field to relevant registers
-    MOVE.W (A6),D0           ;Move current OP code into D0
-    MOVE.W  #10,D1           ;Prepare 10 bit shift to D1
-    LSL.W   D1,D0            ;Truncate to find the last 6 bits
-    LSR.W   D1,D0            ;Shift back to get the proper 6 bits
-    MOVE.W D0,D7             ;Move last 6 bits into D7
-    MOVE.W  #3,D1
-    LSR.W   D1,D7
-    MOVE.W  D7,D6             ;Move the 'upper' 3 bits into D6
-    MOVE.W  #12,D1
-    LSL.W   D1,D0
-    LSR.W   D1,D0
-    MOVE.W  D0,D7              ;Move the 'lower' 3 bits into D7
-    MOVEM.L (SP)+,D0-D1 ; Restore registers
+
     RTS
+    
 * GROUP_1                      
 ********************************************************************************
 * MOVE.B: $1, 11-9 DST Reg, 8-6 DST Mode, 5-3 SRC Mode, 2-0 SRC Reg
