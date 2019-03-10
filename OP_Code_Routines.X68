@@ -306,6 +306,22 @@ MOVE_AND_MOVEA_PARSE_EA:       ;Move the 3 bit dynamic register bits to proper r
     RTS                     ;Return to stack
 **********************************************************************************
 
+*FIND_TRAILING_BITS_TO_EA
+**********************************************************************************
+FIND_TRAILING_BITS_TO_EA:       ;Move the 3 bit dynamic register bits to proper register
+    MOVEM.L  D0-D5/A6,-(SP) ;Save all changed registers
+    MOVE.W   (A6),D0        ;Move current OP code into D0
+    MOVE.W   #7,D1          ;Prepare 4 bit shift to D1
+    LSL.W    D1,D0          ;Truncate to find the 2 size bits
+    LSR.W    D1,D0          ;Reposition the bits
+    MOVE.W   #9,D1          ;Prepare 9 bit shift to D1
+    LSR.W    D1,D0          ;Truncate to shift 3 bits to a byte
+    MOVE.W   D0,D4          ;Move 3 register bits into D4
+    MOVEM.L (SP)+,D0-D5/A6  ;Restore registers
+    RTS                    ;Return to stack
+**********************************************************************************
+
+
 
 
 
