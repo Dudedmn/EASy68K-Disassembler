@@ -31,6 +31,10 @@ START:
     *   (2) how to build a (Callee-Saved) method
     *   (3) how to call that method using JSR (return with RTS)
     ***********************************************************
+   
+    LEA MAIN_CONSOLE, A1
+    JSR TrapTask13
+    
     LEA MSG1, A1        ; buffer of chars to write
     JSR TrapTask13
     
@@ -274,6 +278,20 @@ sub37 SUB.B #$37,D0 * Strip 37
 sub30 SUB.B #$30,D0 * Strip 30
 ret_sa RTS * Go back
 
+
+MAIN_CONSOLE:
+   
+      DC.B '============================================================',CR,LF
+      DC.B '||                                                        ||',CR,LF
+      DC.B '||   #####      ###    ##   ##                            ||',CR,LF
+      DC.B '||  ##        ##   ##  ## ##                              ||',CR,LF
+      DC.B '|| ## ####     #####   ####                               ||',CR,LF
+      DC.B '|| ##    ##  ##    ##  ####                               ||',CR,LF
+      DC.B '|| ##    ##  ##    ##  ## ##                              ||',CR,LF
+      DC.B '||  #####     ######   ##  ##                             ||',CR,LF
+      DC.B '||                                                        ||',CR,LF
+      DC.B '||   Daniel Yan, Fahad Alshehri, Denny Park               ||',CR,LF
+      DC.B '============================================================',CR,LF,0
     
 * Required variables and constants go here for your Disassembler
 CR                  EQU $0D
@@ -285,8 +303,16 @@ outFilename         DC.B 'Output.txt',0
 byteRead            DS.B 1
 ascii_val           DC.B $31,$41,$30,$30,$31,$41,$30,$30 * Test value $1A001A00
 
+Welcome_Message01  DC.B ''
+Welcome_Message02  DC.B ''
+Welcome_Message03  DC.B ''
+Welcome_Message04  DC.B ''
+Welcome_Message05  DC.B ''
+Welcome_Message06  DC.B ''
+
 
    END    START        ; last line of source
+
 
 
 
