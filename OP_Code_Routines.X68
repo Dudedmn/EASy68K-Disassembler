@@ -182,6 +182,26 @@ OP_JSR_DONE:
          MOVEM.L (SP)+,D0-D1       ;Recover register D0
          JMP READ_NEXT_INSTRUCTION
 **********************************************************************************
+
+
+
+
+
+*************FOR DENNY EA
+
+
+    ;MOVE.W #%0000111110001110,(A6)              ;Dynamic BCLR
+    ;MOVE.W #%0010001001001101,(A6)              ;MOVEA.L A5,A1
+    ;MOVE.W #%0010000000001101,(A6)              ;MOVE.L A5,A1
+     MOVE.W #%0011001001001101,(A6)              ;MOVEA.W A5,A1
+    ;MOVE.W #%0011000000001101,(A6)              ;MOVE.W A5,A1
+    ;MOVE.W #%0000000001000001,(A6)              ;ORI.W D1
+    JSR MOVE_LAST_6_BITS_TO_EA
+    JSR FIND_2_BIT_SIZE_TO_EA
+    JSR FIND_3_BIT_REG_TO_EA
+
+
+
 ********** EA Parsing ************************************************************
 
 * MOVE_LAST_6_BITS_TO_EA
@@ -366,10 +386,10 @@ CHECK_OP_MOVE_B:
 C_GROUP_2:
 
 CHECK_OP_MOVEA_L:
-    MOVE.W (A6),D0
-    ANDI.W #$FF00,D0
-    CMP.W #$2000,D0
-    BRA FIND_MOVEA_L_DIFFERENCE
+    MOVE.W (A6),D0                  ;Move current instruction set into D0  
+    ANDI.W #$FF00,D0                ;Mask relevant bits to D0
+    CMP.W #$2000,D0                 ;Compare the appropriate masked bits
+    BRA FIND_MOVEA_L_DIFFERENCE     ;Branch always to check 
 
     
 FIND_MOVEA_L_DIFFERENCE:    ;Finds difference between MOVEA and MOVE
@@ -381,8 +401,8 @@ FIND_MOVEA_L_DIFFERENCE:    ;Finds difference between MOVEA and MOVE
     LSR.W    D1,D0          ;Truncate to shift 3 bits to a register
     MOVE.W   D0,D6          ;Move 3 address mode bits into D6
     CMP.W   #$1,D6          ;Check if the address mode value is MOVEA
-    BNE     CHECK_OP_MOVE_L 
-    BEQ     PRINT_OP_MOVEA_L  
+    BNE     CHECK_OP_MOVE_L  ;Branch if not equal to check MOVE
+    BEQ     PRINT_OP_MOVEA_L ;Print out the MOVEA address 
     
 CHECK_OP_MOVE_L:
     MOVE.W (A6),D0
@@ -436,9 +456,10 @@ CHECK_OP_MOVE_W:
 * %D = 0 , Register to Memory, 1 Memory to Register
 ********************************************************************************
 C_GROUP_4:
-
+    
 CHECK_OP_LEA:
-
+    MOVE.W (A6),D0
+    ANDI.W #$
 CHECK_OP_JSR:
 
 CHECK_OP_RTS:
