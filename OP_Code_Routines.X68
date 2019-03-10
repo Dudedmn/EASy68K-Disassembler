@@ -19,7 +19,7 @@ START ; Start the op code routine
     ;MOVE.W #%0000111110001110,(A6)              ;Dynamic BCLR
     ;MOVE.W #%0010001001001101,(A6)              ;MOVEA.L A5,A1
     ;MOVE.W #%0010000000001101,(A6)              ;MOVE.L A5,A1
-    MOVE.W #%0011001001001101,(A6)              ;MOVEA.W A5,A1
+    MOVE.W #%0011011001001101,(A6)              ;MOVEA.W A5,A1
     ;MOVE.W #%0011000000001101,(A6)              ;MOVE.W A5,A1
     ;MOVE.W #%0000000001000001,(A6)              ;ORI.W D1
     ;MOVE.W CUR_OP_CODE,A6                       ;Loading memory space to address register
@@ -182,6 +182,7 @@ OP_JSR_DONE:
          MOVEM.L (SP)+,D0-D1       ;Recover register D0
          JMP READ_NEXT_INSTRUCTION
 **********************************************************************************
+
 ********** EA Parsing ************************************************************
 
 * MOVE_LAST_6_BITS_TO_EA
@@ -263,6 +264,49 @@ FIND_3_BIT_REG_TO_EA:       ;Move the 3 bit dynamic register bits to proper regi
     MOVEM.L (SP)+,D0-D5/A6  ;Restore registers
     RTS                     ;Return to stack
 **********************************************************************************
+
+* MOVE_AND_MOVEA_PARSE_EA
+**********************************************************************************
+* Description: Special parsing for the SRC and DST Mode/Reg for MOVE/MOVE
+*
+* Registers used: A6,D0,D1,D7,D6,D5,D4
+*
+* Precondition: OP code has been identified with either MOVE or MOVEA
+*
+* Postcondition: Store all relevant EA bits into associated register.
+**********************************************************************************
+MOVE_AND_MOVEA_PARSE_EA:       ;Move the 3 bit dynamic register bits to proper register
+    MOVEM.L D0-D7/A6, -(SP)  ;Save all changed registers
+    MOVE.W (A6),D0           ;Move current OP code into D0
+    MOVE.W  #10,D1           ;Prepare 10 bit shift to D1
+    LSL.W   D1,D0            ;Truncate to find the last 6 bits
+    LSR.W   D1,D0            ;Shift back to get the proper 6 bits
+    MOVE.W  D0,D7            ;Move last 6 bits into D7
+    MOVE.W  #3,D1            ;Prepare 3 bit shift into D1
+    LSR.W   D1,D7            ;Shift 3 bits off D7 to obtain EA Mode
+    MOVE.W  D7,D6            ;Move the 'upper' 3 bits into D6
+    MOVE.W  #13,D1           ;Prepare 13 bit shift into D1
+    LSL.W   D1,D0            ;Shift D0 left 13 bits to reposition current 3 bits
+    LSR.W   D1,D0            ;Shift D0 right 13 bits to reposition current 3 bits
+    MOVE.W  D0,D7            ;Move the 'lower' 3 bits into D7
+    **************MOVING SOURCE*********** TO BE DONE LATER
+    ; MOVE.W #%0011 011 001 001 101,(A6)              ;MOVEA.W A5,A3
+    
+    MOVE.W (A6),D0
+    MOVE.W  #4,D1
+    LSL.W   D1,D0
+    LSR.W   D1,D0
+    MOVE.W  #6,D1
+    LSR.W   D1,D0
+    MOVE.W  #3,D1
+    LSR.W   D1,D0
+    MOVE.W  D0,D5
+    MOVE.W  D1,D4
+    MOVEM.L (SP)+,D0-D7/A6   ;Restore registers
+    RTS                     ;Return to stack
+**********************************************************************************
+
+
 
 
 ********** End of EA Parsing *****************************************************
@@ -366,10 +410,10 @@ CHECK_OP_MOVE_B:
 C_GROUP_2:
 
 CHECK_OP_MOVEA_L:
-    MOVE.W (A6),D0
-    ANDI.W #$FF00,D0
-    CMP.W #$2000,D0
-    BRA FIND_MOVEA_L_DIFFERENCE
+    MOVE.W (A6),D0                  ;Move current instruction set into D0  
+    ANDI.W #$FF00,D0                ;Mask relevant bits to D0
+    CMP.W #$2000,D0                 ;Compare the appropriate masked bits
+    BRA FIND_MOVEA_L_DIFFERENCE     ;Branch always to check 
 
     
 FIND_MOVEA_L_DIFFERENCE:    ;Finds difference between MOVEA and MOVE
@@ -381,8 +425,8 @@ FIND_MOVEA_L_DIFFERENCE:    ;Finds difference between MOVEA and MOVE
     LSR.W    D1,D0          ;Truncate to shift 3 bits to a register
     MOVE.W   D0,D6          ;Move 3 address mode bits into D6
     CMP.W   #$1,D6          ;Check if the address mode value is MOVEA
-    BNE     CHECK_OP_MOVE_L 
-    BEQ     PRINT_OP_MOVEA_L  
+    BNE     CHECK_OP_MOVE_L  ;Branch if not equal to check MOVE
+    BEQ     PRINT_OP_MOVEA_L ;Print out the MOVEA address 
     
 CHECK_OP_MOVE_L:
     MOVE.W (A6),D0
@@ -415,6 +459,7 @@ FIND_MOVEA_W_DIFFERENCE:      ;Finds difference between MOVEA and MOVE
     LSR.W    D1,D0          ;Truncate to shift 3 bits to a register
     MOVE.W   D0,D6          ;Move 3 address mode bits into D6
     CMP.W   #$1,D6          ;Check if the address mode value is MOVEA
+    JSR     MOVE_AND_MOVEA_PARSE_EA
     BNE     CHECK_OP_MOVE_W 
     BEQ     PRINT_OP_MOVEA_W  
     
@@ -436,9 +481,10 @@ CHECK_OP_MOVE_W:
 * %D = 0 , Register to Memory, 1 Memory to Register
 ********************************************************************************
 C_GROUP_4:
-
+    
 CHECK_OP_LEA:
-
+    MOVE.W (A6),D0
+   ; ANDI.W #$
 CHECK_OP_JSR:
 
 CHECK_OP_RTS:
