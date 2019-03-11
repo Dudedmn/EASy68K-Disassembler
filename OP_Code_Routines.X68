@@ -6,26 +6,48 @@
 * Description: Op code determining to identify values
 
   ORG $2000
-CUR_OP_CODE DS.W 1  ; Current OP Code Word 
-EA_SIZE     DS.W 1
+CUR_OP_CODE DS.W 1  ; Current OP Code Word
+  ORG $2100 
+G_BUFFER    DS.B 100
+    LEA G_BUFFER,A4
   ORG $1000 ; Start at Address $1000
-
+    
 START ; Start the op code routine
     
 ***************************** Inputs **********************************************
     ;MOVE.W #%0000100010000010,CUR_OP_CODE       ;Static BCLR
     ;MOVE.W #%0000111110001110,CUR_OP_CODE       ;Dynamic BCLR
     ;MOVE.W #%0000000001000001,CUR_OP_CODE       ;ORI.W D1
-    ;MOVE.W #%0000111110001110,(A6)              ;Dynamic BCLR
-    ;MOVE.W #%0010001001001101,(A6)              ;MOVEA.L A5,A1
+    
+    ;MOVE.W #%0000111110001110,D0              ;Dynamic BCLR
+    ;IN HEX $018E. D7 = 110, D6 = 001, D4 = %110, D5 = 7, (A6) = %0000
+    
+    ;MOVE.W  #$018E,D0                        ;Dynamic BCLR in hex
+    ;MOVE.W  #$02FF,(A6)                         ;INVALID_OP code
+    ;MOVE.W #%0000110001010111,(A6)
+    MOVE.W #%0010011001001101,D0                       ;MOVEA                        
+    ;MOVE.W #%0010001001001101,CUR_OP_CODE              ;MOVEA.L A5,A1
+    ;MOVE.W CUR_OP_CODE,(A6)
+    ;MOVE.W #$224D
+    ;Expected values:
+    ;D7, DST REG:   011
+    ;D6, DST MODE:  001
+    ;D5, SRC REG:   101
+    ;D4, SRC MODE:  001
+    ;CHECK IF DST MODE IS %111 or SRC MODE IS %111 for MOVE
+    ;(A3), DST TRAIL:  001
+    ;(A2), SRC TRAIL: ONLY FOR MOVE
     ;MOVE.W #%0010000000001101,(A6)              ;MOVE.L A5,A1
-    MOVE.W #%0011011001001101,(A6)              ;MOVEA.W A5,A1
+    ;MOVE.W #%0011011001001101,(A6)              ;MOVEA.W A5,A1
     ;MOVE.W #%0011000000001101,(A6)              ;MOVE.W A5,A1
     ;MOVE.W #%0000000001000001,(A6)              ;ORI.W D1
     ;MOVE.W CUR_OP_CODE,A6                       ;Loading memory space to address register
     ;MOVE.W CUR_OP_CODE,(A6)                     ;Loading memory value to address value
 ************************************************************************************
-    MOVE.W (A6),D0  
+LOAD_OP_CODE:
+    MOVE.W D0,CUR_OP_CODE
+    MOVE.W CUR_OP_CODE,(A6)
+    MOVE.W (A6),D0          ;Load current instruction set into D0
     JSR OP_JSR_Routine      ;Use the JSR routine to identify the op code
 *-----------------------------------------------------------
 *First Nibble Values (15-12)
@@ -199,7 +221,7 @@ OP_JSR_DONE:
 * for EA Mode have been stored in D7, Bits for EA Reg been stored in D6.
 **********************************************************************************
 MOVE_LAST_6_BITS_TO_EA:      ;Move last 6 bits from EA field to relevant registers
-    MOVEM.L D0-D7/A6, -(SP)  ;Save all changed registers
+   ; MOVEM.L D0-D7/A6, -(SP)  ;Save all changed registers
     MOVE.W (A6),D0           ;Move current OP code into D0
     MOVE.W  #10,D1           ;Prepare 10 bit shift to D1
     LSL.W   D1,D0            ;Truncate to find the last 6 bits
@@ -212,7 +234,7 @@ MOVE_LAST_6_BITS_TO_EA:      ;Move last 6 bits from EA field to relevant registe
     LSL.W   D1,D0            ;Shift D0 left 13 bits to reposition current 3 bits
     LSR.W   D1,D0            ;Shift D0 right 13 bits to reposition current 3 bits
     MOVE.W  D0,D7            ;Move the 'lower' 3 bits into D7
-    MOVEM.L (SP)+,D0-D7/A6   ;Restore registers
+   ; MOVEM.L (SP)+,D0-D7/A6   ;Restore registers
     RTS                      ;Return to stack
     
 * FIND_2_BIT_SIZE_TO_EA
@@ -228,15 +250,15 @@ MOVE_LAST_6_BITS_TO_EA:      ;Move last 6 bits from EA field to relevant registe
 * Postcondition: 2 bit size field has been isolated and stored into D5.
 **********************************************************************************
 FIND_2_BIT_SIZE_TO_EA:      ;Move the 2 bit size field relevant register
-    MOVEM.L  D0-D5/A6,-(SP) ;Save all changed registers
+   ; MOVEM.L  D0-D5/A6,-(SP) ;Save all changed registers
     MOVE.W   (A6),D0        ;Move current OP code into D0
     MOVE.W   #8,D1          ;Prepare 8 bit shift to D1
     LSL.W    D1,D0          ;Truncate to find the 2 size bits
     LSR.W    D1,D0          ;Reposition the bits
     MOVE.W   #6,D1          ;Prepare 6 bit shift to D1
     LSR.W    D1,D0          ;Truncate to shift 2 bits to a byte
-    MOVE.W   D0,D5          ;Move 2 size bits into D5
-    MOVEM.L (SP)+,D0-D5/A6  ;Restore registers
+    MOVE.W   D0,D4          ;Move 2 size bits into D5
+  ;  MOVEM.L (SP)+,D0-D5/A6  ;Restore registers
     RTS                     ;Return to stack
 **********************************************************************************
 
@@ -253,15 +275,15 @@ FIND_2_BIT_SIZE_TO_EA:      ;Move the 2 bit size field relevant register
 * Postcondition: 3 bit dynamic register has been isolated and stored into D4.
 **********************************************************************************
 FIND_3_BIT_REG_TO_EA:       ;Move the 3 bit dynamic register bits to proper register
-    MOVEM.L  D0-D5/A6,-(SP) ;Save all changed registers
+   ; MOVEM.L  D0-D5/A6,-(SP) ;Save all changed registers
     MOVE.W   (A6),D0        ;Move current OP code into D0
     MOVE.W   #4,D1          ;Prepare 4 bit shift to D1
     LSL.W    D1,D0          ;Truncate to find the 2 size bits
     LSR.W    D1,D0          ;Reposition the bits
     MOVE.W   #9,D1          ;Prepare 9 bit shift to D1
     LSR.W    D1,D0          ;Truncate to shift 3 bits to a byte
-    MOVE.W   D0,D4          ;Move 3 register bits into D4
-    MOVEM.L (SP)+,D0-D5/A6  ;Restore registers
+    MOVE.W   D0,D5          ;Move 3 register bits into D4
+   ; MOVEM.L (SP)+,D0-D5/A6  ;Restore registers
     RTS                     ;Return to stack
 **********************************************************************************
 
@@ -276,48 +298,58 @@ FIND_3_BIT_REG_TO_EA:       ;Move the 3 bit dynamic register bits to proper regi
 * Postcondition: Store all relevant EA bits into associated register.
 **********************************************************************************
 MOVE_AND_MOVEA_PARSE_EA:       ;Move the 3 bit dynamic register bits to proper register
-    MOVEM.L D0-D7/A6, -(SP)  ;Save all changed registers
-    MOVE.W (A6),D0           ;Move current OP code into D0
+   ; MOVEM.L D0-D7/A6, -(SP)  ;Save all changed registers
+    MOVE.W CUR_OP_CODE,D0           ;Move current OP code into D0
     MOVE.W  #10,D1           ;Prepare 10 bit shift to D1
     LSL.W   D1,D0            ;Truncate to find the last 6 bits
     LSR.W   D1,D0            ;Shift back to get the proper 6 bits
-    MOVE.W  D0,D7            ;Move last 6 bits into D7
+    MOVE.W  D0,D7            ;Move last 6 bits into D7, SRC REG MODE
     MOVE.W  #3,D1            ;Prepare 3 bit shift into D1
     LSR.W   D1,D7            ;Shift 3 bits off D7 to obtain EA Mode
-    MOVE.W  D7,D6            ;Move the 'upper' 3 bits into D6
+    MOVE.W  D7,D5            ;Move the 'upper' 3 bits into D6
     MOVE.W  #13,D1           ;Prepare 13 bit shift into D1
     LSL.W   D1,D0            ;Shift D0 left 13 bits to reposition current 3 bits
     LSR.W   D1,D0            ;Shift D0 right 13 bits to reposition current 3 bits
-    MOVE.W  D0,D7            ;Move the 'lower' 3 bits into D7
+    MOVE.W  D0,D4            ;Move the 'lower' 3 bits into D7
     **************MOVING SOURCE*********** TO BE DONE LATER
     ; MOVE.W #%0011 011 001 001 101,(A6)              ;MOVEA.W A5,A3
-    
-    MOVE.W (A6),D0
-    MOVE.W  #4,D1
-    LSL.W   D1,D0
-    LSR.W   D1,D0
-    MOVE.W  #6,D1
-    LSR.W   D1,D0
-    MOVE.W  #3,D1
-    LSR.W   D1,D0
-    MOVE.W  D0,D5
-    MOVE.W  D1,D4
-    MOVEM.L (SP)+,D0-D7/A6   ;Restore registers
+    ; MOVE.W #%0010 011 001 001 101,D0                ;MOVEA.L A5,A3
+     ;Expected values:
+    ;D7, DST REG:   011
+    ;D6, DST MODE:  001
+    ;D5, SRC MODE:  001
+    ;D4, SRC REG:   101
+    ;00011001
+    MOVE.W CUR_OP_CODE,D0     ;Move current OP code into D0     
+    MOVE.W  #4,D1             ;Prepare 4 bit shift to D1
+    LSL.W   D1,D0             ;Truncate to find bits 11-6
+    LSR.W   D1,D0             ;Reposition bits
+    MOVE.W  #6,D1             ;Prepare 6 bit shift to D1
+    LSR.W   D1,D0             ;Truncate the SRC Reg/Mode bits
+    MOVE.W  #3,D1             ;Prepare a 3 bit shift to D1 for DST Reg/Mode
+    MOVE.W  D0,D6             ;Copy over the current 6 bits to D6
+    LSR.W   D1,D0             ;Truncate DST Mode  
+    MOVE.W  D0,D7             ;Move DST Reg to D7
+    MOVE.W  #13,D1             
+    LSL.W   D1,D6             ;Truncate 13 bits in D6
+    LSR.W   D1,D6             ;Reposition D6
+                              ;D6 now contains the DST Reg
+   ; MOVEM.L (SP)+,D0-D7/A6   ;Restore registers
     RTS                     ;Return to stack
 **********************************************************************************
 
 *FIND_TRAILING_BITS_TO_EA
 **********************************************************************************
 FIND_TRAILING_BITS_TO_EA:       ;Move the 3 bit dynamic register bits to proper register
-    MOVEM.L  D0-D5/A6,-(SP) ;Save all changed registers
+   ; MOVEM.L  D0-D5/A6,-(SP) ;Save all changed registers
     MOVE.W   (A6),D0        ;Move current OP code into D0
     MOVE.W   #7,D1          ;Prepare 4 bit shift to D1
     LSL.W    D1,D0          ;Truncate to find the 2 size bits
     LSR.W    D1,D0          ;Reposition the bits
-    MOVE.W   #9,D1          ;Prepare 9 bit shift to D1
+    MOVE.W   #6,D1          ;Prepare 9 bit shift to D1
     LSR.W    D1,D0          ;Truncate to shift 3 bits to a byte
-    MOVE.W   D0,D4          ;Move 3 register bits into D4
-    MOVEM.L (SP)+,D0-D5/A6  ;Restore registers
+    MOVE.W   D0,(A3)          ;Move 3 register bits into D4
+   ; MOVEM.L (SP)+,D0-D5/A6  ;Restore registers
     RTS                    ;Return to stack
 **********************************************************************************
 
@@ -388,8 +420,7 @@ CHECK_OP_S_BCLR:
     CMP.W   #$0800,D0       ;Compare the appropriate masked bits
     BNE     CHECK_OP_D_BCLR ;Branch to next comparison if not equal
     JSR     PRINT_OP_S_BCLR ;Print the OP code if equal
-    JSR     MOVE_LAST_6_BITS_TO_EA
-    MOVEM.L (SP)+,D6-D7     ;POP STACK
+    ;MOVEM.L (SP)+,D6-D7     ;POP STACK
     BRA     CG0_C           ;Finish routine
 CHECK_OP_D_BCLR:
     MOVE.W (A6),D0                ;Move current instruction set into D
@@ -397,8 +428,6 @@ CHECK_OP_D_BCLR:
     CMP.W   #%0000000110000000,D0 ;Compare the expected binary value
     BNE     CG0_F                 ;If not equal this must be an invalid OP code
     JSR     PRINT_OP_D_BCLR       ;Print the OP code if equal
-    JSR     MOVE_LAST_6_BITS_TO_EA
-    JSR     FIND_3_BIT_REG_TO_EA
     BRA     CG0_C                ;Finish routine
 CG0_F:                       ;Checks have been finished, invalid OP code has been found
     BRA INVALID_OP    
@@ -657,41 +686,72 @@ READ_NEXT_INSTRUCTION: ; Needs to read next instruction set {PLACEHOLDER}
 ********************** PRINTING ROUTINES ****************************************
 PRINT_OP_ORI:
     LEA P_OP_ORI,A1
+    ;MOVE.W P_OP_ORI,(A4)+
     JSR PRINT_OP
     RTS
 PRINT_OP_CMPI:
+    JSR FIND_3_BIT_REG_TO_EA
+    JSR FIND_2_BIT_SIZE_TO_EA
+    JSR MOVE_LAST_6_BITS_TO_EA
     LEA P_OP_CMPI,A1
+    ;MOVE.W P_OP_CMPI,(A4)+
     JSR PRINT_OP
     RTS
 PRINT_OP_S_BCLR:
+    	JSR MOVE_LAST_6_BITS_TO_EA
+	JSR FIND_3_BIT_REG_TO_EA
+	MOVE.W #$0,(A6)
+	MOVE.W #%000, D4
     LEA P_OP_S_BCLR,A1
+    ;MOVE.W P_OP_S_BCLR,(A4)+
     JSR PRINT_OP
     RTS
 PRINT_OP_D_BCLR:
+	JSR MOVE_LAST_6_BITS_TO_EA
+	JSR FIND_3_BIT_REG_TO_EA
+	MOVE.W #$0,(A6)
+	MOVE.W #%110, D4
     LEA P_OP_D_BCLR,A1
+    ;MOVE.W P_OP_D_BCLR,(A4)+
     JSR PRINT_OP
     RTS    
 PRINT_OP_MOVEB:
+    JSR MOVE_AND_MOVEA_PARSE_EA
+    MOVE.W #$1,(A6)
     LEA P_OP_MOVEB,A1
+    ;MOVE.W P_OP_MOVEB,(A4)+
     JSR PRINT_OP
     RTS
 PRINT_OP_MOVEA_L:
+    JSR MOVE_AND_MOVEA_PARSE_EA
+    MOVE.W #$2,(A6)
     LEA P_OP_MOVEA_L,A1
+    ;MOVE.W P_OP_MOVEA_L,(A4)+
     JSR PRINT_OP
     RTS
 PRINT_OP_MOVE_L:
+    JSR MOVE_AND_MOVEA_PARSE_EA
+    MOVE.W #$2,(A6)
     LEA P_OP_MOVE_L,A1
+    ;MOVE.W P_OP_MOVE_L,(A4)+
     JSR PRINT_OP
     RTS
 PRINT_OP_MOVEA_W:
+    JSR MOVE_AND_MOVEA_PARSE_EA
+    MOVE.W #$3,(A6)
     LEA P_OP_MOVEA_W,A1
+    ;MOVE.W P_OP_MOVEA_W,(A4)+
     JSR PRINT_OP
     RTS
 PRINT_OP_MOVE_W:
+    JSR MOVE_AND_MOVEA_PARSE_EA
+    MOVE.W #$3,(A6)
     LEA P_OP_MOVE_W,A1
+    ;MOVE.W P_OP_MOVE_W,(A4)+
     JSR PRINT_OP
     RTS    
 PRINT_OP:   ;Prints current op code byte
+    ;MOVE.W (A4),(A1)       ; NEEDS TO USE G_BUFFER LATER
     MOVE.B #13,D0
     TRAP #15
     RTS
@@ -705,6 +765,9 @@ PRINT_OP:   ;Prints current op code byte
 
 P_INVALID_OP    DC.B    'DATA',0
 OP_FOUND        DC.B    'Found OP',0 ; this should be taken out later
+P_SIZE_B        DC.B    '.B',0
+P_SIZE_W        DC.B    '.W',0
+P_SIZE_L        DC.B    '.L',0
 P_OP_ORI        DC.B    'ORI',0
 P_OP_CMPI       DC.B    'CMPI',0
 P_OP_S_BCLR     DC.B    'BCLR',0
@@ -742,6 +805,7 @@ P_OP_ROR        DC.B    'ROR',0
 P_OP_ROL        DC.B    'ROL',0
 ***************** END OF DATA CONSTANT PRINTS ***********************************
     END START
+
 
 
 
