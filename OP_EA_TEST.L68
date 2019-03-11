@@ -1,0 +1,469 @@
+00001000 Starting Address
+Assembler used: EASy68K Editor/Assembler v5.16.01
+Created On: 3/10/2019 6:35:26 PM
+
+00000000                             1  
+00001000                             2      ORG    $1000
+00001000                             3  START:
+00001000                             4  
+00001000                             5  **************************************************
+00001000                             6  *   [NOTICE]
+00001000                             7  *   Data Register for Mode => D3
+00001000                             8  *   Data Register for Register# => D2
+00001000                             9  *   Address Register for Trailing Bits => A3
+00001000                            10  **************************************************
+00001000                            11    
+00001000                            12   
+00001000                            13  *************FOR DENNY EA*********************************************************
+00001000                            14      * BCLR.L #$0E,d0
+00001000                            15      * 0000 100 010 000 000
+00001000                            16      ;MOVEA.W #%0000, A6
+00001000                            17      ;MOVE.B  #%100, D7
+00001000                            18      ;MOVE.B  #%010, D6
+00001000                            19      ;MOVE.B  #%000, D5
+00001000                            20      ;MOVE.B  #%000, D4
+00001000                            21      ;MOVEA.L #$000E, A3
+00001000                            22  
+00001000                            23      ;MOVE.W #%0000111110001110,(A6)              ;Dynamic BCLR
+00001000                            24      ;MOVE.W #%0010001001001101,(A6)              ;MOVEA.L A5,A1
+00001000                            25      ;MOVE.W #%0010000000001101,(A6)              ;MOVE.L A5,A1
+00001000                            26      ;MOVE.W #%0011010001000000,(A6)              ;MOVEA.W D0,A2
+00001000                            27      ;MOVE.W #%0011000000001101,(A6)              ;MOVEA.W A5,A1
+00001000                            28      ;MOVE.W #%0011000000001101,(A6)              ;MOVE.W A5,A1
+00001000                            29      ;MOVE.W #%0000000001000001,(A6)              ;ORI.W D1
+00001000                            30      ;JSR MOVE_LAST_6_BITS_TO_EA
+00001000                            31      ;JSR FIND_2_BIT_SIZE_TO_EA
+00001000                            32      ;JSR FIND_3_BIT_REG_TO_EA
+00001000                            33  
+00001000                            34  
+00001000                            35  **********************************************************************************
+00001000  3CBC 264D                 36        MOVE.W #%0010011001001101,(A6) ;MOVEA.L A5,A1
+00001004                            37  MOVE_AND_MOVEA_PARSE_EA:       ;Move the 3 bit dynamic register bits to proper register
+00001004                            38     ; MOVEM.L D0-D7/A6, -(SP)  ;Save all changed registers
+00001004  3016                      39      MOVE.W (A6),D0           ;Move current OP code into D0
+00001006  323C 000A                 40      MOVE.W  #10,D1           ;Prepare 10 bit shift to D1
+0000100A  E368                      41      LSL.W   D1,D0            ;Truncate to find the last 6 bits
+0000100C  E268                      42      LSR.W   D1,D0            ;Shift back to get the proper 6 bits
+0000100E  3E00                      43      MOVE.W  D0,D7            ;Move last 6 bits into D7, SRC REG MODE
+00001010  323C 0003                 44      MOVE.W  #3,D1            ;Prepare 3 bit shift into D1
+00001014  E26F                      45      LSR.W   D1,D7            ;Shift 3 bits off D7 to obtain EA Mode
+00001016  3A07                      46      MOVE.W  D7,D5            ;Move the 'upper' 3 bits into D6
+00001018  323C 000D                 47      MOVE.W  #13,D1           ;Prepare 13 bit shift into D1
+0000101C  E368                      48      LSL.W   D1,D0            ;Shift D0 left 13 bits to reposition current 3 bits
+0000101E  E268                      49      LSR.W   D1,D0            ;Shift D0 right 13 bits to reposition current 3 bits
+00001020  3800                      50      MOVE.W  D0,D4            ;Move the 'lower' 3 bits into D7
+00001022                            51      **************MOVING SOURCE*********** TO BE DONE LATER
+00001022                            52      ; MOVE.W #%0011 011 001 001 101,(A6)              ;MOVEA.W A5,A3
+00001022                            53      ; MOVE.W #%0010 011 001 001 101,D0                ;MOVEA.L A5,A3
+00001022                            54       ;Expected values:
+00001022                            55      ;D7, DST REG:   011
+00001022                            56      ;D6, DST MODE:  001
+00001022                            57      ;D5, SRC MODE:  001
+00001022                            58      ;D4, SRC REG:   101
+00001022                            59      ;00011001
+00001022  3016                      60      MOVE.W (A6),D0     ;Move current OP code into D0     
+00001024  323C 0004                 61      MOVE.W  #4,D1             ;Prepare 4 bit shift to D1
+00001028  E368                      62      LSL.W   D1,D0             ;Truncate to find bits 11-6
+0000102A  E268                      63      LSR.W   D1,D0             ;Reposition bits
+0000102C  323C 0006                 64      MOVE.W  #6,D1             ;Prepare 6 bit shift to D1
+00001030  E268                      65      LSR.W   D1,D0             ;Truncate the SRC Reg/Mode bits
+00001032  323C 0003                 66      MOVE.W  #3,D1             ;Prepare a 3 bit shift to D1 for DST Reg/Mode
+00001036  3C00                      67      MOVE.W  D0,D6             ;Copy over the current 6 bits to D6
+00001038  E268                      68      LSR.W   D1,D0             ;Truncate DST Mode  
+0000103A  3E00                      69      MOVE.W  D0,D7             ;Move DST Reg to D7
+0000103C  323C 000D                 70      MOVE.W  #13,D1             
+00001040  E36E                      71      LSL.W   D1,D6             ;Truncate 13 bits in D6
+00001042  E26E                      72      LSR.W   D1,D6             ;Reposition D6
+00001044  3CBC 0002                 73      MOVE.W #$2,(A6)                           ;D6 now contains the DST Reg
+00001048                            74     ; MOVEM.L (SP)+,D0-D7/A6   ;Restore registers
+00001048                            75  
+00001048                            76  
+00001048                            77  
+00001048                            78  
+00001048                            79  
+00001048                            80  
+00001048                            81  
+00001048                            82  ***
+00001048                            83     
+00001048  49F9 000012AA             84      LEA     G_BUFFER, A4
+0000104E                            85  
+0000104E  4EB9 00001058             86      JSR     CHECK_XXXX
+00001054  FFFF FFFF                 87  EXT SIMHALT * This EXT alias is critical for NOT loading error
+00001058                            88  
+00001058                            89  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+00001058                            90  * EXECUTION **************************************
+00001058                            91      * 0011 001 001 111 100
+00001058                            92      ;MOVEA.W #%0001, A6
+00001058                            93      ;MOVE.B  #%001, D7
+00001058                            94      ;MOVE.B  #%001, D6
+00001058                            95      ;MOVE.B  #%101, D5
+00001058                            96      ;MOVE.B  #%100, D4
+00001058                            97      ;MOVEA.L #$A0ABCDEF, A3
+00001058                            98      ;LEA     G_BUFFER, A4
+00001058                            99  
+00001058                           100      ;JSR     CHECK_XXXX
+00001058                           101  ;EXT SIMHALT * This EXT alias is critical for NOT loading error
+00001058                           102  **************************************************
+00001058                           103  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+00001058                           104  
+00001058                           105  
+00001058                           106  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+00001058                           107  * CHECK_INSTRUCTION_BITS FUNCTIONS ***************
+00001058                           108  CHECK_XXXX:
+00001058  BCFC 0008                109      CMPA    #$8, A6
+0000105C  6D00 0008                110      BLT     CHECK_0XXX
+00001060  4EF9 00001074            111      JMP     CHECK_1XXX
+00001066                           112      
+00001066                           113  CHECK_0XXX:
+00001066  BCFC 0004                114      CMPA    #$4, A6
+0000106A  6D00 000A                115      BLT     CHECK_00XX
+0000106E  4EF9 0000108C            116      JMP     CHECK_01XX
+00001074                           117  
+00001074                           118  CHECK_1XXX:
+00001074  4E75                     119      RTS
+00001076                           120  
+00001076                           121  CHECK_00XX:
+00001076  BCFC 0001                122      CMPA    #$1, A6
+0000107A  6D00 0014                123      BLT     LOAD_0000
+0000107E  BCFC 0002                124      CMPA    #$2, A6
+00001082  6E00 000A                125      BGT     CHECK_0011
+00001086                           126      
+00001086                           127      * IT IS 00XX(=MOVE(A))
+00001086  4EF9 000010BC            128      JMP     LOAD_00XX
+0000108C                           129  
+0000108C                           130  CHECK_01XX:
+0000108C  4E75                     131      RTS
+0000108E                           132      
+0000108E                           133  CHECK_0011:
+0000108E  4E75                     134      RTS
+00001090                           135  **************************************************
+00001090                           136  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+00001090                           137  
+00001090                           138  
+00001090                           139  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+00001090                           140  * LOAD_THIS FUNCTIONS (HIGHEST LEVEL) ************
+00001090                           141  LOAD_0000:
+00001090                           142              * Work on the First Half (Dynamic BCLR) Part
+00001090  0C04 0006                143              CMPI.B  #%110, D4
+00001094  6600 0014                144              BNE     LATER_HALF  * It's not Dynamic BCLR
+00001098                           145              
+00001098  163C 0000                146              MOVE.B  #%000, D3 * D3 is for mode (as if %000 was passed in as mode)
+0000109C  1405                     147              MOVE.B  D5, D2 * D2 is for register #
+0000109E                           148  
+0000109E  4EB9 000010DE            149              JSR     LOAD_EA
+000010A4  4EB9 000011EC            150              JSR     LOAD_COMMA_SPACE
+000010AA                           151  
+000010AA                           152              * ORI/CMPI/BCLR ********************************
+000010AA  1606                     153  LATER_HALF  MOVE.B  D6, D3 * D3 is for mode
+000010AC  1407                     154              MOVE.B  D7, D2 * D2 is for register #
+000010AE                           155      
+000010AE  4EB9 000010DE            156              JSR     LOAD_EA
+000010B4  4EB9 000011D2            157              JSR     LOAD_NEW_LINE
+000010BA                           158      
+000010BA  4E75                     159              RTS
+000010BC                           160      
+000010BC                           161  LOAD_00XX:
+000010BC  1605                     162      MOVE.B  D5, D3
+000010BE  1404                     163      MOVE.B  D4, D2
+000010C0                           164      
+000010C0  4EB9 000010DE            165      JSR     LOAD_EA
+000010C6  4EB9 000011EC            166      JSR     LOAD_COMMA_SPACE
+000010CC                           167      
+000010CC  1606                     168      MOVE.B  D6, D3
+000010CE  1407                     169      MOVE.B  D7, D2
+000010D0                           170      
+000010D0  4EB9 000010DE            171      JSR     LOAD_EA
+000010D6  4EB9 000011D2            172      JSR     LOAD_NEW_LINE
+000010DC                           173      
+000010DC  4E75                     174      RTS
+000010DE                           175  **************************************************
+000010DE                           176  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+000010DE                           177  
+000010DE                           178  
+000010DE                           179  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+000010DE                           180  * LOAD_THIS FUNCTIONS (HIGH LEVEL) ***************
+000010DE                           181  LOAD_EA:
+000010DE  347C 10EE                182          MOVEA.  #SAVED, A2 * remember to come back!
+000010E2                           183  
+000010E2  0C43 0007                184          CMPI    #%111, D3
+000010E6  6D00 0008                185          BLT     LOAD_LT_111
+000010EA  6C00 0030                186          BGE     LOAD_GE_111
+000010EE                           187      
+000010EE  4E75                     188  SAVED   RTS
+000010F0                           189  
+000010F0                           190  LOAD_LT_111:
+000010F0  0C43 0000                191      CMPI    #%000, D3 * e.g. D3
+000010F4  6700 0042                192      BEQ     LOAD_DATA_REGISTER
+000010F8  0C43 0001                193      CMPI    #%001, D3 * e.g. A3
+000010FC  6700 004A                194      BEQ     LOAD_ADDR_REGISTER
+00001100  0C43 0002                195      CMPI    #%010, D3 * e.g. (A3)
+00001104  6700 0052                196      BEQ     LOAD_ADDRESS
+00001108  0C43 0003                197      CMPI    #%011, D3 * e.g. (A3)+
+0000110C  6700 005C                198      BEQ     LOAD_ADDRESS_W_POST_INC
+00001110  0C43 0004                199      CMPI    #%100, D3 * e.g. -(A3)
+00001114  6700 0060                200      BEQ     LOAD_ADDRESS_W_PRE_DEC
+00001118                           201      
+00001118  4EF8 1054                202      JMP     EXT
+0000111C                           203      
+0000111C                           204  LOAD_GE_111:
+0000111C  0C42 0000                205      CMPI    #%000, D2
+00001120  6700 0060                206      BEQ     LOAD_ABS_SHORT
+00001124  0C42 0001                207      CMPI    #%001, D2
+00001128  6700 0068                208      BEQ     LOAD_ABS_LONG
+0000112C  0C42 0004                209      CMPI    #%100, D2
+00001130  6700 0070                210      BEQ     LOAD_IMMDTE
+00001134                           211      
+00001134  4EF8 1054                212      JMP     EXT
+00001138                           213  **************************************************
+00001138                           214  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+00001138                           215  
+00001138                           216  
+00001138                           217  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+00001138                           218  * LOAD_THIS FUNCTIONS (INTERMEDIATE LEVEL) *******
+00001138                           219  LOAD_DATA_REGISTER:
+00001138                           220      * e.g. D3
+00001138  4EB9 00001206            221      JSR     LOAD_D
+0000113E  2002                     222      MOVE.L  D2, D0 * Loading D2(=Dreg to D0)
+00001140  4EB9 0000127A            223      JSR     LOAD_NUM
+00001146  4ED2                     224      JMP     (A2)
+00001148                           225  
+00001148                           226  LOAD_ADDR_REGISTER:
+00001148                           227      * e.g. A3
+00001148  4EB9 00001214            228      JSR     LOAD_A
+0000114E  2002                     229      MOVE.L  D2, D0
+00001150  4EB9 0000127A            230      JSR     LOAD_NUM
+00001156  4ED2                     231      JMP     (A2)
+00001158                           232  
+00001158                           233  LOAD_ADDRESS:
+00001158                           234      * e.g. (A3)
+00001158  4EB9 00001222            235      JSR     LOAD_PTHSIS_OPEN
+0000115E  4EB8 1148                236      JSR     LOAD_ADDR_REGISTER
+00001162  4EB9 00001230            237      JSR     LOAD_PTHSIS_CLSD
+00001168  4ED2                     238      JMP     (A2)
+0000116A                           239  
+0000116A                           240  LOAD_ADDRESS_W_POST_INC:
+0000116A                           241      * e.g. (A3)+
+0000116A  4EB8 1158                242      JSR     LOAD_ADDRESS
+0000116E  4EB9 0000125A            243      JSR     LOAD_PLUS_SIGN
+00001174  4ED2                     244      JMP     (A2)
+00001176                           245  
+00001176                           246  LOAD_ADDRESS_W_PRE_DEC:
+00001176                           247      * e.g. -(A3)
+00001176  4EB9 00001268            248      JSR     LOAD_MINUS_SIGN
+0000117C  4EB8 1158                249      JSR     LOAD_ADDRESS
+00001180  4ED2                     250      JMP     (A2)
+00001182                           251  
+00001182                           252  LOAD_ABS_SHORT:
+00001182  4EB9 0000123E            253      JSR     LOAD_HEX_SIGN
+00001188  300B                     254      MOVE.W  A3, D0
+0000118A  4EB9 000011AC            255      JSR     LOAD_BYTES
+00001190  4ED2                     256      JMP     (A2)
+00001192                           257  
+00001192                           258  LOAD_ABS_LONG:
+00001192  4EB9 0000123E            259      JSR     LOAD_HEX_SIGN
+00001198  200B                     260      MOVE.L  A3, D0
+0000119A  4EB9 000011AC            261      JSR     LOAD_BYTES
+000011A0  4ED2                     262      JMP     (A2)
+000011A2                           263      
+000011A2                           264  LOAD_IMMDTE:
+000011A2  4EB9 0000124C            265      JSR     LOAD_IMMDTE_VALU
+000011A8  4EF8 1192                266      JMP     LOAD_ABS_LONG
+000011AC                           267  
+000011AC                           268  **************************************************
+000011AC                           269  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+000011AC                           270  
+000011AC                           271  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+000011AC                           272  * LOAD_THIS FUNCTIONS (LOW LEVEL) ****************
+000011AC                           273  * Shifts the bits to the left and prints the
+000011AC                           274  * left-most bit
+000011AC                           275  LOAD_BYTES:
+000011AC  2200                     276          MOVE.L  D0, D1
+000011AE  3A7C 0008                277          MOVEA.W #8, A5
+000011B2  BAFC 0000                278  LOOP    CMPA    #0, A5
+000011B6  6E00 0004                279          BGT     ROTATE
+000011BA  4E75                     280          RTS
+000011BC                           281      
+000011BC  E999                     282  ROTATE  ROL.L   #$04, D1
+000011BE  1001                     283          MOVE.B  D1, D0
+000011C0  0280 0000000F            284          ANDI.L  #$0000000F, D0
+000011C6  4EB9 0000127A            285          JSR     LOAD_NUM
+000011CC  534D                     286          SUBA    #1, A5
+000011CE  4EF8 11B2                287          JMP     LOOP        
+000011D2                           288  
+000011D2                           289  LOAD_NEW_LINE:
+000011D2  1039 000012A8            290      MOVE.B  CR, D0
+000011D8  4EB9 00001276            291      JSR     LOAD_THIS_SHIT
+000011DE  1039 000012A9            292      MOVE.B  LF, D0
+000011E4  4EB9 00001276            293      JSR     LOAD_THIS_SHIT
+000011EA  4E75                     294      RTS
+000011EC                           295  
+000011EC                           296  LOAD_COMMA_SPACE:
+000011EC  1039 000012A6            297      MOVE.B  COMMA, D0
+000011F2  4EB9 00001276            298      JSR     LOAD_THIS_SHIT
+000011F8  1039 000012A7            299      MOVE.B  SPACE, D0
+000011FE  4EB9 00001276            300      JSR     LOAD_THIS_SHIT
+00001204                           301      
+00001204  4E75                     302      RTS
+00001206                           303      
+00001206                           304  LOAD_D:
+00001206  1039 0000129F            305      MOVE.B  DATA, D0
+0000120C  4EB9 00001276            306      JSR     LOAD_THIS_SHIT
+00001212  4E75                     307      RTS
+00001214                           308      
+00001214                           309  LOAD_A:
+00001214  1039 0000129E            310      MOVE.B  ADDRESS, D0
+0000121A  4EB9 00001276            311      JSR     LOAD_THIS_SHIT
+00001220  4E75                     312      RTS
+00001222                           313  
+00001222                           314  LOAD_PTHSIS_OPEN:    
+00001222  1039 000012A0            315      MOVE.B  PTHSIS_OPEN, D0
+00001228  4EB9 00001276            316      JSR     LOAD_THIS_SHIT
+0000122E  4E75                     317      RTS
+00001230                           318      
+00001230                           319  LOAD_PTHSIS_CLSD:
+00001230  1039 000012A1            320      MOVE.B  PTHSIS_CLSD, D0
+00001236  4EB9 00001276            321      JSR     LOAD_THIS_SHIT
+0000123C  4E75                     322      RTS
+0000123E                           323      
+0000123E                           324  LOAD_HEX_SIGN:
+0000123E  1039 000012A2            325      MOVE.B  HEX_SIGN, D0
+00001244  4EB9 00001276            326      JSR     LOAD_THIS_SHIT
+0000124A  4E75                     327      RTS
+0000124C                           328  
+0000124C                           329  LOAD_IMMDTE_VALU:
+0000124C  1039 000012A3            330      MOVE.B  IMMDTE_VALU, D0
+00001252  4EB9 00001276            331      JSR     LOAD_THIS_SHIT
+00001258  4E75                     332      RTS
+0000125A                           333  
+0000125A                           334  LOAD_PLUS_SIGN:
+0000125A  1039 000012A4            335      MOVE.B  PLUS_SIGN, D0
+00001260  4EB9 00001276            336      JSR     LOAD_THIS_SHIT
+00001266  4E75                     337      RTS
+00001268                           338      
+00001268                           339  LOAD_MINUS_SIGN:
+00001268  1039 000012A5            340      MOVE.B  MINUS_SIGN, D0
+0000126E  4EB9 00001276            341      JSR     LOAD_THIS_SHIT
+00001274  4E75                     342      RTS
+00001276                           343  **************************************************
+00001276                           344  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+00001276                           345  
+00001276                           346  
+00001276                           347  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+00001276                           348  * LOAD_THIS FUNCTIONS (LOWEST LEVEL) *************
+00001276                           349  
+00001276                           350  * Moves the hex value from D0 to G_BUFFER in A4
+00001276                           351  LOAD_THIS_SHIT:
+00001276  18C0                     352      MOVE.B  D0, (A4)+
+00001278  4E75                     353      RTS
+0000127A                           354  
+0000127A                           355  * Adds $30 to a number in D0 to make it a hex
+0000127A                           356  * If the number is greater than 9 (A~F), then adds $37
+0000127A                           357  * Then moves the hex value from D0 to G_BUFFER in A4
+0000127A                           358  LOAD_NUM:
+0000127A  0C00 0009                359      CMPI.B  #$9, D0
+0000127E  6E00 0006                360      BGT     GT
+00001282  6F00 000C                361      BLE     LE
+00001286                           362      
+00001286  0600 0037                363  GT  ADDI.B  #$37, D0 * A~F
+0000128A  4EF9 0000129A            364      JMP     END
+00001290  0600 0030                365  LE  ADDI.B  #$30, D0 * 0~9
+00001294  4EF9 0000129A            366      JMP     END
+0000129A                           367  
+0000129A  18C0                     368  END MOVE.B  D0, (A4)+
+0000129C  4E75                     369      RTS
+0000129E                           370  **************************************************
+0000129E                           371  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0000129E                           372  
+0000129E                           373  
+0000129E                           374  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0000129E                           375  * MESSAGE VARIABLES ******************************
+0000129E= 41                       376  ADDRESS         DC.B    $41
+0000129F= 44                       377  DATA            DC.B    $44
+000012A0                           378  
+000012A0= 28                       379  PTHSIS_OPEN     DC.B    $28
+000012A1= 29                       380  PTHSIS_CLSD     DC.B    $29
+000012A2= 24                       381  HEX_SIGN        DC.B    $24
+000012A3= 23                       382  IMMDTE_VALU     DC.B    $23
+000012A4= 2B                       383  PLUS_SIGN       DC.B    $2B
+000012A5= 2D                       384  MINUS_SIGN      DC.B    $2D
+000012A6                           385  
+000012A6= 2C                       386  COMMA           DC.B    $2C
+000012A7= 20                       387  SPACE           DC.B    $20
+000012A8                           388  
+000012A8= 0D                       389  CR              DC.B    $D
+000012A9= 0A                       390  LF              DC.B    $A
+000012AA                           391  **************************************************
+000012AA                           392  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+000012AA                           393  
+000012AA                           394  
+000012AA                           395  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+000012AA                           396  * GLOBAL BUFFER **********************************
+000012AA                           397  G_BUFFER        DS.B    100
+0000130E                           398  **************************************************
+0000130E                           399  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0000130E                           400  
+0000130E                           401  
+0000130E                           402      END    START
+
+No errors detected
+No warnings generated
+
+
+SYMBOL TABLE INFORMATION
+Symbol-name         Value
+-------------------------
+ADDRESS             129E
+CHECK_0011          108E
+CHECK_00XX          1076
+CHECK_01XX          108C
+CHECK_0XXX          1066
+CHECK_1XXX          1074
+CHECK_XXXX          1058
+COMMA               12A6
+CR                  12A8
+DATA                129F
+END                 129A
+EXT                 1054
+GT                  1286
+G_BUFFER            12AA
+HEX_SIGN            12A2
+IMMDTE_VALU         12A3
+LATER_HALF          10AA
+LE                  1290
+LF                  12A9
+LOAD_0000           1090
+LOAD_00XX           10BC
+LOAD_A              1214
+LOAD_ABS_LONG       1192
+LOAD_ABS_SHORT      1182
+LOAD_ADDRESS        1158
+LOAD_ADDRESS_W_POST_INC  116A
+LOAD_ADDRESS_W_PRE_DEC  1176
+LOAD_ADDR_REGISTER  1148
+LOAD_BYTES          11AC
+LOAD_COMMA_SPACE    11EC
+LOAD_D              1206
+LOAD_DATA_REGISTER  1138
+LOAD_EA             10DE
+LOAD_GE_111         111C
+LOAD_HEX_SIGN       123E
+LOAD_IMMDTE         11A2
+LOAD_IMMDTE_VALU    124C
+LOAD_LT_111         10F0
+LOAD_MINUS_SIGN     1268
+LOAD_NEW_LINE       11D2
+LOAD_NUM            127A
+LOAD_PLUS_SIGN      125A
+LOAD_PTHSIS_CLSD    1230
+LOAD_PTHSIS_OPEN    1222
+LOAD_THIS_SHIT      1276
+LOOP                11B2
+MINUS_SIGN          12A5
+MOVE_AND_MOVEA_PARSE_EA  1004
+PLUS_SIGN           12A4
+PTHSIS_CLSD         12A1
+PTHSIS_OPEN         12A0
+ROTATE              11BC
+SAVED               10EE
+SPACE               12A7
+START               1000
