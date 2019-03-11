@@ -125,6 +125,41 @@ mainloop    CMPA.L A5, A6
 DONE
 
 
+**************************************************************************
+* ClearBuffer
+***********************************************************************
+* Clears the given buffer by filling it with NULL. By default it will fill 80
+* bytes from the buffer pointer with NULL, so make sure the buffer reserves
+* that many bytes. The default can be changed.
+*
+**
+* @param Arg_ClearBuffer_Buffer     Pointer to buffer
+* @param Arg_ClearBuffer_Length     Byte length of buffer, default 80
+* @branch _ClearBuffer_Loop         Buffer loop
+* @branch _ClearBuffer_End          Subroutine end
+*****************************************************************************
+Arg_ClearBuffer_Buffer  DS.L    1
+Arg_ClearBuffer_Length  DC.L    80
+
+ClearBuffer:            DS.W    0
+    MOVEM.L     D0-D1/A0, -(SP)             * Backup registers to stack
+    MOVEA.L     Arg_ClearBuffer_Buffer, A0  * Load buffer address
+    MOVE.L      Arg_ClearBuffer_Length, D0  * Load buffer length
+    CLR.L       D1                          * Clear counter
+    
+_ClearBuffer_Loop
+    CMP.L       D0, D1                      * If counter >= length
+    BGE         _ClearBuffer_End            * Finish subroutine
+    
+    CLR.B       (A0)+                       * Clear current character in buffer
+    ADDQ        #1, D1                      * Increment counter
+    BRA         _ClearBuffer_Loop           * Loop back
+    
+_ClearBuffer_End
+    MOVEM.L     (SP)+, D0-D1/A0             * Restore registers from stack
+    RTS                                     * Exit subroutine
+
+
     SIMHALT
 
 
