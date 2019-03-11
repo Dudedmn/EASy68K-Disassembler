@@ -36,36 +36,70 @@ START:
     LEA MAIN_CONSOLE, A1
     JSR TrapTask13
     
-    MOVE.B #50, D0
-    TRAP #15       * close all files
     
-    MOVE #51,D0    * opems existing files
-    LEA filename, A1
-    TRAP #15
+    ******************************************
+    **
+    **     ___         ___        /  __  
+    **    |__  | |    |__     |  /  /  \  
+    **    |    | |___ |___    | /   \__/ 
+    **                           
+    **
+    ** This is the beggnining of the code for reading from files
+    ******************************************
+; Display description
+        lea     description,A1          ; location of text to display
+        move.b  #14,D0                  ; trap task #14, displays null terminated string at (A1)
+        trap    #15                     ; perform task
+; Attempt to open file for input
+        lea     fileName,A1             ; name of file to open
+        move.b  #51,D0                  ; trap task #51, open existing file
+        trap    #15                     ; perform task
+        move.l  D1,fileID               ; save file ID
+
+; Read string from file
+        lea     string,A1               ; location of string buffer
+        move.l  fileID,D1               ; file ID of file to read from
+        clr.l   D2
+        move.w  #SIZE,D2                ; number of bytes to read
+        move.b  #53,D0                  ; trap task #53, read from file
+        trap    #15                     ; perform task
+; Close file when finished
+        move.b  #56,D0                  ; trap task #56, close file, D1 contains fileID
+        trap    #15                     ; perform task
+; Display result label
+        lea     result,A1               ; location of text to display
+        move.b  #14,D0                  ; trap task #14, displays null terminated string at (A1)
+        trap    #15                     ; perform task
+; Display string
+        lea     string,A1               ; location of text to display
+        move.w  #SIZE,D1                ; max characters to display
+        move.b  #0,D0                   ; trap task #0, displays string
+        trap    #15                     ; perform task
+; Display success message
+        lea     success,A1              ; location of text to display
+        move.b  #14,D0                  ; trap task #14, displays null terminated string at (A1)
+        trap    #15                     ; perform task
     
-    LEA buffer, A1
-    MOVE.W #2, D2  *reading a word from a file which is equal to reading two bytes
     
     
-    LEA MSG1, A1        ; buffer of chars to write
-    JSR TrapTask13
+    *LEA MSG1, A1        ; buffer of chars to write
+    *JSR TrapTask13
     
     * Read input from the user as string
     * and save it in A1
-    MOVE.B #2, D0
-    TRAP #15
+    *MOVE.B #2, D0
+    *TRAP #15
     
     * Convernt the string in A1 to hex
     * and store it in D7
-    JSR AsciiToHex
+    *JSR AsciiToHex
     
     * Move the long value in D7 
     * to the variable STARTADDR
-    MOVE.L D7, STARTADDR
+    *MOVE.L D7, STARTADDR
+    
 
     
-    LEA MSG2, A1        ; buffer of chars to write    
-    JSR TrapTask13
 
     LEA ascii_val, A1
     JSR AsciiToHex     ;  example of how to convert ascii to hex
@@ -309,15 +343,27 @@ MAIN_CONSOLE:
 CR                  EQU $0D
 LF                  EQU $0A
 NEWLINE             DC.B CR,LF,0  
-MSG1                DC.B 'Please enter the starting address:',0
-MSG2                DC.B 'Please enter the ending address:',0
 outFilename         DC.B 'Output.txt',0
 byteRead            DS.B 1
 ascii_val           DC.B $31,$41,$30,$30,$31,$41,$30,$30 * Test value $1A001A00
 
+* Variables and constants
+CR              EQU     $D              ; ASCII code for carriage return
+LF              EQU     $A              ; ASCII code for line feed
+SIZE            EQU     80              ; Max string size
+description     DC.B    'Demonstrates reading a string from a file. ',CR,LF,CR,LF,0
+result          DC.B    'The string read from the file is:',CR,LF,0
+fileName        DC.B    'Config.cfg',0   ; name of text file
+errorFile       DC.B    'A file error occurred.',CR,LF,0
+success         DC.B    'File read complete.',CR,LF,0
+string          DS.B    SIZE            ; I/O buffer
+strSize         DS.W    1               ; Size if input string
+fileID          DS.L    1               ; File ID
+
 
 
    END    START        ; last line of source
+
 
 
 
