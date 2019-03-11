@@ -11,21 +11,15 @@ CUR_OP_CODE DS.W 1  ; Current OP Code Word
 G_BUFFER_PREP DS.B 80
   ORG $1700 
 G_BUFFER    DS.B 80
-P_OP_MOVEA_L
-        DC.B    'MOVEA.L',0  
-P_OP_A_L
-        DC.B    'A.L',0
-P_OP_TAB
-        DC.B    '   ',0
-    LEA G_BUFFER,A4
+ 
   ORG $1000 ; Start at Address $1000
 START
 
  ; Start the op code routine
  
-    LEA P_OP_MOVEA_L,A4    ; Load the message onto A4
-    MOVE.L (A4),G_BUFFER   ; Load the value of the message onto the G_BUFFER
-    ADDQ.W #4,A4           ; Increment 4 spaces in the address
+   ; LEA P_OP_MOVEA_L,A4    ; Load the message onto A4
+   ; MOVE.L (A4),G_BUFFER   ; Load the value of the message onto the G_BUFFER
+   ; ADDQ.W #4,A4           ; Increment 4 spaces in the address
    ;This is the right area for pointer now, however when I add here it can't go
    ;back 
 *********************************************************************************
@@ -42,10 +36,10 @@ START
 ********************************************************************************* 
     
     ;ADD.L $FFFF,G_BUFFER_PREP
-    LEA P_OP_A_L,A1
-    MOVE.L (A4),G_BUFFER_PREP
+    ;LEA P_OP_A_L,A1
+    ;MOVE.L (A4),G_BUFFER_PREP
     
-***************************** Inputs **********************************************
+***************************** Input Tests ********************************************
     ;MOVE.W #%0000100010000010,CUR_OP_CODE       ;Static BCLR
     ;MOVE.W #%0000111110001110,CUR_OP_CODE       ;Dynamic BCLR
     ;MOVE.W #%0000000001000001,CUR_OP_CODE       ;ORI.W D1
@@ -58,8 +52,8 @@ START
     ;MOVE.W  #$018E,D0                        ;Dynamic BCLR in hex
     ;MOVE.W  #$02FF,(A6)                         ;INVALID_OP code
     ;MOVE.W #%0000110001010111,(A6)
-    MOVE.W #%0010011001001101,D0                       ;MOVEA                        
-    ;MOVE.W #%0010001001001101,CUR_OP_CODE              ;MOVEA.L A5,A1
+    ;MOVE.W #%0010011001001101,D0                       ;MOVEA  
+     ;MOVE.W #%0010001001001101,CUR_OP_CODE              ;MOVEA.L A5,A1
     ;MOVE.W CUR_OP_CODE,(A6)
     ;MOVE.W #$264D
     ;Expected values:
@@ -76,6 +70,19 @@ START
     ;MOVE.W #%0000000001000001,(A6)              ;ORI.W D1
     ;MOVE.W CUR_OP_CODE,A6                       ;Loading memory space to address register
     ;MOVE.W CUR_OP_CODE,(A6)                     ;Loading memory value to address value
+ 
+    ****GROUP 4 tests****
+    ;MOVE.W #$4E75,D0                                    ;RTS
+    ;MOVE.W #$4E71,D0                                    ;NOP
+    ;MOVE.W #$4415,D0                                        ;NEG.L D5
+    ;MOVE.W #$43CC,D0                                         ;LEA A1,A6
+    ;MOVE.W #%0100100010001110
+    ;MOVE.W #$488E,D0                                        ;MOVEM.W Reg to Mem, A6
+    MOVE.W #$4C8E,D0                                         ;MOVEM.W Mem to Reg, A6
+    ;MOVE.W #$4E95,D0                                       ;JSR (A5)               
+
+   
+   
 ************************************************************************************
 LOAD_OP_CODE:
     MOVE.W D0,CUR_OP_CODE
@@ -85,22 +92,22 @@ LOAD_OP_CODE:
 *-----------------------------------------------------------
 *First Nibble Values (15-12)
 *Value                  Operations
-*$0                     GROUP_0: ORI,BCLR (static and dynamic),CMPI
-*$1                     GROUP_1: MOVE.B                   
-*$2                     GROUP_2: MOVE.L, MOVEA.L
-*$3                     GROUP_3: MOVE.W, MOVEA.W
-*$4                     GROUP_4: LEA,JSR,RTS,NEG,MOVEM
-*$5                     GROUP_5: SUBQ
-*$6                     GROUP_6: Bcc(BCS,BGE,BLT,BVC), BRA
-*$7                     GROUP_7: INVALID_OP
-*$8                     GROUP_8: DIVS, OR
-*$9                     GROUP_7: SUB
-*$A                     GROUP_A: INVALID_OP
-*$B                     GROUP_B: EOR, CMP
-*$C                     GROUP_C: MULS
-*$D                     GROUP_D: ADD, ADDA
-*$E                     GROUP_E: LSR, LSL, ASR, ASL, ROL, ROR
-*$F                     GROUP_F: INVALID_OP
+*$0                     GROUP_0: ORI,BCLR (static and dynamic),CMPI --- Partial, needs SIZE print for ORI, BCLR, CMPI
+*$1                     GROUP_1: MOVE.B                             --- Partial, needs trailing bits
+*$2                     GROUP_2: MOVE.L, MOVEA.L                    --- Partial, needs trailing bits
+*$3                     GROUP_3: MOVE.W, MOVEA.W                    --- Partial, needs trailing bits
+*$4                     GROUP_4: LEA,JSR,RTS,NEG,MOVEM              --- Partial, needs SIZE print for NEG, MOVEM
+*$5                     GROUP_5: SUBQ                               --- Not started
+*$6                     GROUP_6: Bcc(BCS,BGE,BLT,BVC), BRA          --- Not started
+*$7                     GROUP_7: INVALID_OP                         --- DONE
+*$8                     GROUP_8: DIVS, OR                           --- Not started
+*$9                     GROUP_7: SUB                                --- Not started
+*$A                     GROUP_A: INVALID_OP                         --- DONE
+*$B                     GROUP_B: EOR, CMP                           --- Not started
+*$C                     GROUP_C: MULS                               --- Not started
+*$D                     GROUP_D: ADD, ADDA                          --- Not started
+*$E                     GROUP_E: LSR, LSL, ASR, ASL, ROL, ROR       --- Not started
+*$F                     GROUP_F: INVALID_OP                         --- DONE
 
 
 * OP_JSR_Routine
@@ -433,7 +440,7 @@ C_GROUP_0:
     MOVEM.L D0-D1, -(SP) ; Backup registers
     
 CHECK_OP_ORI:
-    MOVE.W  (A6),D0         ;Move current instruction set into D
+    MOVE.W  CUR_OP_CODE,D0         ;Move current instruction set into D
     ANDI.W  #$FF00,D0       ;Mask relevant bits to D0
     CMP.W   #$0000,D0       ;Compare the appropriate masked bits     
     BNE     CHECK_OP_CMPI   ;Branch to next comparison if not equal
@@ -441,14 +448,14 @@ CHECK_OP_ORI:
     JSR     FIND_2_BIT_SIZE_TO_EA         
     BRA     CG0_C           ;Finish routine
 CHECK_OP_CMPI:
-    MOVE.W  (A6),D0         ;Move current instruction set into D
+    MOVE.W  CUR_OP_CODE,D0         ;Move current instruction set into D
     ANDI.W  #$FF00,D0       ;Mask relevant bits to D0
     CMP.W   #$0C00,D0       ;Compare the appropriate masked bits   
     BNE     CHECK_OP_S_BCLR ;Branch to next comparison if not equal       
     JSR     PRINT_OP_CMPI   ;Print the OP code if equal
     BRA     CG0_C           ;Finish routine
 CHECK_OP_S_BCLR:
-    MOVE.W  (A6),D0         ;Move current instruction set into D
+    MOVE.W  CUR_OP_CODE,D0         ;Move current instruction set into D
     ANDI.W  #$FF00,D0       ;Mask relevant bits to D0
     CMP.W   #$0800,D0       ;Compare the appropriate masked bits
     BNE     CHECK_OP_D_BCLR ;Branch to next comparison if not equal
@@ -456,7 +463,7 @@ CHECK_OP_S_BCLR:
     ;MOVEM.L (SP)+,D6-D7     ;POP STACK
     BRA     CG0_C           ;Finish routine
 CHECK_OP_D_BCLR:
-    MOVE.W (A6),D0                ;Move current instruction set into D
+    MOVE.W  CUR_OP_CODE,D0                ;Move current instruction set into D
     ANDI.W  #%0000000110000000,D0 ;Do a direct binary bitmask to see which bits are needed
     CMP.W   #%0000000110000000,D0 ;Compare the expected binary value
     BNE     CG0_F                 ;If not equal this must be an invalid OP code
@@ -474,7 +481,7 @@ CG0_C:                       ;Checks have been finished,a valid OP code has been
 C_GROUP_1:
 
 CHECK_OP_MOVE_B:
-    MOVE.W (A6),D0                  ;Move current instruction set into D0          
+    MOVE.W  CUR_OP_CODE,D0                  ;Move current instruction set into D0          
     ANDI.W  #$FF00,D0               ;Mask relevant bits to D0
     CMP.W #$1000,D0                 ;Compare the appropriate masked bits 
     BNE INVALID_OP                  ;Invalid OP code has been found
@@ -488,14 +495,14 @@ CHECK_OP_MOVE_B:
 C_GROUP_2:
 
 CHECK_OP_MOVEA_L:
-    MOVE.W (A6),D0                  ;Move current instruction set into D0  
+    MOVE.W CUR_OP_CODE,D0                  ;Move current instruction set into D0  
     ANDI.W #$FF00,D0                ;Mask relevant bits to D0
     CMP.W #$2000,D0                 ;Compare the appropriate masked bits
     BRA FIND_MOVEA_L_DIFFERENCE     ;Branch always to check 
 
     
 FIND_MOVEA_L_DIFFERENCE:    ;Finds difference between MOVEA and MOVE
-    MOVE.W   (A6),D0        ;Move current OP code into D0
+    MOVE.W   CUR_OP_CODE,D0        ;Move current OP code into D0
     MOVE.W   #7,D1          ;Prepare 7 bit shift to D1
     LSL.W    D1,D0          ;Truncate to find the 3 address mode bits
     LSR.W    D1,D0          ;Reposition the bits
@@ -507,7 +514,7 @@ FIND_MOVEA_L_DIFFERENCE:    ;Finds difference between MOVEA and MOVE
     BEQ     PRINT_OP_MOVEA_L ;Print out the MOVEA address 
     
 CHECK_OP_MOVE_L:
-    MOVE.W (A6),D0
+    MOVE.W CUR_OP_CODE,D0
     ANDI.W #$FF00,D0
     CMP.W #$2000,D0
     BNE INVALID_OP
@@ -522,14 +529,14 @@ CHECK_OP_MOVE_L:
 C_GROUP_3:
 
 CHECK_OP_MOVEA_W:
-    MOVE.W (A6),D0
+    MOVE.W CUR_OP_CODE,D0
     ANDI.W #$FF00,D0
     CMP.W #$3000,D0
     BRA FIND_MOVEA_W_DIFFERENCE
 
     
 FIND_MOVEA_W_DIFFERENCE:      ;Finds difference between MOVEA and MOVE
-    MOVE.W   (A6),D0        ;Move current OP code into D0
+    MOVE.W   CUR_OP_CODE,D0        ;Move current OP code into D0
     MOVE.W   #7,D1          ;Prepare 7 bit shift to D1
     LSL.W    D1,D0          ;Truncate to find the 3 address mode bits
     LSR.W    D1,D0          ;Reposition the bits
@@ -542,7 +549,7 @@ FIND_MOVEA_W_DIFFERENCE:      ;Finds difference between MOVEA and MOVE
     BEQ     PRINT_OP_MOVEA_W  
     
 CHECK_OP_MOVE_W:
-    MOVE.W (A6),D0
+    MOVE.W CUR_OP_CODE,D0
     ANDI.W #$FF00,D0
     CMP.W #$3000,D0
     BNE INVALID_OP
@@ -559,16 +566,46 @@ CHECK_OP_MOVE_W:
 * %D = 0 , Register to Memory, 1 Memory to Register
 ********************************************************************************
 C_GROUP_4:
+CHECK_OP_RTS:
+    MOVE.W CUR_OP_CODE,D0
+    CMP.W  #$4E75,D0
+    BNE    CHECK_OP_NOP
+    BEQ    PRINT_OP_RTS
+    
+CHECK_OP_NOP:
+    MOVE.W CUR_OP_CODE,D0
+    CMP.W  #$4E71,D0
+    BNE    CHECK_OP_LEA
+    BEQ    PRINT_OP_NOP
     
 CHECK_OP_LEA:
-    MOVE.W (A6),D0
-   ; ANDI.W #$
+    MOVE.W CUR_OP_CODE,D0
+    ANDI.W #$F1C0,D0
+    CMP.W  #$41C0,D0
+    BNE    CHECK_OP_JSR
+    BEQ    PRINT_OP_LEA
+    
 CHECK_OP_JSR:
-
-CHECK_OP_RTS:
-
+    MOVE.W CUR_OP_CODE,D0
+    ANDI.W #$FFC0,D0
+    CMP.W  #$4E80,D0
+    BNE    CHECK_OP_NEG
+    BEQ    PRINT_OP_JSR
+    
 CHECK_OP_NEG:
-
+    MOVE.W CUR_OP_CODE,D0
+    ANDI.W #$FF00,D0
+    CMP.W  #$4400,D0
+    BNE    CHECK_OP_MOVEM
+    BEQ    PRINT_OP_NEG
+ 
+CHECK_OP_MOVEM:
+    MOVE.W CUR_OP_CODE,D0
+    ANDI.W #$FB80,D0
+    CMP.W  #$4880,D0
+    BNE    INVALID_OP
+    BEQ    PRINT_OP_MOVEM_W
+    
 * GROUP_5
 ********************************************************************************
 * SUBQ: $5, 11-9 DATA, 8 %1, 7-6 Size, 5-3 EA Mode, 2-0 EA Reg
@@ -778,10 +815,10 @@ PRINT_OP_MOVEA_L:
     JSR MOVE_AND_MOVEA_PARSE_EA
     MOVE.W #$2,(A6)
     LEA P_OP_MOVEA_L,A1
-    MOVE.L A1,G_BUFFER_PREP
-    MOVE.B (A1)+,D0
-    CMPI.B #$FF,D0
-    BNE MAKE_VAL_ASCII
+    ;MOVE.L A1,G_BUFFER_PREP
+    ;MOVE.B (A1)+,D0
+    ;CMPI.B #$FF,D0
+    ;BNE MAKE_VAL_ASCII
     ;MOVE.W P_OP_MOVEA_L,(A4)+
     JSR PRINT_OP
     RTS
@@ -805,7 +842,35 @@ PRINT_OP_MOVE_W:
     LEA P_OP_MOVE_W,A1
     ;MOVE.W P_OP_MOVE_W,(A4)+
     JSR PRINT_OP
-    RTS    
+    RTS
+PRINT_OP_NOP:
+    LEA P_OP_NOP,A1
+    JSR PRINT_OP
+    RTS
+PRINT_OP_JSR:
+    LEA P_OP_JSR,A1
+    JSR PRINT_OP
+    RTS
+PRINT_OP_RTS:
+    LEA P_OP_RTS,A1
+    JSR PRINT_OP
+    RTS
+PRINT_OP_LEA:
+    LEA P_OP_LEA,A1
+    JSR PRINT_OP
+    RTS
+PRINT_OP_NEG:
+    LEA P_OP_NEG,A1
+    JSR PRINT_OP
+    RTS
+PRINT_OP_MOVEM_W:
+    LEA P_OP_MOVEM_W,A1
+    JSR PRINT_OP
+    RTS
+PRINT_OP_MOVEM_L:
+    LEA P_OP_MOVEM_L,A1
+    JSR PRINT_OP
+    RTS
 PRINT_OP:   ;Prints current op code byte
     ;MOVE.W (A4),(A1)       ; NEEDS TO USE G_BUFFER LATER
     MOVE.B #13,D0
@@ -829,7 +894,7 @@ P_OP_CMPI       DC.B    'CMPI',0
 P_OP_S_BCLR     DC.B    'BCLR',0
 P_OP_D_BCLR     DC.B    'BCLR',0
 P_OP_MOVEB      DC.B    'MOVE.B',0
-
+P_OP_MOVEA_L    DC.B    'MOVEA.L',0 
 P_OP_MOVE_L     DC.B    'MOVE.L',0
 P_OP_MOVEA_W    DC.B    'MOVEA.W',0
 P_OP_MOVE_W     DC.B    'MOVE.W',0
@@ -837,6 +902,7 @@ P_OP_MOVEM_W    DC.B    'MOVEM.W',0
 P_OP_MOVEM_L    DC.B    'MOVEM.L',0
 P_OP_LEA        DC.B    'LEA',0
 P_OP_JSR        DC.B    'JSR',0
+P_OP_NOP        DC.B    'NOP',0
 P_OP_RTS        DC.B    'RTS',0
 P_OP_NEG        DC.B    'NEG',0
 P_OP_SUBQ       DC.B    'SUBQ',0
@@ -862,6 +928,7 @@ P_OP_ROL        DC.B    'ROL',0
 ***************** END OF DATA CONSTANT PRINTS ***********************************
     
     END START
+
 
 
 

@@ -1,6 +1,6 @@
 00001000 Starting Address
 Assembler used: EASy68K Editor/Assembler v5.16.01
-Created On: 3/10/2019 6:08:27 PM
+Created On: 3/11/2019 3:09:34 PM
 
 00000000                             1  *-----------------------------------------------------------
 00000000                             2  * Title      : OP Code routines for Disassembler
@@ -9,806 +9,929 @@ Created On: 3/10/2019 6:08:27 PM
 00000000                             5  
 00000000                             6  * Description: Op code determining to identify values
 00000000                             7  
-00002000                             8    ORG $2000
-00002000                             9  CUR_OP_CODE DS.W 1  ; Current OP Code Word
-00002100                            10    ORG $2100 
-00002100                            11  G_BUFFER    DS.B 100
-00002164  49F8 2100                 12      LEA G_BUFFER,A4
-00001000                            13    ORG $1000 ; Start at Address $1000
-00001000                            14      
-00001000                            15  START ; Start the op code routine
-00001000                            16      
-00001000                            17  ***************************** Inputs **********************************************
-00001000                            18      ;MOVE.W #%0000100010000010,CUR_OP_CODE       ;Static BCLR
-00001000                            19      ;MOVE.W #%0000111110001110,CUR_OP_CODE       ;Dynamic BCLR
-00001000                            20      ;MOVE.W #%0000000001000001,CUR_OP_CODE       ;ORI.W D1
-00001000                            21      
-00001000                            22      ;MOVE.W #%0000111110001110,D0              ;Dynamic BCLR
-00001000                            23      ;IN HEX $018E. D7 = 110, D6 = 001, D4 = %110, D5 = 7, (A6) = %0000
-00001000                            24      
-00001000                            25      ;MOVE.W  #$018E,D0                        ;Dynamic BCLR in hex
-00001000                            26      ;MOVE.W  #$02FF,(A6)                         ;INVALID_OP code
-00001000                            27      ;MOVE.W #%0000110001010111,(A6)
-00001000  303C 264D                 28      MOVE.W #%0010011001001101,D0                       ;MOVEA                        
-00001004                            29      ;MOVE.W #%0010001001001101,CUR_OP_CODE              ;MOVEA.L A5,A1
-00001004                            30      ;MOVE.W CUR_OP_CODE,(A6)
-00001004                            31      ;MOVE.W #$224D
-00001004                            32      ;Expected values:
-00001004                            33      ;D7, DST REG:   011
-00001004                            34      ;D6, DST MODE:  001
-00001004                            35      ;D5, SRC REG:   101
-00001004                            36      ;D4, SRC MODE:  001
-00001004                            37      ;CHECK IF DST MODE IS %111 or SRC MODE IS %111 for MOVE
-00001004                            38      ;(A3), DST TRAIL:  001
-00001004                            39      ;(A2), SRC TRAIL: ONLY FOR MOVE
-00001004                            40      ;MOVE.W #%0010000000001101,(A6)              ;MOVE.L A5,A1
-00001004                            41      ;MOVE.W #%0011011001001101,(A6)              ;MOVEA.W A5,A1
-00001004                            42      ;MOVE.W #%0011000000001101,(A6)              ;MOVE.W A5,A1
-00001004                            43      ;MOVE.W #%0000000001000001,(A6)              ;ORI.W D1
-00001004                            44      ;MOVE.W CUR_OP_CODE,A6                       ;Loading memory space to address register
-00001004                            45      ;MOVE.W CUR_OP_CODE,(A6)                     ;Loading memory value to address value
-00001004                            46  ************************************************************************************
-00001004                            47  LOAD_OP_CODE:
-00001004  31C0 2000                 48      MOVE.W D0,CUR_OP_CODE
-00001008  3CB8 2000                 49      MOVE.W CUR_OP_CODE,(A6)
-0000100C  3016                      50      MOVE.W (A6),D0          ;Load current instruction set into D0
-0000100E  4EB9 00001014             51      JSR OP_JSR_Routine      ;Use the JSR routine to identify the op code
-00001014                            52  *-----------------------------------------------------------
-00001014                            53  *First Nibble Values (15-12)
-00001014                            54  *Value                  Operations
-00001014                            55  *$0                     GROUP_0: ORI,BCLR (static and dynamic),CMPI
-00001014                            56  *$1                     GROUP_1: MOVE.B                   
-00001014                            57  *$2                     GROUP_2: MOVE.L, MOVEA.L
-00001014                            58  *$3                     GROUP_3: MOVE.W, MOVEA.W
-00001014                            59  *$4                     GROUP_4: LEA,JSR,RTS,NEG,MOVEM
-00001014                            60  *$5                     GROUP_5: SUBQ
-00001014                            61  *$6                     GROUP_6: Bcc(BCS,BGE,BLT,BVC), BRA
-00001014                            62  *$7                     GROUP_7: INVALID_OP
-00001014                            63  *$8                     GROUP_8: DIVS, OR
-00001014                            64  *$9                     GROUP_7: SUB
-00001014                            65  *$A                     GROUP_A: INVALID_OP
-00001014                            66  *$B                     GROUP_B: EOR, CMP
-00001014                            67  *$C                     GROUP_C: MULS
-00001014                            68  *$D                     GROUP_D: ADD, ADDA
-00001014                            69  *$E                     GROUP_E: LSR, LSL, ASR, ASL, ROL, ROR
-00001014                            70  *$F                     GROUP_F: INVALID_OP
-00001014                            71  
-00001014                            72  
-00001014                            73  * OP_JSR_Routine
-00001014                            74  **********************************************************************************
-00001014                            75  * Description: Catalog all supported OP codes into groupings based on their hex
-00001014                            76  * values. Sort the supported OP codes by looking at the first nibble for their
-00001014                            77  * grouping value. Call underlying subroutines for further identification of the
-00001014                            78  * op code.
-00001014                            79  *
-00001014                            80  * Registers used: A6,D0,D1 
-00001014                            81  *
-00001014                            82  * Precondition: Instruction set (size Word) has been loaded in the appropriate
-00001014                            83  * address to be parsed and read.
-00001014                            84  
-00001014                            85  * Postcondition: OP code has been identified as either valid or invalid. If it is
-00001014                            86  * valid, it is stored into A6 and EA parsing methods are called to pass needed
-00001014                            87  * information to EA. If invalid, DATA output will be utilized to indicate so.
-00001014                            88  **********************************************************************************
-00001014                            89  * These valid operand codes refer to the basic supported operand codes
-00001014                            90  * Groups refer to the first nibble value that is supported by the operand
-00001014                            91  OP_JSR_Routine:
-00001014  48E7 C000                 92      MOVEM.L D0-D1, -(SP)           ;Backup registers D0 and D1 by pushing it on the Stack
-00001018  720C                      93      MOVE.L #12, D1                 ;Prepare bit shift left for D1   
-0000101A  E2A8                      94      LSR.L   D1,D0                  ;Shift 12 bits to only get first 4 bits for D0
-0000101C                            95  
-0000101C                            96  GROUP_0:                ;$0| ORI, BCLR (static and dynamic), CMPI                  
-0000101C  B03C 0000                 97      CMP.B   #$0,D0                 ;Compare first nibble
-00001020  6600 000C                 98      BNE     GROUP_1                ;If first nibble value isn't $0, branch to next
-00001024  4EB9 000011E4             99      JSR     C_GROUP_0              ;Jump to group 0 checking if nibble value is $0
-0000102A  6000 010C                100      BRA     OP_JSR_DONE            ;Finish subroutine once checking is finished
-0000102E                           101      
-0000102E                           102  GROUP_1:                ;$1| MOVE.B
-0000102E  B03C 0001                103      CMP.B   #$1,D0                 ;Compare first nibble
-00001032  6600 000C                104      BNE     GROUP_2                ;If first nibble value isn't $1, branch to next
-00001036  4EB9 00001252            105      JSR     C_GROUP_1              ;Jump to group 1 checking if nibble value is $1
-0000103C  6000 00FA                106      BRA     OP_JSR_DONE            ;Finish subroutine once checking is finished
-00001040                           107  
-00001040                           108  GROUP_2:                ;$2| MOVE.L, MOVEA.L
-00001040  B03C 0002                109      CMP.B   #$2,D0                 ;Compare first nibble
-00001044  6600 000C                110      BNE     GROUP_3                ;If first nibble value isn't $2, branch to next
-00001048  4EB9 00001266            111      JSR     C_GROUP_2              ;Jump to group 2 checking if nibble value is $2
-0000104E  6000 00E8                112      BRA     OP_JSR_DONE            ;Finish subroutine once checking is finished
-00001052                           113  
-00001052                           114  GROUP_3:                ;$3| MOVE.W, MOVEA.W
-00001052  B03C 0003                115      CMP.B   #$3,D0                 ;Compare first nibble
-00001056  6600 000C                116      BNE     GROUP_4                ;If first nibble value isn't $3, branch to next
-0000105A  4EB9 000012A6            117      JSR     C_GROUP_3              ;Jump to group 3 checking if nibble value is $3
-00001060  6000 00D6                118      BRA     OP_JSR_DONE            ;Finish subroutine once checking is finished
-00001064                           119  
-00001064                           120  GROUP_4:                ;$4| LEA, JSR, RTS, NEG, MOVEM
-00001064  B03C 0004                121      CMP.B   #$4,D0                 ;Compare first nibble
-00001068  6600 000C                122      BNE     GROUP_5                ;If first nibble value isn't $4, branch to next
-0000106C  4EB9 000012EA            123      JSR     C_GROUP_4              ;Jump to group 4 checking if nibble value is $4
-00001072  6000 00C4                124      BRA     OP_JSR_DONE            ;Finish subroutine once checking is finished
-00001076                           125  
-00001076                           126  
-00001076                           127  GROUP_5:                ;$5| SUBQ
-00001076  B03C 0005                128      CMP.B   #$5,D0                 ;Compare first nibble
-0000107A  6600 000C                129      BNE     GROUP_6                ;If first nibble value isn't $5, branch to next
-0000107E  4EB9 000012EC            130      JSR     C_GROUP_5              ;Jump to group 5 checking if nibble value is $5
-00001084  6000 00B2                131      BRA     OP_JSR_DONE            ;Finish subroutine once checking is finished
-00001088                           132  
-00001088                           133  
-00001088                           134  GROUP_6:                ;$6| Bcc (BCS,BGE,BLT,BVC) BRA
-00001088  B03C 0006                135      CMP.B   #$6,D0                 ;Compare first nibble
-0000108C  6600 000C                136      BNE     GROUP_7                ;If first nibble value isn't $6, branch to next
-00001090  4EB9 000012EC            137      JSR     C_GROUP_6              ;Jump to group 6 checking if nibble value is $6
-00001096  6000 00A0                138      BRA     OP_JSR_DONE            ;Finish subroutine once checking is finished
-0000109A                           139  
-0000109A                           140  
-0000109A                           141  GROUP_7:                ;$7| Display: DATA, $WXYZ (Unsupported)
-0000109A  B03C 0007                142      CMP.B   #$7,D0                 ;Compare first nibble
-0000109E  6600 000C                143      BNE     GROUP_8                ;If first nibble value isn't $7, branch to next
-000010A2  4EB9 000012EC            144      JSR     C_GROUP_7              ;Jump to group 7 checking if nibble value is $7
-000010A8  6000 008E                145      BRA     OP_JSR_DONE            ;Finish subroutine once checking is finished
-000010AC                           146  
-000010AC                           147  
-000010AC                           148  GROUP_8:                ;$8| DIVS, OR
-000010AC  B03C 0008                149      CMP.B   #$8,D0                 ;Compare first nibble
-000010B0  6600 000C                150      BNE     GROUP_9                ;If first nibble value isn't $8, branch to next
-000010B4  4EB9 000012F2            151      JSR     C_GROUP_8              ;Jump to group 8 checking if nibble value is $8
-000010BA  6000 007C                152      BRA     OP_JSR_DONE            ;Finish subroutine once checking is finished
-000010BE                           153  
-000010BE                           154  
-000010BE                           155  GROUP_9:                ;$9| SUB
-000010BE  B03C 0009                156      CMP.B   #$9,D0                 ;Compare first nibble
-000010C2  6600 000C                157      BNE     GROUP_A                ;If first nibble value isn't $9, branch to next
-000010C6  4EB9 000012F2            158      JSR     C_GROUP_9              ;Jump to group 9 checking if nibble value is $9
-000010CC  6000 006A                159      BRA     OP_JSR_DONE            ;Finish subroutine once checking is finished
-000010D0                           160  
-000010D0                           161  
-000010D0                           162  GROUP_A:                ;$A| Display: DATA, $WXYZ (Unsupported)
-000010D0  B03C 000A                163      CMP.B   #$A,D0                 ;Compare first nibble
-000010D4  6600 000C                164      BNE     GROUP_B                ;If first nibble value isn't $A, branch to next
-000010D8  4EB9 000012F2            165      JSR     C_GROUP_A              ;Jump to group A checking if nibble value is $A
-000010DE  6000 0058                166      BRA     OP_JSR_DONE            ;Finish subroutine once checking is finished
-000010E2                           167  
-000010E2                           168  
-000010E2                           169  GROUP_B:                ;$B| EOR, CMP
-000010E2  B03C 000B                170      CMP.B   #$B,D0                 ;Compare first nibble
-000010E6  6600 000C                171      BNE     GROUP_C                ;If first nibble value isn't $B, branch to next
-000010EA  4EB9 000012F8            172      JSR     C_GROUP_B              ;Jump to group B checking if nibble value is $B
-000010F0  6000 0046                173      BRA     OP_JSR_DONE            ;Finish subroutine once checking is finished
-000010F4                           174  
-000010F4                           175  
-000010F4                           176  GROUP_C:                ;$C| MULS
-000010F4  B03C 000C                177      CMP.B   #$C,D0                 ;Compare first nibble
-000010F8  6600 000C                178      BNE     GROUP_D                ;If first nibble value isn't $C, branch to next
-000010FC  4EB9 000012F8            179      JSR     C_GROUP_C              ;Jump to group C checking if nibble value is $C
-00001102  6000 0034                180      BRA     OP_JSR_DONE            ;Finish subroutine once checking is finished
-00001106                           181  
-00001106                           182  
-00001106                           183  GROUP_D:                 ;$D| ADD, ADDA
-00001106  B03C 000D                184      CMP.B   #$D,D0                 ;Compare first nibble
-0000110A  6600 000C                185      BNE     GROUP_E                ;If first nibble value isn't $D, branch to next
-0000110E  4EB9 000012F8            186      JSR     C_GROUP_D              ;Jump to group D checking if nibble value is $D
-00001114  6000 0022                187      BRA     OP_JSR_DONE            ;Finish subroutine once checking is finished
-00001118                           188  
-00001118                           189  
-00001118                           190  GROUP_E:                ;$E| LSR, LSL, ASR, ASL, ROL, ROR
-00001118  B03C 000E                191      CMP.B   #$E,D0                 ;Compare first nibble
-0000111C  6600 000C                192      BNE     GROUP_F                ;If first nibble value isn't $E, branch to next
-00001120  4EB9 000012F8            193      JSR     C_GROUP_E              ;Jump to group E checking if nibble value is $E
-00001126  6000 0010                194      BRA     OP_JSR_DONE            ;Finish subroutine once checking is finished
-0000112A                           195  
-0000112A                           196  
-0000112A                           197  GROUP_F:                ;$F| Display: DATA, $WXYZ (Unsupported)
-0000112A  B03C 000F                198      CMP.B   #$F,D0                 ;Compare first nibble
-0000112E  4EB9 000012F8            199      JSR     C_GROUP_F              ;Jump to group F checking if nibble value is $F
-00001134  6000 0002                200      BRA     OP_JSR_DONE            ;Finish subroutine once checking is finished
-00001138                           201  
-00001138                           202  
-00001138                           203  OP_JSR_DONE:
-00001138  4CDF 0003                204           MOVEM.L (SP)+,D0-D1       ;Recover register D0
-0000113C  4EF9 0000130E            205           JMP READ_NEXT_INSTRUCTION
-00001142                           206  **********************************************************************************
-00001142                           207  
-00001142                           208  ********** EA Parsing ************************************************************
-00001142                           209  
-00001142                           210  * MOVE_LAST_6_BITS_TO_EA
-00001142                           211  **********************************************************************************
-00001142                           212  * Description: For OP codes with the last 6 bits specified as EA Mode and EA Reg,
-00001142                           213  * the last 6 bits will be parsed and moved into the appropriate registers.
-00001142                           214  *
-00001142                           215  * Registers used: A6,D0,D1,D6,D7 
-00001142                           216  
-00001142                           217  * Precondition: OP code has been identified with only the last 6 bits for EA,
-00001142                           218  * current instruction set is stored into A6.
-00001142                           219  
-00001142                           220  * Postcondition: Last 6 bits of instruction bit has been isolated and stored. Bits
-00001142                           221  * for EA Mode have been stored in D7, Bits for EA Reg been stored in D6.
-00001142                           222  **********************************************************************************
-00001142                           223  MOVE_LAST_6_BITS_TO_EA:      ;Move last 6 bits from EA field to relevant registers
-00001142                           224     ; MOVEM.L D0-D7/A6, -(SP)  ;Save all changed registers
-00001142  3016                     225      MOVE.W (A6),D0           ;Move current OP code into D0
-00001144  323C 000A                226      MOVE.W  #10,D1           ;Prepare 10 bit shift to D1
-00001148  E368                     227      LSL.W   D1,D0            ;Truncate to find the last 6 bits
-0000114A  E268                     228      LSR.W   D1,D0            ;Shift back to get the proper 6 bits
-0000114C  3E00                     229      MOVE.W  D0,D7            ;Move last 6 bits into D7
-0000114E  323C 0003                230      MOVE.W  #3,D1            ;Prepare 3 bit shift into D1
-00001152  E26F                     231      LSR.W   D1,D7            ;Shift 3 bits off D7 to obtain EA Mode
-00001154  3C07                     232      MOVE.W  D7,D6            ;Move the 'upper' 3 bits into D6
-00001156  323C 000D                233      MOVE.W  #13,D1           ;Prepare 13 bit shift into D1
-0000115A  E368                     234      LSL.W   D1,D0            ;Shift D0 left 13 bits to reposition current 3 bits
-0000115C  E268                     235      LSR.W   D1,D0            ;Shift D0 right 13 bits to reposition current 3 bits
-0000115E  3E00                     236      MOVE.W  D0,D7            ;Move the 'lower' 3 bits into D7
-00001160                           237     ; MOVEM.L (SP)+,D0-D7/A6   ;Restore registers
-00001160  4E75                     238      RTS                      ;Return to stack
-00001162                           239      
-00001162                           240  * FIND_2_BIT_SIZE_TO_EA
-00001162                           241  **********************************************************************************
-00001162                           242  * Description: For OP codes with 2 bit size fields, the 2 relevant bits (7-6) will 
-00001162                           243  * be parsed and moved to the appropriate registers.
-00001162                           244  *
-00001162                           245  * Registers used: A6,D0,D1,D5
-00001162                           246  *
-00001162                           247  * Precondition: OP code has been identified with 2 size bit field for EA, current
-00001162                           248  * instruction set for OP code is stored in to A6.
-00001162                           249  *
-00001162                           250  * Postcondition: 2 bit size field has been isolated and stored into D5.
-00001162                           251  **********************************************************************************
-00001162                           252  FIND_2_BIT_SIZE_TO_EA:      ;Move the 2 bit size field relevant register
-00001162                           253     ; MOVEM.L  D0-D5/A6,-(SP) ;Save all changed registers
-00001162  3016                     254      MOVE.W   (A6),D0        ;Move current OP code into D0
-00001164  323C 0008                255      MOVE.W   #8,D1          ;Prepare 8 bit shift to D1
-00001168  E368                     256      LSL.W    D1,D0          ;Truncate to find the 2 size bits
-0000116A  E268                     257      LSR.W    D1,D0          ;Reposition the bits
-0000116C  323C 0006                258      MOVE.W   #6,D1          ;Prepare 6 bit shift to D1
-00001170  E268                     259      LSR.W    D1,D0          ;Truncate to shift 2 bits to a byte
-00001172  3800                     260      MOVE.W   D0,D4          ;Move 2 size bits into D5
-00001174                           261    ;  MOVEM.L (SP)+,D0-D5/A6  ;Restore registers
-00001174  4E75                     262      RTS                     ;Return to stack
-00001176                           263  **********************************************************************************
-00001176                           264  
-00001176                           265  * FIND_3_BIT_REG_TO_EA
-00001176                           266  **********************************************************************************
-00001176                           267  * Description: OP codes with a dynamic 3 bit register in bits 11-9 will be parsed
-00001176                           268  * and have those 3 bits isolated and moved to the appropriate registers.
-00001176                           269  *
-00001176                           270  * Registers used: A6,D0,D1,D5
-00001176                           271  *
-00001176                           272  * Precondition: OP code has been identified with a dynamic 3 bit register in bits
-00001176                           273  * 11-9.
-00001176                           274  *
-00001176                           275  * Postcondition: 3 bit dynamic register has been isolated and stored into D4.
-00001176                           276  **********************************************************************************
-00001176                           277  FIND_3_BIT_REG_TO_EA:       ;Move the 3 bit dynamic register bits to proper register
-00001176                           278     ; MOVEM.L  D0-D5/A6,-(SP) ;Save all changed registers
-00001176  3016                     279      MOVE.W   (A6),D0        ;Move current OP code into D0
-00001178  323C 0004                280      MOVE.W   #4,D1          ;Prepare 4 bit shift to D1
-0000117C  E368                     281      LSL.W    D1,D0          ;Truncate to find the 2 size bits
-0000117E  E268                     282      LSR.W    D1,D0          ;Reposition the bits
-00001180  323C 0009                283      MOVE.W   #9,D1          ;Prepare 9 bit shift to D1
-00001184  E268                     284      LSR.W    D1,D0          ;Truncate to shift 3 bits to a byte
-00001186  3A00                     285      MOVE.W   D0,D5          ;Move 3 register bits into D4
-00001188                           286     ; MOVEM.L (SP)+,D0-D5/A6  ;Restore registers
-00001188  4E75                     287      RTS                     ;Return to stack
-0000118A                           288  **********************************************************************************
-0000118A                           289  
-0000118A                           290  * MOVE_AND_MOVEA_PARSE_EA
-0000118A                           291  **********************************************************************************
-0000118A                           292  * Description: Special parsing for the SRC and DST Mode/Reg for MOVE/MOVE
-0000118A                           293  *
-0000118A                           294  * Registers used: A6,D0,D1,D7,D6,D5,D4
-0000118A                           295  *
-0000118A                           296  * Precondition: OP code has been identified with either MOVE or MOVEA
-0000118A                           297  *
-0000118A                           298  * Postcondition: Store all relevant EA bits into associated register.
-0000118A                           299  **********************************************************************************
-0000118A                           300  MOVE_AND_MOVEA_PARSE_EA:       ;Move the 3 bit dynamic register bits to proper register
-0000118A                           301     ; MOVEM.L D0-D7/A6, -(SP)  ;Save all changed registers
-0000118A  3038 2000                302      MOVE.W CUR_OP_CODE,D0           ;Move current OP code into D0
-0000118E  323C 000A                303      MOVE.W  #10,D1           ;Prepare 10 bit shift to D1
-00001192  E368                     304      LSL.W   D1,D0            ;Truncate to find the last 6 bits
-00001194  E268                     305      LSR.W   D1,D0            ;Shift back to get the proper 6 bits
-00001196  3E00                     306      MOVE.W  D0,D7            ;Move last 6 bits into D7, SRC REG MODE
-00001198  323C 0003                307      MOVE.W  #3,D1            ;Prepare 3 bit shift into D1
-0000119C  E26F                     308      LSR.W   D1,D7            ;Shift 3 bits off D7 to obtain EA Mode
-0000119E  3A07                     309      MOVE.W  D7,D5            ;Move the 'upper' 3 bits into D6
-000011A0  323C 000D                310      MOVE.W  #13,D1           ;Prepare 13 bit shift into D1
-000011A4  E368                     311      LSL.W   D1,D0            ;Shift D0 left 13 bits to reposition current 3 bits
-000011A6  E268                     312      LSR.W   D1,D0            ;Shift D0 right 13 bits to reposition current 3 bits
-000011A8  3800                     313      MOVE.W  D0,D4            ;Move the 'lower' 3 bits into D7
-000011AA                           314      **************MOVING SOURCE*********** TO BE DONE LATER
-000011AA                           315      ; MOVE.W #%0011 011 001 001 101,(A6)              ;MOVEA.W A5,A3
-000011AA                           316      ; MOVE.W #%0010 011 001 001 101,D0                ;MOVEA.L A5,A3
-000011AA                           317       ;Expected values:
-000011AA                           318      ;D7, DST REG:   011
-000011AA                           319      ;D6, DST MODE:  001
-000011AA                           320      ;D5, SRC MODE:  001
-000011AA                           321      ;D4, SRC REG:   101
-000011AA                           322      ;00011001
-000011AA  3038 2000                323      MOVE.W CUR_OP_CODE,D0     ;Move current OP code into D0     
-000011AE  323C 0004                324      MOVE.W  #4,D1             ;Prepare 4 bit shift to D1
-000011B2  E368                     325      LSL.W   D1,D0             ;Truncate to find bits 11-6
-000011B4  E268                     326      LSR.W   D1,D0             ;Reposition bits
-000011B6  323C 0006                327      MOVE.W  #6,D1             ;Prepare 6 bit shift to D1
-000011BA  E268                     328      LSR.W   D1,D0             ;Truncate the SRC Reg/Mode bits
-000011BC  323C 0003                329      MOVE.W  #3,D1             ;Prepare a 3 bit shift to D1 for DST Reg/Mode
-000011C0  3C00                     330      MOVE.W  D0,D6             ;Copy over the current 6 bits to D6
-000011C2  E268                     331      LSR.W   D1,D0             ;Truncate DST Mode  
-000011C4  3E00                     332      MOVE.W  D0,D7             ;Move DST Reg to D7
-000011C6  323C 000D                333      MOVE.W  #13,D1             
-000011CA  E36E                     334      LSL.W   D1,D6             ;Truncate 13 bits in D6
-000011CC  E26E                     335      LSR.W   D1,D6             ;Reposition D6
-000011CE                           336                                ;D6 now contains the DST Reg
-000011CE                           337     ; MOVEM.L (SP)+,D0-D7/A6   ;Restore registers
-000011CE  4E75                     338      RTS                     ;Return to stack
-000011D0                           339  **********************************************************************************
-000011D0                           340  
-000011D0                           341  *FIND_TRAILING_BITS_TO_EA
-000011D0                           342  **********************************************************************************
-000011D0                           343  FIND_TRAILING_BITS_TO_EA:       ;Move the 3 bit dynamic register bits to proper register
-000011D0                           344     ; MOVEM.L  D0-D5/A6,-(SP) ;Save all changed registers
-000011D0  3016                     345      MOVE.W   (A6),D0        ;Move current OP code into D0
-000011D2  323C 0007                346      MOVE.W   #7,D1          ;Prepare 4 bit shift to D1
-000011D6  E368                     347      LSL.W    D1,D0          ;Truncate to find the 2 size bits
-000011D8  E268                     348      LSR.W    D1,D0          ;Reposition the bits
-000011DA  323C 0006                349      MOVE.W   #6,D1          ;Prepare 9 bit shift to D1
-000011DE  E268                     350      LSR.W    D1,D0          ;Truncate to shift 3 bits to a byte
-000011E0  3680                     351      MOVE.W   D0,(A3)          ;Move 3 register bits into D4
-000011E2                           352     ; MOVEM.L (SP)+,D0-D5/A6  ;Restore registers
-000011E2  4E75                     353      RTS                    ;Return to stack
-000011E4                           354  **********************************************************************************
-000011E4                           355  
-000011E4                           356  
-000011E4                           357  
-000011E4                           358  
-000011E4                           359  
-000011E4                           360  ********** End of EA Parsing *****************************************************
-000011E4                           361  
-000011E4                           362  *******************JMP LABELS ****************************************************
-000011E4                           363  * Labelling for group codes will be in the following format
-000011E4                           364  
-000011E4                           365  * <JMP Labelname>
-000011E4                           366  ********************************************************************************
-000011E4                           367  * Checking List Order (If more than one value)
-000011E4                           368  * Operand1 - $<nibble value>, a-b <specifier>, c-d <specifier> ...
-000011E4                           369  * Operand2 - $<nibble value>, a-b <specifier>, c-d <specifier> ...
-000011E4                           370  
-000011E4                           371  * Where a-b will refer to the bit corresponding bit value in the instruction
-000011E4                           372  * format, and a specifier will be attached such as Size, EA Mode, SRC Reg, etc
-000011E4                           373  * to clarify what a specific bit range means.
-000011E4                           374  * Checking order refers to what order the checks will be performed in. 
-000011E4                           375  * Any other code outside of the listed ones will be INVALID_OP.
-000011E4                           376  ********************************************************************************
-000011E4                           377  
-000011E4                           378  ********************************************************************************
-000011E4                           379  * Global Field Descriptions
-000011E4                           380  * Size Field: Byte = 00 Word = 01 Long = 10
-000011E4                           381  * EA Mode: Refer to EA Address Modes
-000011E4                           382  * EA Reg: 3-bit input that is mapped to the respective binary value
-000011E4                           383  ********************************************************************************
-000011E4                           384  
-000011E4                           385  * GROUP_0                      
-000011E4                           386  ********************************************************************************
-000011E4                           387  * Description: Checks for the following listed OP codes to be present or not
-000011E4                           388  *
-000011E4                           389  * ORI: $00, 7-6 Size, 5-3 EA Mode, 2-0 EA Reg
-000011E4                           390  * CMPI: $0C, 7-6 Size, 5-3 EA Mode, 2-0 EA Reg
-000011E4                           391  * Dynamic BCLR: $0, 11-9 Register, 8-6 %110, 5-3 EA Mode, 2-0 EA Reg
-000011E4                           392  * Static BCLR: $01, 7-6 10, 5-3 EA Mode, 2-0 EA Reg
-000011E4                           393  *
-000011E4                           394  * Precondition: First nibble has been identified as $0
-000011E4                           395  * Postcondition: Parses proper OP code with a nibble value of $0 or finds an
-000011E4                           396  * invalid OP code. After a successful parse loading for EA values will be done
-000011E4                           397  * through a subroutine.
-000011E4                           398  ********************************************************************************
-000011E4                           399  C_GROUP_0:
-000011E4  48E7 C000                400      MOVEM.L D0-D1, -(SP) ; Backup registers
-000011E8                           401      
-000011E8                           402  CHECK_OP_ORI:
-000011E8  3016                     403      MOVE.W  (A6),D0         ;Move current instruction set into D
-000011EA  0240 FF00                404      ANDI.W  #$FF00,D0       ;Mask relevant bits to D0
-000011EE  B07C 0000                405      CMP.W   #$0000,D0       ;Compare the appropriate masked bits     
-000011F2  6600 0010                406      BNE     CHECK_OP_CMPI   ;Branch to next comparison if not equal
-000011F6  4EB9 00001312            407      JSR     PRINT_OP_ORI    ;Print the OP code if equal
-000011FC  4EB8 1162                408      JSR     FIND_2_BIT_SIZE_TO_EA         
-00001200  6000 004E                409      BRA     CG0_C           ;Finish routine
-00001204                           410  CHECK_OP_CMPI:
-00001204  3016                     411      MOVE.W  (A6),D0         ;Move current instruction set into D
-00001206  0240 FF00                412      ANDI.W  #$FF00,D0       ;Mask relevant bits to D0
-0000120A  B07C 0C00                413      CMP.W   #$0C00,D0       ;Compare the appropriate masked bits   
-0000120E  6600 000C                414      BNE     CHECK_OP_S_BCLR ;Branch to next comparison if not equal       
-00001212  4EB9 00001320            415      JSR     PRINT_OP_CMPI   ;Print the OP code if equal
-00001218  6000 0036                416      BRA     CG0_C           ;Finish routine
-0000121C                           417  CHECK_OP_S_BCLR:
-0000121C  3016                     418      MOVE.W  (A6),D0         ;Move current instruction set into D
-0000121E  0240 FF00                419      ANDI.W  #$FF00,D0       ;Mask relevant bits to D0
-00001222  B07C 0800                420      CMP.W   #$0800,D0       ;Compare the appropriate masked bits
-00001226  6600 000C                421      BNE     CHECK_OP_D_BCLR ;Branch to next comparison if not equal
-0000122A  4EB9 0000133A            422      JSR     PRINT_OP_S_BCLR ;Print the OP code if equal
-00001230                           423      ;MOVEM.L (SP)+,D6-D7     ;POP STACK
-00001230  6000 001E                424      BRA     CG0_C           ;Finish routine
-00001234                           425  CHECK_OP_D_BCLR:
-00001234  3016                     426      MOVE.W (A6),D0                ;Move current instruction set into D
-00001236  0240 0180                427      ANDI.W  #%0000000110000000,D0 ;Do a direct binary bitmask to see which bits are needed
-0000123A  B07C 0180                428      CMP.W   #%0000000110000000,D0 ;Compare the expected binary value
-0000123E  6600 000C                429      BNE     CG0_F                 ;If not equal this must be an invalid OP code
-00001242  4EB9 00001358            430      JSR     PRINT_OP_D_BCLR       ;Print the OP code if equal
-00001248  6000 0006                431      BRA     CG0_C                ;Finish routine
-0000124C                           432  CG0_F:                       ;Checks have been finished, invalid OP code has been found
-0000124C  6000 00B0                433      BRA INVALID_OP    
-00001250                           434  CG0_C:                       ;Checks have been finished,a valid OP code has been found
-00001250  4E75                     435      RTS                      ;Return to stack
-00001252                           436      
-00001252                           437  * GROUP_1                      
-00001252                           438  ********************************************************************************
-00001252                           439  * MOVE.B: $1, 11-9 DST Reg, 8-6 DST Mode, 5-3 SRC Mode, 2-0 SRC Reg
-00001252                           440  ********************************************************************************
-00001252                           441  C_GROUP_1:
-00001252                           442  
-00001252                           443  CHECK_OP_MOVE_B:
-00001252  3016                     444      MOVE.W (A6),D0                  ;Move current instruction set into D0          
-00001254  0240 FF00                445      ANDI.W  #$FF00,D0               ;Mask relevant bits to D0
-00001258  B07C 1000                446      CMP.W #$1000,D0                 ;Compare the appropriate masked bits 
-0000125C  6600 00A0                447      BNE INVALID_OP                  ;Invalid OP code has been found
-00001260  6700 0114                448      BEQ PRINT_OP_MOVEB              ;Print the OP code if equal
-00001264  4E75                     449      RTS                             ;Return to stack
-00001266                           450  * GROUP_2
-00001266                           451  ********************************************************************************
-00001266                           452  * MOVEA.L: $2, 11-9 DST Reg, 8-6 %001, 5-3 SRC Mode, 2-0 SRC Reg
-00001266                           453  * MOVE.L: $2, 11-9 DST Reg, 8-6 DST Mode, 5-3 SRC Mode, 2-0 SRC Reg
-00001266                           454  ********************************************************************************
-00001266                           455  C_GROUP_2:
-00001266                           456  
-00001266                           457  CHECK_OP_MOVEA_L:
-00001266  3016                     458      MOVE.W (A6),D0                  ;Move current instruction set into D0  
-00001268  0240 FF00                459      ANDI.W #$FF00,D0                ;Mask relevant bits to D0
-0000126C  B07C 2000                460      CMP.W #$2000,D0                 ;Compare the appropriate masked bits
-00001270  6000 0002                461      BRA FIND_MOVEA_L_DIFFERENCE     ;Branch always to check 
-00001274                           462  
-00001274                           463      
-00001274                           464  FIND_MOVEA_L_DIFFERENCE:    ;Finds difference between MOVEA and MOVE
-00001274  3016                     465      MOVE.W   (A6),D0        ;Move current OP code into D0
-00001276  323C 0007                466      MOVE.W   #7,D1          ;Prepare 7 bit shift to D1
-0000127A  E368                     467      LSL.W    D1,D0          ;Truncate to find the 3 address mode bits
-0000127C  E268                     468      LSR.W    D1,D0          ;Reposition the bits
-0000127E  323C 0006                469      MOVE.W   #6,D1          ;Prepare 6 bit shift to D1
-00001282  E268                     470      LSR.W    D1,D0          ;Truncate to shift 3 bits to a register
-00001284  3C00                     471      MOVE.W   D0,D6          ;Move 3 address mode bits into D6
-00001286  BC7C 0001                472      CMP.W   #$1,D6          ;Check if the address mode value is MOVEA
-0000128A  6600 0006                473      BNE     CHECK_OP_MOVE_L  ;Branch if not equal to check MOVE
-0000128E  6700 00FC                474      BEQ     PRINT_OP_MOVEA_L ;Print out the MOVEA address 
-00001292                           475      
-00001292                           476  CHECK_OP_MOVE_L:
-00001292  3016                     477      MOVE.W (A6),D0
-00001294  0240 FF00                478      ANDI.W #$FF00,D0
-00001298  B07C 2000                479      CMP.W #$2000,D0
-0000129C  6600 0060                480      BNE INVALID_OP
-000012A0  6700 0100                481      BEQ PRINT_OP_MOVE_L
-000012A4  4E75                     482      RTS
-000012A6                           483      
-000012A6                           484  * GROUP_3
-000012A6                           485  ********************************************************************************
-000012A6                           486  * MOVEA.W: $3, 11-9 DST Reg, 8-6 %001, 5-3 SRC Mode, 2-0 SRC Reg
-000012A6                           487  * MOVE.W: $3, 11-9 DST Reg, 8-6 DST Mode, 5-3 SRC Mode, 2-0 SRC Reg
-000012A6                           488  ********************************************************************************
-000012A6                           489  C_GROUP_3:
-000012A6                           490  
-000012A6                           491  CHECK_OP_MOVEA_W:
-000012A6  3016                     492      MOVE.W (A6),D0
-000012A8  0240 FF00                493      ANDI.W #$FF00,D0
-000012AC  B07C 3000                494      CMP.W #$3000,D0
-000012B0  6000 0002                495      BRA FIND_MOVEA_W_DIFFERENCE
-000012B4                           496  
-000012B4                           497      
-000012B4                           498  FIND_MOVEA_W_DIFFERENCE:      ;Finds difference between MOVEA and MOVE
-000012B4  3016                     499      MOVE.W   (A6),D0        ;Move current OP code into D0
-000012B6  323C 0007                500      MOVE.W   #7,D1          ;Prepare 7 bit shift to D1
-000012BA  E368                     501      LSL.W    D1,D0          ;Truncate to find the 3 address mode bits
-000012BC  E268                     502      LSR.W    D1,D0          ;Reposition the bits
-000012BE  323C 0006                503      MOVE.W   #6,D1          ;Prepare 6 bit shift to D1
-000012C2  E268                     504      LSR.W    D1,D0          ;Truncate to shift 3 bits to a register
-000012C4  3C00                     505      MOVE.W   D0,D6          ;Move 3 address mode bits into D6
-000012C6  BC7C 0001                506      CMP.W   #$1,D6          ;Check if the address mode value is MOVEA
-000012CA  4EB8 118A                507      JSR     MOVE_AND_MOVEA_PARSE_EA
-000012CE  6600 0006                508      BNE     CHECK_OP_MOVE_W 
-000012D2  6700 00E4                509      BEQ     PRINT_OP_MOVEA_W  
-000012D6                           510      
-000012D6                           511  CHECK_OP_MOVE_W:
-000012D6  3016                     512      MOVE.W (A6),D0
-000012D8  0240 FF00                513      ANDI.W #$FF00,D0
-000012DC  B07C 3000                514      CMP.W #$3000,D0
-000012E0  6600 001C                515      BNE INVALID_OP
-000012E4  6700 00E8                516      BEQ PRINT_OP_MOVE_W
-000012E8  4E75                     517      RTS
-000012EA                           518  
-000012EA                           519  * GROUP_4
-000012EA                           520  ********************************************************************************
-000012EA                           521  * LEA: $4, 11-9 Reg, 8-6 %111, 5-3 EA Mode, 2-0 EA Reg
-000012EA                           522  * JSR: $4E, 7-6 %10, 5-3 EA Mode, 2-0 EA Reg 
-000012EA                           523  * RTS: $4E75
-000012EA                           524  * NEG: $44, 7-6 Size, 5-3 EA Mode, 2-0 EA Reg
-000012EA                           525  * MOVEM: $4, 11 %1, 10 %D, 9-7 %001, 6 S, 5-3 EA Mode, 2-0 EA Reg
-000012EA                           526  * %D = 0 , Register to Memory, 1 Memory to Register
-000012EA                           527  ********************************************************************************
-000012EA                           528  C_GROUP_4:
-000012EA                           529      
-000012EA                           530  CHECK_OP_LEA:
-000012EA  3016                     531      MOVE.W (A6),D0
-000012EC                           532     ; ANDI.W #$
-000012EC                           533  CHECK_OP_JSR:
-000012EC                           534  
-000012EC                           535  CHECK_OP_RTS:
-000012EC                           536  
-000012EC                           537  CHECK_OP_NEG:
-000012EC                           538  
-000012EC                           539  * GROUP_5
-000012EC                           540  ********************************************************************************
-000012EC                           541  * SUBQ: $5, 11-9 DATA, 8 %1, 7-6 Size, 5-3 EA Mode, 2-0 EA Reg
-000012EC                           542  ********************************************************************************
-000012EC                           543  C_GROUP_5:
-000012EC                           544  
-000012EC                           545  CHECK_OP_SUBQ:
-000012EC                           546  
-000012EC                           547  * GROUP_6
-000012EC                           548  ********************************************************************************
-000012EC                           549  * BRA: $60, 7-0 8-Bit Displacement
-000012EC                           550  * Bcc: $6, 11-8 Condition, 7-0 8-Bit Displacement
-000012EC                           551  *   Branch: <Condition>   
-000012EC                           552  *   BCS: %0101          
-000012EC                           553  *   BGE: %1100      
-000012EC                           554  *   BLT: %1101  
-000012EC                           555  *   BVC: %1000
-000012EC                           556  
-000012EC                           557  ********************************************************************************
-000012EC                           558  C_GROUP_6:
-000012EC                           559  
-000012EC                           560  CHECK_OP_BRA:
-000012EC                           561  
-000012EC                           562  CHECK_OP_BCS:
-000012EC                           563  
-000012EC                           564  CHECK_OP_BGE:
-000012EC                           565  
-000012EC                           566  CHECK_OP_BLT:
-000012EC                           567  
-000012EC                           568  CHECK_OP_BVC:
-000012EC                           569  
-000012EC                           570  *GROUP_7
-000012EC                           571  ********************************************************************************
-000012EC                           572  * Currently no OP codes here are supported.
-000012EC                           573  ********************************************************************************
-000012EC                           574  C_GROUP_7:
-000012EC  4EB9 000012FE            575      JSR INVALID_OP
-000012F2                           576  
-000012F2                           577  * GROUP_8
-000012F2                           578  ********************************************************************************
-000012F2                           579  * DIVS: $8, 11-9 Reg, 8-6 %111, 5-3 EA Mode, 2-0 EA Reg
-000012F2                           580  * OR: $80, 7-6 Size, 5-3 EA Mode, 2-0 EA Register
-000012F2                           581  ********************************************************************************
-000012F2                           582  C_GROUP_8:
-000012F2                           583  
-000012F2                           584  CHECK_OP_DIVS:
-000012F2                           585  
-000012F2                           586  CHECK_OP_OR:
-000012F2                           587  
-000012F2                           588  * GROUP_9                      
-000012F2                           589  ********************************************************************************
-000012F2                           590  * SUB: $9, 11-9 Reg, 8-6 OPMODE, 5-3 EA Mode, 2-0 EA Reg
-000012F2                           591  ********************************************************************************
-000012F2                           592  C_GROUP_9:
-000012F2                           593  
-000012F2                           594  CHECK_OP_SUB:
-000012F2                           595  
-000012F2                           596  *GROUP_A
-000012F2                           597  ********************************************************************************
-000012F2                           598  * Currently no OP codes here are supported.
-000012F2                           599  ********************************************************************************
-000012F2                           600  C_GROUP_A:
-000012F2  4EB9 000012FE            601      JSR INVALID_OP
-000012F8                           602  
-000012F8                           603  * GROUP_B                     
-000012F8                           604  ********************************************************************************
-000012F8                           605  * EOR: $B, 11-9 Reg, 8 %1, 8-6 OPMODE, 5-3 EA Mode, 2-0 EA Reg
-000012F8                           606  * CMP: $B, 11-9 Reg, 8 %0, 8-6 OPMODE, 5-3 EA Mode, 2-0 EA Reg
-000012F8                           607  * The specific bit difference is listed 
-000012F8                           608  ********************************************************************************
-000012F8                           609  C_GROUP_B:
-000012F8                           610  
-000012F8                           611  CHECK_OP_EOR:
-000012F8                           612  
-000012F8                           613  CHECK_OP_CMP:
-000012F8                           614  
-000012F8                           615  * GROUP_C                     
-000012F8                           616  ********************************************************************************
-000012F8                           617  * MULS: $C, 11-8 Reg, 8-6 %111, 5-3 EA Mode, 2-0 EA Reg
-000012F8                           618  ********************************************************************************
-000012F8                           619  C_GROUP_C:
-000012F8                           620  
-000012F8                           621  CHECK_OP_MULS:
-000012F8                           622  
-000012F8                           623  * GROUP_D                     
-000012F8                           624  ********************************************************************************
-000012F8                           625  * ADD: $D, 11-9 Reg, 8-6 OPMODE, 5-3 EA Mode, 2-0 EA Reg
-000012F8                           626  * ADDA: $D, 11- 9 Reg, 8-6 OPMODE, 7-6 %11, 5-3 EA Mode, 2-0 EA Reg
-000012F8                           627  * The specific bit difference is listed out in the OPMODE field.
-000012F8                           628  ********************************************************************************
-000012F8                           629  C_GROUP_D:
-000012F8                           630  
-000012F8                           631  CHECK_OP_ADDA:
-000012F8                           632  
-000012F8                           633  CHECK_OP_ADD:
-000012F8                           634  
-000012F8                           635  * GROUP_E                     
-000012F8                           636  ********************************************************************************
-000012F8                           637  * LSR: $E, 11-9 Count/Reg, 8 %0, 7-6 Size, 5 i/r, 4-3 %01, 2-0 Reg
-000012F8                           638  * LSL: $E, 11-9 Count/Reg, 8 %1, 7-6 Size, 5 i/r, 4-3 %01, 2-0 Reg
-000012F8                           639  * ASR: $E, $0, 8 %0, 7-6 %11, 5-3 EA Mode, 2-0 EA reg
-000012F8                           640  * ASL: $E, $0, 8 %1, 7-6 %11, 5-3 EA Mode, 2-0 EA reg
-000012F8                           641  * ROR: $E, 11-9 Count/Reg, 8 %0, 7-6 Size, 5 i/r, 4-3 %11, 2-0 Reg
-000012F8                           642  * ROL: $E, 11-9 Count/Reg, 8 %1, 7-6 Size, 5 i/r, 4-3 %11, 2-0 Reg
-000012F8                           643  * Count/Reg for LSR/LSL refers to shift count, where 0 = shift count of 8, 1-7 
-000012F8                           644  * refers to the respective value when i/r = 0. If i/r = 1, data register in the 
-000012F8                           645  * Count/Reg field specifies the shift count.  
-000012F8                           646  * 
-000012F8                           647  * Count/Reg for ROR/ROL specifies rotate count instead of shift count.
-000012F8                           648  ********************************************************************************
-000012F8                           649  C_GROUP_E:
-000012F8                           650  
-000012F8                           651  CHECK_OP_LSR:
-000012F8                           652  
-000012F8                           653  CHECK_OP_LSL:
-000012F8                           654  
-000012F8                           655  CHECK_OP_ASL:
-000012F8                           656  
-000012F8                           657  CHECK_OP_ASR:
-000012F8                           658  
-000012F8                           659  CHECK_OP_ROL:
-000012F8                           660  
-000012F8                           661  CHECK_OP_ROR:
-000012F8                           662  
-000012F8                           663  * GROUP_F
-000012F8                           664  ********************************************************************************
-000012F8                           665  * Currently no OP codes here are supported.
-000012F8                           666  ********************************************************************************
-000012F8                           667  C_GROUP_F:
-000012F8  4EB9 000012FE            668      JSR INVALID_OP
-000012FE                           669      
-000012FE                           670  * INVALID_OP                     
-000012FE                           671  ********************************************************************************
-000012FE                           672  * Any value that is not covered in the above groups would be considered invalid. 
-000012FE                           673  * The following values in the first nibble would also indicate that the 
-000012FE                           674  * operand codes is already invalid: $7, $A, $F.
-000012FE                           675  * For unsupported OP codes, display DATA $WXYZ   
-000012FE                           676  * THIS WILL NEED TO BE CHANGED TO DISPLAY: 1000 DATA $WXYZ IN THE FUTURE
-000012FE                           677  ********************************************************************************
-000012FE                           678  INVALID_OP:  ; Prints DATA for invalid op
-000012FE  43F9 000013EC            679      LEA P_INVALID_OP,A1
-00001304  103C 000D                680      MOVE.B #13,D0
-00001308  4E4F                     681      TRAP #15
-0000130A  FFFF FFFF                682      SIMHALT
-0000130E                           683  READ_NEXT_INSTRUCTION: ; Needs to read next instruction set {PLACEHOLDER}
-0000130E  FFFF FFFF                684      SIMHALT
-00001312                           685      
-00001312                           686  ********************** PRINTING ROUTINES ****************************************
-00001312                           687  PRINT_OP_ORI:
-00001312  43F9 00001403            688      LEA P_OP_ORI,A1
-00001318                           689      ;MOVE.W P_OP_ORI,(A4)+
-00001318  4EB9 000013E4            690      JSR PRINT_OP
-0000131E  4E75                     691      RTS
-00001320                           692  PRINT_OP_CMPI:
-00001320  4EB8 1176                693      JSR FIND_3_BIT_REG_TO_EA
-00001324  4EB8 1162                694      JSR FIND_2_BIT_SIZE_TO_EA
-00001328  4EB8 1142                695      JSR MOVE_LAST_6_BITS_TO_EA
-0000132C  43F9 00001407            696      LEA P_OP_CMPI,A1
-00001332                           697      ;MOVE.W P_OP_CMPI,(A4)+
-00001332  4EB9 000013E4            698      JSR PRINT_OP
-00001338  4E75                     699      RTS
-0000133A                           700  PRINT_OP_S_BCLR:
-0000133A  4EB8 1142                701          JSR MOVE_LAST_6_BITS_TO_EA
-0000133E  4EB8 1176                702      JSR FIND_3_BIT_REG_TO_EA
-00001342  3CBC 0000                703      MOVE.W #$0,(A6)
-00001346  383C 0000                704      MOVE.W #%000, D4
-0000134A  43F9 0000140C            705      LEA P_OP_S_BCLR,A1
-00001350                           706      ;MOVE.W P_OP_S_BCLR,(A4)+
-00001350  4EB9 000013E4            707      JSR PRINT_OP
-00001356  4E75                     708      RTS
-00001358                           709  PRINT_OP_D_BCLR:
-00001358  4EB8 1142                710      JSR MOVE_LAST_6_BITS_TO_EA
-0000135C  4EB8 1176                711      JSR FIND_3_BIT_REG_TO_EA
-00001360  3CBC 0000                712      MOVE.W #$0,(A6)
-00001364  383C 0006                713      MOVE.W #%110, D4
-00001368  43F9 00001411            714      LEA P_OP_D_BCLR,A1
-0000136E                           715      ;MOVE.W P_OP_D_BCLR,(A4)+
-0000136E  4EB9 000013E4            716      JSR PRINT_OP
-00001374  4E75                     717      RTS    
-00001376                           718  PRINT_OP_MOVEB:
-00001376  4EB8 118A                719      JSR MOVE_AND_MOVEA_PARSE_EA
-0000137A  3CBC 0001                720      MOVE.W #$1,(A6)
-0000137E  43F9 00001416            721      LEA P_OP_MOVEB,A1
-00001384                           722      ;MOVE.W P_OP_MOVEB,(A4)+
-00001384  4EB9 000013E4            723      JSR PRINT_OP
-0000138A  4E75                     724      RTS
-0000138C                           725  PRINT_OP_MOVEA_L:
-0000138C  4EB8 118A                726      JSR MOVE_AND_MOVEA_PARSE_EA
-00001390  3CBC 0002                727      MOVE.W #$2,(A6)
-00001394  43F9 0000141D            728      LEA P_OP_MOVEA_L,A1
-0000139A                           729      ;MOVE.W P_OP_MOVEA_L,(A4)+
-0000139A  4EB9 000013E4            730      JSR PRINT_OP
-000013A0  4E75                     731      RTS
-000013A2                           732  PRINT_OP_MOVE_L:
-000013A2  4EB8 118A                733      JSR MOVE_AND_MOVEA_PARSE_EA
-000013A6  3CBC 0002                734      MOVE.W #$2,(A6)
-000013AA  43F9 00001425            735      LEA P_OP_MOVE_L,A1
-000013B0                           736      ;MOVE.W P_OP_MOVE_L,(A4)+
-000013B0  4EB9 000013E4            737      JSR PRINT_OP
-000013B6  4E75                     738      RTS
-000013B8                           739  PRINT_OP_MOVEA_W:
-000013B8  4EB8 118A                740      JSR MOVE_AND_MOVEA_PARSE_EA
-000013BC  3CBC 0003                741      MOVE.W #$3,(A6)
-000013C0  43F9 0000142C            742      LEA P_OP_MOVEA_W,A1
-000013C6                           743      ;MOVE.W P_OP_MOVEA_W,(A4)+
-000013C6  4EB9 000013E4            744      JSR PRINT_OP
-000013CC  4E75                     745      RTS
-000013CE                           746  PRINT_OP_MOVE_W:
-000013CE  4EB8 118A                747      JSR MOVE_AND_MOVEA_PARSE_EA
-000013D2  3CBC 0003                748      MOVE.W #$3,(A6)
-000013D6  43F9 00001434            749      LEA P_OP_MOVE_W,A1
-000013DC                           750      ;MOVE.W P_OP_MOVE_W,(A4)+
-000013DC  4EB9 000013E4            751      JSR PRINT_OP
-000013E2  4E75                     752      RTS    
-000013E4                           753  PRINT_OP:   ;Prints current op code byte
-000013E4                           754      ;MOVE.W (A4),(A1)       ; NEEDS TO USE G_BUFFER LATER
-000013E4  103C 000D                755      MOVE.B #13,D0
-000013E8  4E4F                     756      TRAP #15
-000013EA  4E75                     757      RTS
-000013EC                           758  ******************* END OF PRINTING ROUTINES ***********************************
-000013EC                           759  
-000013EC                           760  ******************* END OF JMP LABELS ******************************************
-000013EC                           761  
-000013EC                           762  ******************* DATA CONSTANT PRINTS ***************************************
-000013EC                           763  * Formatting is as follows: P_OP_<OPCODE>, where P = Print, OP = Operation,
-000013EC                           764  * <OPCODE> is any valid operand
-000013EC                           765  
-000013EC= 44 41 54 41 00           766  P_INVALID_OP    DC.B    'DATA',0
-000013F1= 46 6F 75 6E 64 20 ...    767  OP_FOUND        DC.B    'Found OP',0 ; this should be taken out later
-000013FA= 2E 42 00                 768  P_SIZE_B        DC.B    '.B',0
-000013FD= 2E 57 00                 769  P_SIZE_W        DC.B    '.W',0
-00001400= 2E 4C 00                 770  P_SIZE_L        DC.B    '.L',0
-00001403= 4F 52 49 00              771  P_OP_ORI        DC.B    'ORI',0
-00001407= 43 4D 50 49 00           772  P_OP_CMPI       DC.B    'CMPI',0
-0000140C= 42 43 4C 52 00           773  P_OP_S_BCLR     DC.B    'BCLR',0
-00001411= 42 43 4C 52 00           774  P_OP_D_BCLR     DC.B    'BCLR',0
-00001416= 4D 4F 56 45 2E 42 00     775  P_OP_MOVEB      DC.B    'MOVE.B',0
-0000141D= 4D 4F 56 45 41 2E ...    776  P_OP_MOVEA_L    DC.B    'MOVEA.L',0
-00001425= 4D 4F 56 45 2E 4C 00     777  P_OP_MOVE_L     DC.B    'MOVE.L',0
-0000142C= 4D 4F 56 45 41 2E ...    778  P_OP_MOVEA_W    DC.B    'MOVEA.W',0
-00001434= 4D 4F 56 45 2E 57 00     779  P_OP_MOVE_W     DC.B    'MOVE.W',0
-0000143B= 4D 4F 56 45 4D 2E ...    780  P_OP_MOVEM_W    DC.B    'MOVEM.W',0
-00001443= 4D 4F 56 45 4D 2E ...    781  P_OP_MOVEM_L    DC.B    'MOVEM.L',0
-0000144B= 4C 45 41 00              782  P_OP_LEA        DC.B    'LEA',0
-0000144F= 4A 53 52 00              783  P_OP_JSR        DC.B    'JSR',0
-00001453= 52 54 53 00              784  P_OP_RTS        DC.B    'RTS',0
-00001457= 4E 45 47 00              785  P_OP_NEG        DC.B    'NEG',0
-0000145B= 53 55 42 51 00           786  P_OP_SUBQ       DC.B    'SUBQ',0
-00001460= 42 52 41 00              787  P_OP_BRA        DC.B    'BRA',0
-00001464= 42 43 53 00              788  P_OP_BCS        DC.B    'BCS',0
-00001468= 42 47 45 00              789  P_OP_BGE        DC.B    'BGE',0
-0000146C= 42 4C 54 00              790  P_OP_BLT        DC.B    'BLT',0
-00001470= 42 56 43 00              791  P_OP_BVC        DC.B    'BVC',0
-00001474= 44 49 56 53 00           792  P_OP_DIVS       DC.B    'DIVS',0
-00001479= 4F 52 00                 793  P_OP_OR         DC.B    'OR',0
-0000147C= 53 55 42 00              794  P_OP_SUB        DC.B    'SUB',0
-00001480= 45 4F 52 00              795  P_OP_EOR        DC.B    'EOR',0
-00001484= 43 4D 50 00              796  P_OP_CMP        DC.B    'CMP',0
-00001488= 4D 55 4C 53 00           797  P_OP_MULS       DC.B    'MULS',0
-0000148D= 41 44 44 41 00           798  P_OP_ADDA       DC.B    'ADDA',0
-00001492= 41 44 44 00              799  P_OP_ADD        DC.B    'ADD',0
-00001496= 4C 53 52 00              800  P_OP_LSR        DC.B    'LSR',0
-0000149A= 4C 53 4C 00              801  P_OP_LSL        DC.B    'LSL',0
-0000149E= 41 53 52 00              802  P_OP_ASR        DC.B    'ASR',0
-000014A2= 41 53 4C 00              803  P_OP_ASL        DC.B    'ASL',0
-000014A6= 52 4F 52 00              804  P_OP_ROR        DC.B    'ROR',0
-000014AA= 52 4F 4C 00              805  P_OP_ROL        DC.B    'ROL',0
-000014AE                           806  ***************** END OF DATA CONSTANT PRINTS ***********************************
-000014AE                           807      END START
+00001500                             8    ORG $1500
+00001500                             9  CUR_OP_CODE DS.W 1  ; Current OP Code Word
+00001600                            10    ORG $1600
+00001600                            11  G_BUFFER_PREP DS.B 80
+00001700                            12    ORG $1700 
+00001700                            13  G_BUFFER    DS.B 80
+00001750                            14   
+00001000                            15    ORG $1000 ; Start at Address $1000
+00001000                            16  START
+00001000                            17  
+00001000                            18   ; Start the op code routine
+00001000                            19   
+00001000                            20     ; LEA P_OP_MOVEA_L,A4    ; Load the message onto A4
+00001000                            21     ; MOVE.L (A4),G_BUFFER   ; Load the value of the message onto the G_BUFFER
+00001000                            22     ; ADDQ.W #4,A4           ; Increment 4 spaces in the address
+00001000                            23     ;This is the right area for pointer now, however when I add here it can't go
+00001000                            24     ;back 
+00001000                            25  *********************************************************************************
+00001000                            26  * Here I'm attempting to 'skip' forward in the address to find the proper location for the string
+00001000                            27  * In the prior command 'LEA P_OP_MOVEA_L,A4' I have loaded 'MOVE' into address space. I cannot move
+00001000                            28  * more than 4 bytes (long) at a single time, so I need to move 'A.L' after which is 3 more bytes
+00001000                            29  * So what I need to do is LOAD 'MOVE' into the address space, skip 4 bytes, then load 'A.L' right
+00001000                            30  * after 'MOVE'. So this would show 'MOVEA.L' in the address space. Which then Denny can load his stuff
+00001000                            31  * after mine.
+00001000                            32  *
+00001000                            33  *In the ideal world this would look something like: P_OP_MOVEA_L then P_OP_A_L then _P_OP_TAB
+00001000                            34  * which would appear as 'MOVEA.L    ' in the address space. This would require 4 increments
+00001000                            35  * after MOVE, then 'A.L' being inserted, then 3 increments (or 7 from start) for the tab
+00001000                            36  ********************************************************************************* 
+00001000                            37      
+00001000                            38      ;ADD.L $FFFF,G_BUFFER_PREP
+00001000                            39      ;LEA P_OP_A_L,A1
+00001000                            40      ;MOVE.L (A4),G_BUFFER_PREP
+00001000                            41      
+00001000                            42  ***************************** Input Tests ********************************************
+00001000                            43      ;MOVE.W #%0000100010000010,CUR_OP_CODE       ;Static BCLR
+00001000                            44      ;MOVE.W #%0000111110001110,CUR_OP_CODE       ;Dynamic BCLR
+00001000                            45      ;MOVE.W #%0000000001000001,CUR_OP_CODE       ;ORI.W D1
+00001000                            46      
+00001000                            47      ;MOVE.W #%0000111110001110,D0              ;Dynamic BCLR
+00001000                            48      ;IN HEX $018E. D7 = 110, D6 = 001, D4 = %110, D5 = 7, (A6) = %0000
+00001000                            49      ;MOVE.W #%0000100010001110,D0              ;Static BCLR
+00001000                            50      ;IN HEX $018E. D7 = 110, D6 = 001, D4 = %110, D5 = 7, (A6) = %0000
+00001000                            51     
+00001000                            52      ;MOVE.W  #$018E,D0                        ;Dynamic BCLR in hex
+00001000                            53      ;MOVE.W  #$02FF,(A6)                         ;INVALID_OP code
+00001000                            54      ;MOVE.W #%0000110001010111,(A6)
+00001000                            55      ;MOVE.W #%0010011001001101,D0                       ;MOVEA  
+00001000                            56       ;MOVE.W #%0010001001001101,CUR_OP_CODE              ;MOVEA.L A5,A1
+00001000                            57      ;MOVE.W CUR_OP_CODE,(A6)
+00001000                            58      ;MOVE.W #$264D
+00001000                            59      ;Expected values:
+00001000                            60      ;D7, DST REG:   011
+00001000                            61      ;D6, DST MODE:  001
+00001000                            62      ;D5, SRC REG:   101
+00001000                            63      ;D4, SRC MODE:  001
+00001000                            64      ;CHECK IF DST MODE IS %111 or SRC MODE IS %111 for MOVE
+00001000                            65      ;(A3), DST TRAIL:  001
+00001000                            66      ;(A2), SRC TRAIL: ONLY FOR MOVE
+00001000                            67      ;MOVE.W #%0010000000001101,(A6)              ;MOVE.L A5,A1
+00001000                            68      ;MOVE.W #%0011011001001101,(A6)              ;MOVEA.W A5,A1
+00001000                            69      ;MOVE.W #%0011000000001101,(A6)              ;MOVE.W A5,A1
+00001000                            70      ;MOVE.W #%0000000001000001,(A6)              ;ORI.W D1
+00001000                            71      ;MOVE.W CUR_OP_CODE,A6                       ;Loading memory space to address register
+00001000                            72      ;MOVE.W CUR_OP_CODE,(A6)                     ;Loading memory value to address value
+00001000                            73   
+00001000                            74      ****GROUP 4 tests****
+00001000                            75      ;MOVE.W #$4E75,D0                                    ;RTS
+00001000                            76      ;MOVE.W #$4E71,D0                                    ;NOP
+00001000                            77      ;MOVE.W #$4415,D0                                        ;NEG.L D5
+00001000                            78      ;MOVE.W #$43CC,D0                                         ;LEA A1,A6
+00001000                            79      ;MOVE.W #%0100100010001110
+00001000                            80      ;MOVE.W #$488E,D0                                        ;MOVEM.W Reg to Mem, A6
+00001000  303C 4C8E                 81      MOVE.W #$4C8E,D0                                         ;MOVEM.W Mem to Reg, A6
+00001004                            82      ;MOVE.W #$4E95,D0                                       ;JSR (A5)               
+00001004                            83  
+00001004                            84     
+00001004                            85     
+00001004                            86  ************************************************************************************
+00001004                            87  LOAD_OP_CODE:
+00001004  31C0 1500                 88      MOVE.W D0,CUR_OP_CODE
+00001008  3CB8 1500                 89      MOVE.W CUR_OP_CODE,(A6)
+0000100C  3016                      90      MOVE.W (A6),D0          ;Load current instruction set into D0
+0000100E  4EB9 00001014             91      JSR OP_JSR_Routine      ;Use the JSR routine to identify the op code
+00001014                            92  *-----------------------------------------------------------
+00001014                            93  *First Nibble Values (15-12)
+00001014                            94  *Value                  Operations
+00001014                            95  *$0                     GROUP_0: ORI,BCLR (static and dynamic),CMPI
+00001014                            96  *$1                     GROUP_1: MOVE.B                   
+00001014                            97  *$2                     GROUP_2: MOVE.L, MOVEA.L
+00001014                            98  *$3                     GROUP_3: MOVE.W, MOVEA.W
+00001014                            99  *$4                     GROUP_4: LEA,JSR,RTS,NEG,MOVEM
+00001014                           100  *$5                     GROUP_5: SUBQ
+00001014                           101  *$6                     GROUP_6: Bcc(BCS,BGE,BLT,BVC), BRA
+00001014                           102  *$7                     GROUP_7: INVALID_OP
+00001014                           103  *$8                     GROUP_8: DIVS, OR
+00001014                           104  *$9                     GROUP_7: SUB
+00001014                           105  *$A                     GROUP_A: INVALID_OP
+00001014                           106  *$B                     GROUP_B: EOR, CMP
+00001014                           107  *$C                     GROUP_C: MULS
+00001014                           108  *$D                     GROUP_D: ADD, ADDA
+00001014                           109  *$E                     GROUP_E: LSR, LSL, ASR, ASL, ROL, ROR
+00001014                           110  *$F                     GROUP_F: INVALID_OP
+00001014                           111  
+00001014                           112  
+00001014                           113  * OP_JSR_Routine
+00001014                           114  **********************************************************************************
+00001014                           115  * Description: Catalog all supported OP codes into groupings based on their hex
+00001014                           116  * values. Sort the supported OP codes by looking at the first nibble for their
+00001014                           117  * grouping value. Call underlying subroutines for further identification of the
+00001014                           118  * op code.
+00001014                           119  *
+00001014                           120  * Registers used: A6,D0,D1 
+00001014                           121  *
+00001014                           122  * Precondition: Instruction set (size Word) has been loaded in the appropriate
+00001014                           123  * address to be parsed and read.
+00001014                           124  
+00001014                           125  * Postcondition: OP code has been identified as either valid or invalid. If it is
+00001014                           126  * valid, it is stored into A6 and EA parsing methods are called to pass needed
+00001014                           127  * information to EA. If invalid, DATA output will be utilized to indicate so.
+00001014                           128  **********************************************************************************
+00001014                           129  * These valid operand codes refer to the basic supported operand codes
+00001014                           130  * Groups refer to the first nibble value that is supported by the operand
+00001014                           131  OP_JSR_Routine:
+00001014  48E7 C000                132      MOVEM.L D0-D1, -(SP)           ;Backup registers D0 and D1 by pushing it on the Stack
+00001018  720C                     133      MOVE.L #12, D1                 ;Prepare bit shift left for D1   
+0000101A  E2A8                     134      LSR.L   D1,D0                  ;Shift 12 bits to only get first 4 bits for D0
+0000101C                           135  
+0000101C                           136  GROUP_0:                ;$0| ORI, BCLR (static and dynamic), CMPI                  
+0000101C  B03C 0000                137      CMP.B   #$0,D0                 ;Compare first nibble
+00001020  6600 000C                138      BNE     GROUP_1                ;If first nibble value isn't $0, branch to next
+00001024  4EB9 000011E4            139      JSR     C_GROUP_0              ;Jump to group 0 checking if nibble value is $0
+0000102A  6000 010C                140      BRA     OP_JSR_DONE            ;Finish subroutine once checking is finished
+0000102E                           141      
+0000102E                           142  GROUP_1:                ;$1| MOVE.B
+0000102E  B03C 0001                143      CMP.B   #$1,D0                 ;Compare first nibble
+00001032  6600 000C                144      BNE     GROUP_2                ;If first nibble value isn't $1, branch to next
+00001036  4EB9 0000125A            145      JSR     C_GROUP_1              ;Jump to group 1 checking if nibble value is $1
+0000103C  6000 00FA                146      BRA     OP_JSR_DONE            ;Finish subroutine once checking is finished
+00001040                           147  
+00001040                           148  GROUP_2:                ;$2| MOVE.L, MOVEA.L
+00001040  B03C 0002                149      CMP.B   #$2,D0                 ;Compare first nibble
+00001044  6600 000C                150      BNE     GROUP_3                ;If first nibble value isn't $2, branch to next
+00001048  4EB9 00001270            151      JSR     C_GROUP_2              ;Jump to group 2 checking if nibble value is $2
+0000104E  6000 00E8                152      BRA     OP_JSR_DONE            ;Finish subroutine once checking is finished
+00001052                           153  
+00001052                           154  GROUP_3:                ;$3| MOVE.W, MOVEA.W
+00001052  B03C 0003                155      CMP.B   #$3,D0                 ;Compare first nibble
+00001056  6600 000C                156      BNE     GROUP_4                ;If first nibble value isn't $3, branch to next
+0000105A  4EB9 000012B6            157      JSR     C_GROUP_3              ;Jump to group 3 checking if nibble value is $3
+00001060  6000 00D6                158      BRA     OP_JSR_DONE            ;Finish subroutine once checking is finished
+00001064                           159  
+00001064                           160  GROUP_4:                ;$4| LEA, JSR, RTS, NEG, MOVEM
+00001064  B03C 0004                161      CMP.B   #$4,D0                 ;Compare first nibble
+00001068  6600 000C                162      BNE     GROUP_5                ;If first nibble value isn't $4, branch to next
+0000106C  4EB9 00001300            163      JSR     C_GROUP_4              ;Jump to group 4 checking if nibble value is $4
+00001072  6000 00C4                164      BRA     OP_JSR_DONE            ;Finish subroutine once checking is finished
+00001076                           165  
+00001076                           166  
+00001076                           167  GROUP_5:                ;$5| SUBQ
+00001076  B03C 0005                168      CMP.B   #$5,D0                 ;Compare first nibble
+0000107A  6600 000C                169      BNE     GROUP_6                ;If first nibble value isn't $5, branch to next
+0000107E  4EB9 00001370            170      JSR     C_GROUP_5              ;Jump to group 5 checking if nibble value is $5
+00001084  6000 00B2                171      BRA     OP_JSR_DONE            ;Finish subroutine once checking is finished
+00001088                           172  
+00001088                           173  
+00001088                           174  GROUP_6:                ;$6| Bcc (BCS,BGE,BLT,BVC) BRA
+00001088  B03C 0006                175      CMP.B   #$6,D0                 ;Compare first nibble
+0000108C  6600 000C                176      BNE     GROUP_7                ;If first nibble value isn't $6, branch to next
+00001090  4EB9 00001370            177      JSR     C_GROUP_6              ;Jump to group 6 checking if nibble value is $6
+00001096  6000 00A0                178      BRA     OP_JSR_DONE            ;Finish subroutine once checking is finished
+0000109A                           179  
+0000109A                           180  
+0000109A                           181  GROUP_7:                ;$7| Display: DATA, $WXYZ (Unsupported)
+0000109A  B03C 0007                182      CMP.B   #$7,D0                 ;Compare first nibble
+0000109E  6600 000C                183      BNE     GROUP_8                ;If first nibble value isn't $7, branch to next
+000010A2  4EB9 00001370            184      JSR     C_GROUP_7              ;Jump to group 7 checking if nibble value is $7
+000010A8  6000 008E                185      BRA     OP_JSR_DONE            ;Finish subroutine once checking is finished
+000010AC                           186  
+000010AC                           187  
+000010AC                           188  GROUP_8:                ;$8| DIVS, OR
+000010AC  B03C 0008                189      CMP.B   #$8,D0                 ;Compare first nibble
+000010B0  6600 000C                190      BNE     GROUP_9                ;If first nibble value isn't $8, branch to next
+000010B4  4EB9 00001376            191      JSR     C_GROUP_8              ;Jump to group 8 checking if nibble value is $8
+000010BA  6000 007C                192      BRA     OP_JSR_DONE            ;Finish subroutine once checking is finished
+000010BE                           193  
+000010BE                           194  
+000010BE                           195  GROUP_9:                ;$9| SUB
+000010BE  B03C 0009                196      CMP.B   #$9,D0                 ;Compare first nibble
+000010C2  6600 000C                197      BNE     GROUP_A                ;If first nibble value isn't $9, branch to next
+000010C6  4EB9 00001376            198      JSR     C_GROUP_9              ;Jump to group 9 checking if nibble value is $9
+000010CC  6000 006A                199      BRA     OP_JSR_DONE            ;Finish subroutine once checking is finished
+000010D0                           200  
+000010D0                           201  
+000010D0                           202  GROUP_A:                ;$A| Display: DATA, $WXYZ (Unsupported)
+000010D0  B03C 000A                203      CMP.B   #$A,D0                 ;Compare first nibble
+000010D4  6600 000C                204      BNE     GROUP_B                ;If first nibble value isn't $A, branch to next
+000010D8  4EB9 00001376            205      JSR     C_GROUP_A              ;Jump to group A checking if nibble value is $A
+000010DE  6000 0058                206      BRA     OP_JSR_DONE            ;Finish subroutine once checking is finished
+000010E2                           207  
+000010E2                           208  
+000010E2                           209  GROUP_B:                ;$B| EOR, CMP
+000010E2  B03C 000B                210      CMP.B   #$B,D0                 ;Compare first nibble
+000010E6  6600 000C                211      BNE     GROUP_C                ;If first nibble value isn't $B, branch to next
+000010EA  4EB9 0000137C            212      JSR     C_GROUP_B              ;Jump to group B checking if nibble value is $B
+000010F0  6000 0046                213      BRA     OP_JSR_DONE            ;Finish subroutine once checking is finished
+000010F4                           214  
+000010F4                           215  
+000010F4                           216  GROUP_C:                ;$C| MULS
+000010F4  B03C 000C                217      CMP.B   #$C,D0                 ;Compare first nibble
+000010F8  6600 000C                218      BNE     GROUP_D                ;If first nibble value isn't $C, branch to next
+000010FC  4EB9 0000137C            219      JSR     C_GROUP_C              ;Jump to group C checking if nibble value is $C
+00001102  6000 0034                220      BRA     OP_JSR_DONE            ;Finish subroutine once checking is finished
+00001106                           221  
+00001106                           222  
+00001106                           223  GROUP_D:                 ;$D| ADD, ADDA
+00001106  B03C 000D                224      CMP.B   #$D,D0                 ;Compare first nibble
+0000110A  6600 000C                225      BNE     GROUP_E                ;If first nibble value isn't $D, branch to next
+0000110E  4EB9 0000137C            226      JSR     C_GROUP_D              ;Jump to group D checking if nibble value is $D
+00001114  6000 0022                227      BRA     OP_JSR_DONE            ;Finish subroutine once checking is finished
+00001118                           228  
+00001118                           229  
+00001118                           230  GROUP_E:                ;$E| LSR, LSL, ASR, ASL, ROL, ROR
+00001118  B03C 000E                231      CMP.B   #$E,D0                 ;Compare first nibble
+0000111C  6600 000C                232      BNE     GROUP_F                ;If first nibble value isn't $E, branch to next
+00001120  4EB9 0000137C            233      JSR     C_GROUP_E              ;Jump to group E checking if nibble value is $E
+00001126  6000 0010                234      BRA     OP_JSR_DONE            ;Finish subroutine once checking is finished
+0000112A                           235  
+0000112A                           236  
+0000112A                           237  GROUP_F:                ;$F| Display: DATA, $WXYZ (Unsupported)
+0000112A  B03C 000F                238      CMP.B   #$F,D0                 ;Compare first nibble
+0000112E  4EB9 0000137C            239      JSR     C_GROUP_F              ;Jump to group F checking if nibble value is $F
+00001134  6000 0002                240      BRA     OP_JSR_DONE            ;Finish subroutine once checking is finished
+00001138                           241  
+00001138                           242  
+00001138                           243  OP_JSR_DONE:
+00001138  4CDF 0003                244           MOVEM.L (SP)+,D0-D1       ;Recover register D0
+0000113C  4EF9 00001392            245           JMP READ_NEXT_INSTRUCTION
+00001142                           246  **********************************************************************************
+00001142                           247  
+00001142                           248  ********** EA Parsing ************************************************************
+00001142                           249  
+00001142                           250  * MOVE_LAST_6_BITS_TO_EA
+00001142                           251  **********************************************************************************
+00001142                           252  * Description: For OP codes with the last 6 bits specified as EA Mode and EA Reg,
+00001142                           253  * the last 6 bits will be parsed and moved into the appropriate registers.
+00001142                           254  *
+00001142                           255  * Registers used: A6,D0,D1,D6,D7 
+00001142                           256  
+00001142                           257  * Precondition: OP code has been identified with only the last 6 bits for EA,
+00001142                           258  * current instruction set is stored into A6.
+00001142                           259  
+00001142                           260  * Postcondition: Last 6 bits of instruction bit has been isolated and stored. Bits
+00001142                           261  * for EA Mode have been stored in D7, Bits for EA Reg been stored in D6.
+00001142                           262  **********************************************************************************
+00001142                           263  MOVE_LAST_6_BITS_TO_EA:      ;Move last 6 bits from EA field to relevant registers
+00001142                           264     ; MOVEM.L D0-D7/A6, -(SP)  ;Save all changed registers
+00001142  3016                     265      MOVE.W (A6),D0           ;Move current OP code into D0
+00001144  323C 000A                266      MOVE.W  #10,D1           ;Prepare 10 bit shift to D1
+00001148  E368                     267      LSL.W   D1,D0            ;Truncate to find the last 6 bits
+0000114A  E268                     268      LSR.W   D1,D0            ;Shift back to get the proper 6 bits
+0000114C  3E00                     269      MOVE.W  D0,D7            ;Move last 6 bits into D7
+0000114E  323C 0003                270      MOVE.W  #3,D1            ;Prepare 3 bit shift into D1
+00001152  E26F                     271      LSR.W   D1,D7            ;Shift 3 bits off D7 to obtain EA Mode
+00001154  3C07                     272      MOVE.W  D7,D6            ;Move the 'upper' 3 bits into D6
+00001156  323C 000D                273      MOVE.W  #13,D1           ;Prepare 13 bit shift into D1
+0000115A  E368                     274      LSL.W   D1,D0            ;Shift D0 left 13 bits to reposition current 3 bits
+0000115C  E268                     275      LSR.W   D1,D0            ;Shift D0 right 13 bits to reposition current 3 bits
+0000115E  3E00                     276      MOVE.W  D0,D7            ;Move the 'lower' 3 bits into D7
+00001160                           277     ; MOVEM.L (SP)+,D0-D7/A6   ;Restore registers
+00001160  4E75                     278      RTS                      ;Return to stack
+00001162                           279      
+00001162                           280  * FIND_2_BIT_SIZE_TO_EA
+00001162                           281  **********************************************************************************
+00001162                           282  * Description: For OP codes with 2 bit size fields, the 2 relevant bits (7-6) will 
+00001162                           283  * be parsed and moved to the appropriate registers.
+00001162                           284  *
+00001162                           285  * Registers used: A6,D0,D1,D5
+00001162                           286  *
+00001162                           287  * Precondition: OP code has been identified with 2 size bit field for EA, current
+00001162                           288  * instruction set for OP code is stored in to A6.
+00001162                           289  *
+00001162                           290  * Postcondition: 2 bit size field has been isolated and stored into D5.
+00001162                           291  **********************************************************************************
+00001162                           292  FIND_2_BIT_SIZE_TO_EA:      ;Move the 2 bit size field relevant register
+00001162                           293     ; MOVEM.L  D0-D5/A6,-(SP) ;Save all changed registers
+00001162  3016                     294      MOVE.W   (A6),D0        ;Move current OP code into D0
+00001164  323C 0008                295      MOVE.W   #8,D1          ;Prepare 8 bit shift to D1
+00001168  E368                     296      LSL.W    D1,D0          ;Truncate to find the 2 size bits
+0000116A  E268                     297      LSR.W    D1,D0          ;Reposition the bits
+0000116C  323C 0006                298      MOVE.W   #6,D1          ;Prepare 6 bit shift to D1
+00001170  E268                     299      LSR.W    D1,D0          ;Truncate to shift 2 bits to a byte
+00001172  3800                     300      MOVE.W   D0,D4          ;Move 2 size bits into D5
+00001174                           301    ;  MOVEM.L (SP)+,D0-D5/A6  ;Restore registers
+00001174  4E75                     302      RTS                     ;Return to stack
+00001176                           303  **********************************************************************************
+00001176                           304  
+00001176                           305  * FIND_3_BIT_REG_TO_EA
+00001176                           306  **********************************************************************************
+00001176                           307  * Description: OP codes with a dynamic 3 bit register in bits 11-9 will be parsed
+00001176                           308  * and have those 3 bits isolated and moved to the appropriate registers.
+00001176                           309  *
+00001176                           310  * Registers used: A6,D0,D1,D5
+00001176                           311  *
+00001176                           312  * Precondition: OP code has been identified with a dynamic 3 bit register in bits
+00001176                           313  * 11-9.
+00001176                           314  *
+00001176                           315  * Postcondition: 3 bit dynamic register has been isolated and stored into D4.
+00001176                           316  **********************************************************************************
+00001176                           317  FIND_3_BIT_REG_TO_EA:       ;Move the 3 bit dynamic register bits to proper register
+00001176                           318     ; MOVEM.L  D0-D5/A6,-(SP) ;Save all changed registers
+00001176  3016                     319      MOVE.W   (A6),D0        ;Move current OP code into D0
+00001178  323C 0004                320      MOVE.W   #4,D1          ;Prepare 4 bit shift to D1
+0000117C  E368                     321      LSL.W    D1,D0          ;Truncate to find the 2 size bits
+0000117E  E268                     322      LSR.W    D1,D0          ;Reposition the bits
+00001180  323C 0009                323      MOVE.W   #9,D1          ;Prepare 9 bit shift to D1
+00001184  E268                     324      LSR.W    D1,D0          ;Truncate to shift 3 bits to a byte
+00001186  3A00                     325      MOVE.W   D0,D5          ;Move 3 register bits into D4
+00001188                           326     ; MOVEM.L (SP)+,D0-D5/A6  ;Restore registers
+00001188  4E75                     327      RTS                     ;Return to stack
+0000118A                           328  **********************************************************************************
+0000118A                           329  
+0000118A                           330  * MOVE_AND_MOVEA_PARSE_EA
+0000118A                           331  **********************************************************************************
+0000118A                           332  * Description: Special parsing for the SRC and DST Mode/Reg for MOVE/MOVE
+0000118A                           333  *
+0000118A                           334  * Registers used: A6,D0,D1,D7,D6,D5,D4
+0000118A                           335  *
+0000118A                           336  * Precondition: OP code has been identified with either MOVE or MOVEA
+0000118A                           337  *
+0000118A                           338  * Postcondition: Store all relevant EA bits into associated register.
+0000118A                           339  **********************************************************************************
+0000118A                           340  MOVE_AND_MOVEA_PARSE_EA:       ;Move the 3 bit dynamic register bits to proper register
+0000118A                           341     ; MOVEM.L D0-D7/A6, -(SP)  ;Save all changed registers
+0000118A  3038 1500                342      MOVE.W CUR_OP_CODE,D0           ;Move current OP code into D0
+0000118E  323C 000A                343      MOVE.W  #10,D1           ;Prepare 10 bit shift to D1
+00001192  E368                     344      LSL.W   D1,D0            ;Truncate to find the last 6 bits
+00001194  E268                     345      LSR.W   D1,D0            ;Shift back to get the proper 6 bits
+00001196  3E00                     346      MOVE.W  D0,D7            ;Move last 6 bits into D7, SRC REG MODE
+00001198  323C 0003                347      MOVE.W  #3,D1            ;Prepare 3 bit shift into D1
+0000119C  E26F                     348      LSR.W   D1,D7            ;Shift 3 bits off D7 to obtain EA Mode
+0000119E  3A07                     349      MOVE.W  D7,D5            ;Move the 'upper' 3 bits into D6
+000011A0  323C 000D                350      MOVE.W  #13,D1           ;Prepare 13 bit shift into D1
+000011A4  E368                     351      LSL.W   D1,D0            ;Shift D0 left 13 bits to reposition current 3 bits
+000011A6  E268                     352      LSR.W   D1,D0            ;Shift D0 right 13 bits to reposition current 3 bits
+000011A8  3800                     353      MOVE.W  D0,D4            ;Move the 'lower' 3 bits into D7
+000011AA                           354      **************MOVING SOURCE*********** TO BE DONE LATER
+000011AA                           355      ; MOVE.W #%0011 011 001 001 101,(A6)              ;MOVEA.W A5,A3
+000011AA                           356      ; MOVE.W #%0010 011 001 001 101,D0                ;MOVEA.L A5,A3
+000011AA                           357       ;Expected values:
+000011AA                           358      ;D7, DST REG:   011
+000011AA                           359      ;D6, DST MODE:  001
+000011AA                           360      ;D5, SRC MODE:  001
+000011AA                           361      ;D4, SRC REG:   101
+000011AA                           362      ;00011001
+000011AA  3038 1500                363      MOVE.W CUR_OP_CODE,D0     ;Move current OP code into D0     
+000011AE  323C 0004                364      MOVE.W  #4,D1             ;Prepare 4 bit shift to D1
+000011B2  E368                     365      LSL.W   D1,D0             ;Truncate to find bits 11-6
+000011B4  E268                     366      LSR.W   D1,D0             ;Reposition bits
+000011B6  323C 0006                367      MOVE.W  #6,D1             ;Prepare 6 bit shift to D1
+000011BA  E268                     368      LSR.W   D1,D0             ;Truncate the SRC Reg/Mode bits
+000011BC  323C 0003                369      MOVE.W  #3,D1             ;Prepare a 3 bit shift to D1 for DST Reg/Mode
+000011C0  3C00                     370      MOVE.W  D0,D6             ;Copy over the current 6 bits to D6
+000011C2  E268                     371      LSR.W   D1,D0             ;Truncate DST Mode  
+000011C4  3E00                     372      MOVE.W  D0,D7             ;Move DST Reg to D7
+000011C6  323C 000D                373      MOVE.W  #13,D1             
+000011CA  E36E                     374      LSL.W   D1,D6             ;Truncate 13 bits in D6
+000011CC  E26E                     375      LSR.W   D1,D6             ;Reposition D6
+000011CE                           376                                ;D6 now contains the DST Reg
+000011CE                           377     ; MOVEM.L (SP)+,D0-D7/A6   ;Restore registers
+000011CE  4E75                     378      RTS                     ;Return to stack
+000011D0                           379  **********************************************************************************
+000011D0                           380  
+000011D0                           381  *FIND_TRAILING_BITS_TO_EA
+000011D0                           382  **********************************************************************************
+000011D0                           383  FIND_TRAILING_BITS_TO_EA:       ;Move the 3 bit dynamic register bits to proper register
+000011D0                           384     ; MOVEM.L  D0-D5/A6,-(SP) ;Save all changed registers
+000011D0  3016                     385      MOVE.W   (A6),D0        ;Move current OP code into D0
+000011D2  323C 0007                386      MOVE.W   #7,D1          ;Prepare 4 bit shift to D1
+000011D6  E368                     387      LSL.W    D1,D0          ;Truncate to find the 2 size bits
+000011D8  E268                     388      LSR.W    D1,D0          ;Reposition the bits
+000011DA  323C 0006                389      MOVE.W   #6,D1          ;Prepare 9 bit shift to D1
+000011DE  E268                     390      LSR.W    D1,D0          ;Truncate to shift 3 bits to a byte
+000011E0  3680                     391      MOVE.W   D0,(A3)          ;Move 3 register bits into D4
+000011E2                           392     ; MOVEM.L (SP)+,D0-D5/A6  ;Restore registers
+000011E2  4E75                     393      RTS                    ;Return to stack
+000011E4                           394  **********************************************************************************
+000011E4                           395  
+000011E4                           396  
+000011E4                           397  
+000011E4                           398  
+000011E4                           399  
+000011E4                           400  ********** End of EA Parsing *****************************************************
+000011E4                           401  
+000011E4                           402  *******************JMP LABELS ****************************************************
+000011E4                           403  * Labelling for group codes will be in the following format
+000011E4                           404  
+000011E4                           405  * <JMP Labelname>
+000011E4                           406  ********************************************************************************
+000011E4                           407  * Checking List Order (If more than one value)
+000011E4                           408  * Operand1 - $<nibble value>, a-b <specifier>, c-d <specifier> ...
+000011E4                           409  * Operand2 - $<nibble value>, a-b <specifier>, c-d <specifier> ...
+000011E4                           410  
+000011E4                           411  * Where a-b will refer to the bit corresponding bit value in the instruction
+000011E4                           412  * format, and a specifier will be attached such as Size, EA Mode, SRC Reg, etc
+000011E4                           413  * to clarify what a specific bit range means.
+000011E4                           414  * Checking order refers to what order the checks will be performed in. 
+000011E4                           415  * Any other code outside of the listed ones will be INVALID_OP.
+000011E4                           416  ********************************************************************************
+000011E4                           417  
+000011E4                           418  ********************************************************************************
+000011E4                           419  * Global Field Descriptions
+000011E4                           420  * Size Field: Byte = 00 Word = 01 Long = 10
+000011E4                           421  * EA Mode: Refer to EA Address Modes
+000011E4                           422  * EA Reg: 3-bit input that is mapped to the respective binary value
+000011E4                           423  ********************************************************************************
+000011E4                           424  
+000011E4                           425  * GROUP_0                      
+000011E4                           426  ********************************************************************************
+000011E4                           427  * Description: Checks for the following listed OP codes to be present or not
+000011E4                           428  *
+000011E4                           429  * ORI: $00, 7-6 Size, 5-3 EA Mode, 2-0 EA Reg
+000011E4                           430  * CMPI: $0C, 7-6 Size, 5-3 EA Mode, 2-0 EA Reg
+000011E4                           431  * Dynamic BCLR: $0, 11-9 Register, 8-6 %110, 5-3 EA Mode, 2-0 EA Reg
+000011E4                           432  * Static BCLR: $01, 7-6 10, 5-3 EA Mode, 2-0 EA Reg
+000011E4                           433  *
+000011E4                           434  * Precondition: First nibble has been identified as $0
+000011E4                           435  * Postcondition: Parses proper OP code with a nibble value of $0 or finds an
+000011E4                           436  * invalid OP code. After a successful parse loading for EA values will be done
+000011E4                           437  * through a subroutine.
+000011E4                           438  ********************************************************************************
+000011E4                           439  C_GROUP_0:
+000011E4  48E7 C000                440      MOVEM.L D0-D1, -(SP) ; Backup registers
+000011E8                           441      
+000011E8                           442  CHECK_OP_ORI:
+000011E8  3038 1500                443      MOVE.W  CUR_OP_CODE,D0         ;Move current instruction set into D
+000011EC  0240 FF00                444      ANDI.W  #$FF00,D0       ;Mask relevant bits to D0
+000011F0  B07C 0000                445      CMP.W   #$0000,D0       ;Compare the appropriate masked bits     
+000011F4  6600 0010                446      BNE     CHECK_OP_CMPI   ;Branch to next comparison if not equal
+000011F8  4EB9 000013BC            447      JSR     PRINT_OP_ORI    ;Print the OP code if equal
+000011FE  4EB8 1162                448      JSR     FIND_2_BIT_SIZE_TO_EA         
+00001202  6000 0054                449      BRA     CG0_C           ;Finish routine
+00001206                           450  CHECK_OP_CMPI:
+00001206  3038 1500                451      MOVE.W  CUR_OP_CODE,D0         ;Move current instruction set into D
+0000120A  0240 FF00                452      ANDI.W  #$FF00,D0       ;Mask relevant bits to D0
+0000120E  B07C 0C00                453      CMP.W   #$0C00,D0       ;Compare the appropriate masked bits   
+00001212  6600 000C                454      BNE     CHECK_OP_S_BCLR ;Branch to next comparison if not equal       
+00001216  4EB9 000013CA            455      JSR     PRINT_OP_CMPI   ;Print the OP code if equal
+0000121C  6000 003A                456      BRA     CG0_C           ;Finish routine
+00001220                           457  CHECK_OP_S_BCLR:
+00001220  3038 1500                458      MOVE.W  CUR_OP_CODE,D0         ;Move current instruction set into D
+00001224  0240 FF00                459      ANDI.W  #$FF00,D0       ;Mask relevant bits to D0
+00001228  B07C 0800                460      CMP.W   #$0800,D0       ;Compare the appropriate masked bits
+0000122C  6600 000C                461      BNE     CHECK_OP_D_BCLR ;Branch to next comparison if not equal
+00001230  4EB9 000013E4            462      JSR     PRINT_OP_S_BCLR ;Print the OP code if equal
+00001236                           463      ;MOVEM.L (SP)+,D6-D7     ;POP STACK
+00001236  6000 0020                464      BRA     CG0_C           ;Finish routine
+0000123A                           465  CHECK_OP_D_BCLR:
+0000123A  3038 1500                466      MOVE.W  CUR_OP_CODE,D0                ;Move current instruction set into D
+0000123E  0240 0180                467      ANDI.W  #%0000000110000000,D0 ;Do a direct binary bitmask to see which bits are needed
+00001242  B07C 0180                468      CMP.W   #%0000000110000000,D0 ;Compare the expected binary value
+00001246  6600 000C                469      BNE     CG0_F                 ;If not equal this must be an invalid OP code
+0000124A  4EB9 00001402            470      JSR     PRINT_OP_D_BCLR       ;Print the OP code if equal
+00001250  6000 0006                471      BRA     CG0_C                ;Finish routine
+00001254                           472  CG0_F:                       ;Checks have been finished, invalid OP code has been found
+00001254  6000 012C                473      BRA INVALID_OP    
+00001258                           474  CG0_C:                       ;Checks have been finished,a valid OP code has been found
+00001258  4E75                     475      RTS                      ;Return to stack
+0000125A                           476      
+0000125A                           477  * GROUP_1                      
+0000125A                           478  ********************************************************************************
+0000125A                           479  * MOVE.B: $1, 11-9 DST Reg, 8-6 DST Mode, 5-3 SRC Mode, 2-0 SRC Reg
+0000125A                           480  ********************************************************************************
+0000125A                           481  C_GROUP_1:
+0000125A                           482  
+0000125A                           483  CHECK_OP_MOVE_B:
+0000125A  3038 1500                484      MOVE.W  CUR_OP_CODE,D0                  ;Move current instruction set into D0          
+0000125E  0240 FF00                485      ANDI.W  #$FF00,D0               ;Mask relevant bits to D0
+00001262  B07C 1000                486      CMP.W #$1000,D0                 ;Compare the appropriate masked bits 
+00001266  6600 011A                487      BNE INVALID_OP                  ;Invalid OP code has been found
+0000126A  6700 01B4                488      BEQ PRINT_OP_MOVEB              ;Print the OP code if equal
+0000126E  4E75                     489      RTS                             ;Return to stack
+00001270                           490  * GROUP_2
+00001270                           491  ********************************************************************************
+00001270                           492  * MOVEA.L: $2, 11-9 DST Reg, 8-6 %001, 5-3 SRC Mode, 2-0 SRC Reg
+00001270                           493  * MOVE.L: $2, 11-9 DST Reg, 8-6 DST Mode, 5-3 SRC Mode, 2-0 SRC Reg
+00001270                           494  ********************************************************************************
+00001270                           495  C_GROUP_2:
+00001270                           496  
+00001270                           497  CHECK_OP_MOVEA_L:
+00001270  3038 1500                498      MOVE.W CUR_OP_CODE,D0                  ;Move current instruction set into D0  
+00001274  0240 FF00                499      ANDI.W #$FF00,D0                ;Mask relevant bits to D0
+00001278  B07C 2000                500      CMP.W #$2000,D0                 ;Compare the appropriate masked bits
+0000127C  6000 0002                501      BRA FIND_MOVEA_L_DIFFERENCE     ;Branch always to check 
+00001280                           502  
+00001280                           503      
+00001280                           504  FIND_MOVEA_L_DIFFERENCE:    ;Finds difference between MOVEA and MOVE
+00001280  3038 1500                505      MOVE.W   CUR_OP_CODE,D0        ;Move current OP code into D0
+00001284  323C 0007                506      MOVE.W   #7,D1          ;Prepare 7 bit shift to D1
+00001288  E368                     507      LSL.W    D1,D0          ;Truncate to find the 3 address mode bits
+0000128A  E268                     508      LSR.W    D1,D0          ;Reposition the bits
+0000128C  323C 0006                509      MOVE.W   #6,D1          ;Prepare 6 bit shift to D1
+00001290  E268                     510      LSR.W    D1,D0          ;Truncate to shift 3 bits to a register
+00001292  3C00                     511      MOVE.W   D0,D6          ;Move 3 address mode bits into D6
+00001294  BC7C 0001                512      CMP.W   #$1,D6          ;Check if the address mode value is MOVEA
+00001298  6600 0006                513      BNE     CHECK_OP_MOVE_L  ;Branch if not equal to check MOVE
+0000129C  6700 0198                514      BEQ     PRINT_OP_MOVEA_L ;Print out the MOVEA address 
+000012A0                           515      
+000012A0                           516  CHECK_OP_MOVE_L:
+000012A0  3038 1500                517      MOVE.W CUR_OP_CODE,D0
+000012A4  0240 FF00                518      ANDI.W #$FF00,D0
+000012A8  B07C 2000                519      CMP.W #$2000,D0
+000012AC  6600 00D4                520      BNE INVALID_OP
+000012B0  6700 019A                521      BEQ PRINT_OP_MOVE_L
+000012B4  4E75                     522      RTS
+000012B6                           523      
+000012B6                           524  * GROUP_3
+000012B6                           525  ********************************************************************************
+000012B6                           526  * MOVEA.W: $3, 11-9 DST Reg, 8-6 %001, 5-3 SRC Mode, 2-0 SRC Reg
+000012B6                           527  * MOVE.W: $3, 11-9 DST Reg, 8-6 DST Mode, 5-3 SRC Mode, 2-0 SRC Reg
+000012B6                           528  ********************************************************************************
+000012B6                           529  C_GROUP_3:
+000012B6                           530  
+000012B6                           531  CHECK_OP_MOVEA_W:
+000012B6  3038 1500                532      MOVE.W CUR_OP_CODE,D0
+000012BA  0240 FF00                533      ANDI.W #$FF00,D0
+000012BE  B07C 3000                534      CMP.W #$3000,D0
+000012C2  6000 0002                535      BRA FIND_MOVEA_W_DIFFERENCE
+000012C6                           536  
+000012C6                           537      
+000012C6                           538  FIND_MOVEA_W_DIFFERENCE:      ;Finds difference between MOVEA and MOVE
+000012C6  3038 1500                539      MOVE.W   CUR_OP_CODE,D0        ;Move current OP code into D0
+000012CA  323C 0007                540      MOVE.W   #7,D1          ;Prepare 7 bit shift to D1
+000012CE  E368                     541      LSL.W    D1,D0          ;Truncate to find the 3 address mode bits
+000012D0  E268                     542      LSR.W    D1,D0          ;Reposition the bits
+000012D2  323C 0006                543      MOVE.W   #6,D1          ;Prepare 6 bit shift to D1
+000012D6  E268                     544      LSR.W    D1,D0          ;Truncate to shift 3 bits to a register
+000012D8  3C00                     545      MOVE.W   D0,D6          ;Move 3 address mode bits into D6
+000012DA  BC7C 0001                546      CMP.W   #$1,D6          ;Check if the address mode value is MOVEA
+000012DE  4EB8 118A                547      JSR     MOVE_AND_MOVEA_PARSE_EA
+000012E2  6600 0006                548      BNE     CHECK_OP_MOVE_W 
+000012E6  6700 017A                549      BEQ     PRINT_OP_MOVEA_W  
+000012EA                           550      
+000012EA                           551  CHECK_OP_MOVE_W:
+000012EA  3038 1500                552      MOVE.W CUR_OP_CODE,D0
+000012EE  0240 FF00                553      ANDI.W #$FF00,D0
+000012F2  B07C 3000                554      CMP.W #$3000,D0
+000012F6  6600 008A                555      BNE INVALID_OP
+000012FA  6700 017C                556      BEQ PRINT_OP_MOVE_W
+000012FE  4E75                     557      RTS
+00001300                           558  
+00001300                           559  * GROUP_4
+00001300                           560  ********************************************************************************
+00001300                           561  * LEA: $4, 11-9 Reg, 8-6 %111, 5-3 EA Mode, 2-0 EA Reg
+00001300                           562  * JSR: $4E, 7-6 %10, 5-3 EA Mode, 2-0 EA Reg 
+00001300                           563  * RTS: $4E75
+00001300                           564  * NEG: $44, 7-6 Size, 5-3 EA Mode, 2-0 EA Reg
+00001300                           565  * MOVEM: $4, 11 %1, 10 %D, 9-7 %001, 6 S, 5-3 EA Mode, 2-0 EA Reg
+00001300                           566  * %D = 0 , Register to Memory, 1 Memory to Register
+00001300                           567  ********************************************************************************
+00001300                           568  C_GROUP_4:
+00001300                           569  CHECK_OP_RTS:
+00001300  3038 1500                570      MOVE.W CUR_OP_CODE,D0
+00001304  B07C 4E75                571      CMP.W  #$4E75,D0
+00001308  6600 0006                572      BNE    CHECK_OP_NOP
+0000130C  6700 019C                573      BEQ    PRINT_OP_RTS
+00001310                           574      
+00001310                           575  CHECK_OP_NOP:
+00001310  3038 1500                576      MOVE.W CUR_OP_CODE,D0
+00001314  B07C 4E71                577      CMP.W  #$4E71,D0
+00001318  6600 0006                578      BNE    CHECK_OP_LEA
+0000131C  6700 0170                579      BEQ    PRINT_OP_NOP
+00001320                           580      
+00001320                           581  CHECK_OP_LEA:
+00001320  3038 1500                582      MOVE.W CUR_OP_CODE,D0
+00001324  0240 F1C0                583      ANDI.W #$F1C0,D0
+00001328  B07C 41C0                584      CMP.W  #$41C0,D0
+0000132C  6600 0006                585      BNE    CHECK_OP_JSR
+00001330  6700 0186                586      BEQ    PRINT_OP_LEA
+00001334                           587      
+00001334                           588  CHECK_OP_JSR:
+00001334  3038 1500                589      MOVE.W CUR_OP_CODE,D0
+00001338  0240 FFC0                590      ANDI.W #$FFC0,D0
+0000133C  B07C 4E80                591      CMP.W  #$4E80,D0
+00001340  6600 0006                592      BNE    CHECK_OP_NEG
+00001344  6700 0156                593      BEQ    PRINT_OP_JSR
+00001348                           594      
+00001348                           595  CHECK_OP_NEG:
+00001348  3038 1500                596      MOVE.W CUR_OP_CODE,D0
+0000134C  0240 FF00                597      ANDI.W #$FF00,D0
+00001350  B07C 4400                598      CMP.W  #$4400,D0
+00001354  6600 0006                599      BNE    CHECK_OP_MOVEM
+00001358  6700 016C                600      BEQ    PRINT_OP_NEG
+0000135C                           601   
+0000135C                           602  CHECK_OP_MOVEM:
+0000135C  3038 1500                603      MOVE.W CUR_OP_CODE,D0
+00001360  0240 FB80                604      ANDI.W #$FB80,D0
+00001364  B07C 4880                605      CMP.W  #$4880,D0
+00001368  6600 0018                606      BNE    INVALID_OP
+0000136C  6700 0166                607      BEQ    PRINT_OP_MOVEM_W
+00001370                           608      
+00001370                           609  * GROUP_5
+00001370                           610  ********************************************************************************
+00001370                           611  * SUBQ: $5, 11-9 DATA, 8 %1, 7-6 Size, 5-3 EA Mode, 2-0 EA Reg
+00001370                           612  ********************************************************************************
+00001370                           613  C_GROUP_5:
+00001370                           614  
+00001370                           615  CHECK_OP_SUBQ:
+00001370                           616  
+00001370                           617  * GROUP_6
+00001370                           618  ********************************************************************************
+00001370                           619  * BRA: $60, 7-0 8-Bit Displacement
+00001370                           620  * Bcc: $6, 11-8 Condition, 7-0 8-Bit Displacement
+00001370                           621  *   Branch: <Condition>   
+00001370                           622  *   BCS: %0101          
+00001370                           623  *   BGE: %1100      
+00001370                           624  *   BLT: %1101  
+00001370                           625  *   BVC: %1000
+00001370                           626  
+00001370                           627  ********************************************************************************
+00001370                           628  C_GROUP_6:
+00001370                           629  
+00001370                           630  CHECK_OP_BRA:
+00001370                           631  
+00001370                           632  CHECK_OP_BCS:
+00001370                           633  
+00001370                           634  CHECK_OP_BGE:
+00001370                           635  
+00001370                           636  CHECK_OP_BLT:
+00001370                           637  
+00001370                           638  CHECK_OP_BVC:
+00001370                           639  
+00001370                           640  *GROUP_7
+00001370                           641  ********************************************************************************
+00001370                           642  * Currently no OP codes here are supported.
+00001370                           643  ********************************************************************************
+00001370                           644  C_GROUP_7:
+00001370  4EB9 00001382            645      JSR INVALID_OP
+00001376                           646  
+00001376                           647  * GROUP_8
+00001376                           648  ********************************************************************************
+00001376                           649  * DIVS: $8, 11-9 Reg, 8-6 %111, 5-3 EA Mode, 2-0 EA Reg
+00001376                           650  * OR: $80, 7-6 Size, 5-3 EA Mode, 2-0 EA Register
+00001376                           651  ********************************************************************************
+00001376                           652  C_GROUP_8:
+00001376                           653  
+00001376                           654  CHECK_OP_DIVS:
+00001376                           655  
+00001376                           656  CHECK_OP_OR:
+00001376                           657  
+00001376                           658  * GROUP_9                      
+00001376                           659  ********************************************************************************
+00001376                           660  * SUB: $9, 11-9 Reg, 8-6 OPMODE, 5-3 EA Mode, 2-0 EA Reg
+00001376                           661  ********************************************************************************
+00001376                           662  C_GROUP_9:
+00001376                           663  
+00001376                           664  CHECK_OP_SUB:
+00001376                           665  
+00001376                           666  *GROUP_A
+00001376                           667  ********************************************************************************
+00001376                           668  * Currently no OP codes here are supported.
+00001376                           669  ********************************************************************************
+00001376                           670  C_GROUP_A:
+00001376  4EB9 00001382            671      JSR INVALID_OP
+0000137C                           672  
+0000137C                           673  * GROUP_B                     
+0000137C                           674  ********************************************************************************
+0000137C                           675  * EOR: $B, 11-9 Reg, 8 %1, 8-6 OPMODE, 5-3 EA Mode, 2-0 EA Reg
+0000137C                           676  * CMP: $B, 11-9 Reg, 8 %0, 8-6 OPMODE, 5-3 EA Mode, 2-0 EA Reg
+0000137C                           677  * The specific bit difference is listed 
+0000137C                           678  ********************************************************************************
+0000137C                           679  C_GROUP_B:
+0000137C                           680  
+0000137C                           681  CHECK_OP_EOR:
+0000137C                           682  
+0000137C                           683  CHECK_OP_CMP:
+0000137C                           684  
+0000137C                           685  * GROUP_C                     
+0000137C                           686  ********************************************************************************
+0000137C                           687  * MULS: $C, 11-8 Reg, 8-6 %111, 5-3 EA Mode, 2-0 EA Reg
+0000137C                           688  ********************************************************************************
+0000137C                           689  C_GROUP_C:
+0000137C                           690  
+0000137C                           691  CHECK_OP_MULS:
+0000137C                           692  
+0000137C                           693  * GROUP_D                     
+0000137C                           694  ********************************************************************************
+0000137C                           695  * ADD: $D, 11-9 Reg, 8-6 OPMODE, 5-3 EA Mode, 2-0 EA Reg
+0000137C                           696  * ADDA: $D, 11- 9 Reg, 8-6 OPMODE, 7-6 %11, 5-3 EA Mode, 2-0 EA Reg
+0000137C                           697  * The specific bit difference is listed out in the OPMODE field.
+0000137C                           698  ********************************************************************************
+0000137C                           699  C_GROUP_D:
+0000137C                           700  
+0000137C                           701  CHECK_OP_ADDA:
+0000137C                           702  
+0000137C                           703  CHECK_OP_ADD:
+0000137C                           704  
+0000137C                           705  * GROUP_E                     
+0000137C                           706  ********************************************************************************
+0000137C                           707  * LSR: $E, 11-9 Count/Reg, 8 %0, 7-6 Size, 5 i/r, 4-3 %01, 2-0 Reg
+0000137C                           708  * LSL: $E, 11-9 Count/Reg, 8 %1, 7-6 Size, 5 i/r, 4-3 %01, 2-0 Reg
+0000137C                           709  * ASR: $E, $0, 8 %0, 7-6 %11, 5-3 EA Mode, 2-0 EA reg
+0000137C                           710  * ASL: $E, $0, 8 %1, 7-6 %11, 5-3 EA Mode, 2-0 EA reg
+0000137C                           711  * ROR: $E, 11-9 Count/Reg, 8 %0, 7-6 Size, 5 i/r, 4-3 %11, 2-0 Reg
+0000137C                           712  * ROL: $E, 11-9 Count/Reg, 8 %1, 7-6 Size, 5 i/r, 4-3 %11, 2-0 Reg
+0000137C                           713  * Count/Reg for LSR/LSL refers to shift count, where 0 = shift count of 8, 1-7 
+0000137C                           714  * refers to the respective value when i/r = 0. If i/r = 1, data register in the 
+0000137C                           715  * Count/Reg field specifies the shift count.  
+0000137C                           716  * 
+0000137C                           717  * Count/Reg for ROR/ROL specifies rotate count instead of shift count.
+0000137C                           718  ********************************************************************************
+0000137C                           719  C_GROUP_E:
+0000137C                           720  
+0000137C                           721  CHECK_OP_LSR:
+0000137C                           722  
+0000137C                           723  CHECK_OP_LSL:
+0000137C                           724  
+0000137C                           725  CHECK_OP_ASL:
+0000137C                           726  
+0000137C                           727  CHECK_OP_ASR:
+0000137C                           728  
+0000137C                           729  CHECK_OP_ROL:
+0000137C                           730  
+0000137C                           731  CHECK_OP_ROR:
+0000137C                           732  
+0000137C                           733  * GROUP_F
+0000137C                           734  ********************************************************************************
+0000137C                           735  * Currently no OP codes here are supported.
+0000137C                           736  ********************************************************************************
+0000137C                           737  C_GROUP_F:
+0000137C  4EB9 00001382            738      JSR INVALID_OP
+00001382                           739      
+00001382                           740  * INVALID_OP                     
+00001382                           741  ********************************************************************************
+00001382                           742  * Any value that is not covered in the above groups would be considered invalid. 
+00001382                           743  * The following values in the first nibble would also indicate that the 
+00001382                           744  * operand codes is already invalid: $7, $A, $F.
+00001382                           745  * For unsupported OP codes, display DATA $WXYZ   
+00001382                           746  * THIS WILL NEED TO BE CHANGED TO DISPLAY: 1000 DATA $WXYZ IN THE FUTURE
+00001382                           747  ********************************************************************************
+00001382                           748  INVALID_OP:  ; Prints DATA for invalid op
+00001382  43F9 000014F8            749      LEA P_INVALID_OP,A1
+00001388  103C 000D                750      MOVE.B #13,D0
+0000138C  4E4F                     751      TRAP #15
+0000138E  FFFF FFFF                752      SIMHALT
+00001392                           753  READ_NEXT_INSTRUCTION: ; Needs to read next instruction set {PLACEHOLDER}
+00001392  FFFF FFFF                754      SIMHALT
+00001396                           755  
+00001396                           756  MAKE_VAL_ASCII:
+00001396  0C00 0009                757      CMPI.B  #$9,D0
+0000139A  6E00 0008                758      BGT     LETTER_ASCII
+0000139E  6F00 000A                759      BLE     NUMBER_ASCII
+000013A2  4E75                     760      RTS
+000013A4                           761      
+000013A4                           762  LETTER_ASCII:
+000013A4  0600 0037                763      ADDI.B #$37,D0 ; A-F
+000013A8  4E75                     764      RTS
+000013AA                           765      
+000013AA                           766  NUMBER_ASCII
+000013AA  0600 0030                767      ADDI.B #$30,D0 ; 0-9
+000013AE  4E75                     768      RTS
+000013B0                           769      
+000013B0                           770  ADD_PERIOD:
+000013B0  2F00                     771      MOVE.L D0,-(SP)
+000013B2  103C 0000                772      MOVE.B #$0,D0
+000013B6  0600 0046                773      ADDI.B #$46,D0
+000013BA  201F                     774      MOVE.L (SP)+,D0
+000013BC                           775  ********************** PRINTING ROUTINES ****************************************
+000013BC                           776  PRINT_OP_ORI:
+000013BC  43F9 0000150F            777      LEA P_OP_ORI,A1
+000013C2                           778      ;MOVE.W P_OP_ORI,(A4)+
+000013C2  4EB9 000014F0            779      JSR PRINT_OP
+000013C8  4E75                     780      RTS
+000013CA                           781  PRINT_OP_CMPI:
+000013CA  4EB8 1176                782      JSR FIND_3_BIT_REG_TO_EA
+000013CE  4EB8 1162                783      JSR FIND_2_BIT_SIZE_TO_EA
+000013D2  4EB8 1142                784      JSR MOVE_LAST_6_BITS_TO_EA
+000013D6  43F9 00001513            785      LEA P_OP_CMPI,A1
+000013DC                           786      ;MOVE.W P_OP_CMPI,(A4)+
+000013DC  4EB9 000014F0            787      JSR PRINT_OP
+000013E2  4E75                     788      RTS
+000013E4                           789  PRINT_OP_S_BCLR:
+000013E4  4EB8 1142                790      JSR MOVE_LAST_6_BITS_TO_EA
+000013E8  4EB8 1176                791      JSR FIND_3_BIT_REG_TO_EA
+000013EC  3CBC 0000                792      MOVE.W #$0,(A6)
+000013F0  383C 0000                793      MOVE.W #%000, D4
+000013F4  43F9 00001518            794      LEA P_OP_S_BCLR,A1
+000013FA                           795      ;MOVE.W P_OP_S_BCLR,(A4)+
+000013FA  4EB9 000014F0            796      JSR PRINT_OP
+00001400  4E75                     797      RTS
+00001402                           798  PRINT_OP_D_BCLR:
+00001402  4EB8 1142                799      JSR MOVE_LAST_6_BITS_TO_EA
+00001406  4EB8 1176                800      JSR FIND_3_BIT_REG_TO_EA
+0000140A  3CBC 0000                801      MOVE.W #$0,(A6)
+0000140E  383C 0006                802      MOVE.W #%110, D4
+00001412  43F9 0000151D            803      LEA P_OP_D_BCLR,A1
+00001418                           804      ;MOVE.W P_OP_D_BCLR,(A4)+
+00001418  4EB9 000014F0            805      JSR PRINT_OP
+0000141E  4E75                     806      RTS    
+00001420                           807  PRINT_OP_MOVEB:
+00001420  4EB8 118A                808      JSR MOVE_AND_MOVEA_PARSE_EA
+00001424  3CBC 0001                809      MOVE.W #$1,(A6)
+00001428  43F9 00001522            810      LEA P_OP_MOVEB,A1
+0000142E                           811      ;MOVE.W P_OP_MOVEB,(A4)+
+0000142E  4EB9 000014F0            812      JSR PRINT_OP
+00001434  4E75                     813      RTS
+00001436                           814  PRINT_OP_MOVEA_L:
+00001436  4EB8 118A                815      JSR MOVE_AND_MOVEA_PARSE_EA
+0000143A  3CBC 0002                816      MOVE.W #$2,(A6)
+0000143E  43F9 00001529            817      LEA P_OP_MOVEA_L,A1
+00001444                           818      ;MOVE.L A1,G_BUFFER_PREP
+00001444                           819      ;MOVE.B (A1)+,D0
+00001444                           820      ;CMPI.B #$FF,D0
+00001444                           821      ;BNE MAKE_VAL_ASCII
+00001444                           822      ;MOVE.W P_OP_MOVEA_L,(A4)+
+00001444  4EB9 000014F0            823      JSR PRINT_OP
+0000144A  4E75                     824      RTS
+0000144C                           825  PRINT_OP_MOVE_L:
+0000144C  4EB8 118A                826      JSR MOVE_AND_MOVEA_PARSE_EA
+00001450  3CBC 0002                827      MOVE.W #$2,(A6)
+00001454  43F9 00001531            828      LEA P_OP_MOVE_L,A1
+0000145A                           829      ;MOVE.W P_OP_MOVE_L,(A4)+
+0000145A  4EB9 000014F0            830      JSR PRINT_OP
+00001460  4E75                     831      RTS
+00001462                           832  PRINT_OP_MOVEA_W:
+00001462  4EB8 118A                833      JSR MOVE_AND_MOVEA_PARSE_EA
+00001466  3CBC 0003                834      MOVE.W #$3,(A6)
+0000146A  43F9 00001538            835      LEA P_OP_MOVEA_W,A1
+00001470                           836      ;MOVE.W P_OP_MOVEA_W,(A4)+
+00001470  4EB9 000014F0            837      JSR PRINT_OP
+00001476  4E75                     838      RTS
+00001478                           839  PRINT_OP_MOVE_W:
+00001478  4EB8 118A                840      JSR MOVE_AND_MOVEA_PARSE_EA
+0000147C  3CBC 0003                841      MOVE.W #$3,(A6)
+00001480  43F9 00001540            842      LEA P_OP_MOVE_W,A1
+00001486                           843      ;MOVE.W P_OP_MOVE_W,(A4)+
+00001486  4EB9 000014F0            844      JSR PRINT_OP
+0000148C  4E75                     845      RTS
+0000148E                           846  PRINT_OP_NOP:
+0000148E  43F9 0000155F            847      LEA P_OP_NOP,A1
+00001494  4EB9 000014F0            848      JSR PRINT_OP
+0000149A  4E75                     849      RTS
+0000149C                           850  PRINT_OP_JSR:
+0000149C  43F9 0000155B            851      LEA P_OP_JSR,A1
+000014A2  4EB9 000014F0            852      JSR PRINT_OP
+000014A8  4E75                     853      RTS
+000014AA                           854  PRINT_OP_RTS:
+000014AA  43F9 00001563            855      LEA P_OP_RTS,A1
+000014B0  4EB9 000014F0            856      JSR PRINT_OP
+000014B6  4E75                     857      RTS
+000014B8                           858  PRINT_OP_LEA:
+000014B8  43F9 00001557            859      LEA P_OP_LEA,A1
+000014BE  4EB9 000014F0            860      JSR PRINT_OP
+000014C4  4E75                     861      RTS
+000014C6                           862  PRINT_OP_NEG:
+000014C6  43F9 00001567            863      LEA P_OP_NEG,A1
+000014CC  4EB9 000014F0            864      JSR PRINT_OP
+000014D2  4E75                     865      RTS
+000014D4                           866  PRINT_OP_MOVEM_W:
+000014D4  43F9 00001547            867      LEA P_OP_MOVEM_W,A1
+000014DA  4EB9 000014F0            868      JSR PRINT_OP
+000014E0  4E75                     869      RTS
+000014E2                           870  PRINT_OP_MOVEM_L:
+000014E2  43F9 0000154F            871      LEA P_OP_MOVEM_L,A1
+000014E8  4EB9 000014F0            872      JSR PRINT_OP
+000014EE  4E75                     873      RTS
+000014F0                           874  PRINT_OP:   ;Prints current op code byte
+000014F0                           875      ;MOVE.W (A4),(A1)       ; NEEDS TO USE G_BUFFER LATER
+000014F0  103C 000D                876      MOVE.B #13,D0
+000014F4  4E4F                     877      TRAP #15
+000014F6  4E75                     878      RTS
+000014F8                           879  ******************* END OF PRINTING ROUTINES ***********************************
+000014F8                           880  
+000014F8                           881  ******************* END OF JMP LABELS ******************************************
+000014F8                           882  
+000014F8                           883  ******************* DATA CONSTANT PRINTS ***************************************
+000014F8                           884  * Formatting is as follows: P_OP_<OPCODE>, where P = Print, OP = Operation,
+000014F8                           885  * <OPCODE> is any valid operand
+000014F8                           886  
+000014F8= 44 41 54 41 00           887  P_INVALID_OP    DC.B    'DATA',0
+000014FD= 46 6F 75 6E 64 20 ...    888  OP_FOUND        DC.B    'Found OP',0 ; this should be taken out later
+00001506= 2E 42 00                 889  P_SIZE_B        DC.B    '.B',0
+00001509= 2E 57 00                 890  P_SIZE_W        DC.B    '.W',0
+0000150C= 2E 4C 00                 891  P_SIZE_L        DC.B    '.L',0
+0000150F= 4F 52 49 00              892  P_OP_ORI        DC.B    'ORI',0
+00001513= 43 4D 50 49 00           893  P_OP_CMPI       DC.B    'CMPI',0
+00001518= 42 43 4C 52 00           894  P_OP_S_BCLR     DC.B    'BCLR',0
+0000151D= 42 43 4C 52 00           895  P_OP_D_BCLR     DC.B    'BCLR',0
+00001522= 4D 4F 56 45 2E 42 00     896  P_OP_MOVEB      DC.B    'MOVE.B',0
+00001529= 4D 4F 56 45 41 2E ...    897  P_OP_MOVEA_L    DC.B    'MOVEA.L',0 
+00001531= 4D 4F 56 45 2E 4C 00     898  P_OP_MOVE_L     DC.B    'MOVE.L',0
+00001538= 4D 4F 56 45 41 2E ...    899  P_OP_MOVEA_W    DC.B    'MOVEA.W',0
+00001540= 4D 4F 56 45 2E 57 00     900  P_OP_MOVE_W     DC.B    'MOVE.W',0
+00001547= 4D 4F 56 45 4D 2E ...    901  P_OP_MOVEM_W    DC.B    'MOVEM.W',0
+0000154F= 4D 4F 56 45 4D 2E ...    902  P_OP_MOVEM_L    DC.B    'MOVEM.L',0
+00001557= 4C 45 41 00              903  P_OP_LEA        DC.B    'LEA',0
+0000155B= 4A 53 52 00              904  P_OP_JSR        DC.B    'JSR',0
+0000155F= 4E 4F 50 00              905  P_OP_NOP        DC.B    'NOP',0
+00001563= 52 54 53 00              906  P_OP_RTS        DC.B    'RTS',0
+00001567= 4E 45 47 00              907  P_OP_NEG        DC.B    'NEG',0
+0000156B= 53 55 42 51 00           908  P_OP_SUBQ       DC.B    'SUBQ',0
+00001570= 42 52 41 00              909  P_OP_BRA        DC.B    'BRA',0
+00001574= 42 43 53 00              910  P_OP_BCS        DC.B    'BCS',0
+00001578= 42 47 45 00              911  P_OP_BGE        DC.B    'BGE',0
+0000157C= 42 4C 54 00              912  P_OP_BLT        DC.B    'BLT',0
+00001580= 42 56 43 00              913  P_OP_BVC        DC.B    'BVC',0
+00001584= 44 49 56 53 00           914  P_OP_DIVS       DC.B    'DIVS',0
+00001589= 4F 52 00                 915  P_OP_OR         DC.B    'OR',0
+0000158C= 53 55 42 00              916  P_OP_SUB        DC.B    'SUB',0
+00001590= 45 4F 52 00              917  P_OP_EOR        DC.B    'EOR',0
+00001594= 43 4D 50 00              918  P_OP_CMP        DC.B    'CMP',0
+00001598= 4D 55 4C 53 00           919  P_OP_MULS       DC.B    'MULS',0
+0000159D= 41 44 44 41 00           920  P_OP_ADDA       DC.B    'ADDA',0
+000015A2= 41 44 44 00              921  P_OP_ADD        DC.B    'ADD',0
+000015A6= 4C 53 52 00              922  P_OP_LSR        DC.B    'LSR',0
+000015AA= 4C 53 4C 00              923  P_OP_LSL        DC.B    'LSL',0
+000015AE= 41 53 52 00              924  P_OP_ASR        DC.B    'ASR',0
+000015B2= 41 53 4C 00              925  P_OP_ASL        DC.B    'ASL',0
+000015B6= 52 4F 52 00              926  P_OP_ROR        DC.B    'ROR',0
+000015BA= 52 4F 4C 00              927  P_OP_ROL        DC.B    'ROL',0
+000015BE                           928  ***************** END OF DATA CONSTANT PRINTS ***********************************
+000015BE                           929      
+000015BE                           930      END START
 
 No errors detected
 No warnings generated
@@ -817,62 +940,65 @@ No warnings generated
 SYMBOL TABLE INFORMATION
 Symbol-name         Value
 -------------------------
-CG0_C               1250
-CG0_F               124C
-CHECK_OP_ADD        12F8
-CHECK_OP_ADDA       12F8
-CHECK_OP_ASL        12F8
-CHECK_OP_ASR        12F8
-CHECK_OP_BCS        12EC
-CHECK_OP_BGE        12EC
-CHECK_OP_BLT        12EC
-CHECK_OP_BRA        12EC
-CHECK_OP_BVC        12EC
-CHECK_OP_CMP        12F8
-CHECK_OP_CMPI       1204
-CHECK_OP_DIVS       12F2
-CHECK_OP_D_BCLR     1234
-CHECK_OP_EOR        12F8
-CHECK_OP_JSR        12EC
-CHECK_OP_LEA        12EA
-CHECK_OP_LSL        12F8
-CHECK_OP_LSR        12F8
-CHECK_OP_MOVEA_L    1266
-CHECK_OP_MOVEA_W    12A6
-CHECK_OP_MOVE_B     1252
-CHECK_OP_MOVE_L     1292
-CHECK_OP_MOVE_W     12D6
-CHECK_OP_MULS       12F8
-CHECK_OP_NEG        12EC
-CHECK_OP_OR         12F2
+ADD_PERIOD          13B0
+CG0_C               1258
+CG0_F               1254
+CHECK_OP_ADD        137C
+CHECK_OP_ADDA       137C
+CHECK_OP_ASL        137C
+CHECK_OP_ASR        137C
+CHECK_OP_BCS        1370
+CHECK_OP_BGE        1370
+CHECK_OP_BLT        1370
+CHECK_OP_BRA        1370
+CHECK_OP_BVC        1370
+CHECK_OP_CMP        137C
+CHECK_OP_CMPI       1206
+CHECK_OP_DIVS       1376
+CHECK_OP_D_BCLR     123A
+CHECK_OP_EOR        137C
+CHECK_OP_JSR        1334
+CHECK_OP_LEA        1320
+CHECK_OP_LSL        137C
+CHECK_OP_LSR        137C
+CHECK_OP_MOVEA_L    1270
+CHECK_OP_MOVEA_W    12B6
+CHECK_OP_MOVEM      135C
+CHECK_OP_MOVE_B     125A
+CHECK_OP_MOVE_L     12A0
+CHECK_OP_MOVE_W     12EA
+CHECK_OP_MULS       137C
+CHECK_OP_NEG        1348
+CHECK_OP_NOP        1310
+CHECK_OP_OR         1376
 CHECK_OP_ORI        11E8
-CHECK_OP_ROL        12F8
-CHECK_OP_ROR        12F8
-CHECK_OP_RTS        12EC
-CHECK_OP_SUB        12F2
-CHECK_OP_SUBQ       12EC
-CHECK_OP_S_BCLR     121C
-CUR_OP_CODE         2000
+CHECK_OP_ROL        137C
+CHECK_OP_ROR        137C
+CHECK_OP_RTS        1300
+CHECK_OP_SUB        1376
+CHECK_OP_SUBQ       1370
+CHECK_OP_S_BCLR     1220
+CUR_OP_CODE         1500
 C_GROUP_0           11E4
-C_GROUP_1           1252
-C_GROUP_2           1266
-C_GROUP_3           12A6
-C_GROUP_4           12EA
-C_GROUP_5           12EC
-C_GROUP_6           12EC
-C_GROUP_7           12EC
-C_GROUP_8           12F2
-C_GROUP_9           12F2
-C_GROUP_A           12F2
-C_GROUP_B           12F8
-C_GROUP_C           12F8
-C_GROUP_D           12F8
-C_GROUP_E           12F8
-C_GROUP_F           12F8
+C_GROUP_1           125A
+C_GROUP_2           1270
+C_GROUP_3           12B6
+C_GROUP_4           1300
+C_GROUP_5           1370
+C_GROUP_6           1370
+C_GROUP_7           1370
+C_GROUP_8           1376
+C_GROUP_9           1376
+C_GROUP_A           1376
+C_GROUP_B           137C
+C_GROUP_C           137C
+C_GROUP_D           137C
+C_GROUP_E           137C
+C_GROUP_F           137C
 FIND_2_BIT_SIZE_TO_EA  1162
 FIND_3_BIT_REG_TO_EA  1176
-FIND_MOVEA_L_DIFFERENCE  1274
-FIND_MOVEA_W_DIFFERENCE  12B4
+FIND_MOVEA_L_DIFFERENCE  1280
+FIND_MOVEA_W_DIFFERENCE  12C6
 FIND_TRAILING_BITS_TO_EA  11D0
 GROUP_0             101C
 GROUP_1             102E
@@ -890,62 +1016,74 @@ GROUP_C             10F4
 GROUP_D             1106
 GROUP_E             1118
 GROUP_F             112A
-G_BUFFER            2100
-INVALID_OP          12FE
+G_BUFFER            1700
+G_BUFFER_PREP       1600
+INVALID_OP          1382
+LETTER_ASCII        13A4
 LOAD_OP_CODE        1004
+MAKE_VAL_ASCII      1396
 MOVE_AND_MOVEA_PARSE_EA  118A
 MOVE_LAST_6_BITS_TO_EA  1142
-OP_FOUND            13F1
+NUMBER_ASCII        13AA
+OP_FOUND            14FD
 OP_JSR_DONE         1138
 OP_JSR_ROUTINE      1014
-PRINT_OP            13E4
-PRINT_OP_CMPI       1320
-PRINT_OP_D_BCLR     1358
-PRINT_OP_MOVEA_L    138C
-PRINT_OP_MOVEA_W    13B8
-PRINT_OP_MOVEB      1376
-PRINT_OP_MOVE_L     13A2
-PRINT_OP_MOVE_W     13CE
-PRINT_OP_ORI        1312
-PRINT_OP_S_BCLR     133A
-P_INVALID_OP        13EC
-P_OP_ADD            1492
-P_OP_ADDA           148D
-P_OP_ASL            14A2
-P_OP_ASR            149E
-P_OP_BCS            1464
-P_OP_BGE            1468
-P_OP_BLT            146C
-P_OP_BRA            1460
-P_OP_BVC            1470
-P_OP_CMP            1484
-P_OP_CMPI           1407
-P_OP_DIVS           1474
-P_OP_D_BCLR         1411
-P_OP_EOR            1480
-P_OP_JSR            144F
-P_OP_LEA            144B
-P_OP_LSL            149A
-P_OP_LSR            1496
-P_OP_MOVEA_L        141D
-P_OP_MOVEA_W        142C
-P_OP_MOVEB          1416
-P_OP_MOVEM_L        1443
-P_OP_MOVEM_W        143B
-P_OP_MOVE_L         1425
-P_OP_MOVE_W         1434
-P_OP_MULS           1488
-P_OP_NEG            1457
-P_OP_OR             1479
-P_OP_ORI            1403
-P_OP_ROL            14AA
-P_OP_ROR            14A6
-P_OP_RTS            1453
-P_OP_SUB            147C
-P_OP_SUBQ           145B
-P_OP_S_BCLR         140C
-P_SIZE_B            13FA
-P_SIZE_L            1400
-P_SIZE_W            13FD
-READ_NEXT_INSTRUCTION  130E
+PRINT_OP            14F0
+PRINT_OP_CMPI       13CA
+PRINT_OP_D_BCLR     1402
+PRINT_OP_JSR        149C
+PRINT_OP_LEA        14B8
+PRINT_OP_MOVEA_L    1436
+PRINT_OP_MOVEA_W    1462
+PRINT_OP_MOVEB      1420
+PRINT_OP_MOVEM_L    14E2
+PRINT_OP_MOVEM_W    14D4
+PRINT_OP_MOVE_L     144C
+PRINT_OP_MOVE_W     1478
+PRINT_OP_NEG        14C6
+PRINT_OP_NOP        148E
+PRINT_OP_ORI        13BC
+PRINT_OP_RTS        14AA
+PRINT_OP_S_BCLR     13E4
+P_INVALID_OP        14F8
+P_OP_ADD            15A2
+P_OP_ADDA           159D
+P_OP_ASL            15B2
+P_OP_ASR            15AE
+P_OP_BCS            1574
+P_OP_BGE            1578
+P_OP_BLT            157C
+P_OP_BRA            1570
+P_OP_BVC            1580
+P_OP_CMP            1594
+P_OP_CMPI           1513
+P_OP_DIVS           1584
+P_OP_D_BCLR         151D
+P_OP_EOR            1590
+P_OP_JSR            155B
+P_OP_LEA            1557
+P_OP_LSL            15AA
+P_OP_LSR            15A6
+P_OP_MOVEA_L        1529
+P_OP_MOVEA_W        1538
+P_OP_MOVEB          1522
+P_OP_MOVEM_L        154F
+P_OP_MOVEM_W        1547
+P_OP_MOVE_L         1531
+P_OP_MOVE_W         1540
+P_OP_MULS           1598
+P_OP_NEG            1567
+P_OP_NOP            155F
+P_OP_OR             1589
+P_OP_ORI            150F
+P_OP_ROL            15BA
+P_OP_ROR            15B6
+P_OP_RTS            1563
+P_OP_SUB            158C
+P_OP_SUBQ           156B
+P_OP_S_BCLR         1518
+P_SIZE_B            1506
+P_SIZE_L            150C
+P_SIZE_W            1509
+READ_NEXT_INSTRUCTION  1392
 START               1000
