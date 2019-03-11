@@ -124,6 +124,76 @@ mainloop    CMPA.L A5, A6
 
 DONE
 
+**
+* AddStrToBuffer
+**
+* Adds the given NULL-terminated string to the specified buffer.
+*
+* Default buffer length is 80 characters, but can be modified in the argument
+* variables.
+*
+* If the buffer length is exceeded, either due to lack of a NULL character or
+* an incorrectly specified length, 1 is returned. Otherwise, 0 is returned to
+* indicate success.
+*
+**
+* @param Arg_AddStrToBuffer_String              Pointer to string
+* @param Arg_AddStrToBuffer_Buffer              Pointer to buffer
+* @param Arg_AddStrToBuffer_BufferLength        Length of buffer (default 80 chars)
+* @return Ret_AddStrToBuffer_Success            0 if successful, 1 otherwise.
+* @branch _AddStrToBuffer_FindBufferNullLoop    Loop to find NULL in buffer
+* @branch _AddStrToBuffer_AddLoop               Loop to add string to buffer
+* @branch _AddStrToBuffer_Success               Branch when string successfully added
+* @branch _AddStrToBuffer_StringLengthExceeded  Branch when length exceeded (either string or buffer)
+* @branch _AddStrToBuffer_End                   End of subroutine
+**
+Arg_AddStrToBuffer_String           DS.L    1
+Arg_AddStrToBuffer_Buffer           DS.L    1
+Arg_AddStrToBuffer_BufferLength     DC.L    80
+Ret_AddStrToBuffer_Success          DS.B    1
+
+AddStrToBuffer:                     DS.W    0
+    MOVEM.L     D0-D1/A0-A1, -(SP)                  * Backup registers to stack
+
+    MOVE.L      Arg_AddStrToBuffer_String, A0       * Load string pointer
+    MOVE.L      Arg_AddStrToBuffer_Buffer, A1       * Load buffer pointer
+    MOVE.L      Arg_AddStrToBuffer_BufferLength, D0 * Load buffer length
+    CLR.W       Ret_AddStrToBuffer_Success          * Clear success bit
+    CLR.L       D1                                  * Clear loop counter
+
+_AddStrToBuffer_BufferLoop
+    CMPI.B      #0, (A1)                            * If buffer char is NULL
+    BEQ         _AddStrToBuffer_AddLoop             * Start adding string to bufer
+    
+    CMP.L       D0, D1                              * If counter >= max length
+    BGE         _AddStrToBuffer_LengthExceeded      * Error, return
+    
+    ADDQ.L      #1, A1                              * Go to next character
+    ADDQ.B      #1, D1                              * Increment counter
+    BRA         _AddStrToBuffer_BufferLoop          * Loop back
+    
+_AddStrToBuffer_AddLoop
+    CMPI.B      #0, (A0)                            * If string char is NULL
+    BEQ         _AddStrToBuffer_Success             * String successfully added
+    
+    CMP.B       D0, D1                              * If counter >= max length
+    BGE         _AddStrToBuffer_LengthExceeded      * Error, return
+    
+    MOVE.B      (A0)+, (A1)+                        * Move string char to buffer char
+    ADDQ.B      #1, D1                              * Increment counter
+    BRA         _AddStrToBuffer_AddLoop             * Loop back
+
+_AddStrToBuffer_Success
+    MOVE.B      #0, (A1)                            * Add NULL to end of string
+    BRA         _AddStrToBuffer_End                 * Finish subroutine
+
+_AddStrToBuffer_LengthExceeded
+    MOVE.W      #1, Ret_AddStrToBuffer_Success      * Invalidate success bit
+
+_AddStrToBuffer_End
+    MOVEM.L     (SP)+, D0-D1/A0-A1                  * Restore registers from stack
+    RTS                                             * Exit subroutine
+
 
 **************************************************************************
 * ClearBuffer
