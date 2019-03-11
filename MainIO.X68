@@ -21,7 +21,7 @@
 *---------------------------------------------------------------------------
 
 *declare the variable startaddr with size 1 long
-STARTADDR   DS.L        1                       * The starting address to decode from
+CURRENTADDR   DS.L        1                       * The starting address to decode from
 
 
 START:
@@ -46,6 +46,11 @@ START:
     **
     ** This is the beggnining of the code for reading from files
     ******************************************
+
+
+    ;Open config.cfg (trap subtasks 50-59) (this is an IO responsibility if 3 team members)
+    
+
 ; Display description
         lea     description,A1          ; location of text to display
         move.b  #14,D0                  ; trap task #14, displays null terminated string at (A1)
@@ -81,62 +86,51 @@ START:
         trap    #15                     ; perform task
     
     
-    
-    *LEA MSG1, A1        ; buffer of chars to write
-    *JSR TrapTask13
-    
-    * Read input from the user as string
-    * and save it in A1
-    *MOVE.B #2, D0
-    *TRAP #15
-    
-    * Convernt the string in A1 to hex
-    * and store it in D7
-    *JSR AsciiToHex
-    
-    * Move the long value in D7 
-    * to the variable STARTADDR
-    *MOVE.L D7, STARTADDR
-    
 
-    
 
-    LEA ascii_val, A1
-    JSR AsciiToHex     ;  example of how to convert ascii to hex
-
-    **************************************************
-    *Your disassembler code goes here
-    **************************************************
-    
-    ;Open config.cfg (trap subtasks 50-59) (this is an IO responsibility if 3 team members)
     ;load start and end address as longs
+    ; Start Address is in A5     
+    LEA string, A1
+    JSR AsciiToHex     ;  example of how to convert ascii to hex
+    MOVE.L D7, A5
+    
+    ; End Address is in A6
+    ADDA.L #2, A1
+    JSR AsciiToHex
+    MOVE.L D7, A6
+    
     
     ;loop from start to end, printing out the instruction or DATA if not recognized 
     ;   use my method below (printStringToFileAndConsole) to print out the individual instruction (or DATA)
+    
+    ;TODO : validate start and ending address 
+
+mainloop    CMPA.L A5, A6
+            BLT DONE
+            
+            *clear both buffers 
+            
+            MOVE.W (A5)+, CUR_OP_CODE
+            
+            *you call the opcode subroutine 
+            
+            *if the opcode is valid, you print the G.BUFFER
+            *if not, you print  DATA $XXXX $ADDRESS 
+            
+            
+            
+            BRA mainLoop
+
+
+DONE
+
 
     SIMHALT
 
-*********************************************************************************
-* Method Name: yourDisassemblerFirstMethodHere
-* Description: call this method from your code above; see the examples above on
-*   how to call methods and use them profusely as you build your final project
-*
-* Preconditions:  TBA
-* Postconditions: TBA
-*********************************************************************************
-method1:
-        NOP
-        RTS
-*********************************************************************************
-* Method Name: yourDisassemblerSecondMethodHere
-* Description:    TBA
-*
-* Preconditions:  TBA
-* Postconditions: TBA
-*********************************************************************************
-method2:
-        NOP
-        RTS
+
+CUR_OP_CODE DS.W 1    
+
+
 *********************************************************************************
 * Method Name: TrapTask13
 * Description: Creates a file if none exists, and appends bytes to that file
@@ -350,7 +344,7 @@ ascii_val           DC.B $31,$41,$30,$30,$31,$41,$30,$30 * Test value $1A001A00
 * Variables and constants
 CR              EQU     $D              ; ASCII code for carriage return
 LF              EQU     $A              ; ASCII code for line feed
-SIZE            EQU     80              ; Max string size
+SIZE            EQU     20             ; Max string size
 description     DC.B    'Demonstrates reading a string from a file. ',CR,LF,CR,LF,0
 result          DC.B    'The string read from the file is:',CR,LF,0
 fileName        DC.B    'Config.cfg',0   ; name of text file
@@ -363,6 +357,7 @@ fileID          DS.L    1               ; File ID
 
 
    END    START        ; last line of source
+
 
 
 
