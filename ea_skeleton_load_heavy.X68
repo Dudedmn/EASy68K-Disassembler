@@ -1,134 +1,68 @@
-    ORG    $1000
-START:
 
+    ORG    $1000
 **************************************************
 *   [NOTICE]
 *   Data Register for Mode => D3
 *   Data Register for Register# => D2
 *   Address Register for Trailing Bits => A3
 **************************************************
-
-*************FOR DENNY EA*********************************************************
-
-
-    ;MOVE.W #%0000111110001110,(A6)              ;Dynamic BCLR
-    ;MOVE.W #%0010001001001101,(A6)              ;MOVEA.L A5,A1
-    ;MOVE.W #%0010000000001101,(A6)              ;MOVE.L A5,A1
-    ;MOVE.W #%0011010001000000,(A6)              ;MOVEA.W D0,A2
-    ;MOVE.W #%0011000000001101,(A6)              ;MOVEA.W A5,A1
-    ;MOVE.W #%0011000000001101,(A6)              ;MOVE.W A5,A1
-    ;MOVE.W #%0000000001000001,(A6)              ;ORI.W D1
-    JSR MOVE_LAST_6_BITS_TO_EA
-    JSR FIND_2_BIT_SIZE_TO_EA
-    JSR FIND_3_BIT_REG_TO_EA
-
-    LEA     G_BUFFER, A4
-
-    JSR     CHECK_XXXX
-EXT SIMHALT * This EXT alias is critical for NOT loading error
-
-**********************************************************************************
-
-********** EA Parsing (WRITTEN BY OPCODE PERSON)**********************************
-
-* MOVE_LAST_6_BITS_TO_EA
-**********************************************************************************
-* Description: For OP codes with the last 6 bits specified as EA Mode and EA Reg,
-* the last 6 bits will be parsed and moved into the appropriate registers.
-*
-* Registers used: A6,D0,D1,D6,D7 
-
-* Precondition: OP code has been identified with only the last 6 bits for EA,
-* current instruction set is stored into A6.
-
-* Postcondition: Last 6 bits of instruction bit has been isolated and stored. Bits
-* for EA Mode have been stored in D7, Bits for EA Reg been stored in D6.
-**********************************************************************************
-MOVE_LAST_6_BITS_TO_EA:      ;Move last 6 bits from EA field to relevant registers
-    ;MOVEM.L D0-D7/A6, -(SP)  ;Save all changed registers
+  
+ 
+	MOVE.W #%0010011001001101,(A6) ;MOVEA.L A5,A3
+MOVE_AND_MOVEA_PARSE_EA:       ;Move the 3 bit dynamic register bits to proper register
+   ; MOVEM.L D0-D7/A6, -(SP)  ;Save all changed registers
     MOVE.W (A6),D0           ;Move current OP code into D0
     MOVE.W  #10,D1           ;Prepare 10 bit shift to D1
     LSL.W   D1,D0            ;Truncate to find the last 6 bits
     LSR.W   D1,D0            ;Shift back to get the proper 6 bits
-    MOVE.W  D0,D7            ;Move last 6 bits into D7
+    MOVE.W  D0,D7            ;Move last 6 bits into D7, SRC REG MODE
     MOVE.W  #3,D1            ;Prepare 3 bit shift into D1
     LSR.W   D1,D7            ;Shift 3 bits off D7 to obtain EA Mode
-    MOVE.W  D7,D6            ;Move the 'upper' 3 bits into D6
+    MOVE.W  D7,D5            ;Move the 'upper' 3 bits into D6
     MOVE.W  #13,D1           ;Prepare 13 bit shift into D1
     LSL.W   D1,D0            ;Shift D0 left 13 bits to reposition current 3 bits
     LSR.W   D1,D0            ;Shift D0 right 13 bits to reposition current 3 bits
-    MOVE.W  D0,D7            ;Move the 'lower' 3 bits into D7
-    ;MOVEM.L (SP)+,D0-D7/A6   ;Restore registers
-    RTS                      ;Return to stack
-    
-* FIND_2_BIT_SIZE_TO_EA
-**********************************************************************************
-* Description: For OP codes with 2 bit size fields, the 2 relevant bits (7-6) will 
-* be parsed and moved to the appropriate registers.
-*
-* Registers used: A6,D0,D1,D5
-*
-* Precondition: OP code has been identified with 2 size bit field for EA, current
-* instruction set for OP code is stored in to A6.
-*
-* Postcondition: 2 bit size field has been isolated and stored into D5.
-**********************************************************************************
-FIND_2_BIT_SIZE_TO_EA:      ;Move the 2 bit size field relevant register
-    ;MOVEM.L  D0-D5/A6,-(SP) ;Save all changed registers
-    MOVE.W   (A6),D0        ;Move current OP code into D0
-    MOVE.W   #8,D1          ;Prepare 8 bit shift to D1
-    LSL.W    D1,D0          ;Truncate to find the 2 size bits
-    LSR.W    D1,D0          ;Reposition the bits
-    MOVE.W   #6,D1          ;Prepare 6 bit shift to D1
-    LSR.W    D1,D0          ;Truncate to shift 2 bits to a byte
-    MOVE.W   D0,D5          ;Move 2 size bits into D5
-    ;MOVEM.L (SP)+,D0-D5/A6  ;Restore registers
-    RTS                     ;Return to stack
-**********************************************************************************
-
-* FIND_3_BIT_REG_TO_EA
-**********************************************************************************
-* Description: OP codes with a dynamic 3 bit register in bits 11-9 will be parsed
-* and have those 3 bits isolated and moved to the appropriate registers.
-*
-* Registers used: A6,D0,D1,D5
-*
-* Precondition: OP code has been identified with a dynamic 3 bit register in bits
-* 11-9.
-*
-* Postcondition: 3 bit dynamic register has been isolated and stored into D4.
-**********************************************************************************
-FIND_3_BIT_REG_TO_EA:       ;Move the 3 bit dynamic register bits to proper register
-    ;MOVEM.L  D0-D5/A6,-(SP) ;Save all changed registers
-    MOVE.W   (A6),D0        ;Move current OP code into D0
-    MOVE.W   #4,D1          ;Prepare 4 bit shift to D1
-    LSL.W    D1,D0          ;Truncate to find the 2 size bits
-    LSR.W    D1,D0          ;Reposition the bits
-    MOVE.W   #9,D1          ;Prepare 9 bit shift to D1
-    LSR.W    D1,D0          ;Truncate to shift 3 bits to a byte
-    MOVE.W   D0,D4          ;Move 3 register bits into D4
-    ;MOVEM.L (SP)+,D0-D5/A6  ;Restore registers
-    RTS                     ;Return to stack
-**********************************************************************************
-
-
-********** End of EA Parsing *****************************************************
-
+    MOVE.W  D0,D4            ;Move the 'lower' 3 bits into D7
+    **************MOVING SOURCE*********** TO BE DONE LATER
+    ; MOVE.W #%0011 011 001 001 101,(A6)              ;MOVEA.W A5,A3
+    ; MOVE.W #%0010 011 001 001 101,D0                ;MOVEA.L A5,A3
+     ;Expected values:
+    ;D7, DST REG:   011
+    ;D6, DST MODE:  001
+    ;D5, SRC MODE:  001
+    ;D4, SRC REG:   101
+    ;00011001
+    MOVE.W (A6),D0     ;Move current OP code into D0     
+    MOVE.W  #4,D1             ;Prepare 4 bit shift to D1
+    LSL.W   D1,D0             ;Truncate to find bits 11-6
+    LSR.W   D1,D0             ;Reposition bits
+    MOVE.W  #6,D1             ;Prepare 6 bit shift to D1
+    LSR.W   D1,D0             ;Truncate the SRC Reg/Mode bits
+    MOVE.W  #3,D1             ;Prepare a 3 bit shift to D1 for DST Reg/Mode
+    MOVE.W  D0,D6             ;Copy over the current 6 bits to D6
+    LSR.W   D1,D0             ;Truncate DST Mode  
+    MOVE.W  D0,D7             ;Move DST Reg to D7
+    MOVE.W  #13,D1             
+    LSL.W   D1,D6             ;Truncate 13 bits in D6
+    LSR.W   D1,D6             ;Reposition D6
+    MOVE.W #$2,A6                           ;D6 now contains the DST Reg
+   ; MOVEM.L (SP)+,D0-D7/A6   ;Restore registers
+***
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 * EXECUTION **************************************
-    * 0011 001 001 111 100
-    ;MOVEA.W #%0001, A6
-    ;MOVE.B  #%001, D7
-    ;MOVE.B  #%001, D6
-    ;MOVE.B  #%101, D5
-    ;MOVE.B  #%100, D4
-    ;MOVEA.L #$A0ABCDEF, A3
-    ;LEA     G_BUFFER, A4
+START:
+    MOVEA.W #%0000, A6
+    MOVE.B  #%000, D7
+    MOVE.B  #%000, D6
+    MOVE.B  #%001, D5
+    MOVE.B  #%001, D4
+    MOVEA.L #$0E, A3
+    LEA     G_BUFFER, A4
 
-    ;JSR     CHECK_XXXX
-;EXT SIMHALT * This EXT alias is critical for NOT loading error
+    JSR     CHECK_XXXX
+EXT SIMHALT * This EXT alias is critical for NOT loading error
 **************************************************
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -169,11 +103,44 @@ CHECK_0011:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 * LOAD_THIS FUNCTIONS (HIGHEST LEVEL) ************
 LOAD_0000:
-            * Work on the First Half (Dynamic BCLR) Part
 
-            * ORI/CMPI/BCLR ********************************
-LATER_HALF  MOVE.B  D6, D3
-            MOVE.B  D7, D2
+;            CMPI.B  #%110, D4
+;            BEQ     DBCLR
+;            BNE     NOT_DBCLR
+
+;DBCLR       MOVE.B  #%000, D3 * D in Dx to Mod
+;            MOVE.B  D5, D2 * x in Dx to Reg
+;            JMP     LOAD_SRC
+
+;NOT_DBCLR   MOVE.B  #%111, D3
+;            MOVE.B  #%100, D2 * IMMDTE to Mod
+;            JMP     LOAD_SRC
+
+;LOAD_SRC    JSR     LOAD_EA
+;            JSR     LOAD_COMMA_SPACE
+            * SRC part done
+
+;            MOVE.B  D6, D3
+;            MOVE.B  D7, D2
+;            JSR     LOAD_EA
+;            JSR     LOAD_NEW_LINE
+            * DST part done
+
+            * Logistics: 1. Assume it's Dynamic BCLR
+            *            2. Check and if not then ORI/CMPI/Static BCLR
+            MOVE.B  #%000, D3 * Assuming its DBCLR
+            
+            CMPI.B  #%110, D4 * Checking to see
+            BEQ     DYNMC_BCLR * It is DBCLR 
+            MOVE.B  #%111, D3 * It is not DBCLR
+
+DYNMC_BCLR  MOVE.B  D5, D2 * D2 is for register #
+
+            JSR     LOAD_EA
+            JSR     LOAD_COMMA_SPACE
+
+            MOVE.B  D7, D3 * D3 is for mode
+            MOVE.B  D6, D2 * D2 is for register #
     
             JSR     LOAD_EA
             JSR     LOAD_NEW_LINE
@@ -422,6 +389,7 @@ G_BUFFER        DS.B    100
 
 
     END    START
+
 *~Font name~Courier New~
 *~Font size~10~
 *~Tab type~1~
