@@ -5,14 +5,45 @@
 
 * Description: Op code determining to identify values
 
-  ORG $2000
+  ORG $1500
 CUR_OP_CODE DS.W 1  ; Current OP Code Word
-  ORG $2100 
-G_BUFFER    DS.B 100
+  ORG $1600
+G_BUFFER_PREP DS.B 80
+  ORG $1700 
+G_BUFFER    DS.B 80
+P_OP_MOVEA_L
+        DC.B    'MOVEA.L',0  
+P_OP_A_L
+        DC.B    'A.L',0
+P_OP_TAB
+        DC.B    '   ',0
     LEA G_BUFFER,A4
   ORG $1000 ; Start at Address $1000
+START
+
+ ; Start the op code routine
+ 
+    LEA P_OP_MOVEA_L,A4    ; Load the message onto A4
+    MOVE.L (A4),G_BUFFER   ; Load the value of the message onto the G_BUFFER
+    ADDQ.W #4,A4           ; Increment 4 spaces in the address
+   ;This is the right area for pointer now, however when I add here it can't go
+   ;back 
+*********************************************************************************
+* Here I'm attempting to 'skip' forward in the address to find the proper location for the string
+* In the prior command 'LEA P_OP_MOVEA_L,A4' I have loaded 'MOVE' into address space. I cannot move
+* more than 4 bytes (long) at a single time, so I need to move 'A.L' after which is 3 more bytes
+* So what I need to do is LOAD 'MOVE' into the address space, skip 4 bytes, then load 'A.L' right
+* after 'MOVE'. So this would show 'MOVEA.L' in the address space. Which then Denny can load his stuff
+* after mine.
+*
+*In the ideal world this would look something like: P_OP_MOVEA_L then P_OP_A_L then _P_OP_TAB
+* which would appear as 'MOVEA.L    ' in the address space. This would require 4 increments
+* after MOVE, then 'A.L' being inserted, then 3 increments (or 7 from start) for the tab
+********************************************************************************* 
     
-START ; Start the op code routine
+    ;ADD.L $FFFF,G_BUFFER_PREP
+    LEA P_OP_A_L,A1
+    MOVE.L (A4),G_BUFFER_PREP
     
 ***************************** Inputs **********************************************
     ;MOVE.W #%0000100010000010,CUR_OP_CODE       ;Static BCLR
@@ -21,14 +52,16 @@ START ; Start the op code routine
     
     ;MOVE.W #%0000111110001110,D0              ;Dynamic BCLR
     ;IN HEX $018E. D7 = 110, D6 = 001, D4 = %110, D5 = 7, (A6) = %0000
-    
+    ;MOVE.W #%0000100010001110,D0              ;Static BCLR
+    ;IN HEX $018E. D7 = 110, D6 = 001, D4 = %110, D5 = 7, (A6) = %0000
+   
     ;MOVE.W  #$018E,D0                        ;Dynamic BCLR in hex
     ;MOVE.W  #$02FF,(A6)                         ;INVALID_OP code
     ;MOVE.W #%0000110001010111,(A6)
     MOVE.W #%0010011001001101,D0                       ;MOVEA                        
     ;MOVE.W #%0010001001001101,CUR_OP_CODE              ;MOVEA.L A5,A1
     ;MOVE.W CUR_OP_CODE,(A6)
-    ;MOVE.W #$224D
+    ;MOVE.W #$264D
     ;Expected values:
     ;D7, DST REG:   011
     ;D6, DST MODE:  001
@@ -682,7 +715,26 @@ INVALID_OP:  ; Prints DATA for invalid op
     SIMHALT
 READ_NEXT_INSTRUCTION: ; Needs to read next instruction set {PLACEHOLDER}
     SIMHALT
+
+MAKE_VAL_ASCII:
+    CMPI.B  #$9,D0
+    BGT     LETTER_ASCII
+    BLE     NUMBER_ASCII
+    RTS
     
+LETTER_ASCII:
+    ADDI.B #$37,D0 ; A-F
+    RTS
+    
+NUMBER_ASCII
+    ADDI.B #$30,D0 ; 0-9
+    RTS
+    
+ADD_PERIOD:
+    MOVE.L D0,-(SP)
+    MOVE.B #$0,D0
+    ADDI.B #$46,D0
+    MOVE.L (SP)+,D0
 ********************** PRINTING ROUTINES ****************************************
 PRINT_OP_ORI:
     LEA P_OP_ORI,A1
@@ -698,7 +750,7 @@ PRINT_OP_CMPI:
     JSR PRINT_OP
     RTS
 PRINT_OP_S_BCLR:
-    	JSR MOVE_LAST_6_BITS_TO_EA
+    JSR MOVE_LAST_6_BITS_TO_EA
 	JSR FIND_3_BIT_REG_TO_EA
 	MOVE.W #$0,(A6)
 	MOVE.W #%000, D4
@@ -726,6 +778,10 @@ PRINT_OP_MOVEA_L:
     JSR MOVE_AND_MOVEA_PARSE_EA
     MOVE.W #$2,(A6)
     LEA P_OP_MOVEA_L,A1
+    MOVE.L A1,G_BUFFER_PREP
+    MOVE.B (A1)+,D0
+    CMPI.B #$FF,D0
+    BNE MAKE_VAL_ASCII
     ;MOVE.W P_OP_MOVEA_L,(A4)+
     JSR PRINT_OP
     RTS
@@ -773,7 +829,7 @@ P_OP_CMPI       DC.B    'CMPI',0
 P_OP_S_BCLR     DC.B    'BCLR',0
 P_OP_D_BCLR     DC.B    'BCLR',0
 P_OP_MOVEB      DC.B    'MOVE.B',0
-P_OP_MOVEA_L    DC.B    'MOVEA.L',0
+
 P_OP_MOVE_L     DC.B    'MOVE.L',0
 P_OP_MOVEA_W    DC.B    'MOVEA.W',0
 P_OP_MOVE_W     DC.B    'MOVE.W',0
@@ -804,6 +860,7 @@ P_OP_ASL        DC.B    'ASL',0
 P_OP_ROR        DC.B    'ROR',0
 P_OP_ROL        DC.B    'ROL',0
 ***************** END OF DATA CONSTANT PRINTS ***********************************
+    
     END START
 
 
