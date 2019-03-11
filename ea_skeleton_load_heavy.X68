@@ -54,11 +54,11 @@ MOVE_AND_MOVEA_PARSE_EA:       ;Move the 3 bit dynamic register bits to proper r
 * EXECUTION **************************************
 START:
     MOVEA.W #%0000, A6
-    MOVE.B  #%000, D7
+    MOVE.B  #%010, D7
     MOVE.B  #%000, D6
-    MOVE.B  #%001, D5
-    MOVE.B  #%001, D4
-    MOVEA.L #$0E, A3
+    MOVE.B  #%000, D4
+    MOVE.B  #%100, D5
+    MOVEA.L #$0017, A3
     LEA     G_BUFFER, A4
 
     JSR     CHECK_XXXX
@@ -103,48 +103,28 @@ CHECK_0011:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 * LOAD_THIS FUNCTIONS (HIGHEST LEVEL) ************
 LOAD_0000:
+            CMPI.B  #%110, D4
+            BEQ     DBCLR
+            BNE     NOT_DBCLR
 
-;            CMPI.B  #%110, D4
-;            BEQ     DBCLR
-;            BNE     NOT_DBCLR
+DBCLR       MOVE.B  #%000, D3 * D in Dx to Mod
+            MOVE.B  D5, D2 * x in Dx to Reg
+            JMP     LOAD_SRC
 
-;DBCLR       MOVE.B  #%000, D3 * D in Dx to Mod
-;            MOVE.B  D5, D2 * x in Dx to Reg
-;            JMP     LOAD_SRC
+NOT_DBCLR   MOVE.B  #%111, D3
+            MOVE.B  #%100, D2 * IMMDTE to Mod
+            JMP     LOAD_SRC
 
-;NOT_DBCLR   MOVE.B  #%111, D3
-;            MOVE.B  #%100, D2 * IMMDTE to Mod
-;            JMP     LOAD_SRC
-
-;LOAD_SRC    JSR     LOAD_EA
-;            JSR     LOAD_COMMA_SPACE
+LOAD_SRC    JSR     LOAD_EA
+            JSR     LOAD_COMMA_SPACE
             * SRC part done
 
-;            MOVE.B  D6, D3
-;            MOVE.B  D7, D2
-;            JSR     LOAD_EA
-;            JSR     LOAD_NEW_LINE
-            * DST part done
-
-            * Logistics: 1. Assume it's Dynamic BCLR
-            *            2. Check and if not then ORI/CMPI/Static BCLR
-            MOVE.B  #%000, D3 * Assuming its DBCLR
-            
-            CMPI.B  #%110, D4 * Checking to see
-            BEQ     DYNMC_BCLR * It is DBCLR 
-            MOVE.B  #%111, D3 * It is not DBCLR
-
-DYNMC_BCLR  MOVE.B  D5, D2 * D2 is for register #
-
-            JSR     LOAD_EA
-            JSR     LOAD_COMMA_SPACE
-
-            MOVE.B  D7, D3 * D3 is for mode
-            MOVE.B  D6, D2 * D2 is for register #
-    
+            MOVE.B  D6, D3
+            MOVE.B  D7, D2
             JSR     LOAD_EA
             JSR     LOAD_NEW_LINE
-    
+            * DST part done
+            
             RTS
     
 LOAD_00XX:
