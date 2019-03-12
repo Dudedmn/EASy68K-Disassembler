@@ -1,33 +1,11 @@
 *-----------------------------------------------------------
 * Title      : OP Code routines for Disassembler
 * Written by : Daniel Yan
-* Date       : 2/28/2019, Updated 3/9/2019
+* Date       : 2/28/2019, Updated 3/12/2019
 
-* Description: Op code determining to identify values
-
-
-;FAHAD CODE
-; ORG place for G_BUFFER
-; ORG place for CUR_OP_CODE
-; ORG place for VALID_OP_CODE
-; ORG place for all other constants
-; ORG START $1000
-; WE NEED TO SEE APPROX HOW MUCH ADDRESS SPACE ALL OUR ROUTINES COVER
-; ORG OUR CONSTANTS/BUFFERS AT A SAFE DISTANCE BETWEEN ROUTINES AND TEST PROGRAM
-
-; MEMORY_ADDRESS OPCODE $HEX_VALUE
-;G_BUFFER
-; 1254 MOVEA.L A3,A6, $3ASD
-; 1254 RTS $4E75
-;B_BUFFER
-; 1254 DATA $CURRENT_OP
-
-; JSR INVALID_OP
-; 
-
-; 8800 MOVEA.L A3,A6 $3FCA
-; 8800 DATA $3FCA
-
+* Description: Disassembler routines to identify any valid
+* OP code dependent on current supported list.
+*------------------------------------------------------------
   ORG $1000 ; Start at Address $1000
 CUR_OP_CODE DS.W 1  ; Current OP Code Word
 EA_SIZE     DS.B 1
@@ -41,53 +19,21 @@ FOURTH_3    DS.B 1
 
 P_OP_MOVEA_L_T  DC.L    'MOVEA.L',0
 P_OP_MOVEA_L_A_L DC.L   'A.L',0
-    LEA G_BUFFER,A4
     
 
 START
-    ; Start the op code routine
-    ;LEA G_BUFFER, A4
+    LEA G_BUFFER,A4
     MOVE.B #0, (A4)
     
     ;MOVE.L (A5)+, D0
-    
+************** BUFFER PRINTING/LOADING EXAMPLES *************************************
     ; Load the message onto A4
     ;MOVE.L #P_OP_MOVEA_L_T, Arg_AddStrToBuffer_String
     ;MOVE.L #G_BUFFER, Arg_AddStrToBuffer_Buffer 
-    
-    
     ;JSR AddStrToBuffer
     ;LEA G_BUFFER, A4   ; Load the value of the message onto the G_BUFFER
     ;MOVE.L P_OP_MOVEA_L_T,(A4)+
     ;MOVE.L P_OP_MOVEA_L_A_L,(A4)+
-    
-    
-    
-
-    ; AFTER THIS POINT THE BUFFER HAS THIS 'MOVE' + 'A.L'          ; Increment 4 spaces in the address
-    
-    
-       
-    
-   
-   ;This is the right area for pointer now, however when I add here it can't go
-   ;back 
-*********************************************************************************
-* Here I'm attempting to 'skip' forward in the address to find the proper location for the string
-* In the prior command 'LEA P_OP_MOVEA_L,A4' I have loaded 'MOVE' into address space. I cannot move
-* more than 4 bytes (long) at a single time, so I need to move 'A.L' after which is 3 more bytes
-* So what I need to do is LOAD 'MOVE' into the address space, skip 4 bytes, then load 'A.L' right
-* after 'MOVE'. So this would show 'MOVEA.L' in the address space. Which then Denny can load his stuff
-* after mine.
-*
-*In the ideal world this would look something like: P_OP_MOVEA_L then P_OP_A_L then _P_OP_TAB
-* which would appear as 'MOVEA.L    ' in the address space. This would require 4 increments
-* after MOVE, then 'A.L' being inserted, then 3 increments (or 7 from start) for the tab
-********************************************************************************* 
-    
-    ;ADD.L $FFFF,G_BUFFER_PREP
-    ;LEA P_OP_A_L,A1
-    ;MOVE.L (A4),G_BUFFER_PREP
     
 ***************************** Input Tests ********************************************
     ***GROUP 0 tests**** SUPPORTED: ORI, BCLR (static, dynamic), CMPI
