@@ -36,10 +36,10 @@ IO
 - [ ] Adhere to commenting format
 
 OP Code
-- [ ] Finish identification for all OP codes
-- [ ] Load messages into buffer successfully
-- [ ] Adhere to commenting format
-- [ ] Validation testing for OP codes
+- [ ] Finish identification for all OP codes, draft of $0-F4 is finished. Testing needed for $7-$F, need to redo approach on $0-$6
+- [ ] Load messages into buffer successfully, WIP after identification
+- [ ] Adhere to commenting format, WIP with identification
+- [ ] Validation testing for OP codes, WIP with identification
 
 EA
 - [x] Finish Trailing Bits
