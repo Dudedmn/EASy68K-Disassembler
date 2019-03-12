@@ -1,351 +1,10 @@
 
     ORG    $1000
-**************************************************
-*   [NOTICE]
-*   Data Register for Mode => D3
-*   Data Register for Register# => D2
-*   Address Register for Trailing Bits => A3
-**************************************************
-  
- 
-	MOVE.W #%0010011001001101,(A6) ;MOVEA.L A5,A3
-MOVE_AND_MOVEA_PARSE_EA:       ;Move the 3 bit dynamic register bits to proper register
-   ; MOVEM.L D0-D7/A6, -(SP)  ;Save all changed registers
-    MOVE.W (A6),D0           ;Move current OP code into D0
-    MOVE.W  #10,D1           ;Prepare 10 bit shift to D1
-    LSL.W   D1,D0            ;Truncate to find the last 6 bits
-    LSR.W   D1,D0            ;Shift back to get the proper 6 bits
-    MOVE.W  D0,D7            ;Move last 6 bits into D7, SRC REG MODE
-    MOVE.W  #3,D1            ;Prepare 3 bit shift into D1
-    LSR.W   D1,D7            ;Shift 3 bits off D7 to obtain EA Mode
-    MOVE.W  D7,D5            ;Move the 'upper' 3 bits into D6
-    MOVE.W  #13,D1           ;Prepare 13 bit shift into D1
-    LSL.W   D1,D0            ;Shift D0 left 13 bits to reposition current 3 bits
-    LSR.W   D1,D0            ;Shift D0 right 13 bits to reposition current 3 bits
-    MOVE.W  D0,D4            ;Move the 'lower' 3 bits into D7
-    **************MOVING SOURCE*********** TO BE DONE LATER
-    ; MOVE.W #%0011 011 001 001 101,(A6)              ;MOVEA.W A5,A3
-    ; MOVE.W #%0010 011 001 001 101,D0                ;MOVEA.L A5,A3
-     ;Expected values:
-    ;D7, DST REG:   011
-    ;D6, DST MODE:  001
-    ;D5, SRC MODE:  001
-    ;D4, SRC REG:   101
-    ;00011001
-    MOVE.W (A6),D0     ;Move current OP code into D0     
-    MOVE.W  #4,D1             ;Prepare 4 bit shift to D1
-    LSL.W   D1,D0             ;Truncate to find bits 11-6
-    LSR.W   D1,D0             ;Reposition bits
-    MOVE.W  #6,D1             ;Prepare 6 bit shift to D1
-    LSR.W   D1,D0             ;Truncate the SRC Reg/Mode bits
-    MOVE.W  #3,D1             ;Prepare a 3 bit shift to D1 for DST Reg/Mode
-    MOVE.W  D0,D6             ;Copy over the current 6 bits to D6
-    LSR.W   D1,D0             ;Truncate DST Mode  
-    MOVE.W  D0,D7             ;Move DST Reg to D7
-    MOVE.W  #13,D1             
-    LSL.W   D1,D6             ;Truncate 13 bits in D6
-    LSR.W   D1,D6             ;Reposition D6
-    MOVE.W #$2,A6                           ;D6 now contains the DST Reg
-   ; MOVEM.L (SP)+,D0-D7/A6   ;Restore registers
-***
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-* EXECUTION **************************************
-START:
-    MOVEA.W #%0001, A6
-    MOVE.B  #%100, D7
-    MOVE.B  #%111, D6
-    MOVE.B  #%000, D4
-    MOVE.B  #%111, D5
-    MOVEA.L #$0004, A3
-    MOVEA.L #$0012, A1
-    LEA     G_BUFFER, A4
-
-    JSR     CHECK_XXXX
-EXT SIMHALT * This EXT alias is critical for NOT loading error
-**************************************************
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-* CHECK_INSTRUCTION_BITS FUNCTIONS ***************
-CHECK_XXXX:
-    CMPA    #$8, A6
-    BLT     CHECK_0XXX
-    JMP     CHECK_1XXX
-    
-CHECK_0XXX:
-    CMPA    #$4, A6
-    BLT     CHECK_00XX
-    JMP     CHECK_01XX
-
-CHECK_1XXX:
-    RTS
-
-CHECK_00XX:
-    CMPA    #$1, A6
-    BLT     LOAD_0000
-    CMPA    #$2, A6
-    BGT     CHECK_0011
-    
-    * IT IS 00XX(=MOVE(A))
-    JMP     LOAD_00XX
-
-CHECK_01XX:
-    RTS
-    
-CHECK_0011:
-    RTS
-**************************************************
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-* LOAD_THIS FUNCTIONS (HIGHEST LEVEL) ************
-LOAD_0000: * BCLR/CMPI/ORI/Dynamic BCLR
-            CMPI.B  #%110, D4
-            BEQ     DBCLR
-            BNE     NOT_DBCLR
-
-DBCLR       MOVE.B  #%000, D3 * D in Dx to Mod
-            MOVE.B  D5, D2 * x in Dx to Reg
-            JMP     LOAD_SRC
-
-NOT_DBCLR   MOVE.B  #%111, D3
-            MOVE.B  #%100, D2 * IMMDTE to Mod
-            JMP     LOAD_SRC
-
-LOAD_SRC    JSR     LOAD_EA
-            JSR     LOAD_COMMA_SPACE
-            * SRC part done
-
-            MOVE.B  D6, D3
-            MOVE.B  D7, D2
-            MOVEA.L A1, A3
-            
-            JSR     LOAD_EA
-            JSR     LOAD_NEW_LINE
-            * DST part done
-            
-            RTS
-    
-LOAD_00XX: * MOVE/MOVEA
-    MOVE.B  D5, D3
-    MOVE.B  D4, D2
-    
-    JSR     LOAD_EA
-    JSR     LOAD_COMMA_SPACE
-    
-    MOVE.B  D6, D3
-    MOVE.B  D7, D2
-    MOVEA.L A1, A3
-    
-    JSR     LOAD_EA
-    JSR     LOAD_NEW_LINE
-    
-    RTS
-**************************************************
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-* LOAD_THIS FUNCTIONS (HIGH LEVEL) ***************
-LOAD_EA:
-        MOVEA.  #SAVED, A2 * remember to come back!
-
-        CMPI    #%111, D3
-        BLT     LOAD_LT_111
-        BGE     LOAD_GE_111
-    
-SAVED   RTS
-
-LOAD_LT_111:
-    CMPI    #%000, D3 * e.g. D3
-    BEQ     LOAD_DATA_REGISTER
-    CMPI    #%001, D3 * e.g. A3
-    BEQ     LOAD_ADDR_REGISTER
-    CMPI    #%010, D3 * e.g. (A3)
-    BEQ     LOAD_ADDRESS
-    CMPI    #%011, D3 * e.g. (A3)+
-    BEQ     LOAD_ADDRESS_W_POST_INC
-    CMPI    #%100, D3 * e.g. -(A3)
-    BEQ     LOAD_ADDRESS_W_PRE_DEC
-    
-    JMP     EXT
-    
-LOAD_GE_111:
-    CMPI    #%000, D2
-    BEQ     LOAD_ABS_SHORT
-    CMPI    #%001, D2
-    BEQ     LOAD_ABS_LONG
-    CMPI    #%100, D2
-    BEQ     LOAD_IMMDTE
-    
-    JMP     EXT
-**************************************************
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-* LOAD_THIS FUNCTIONS (INTERMEDIATE LEVEL) *******
-LOAD_DATA_REGISTER:
-    * e.g. D3
-    JSR     LOAD_D
-    MOVE.L  D2, D0 * Loading D2(=Dreg to D0)
-    JSR     LOAD_NUM
-    JMP     (A2)
-
-LOAD_ADDR_REGISTER:
-    * e.g. A3
-    JSR     LOAD_A
-    MOVE.L  D2, D0
-    JSR     LOAD_NUM
-    JMP     (A2)
-
-LOAD_ADDRESS:
-    * e.g. (A3)
-    JSR     LOAD_PTHSIS_OPEN
-    JSR     LOAD_ADDR_REGISTER
-    JSR     LOAD_PTHSIS_CLSD
-    JMP     (A2)
-
-LOAD_ADDRESS_W_POST_INC:
-    * e.g. (A3)+
-    JSR     LOAD_ADDRESS
-    JSR     LOAD_PLUS_SIGN
-    JMP     (A2)
-
-LOAD_ADDRESS_W_PRE_DEC:
-    * e.g. -(A3)
-    JSR     LOAD_MINUS_SIGN
-    JSR     LOAD_ADDRESS
-    JMP     (A2)
-
-LOAD_ABS_SHORT:
-    JSR     LOAD_HEX_SIGN
-    MOVE.W  A3, D0
-    JSR     LOAD_BYTES
-    JMP     (A2)
-
-LOAD_ABS_LONG:
-    JSR     LOAD_HEX_SIGN
-    MOVE.L  A3, D0
-    JSR     LOAD_BYTES
-    JMP     (A2)
-    
-LOAD_IMMDTE:
-    JSR     LOAD_IMMDTE_VALU
-    JMP     LOAD_ABS_LONG
-
-**************************************************
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-* LOAD_THIS FUNCTIONS (LOW LEVEL) ****************
-* Shifts the bits to the left and prints the
-* left-most bit
-LOAD_BYTES:
-        MOVE.L  D0, D1
-        MOVEA.W #8, A5
-LOOP    CMPA    #0, A5
-        BGT     ROTATE
-        RTS
-    
-ROTATE  ROL.L   #$04, D1
-        MOVE.B  D1, D0
-        ANDI.L  #$0000000F, D0
-        JSR     LOAD_NUM
-        SUBA    #1, A5
-        JMP     LOOP        
-
-LOAD_NEW_LINE:
-    MOVE.B  CR, D0
-    JSR     LOAD_THIS_SHIT
-    MOVE.B  LF, D0
-    JSR     LOAD_THIS_SHIT
-    RTS
-
-LOAD_COMMA_SPACE:
-    MOVE.B  COMMA, D0
-    JSR     LOAD_THIS_SHIT
-    MOVE.B  SPACE, D0
-    JSR     LOAD_THIS_SHIT
-    
-    RTS
-    
-LOAD_D:
-    MOVE.B  DATA, D0
-    JSR     LOAD_THIS_SHIT
-    RTS
-    
-LOAD_A:
-    MOVE.B  ADDRESS, D0
-    JSR     LOAD_THIS_SHIT
-    RTS
-
-LOAD_PTHSIS_OPEN:    
-    MOVE.B  PTHSIS_OPEN, D0
-    JSR     LOAD_THIS_SHIT
-    RTS
-    
-LOAD_PTHSIS_CLSD:
-    MOVE.B  PTHSIS_CLSD, D0
-    JSR     LOAD_THIS_SHIT
-    RTS
-    
-LOAD_HEX_SIGN:
-    MOVE.B  HEX_SIGN, D0
-    JSR     LOAD_THIS_SHIT
-    RTS
-
-LOAD_IMMDTE_VALU:
-    MOVE.B  IMMDTE_VALU, D0
-    JSR     LOAD_THIS_SHIT
-    RTS
-
-LOAD_PLUS_SIGN:
-    MOVE.B  PLUS_SIGN, D0
-    JSR     LOAD_THIS_SHIT
-    RTS
-    
-LOAD_MINUS_SIGN:
-    MOVE.B  MINUS_SIGN, D0
-    JSR     LOAD_THIS_SHIT
-    RTS
-**************************************************
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-* LOAD_THIS FUNCTIONS (LOWEST LEVEL) *************
-
-* Moves the hex value from D0 to G_BUFFER in A4
-LOAD_THIS_SHIT:
-    MOVE.B  D0, (A4)+
-    RTS
-
-* Adds $30 to a number in D0 to make it a hex
-* If the number is greater than 9 (A~F), then adds $37
-* Then moves the hex value from D0 to G_BUFFER in A4
-LOAD_NUM:
-    CMPI.B  #$9, D0
-    BGT     GT
-    BLE     LE
-    
-GT  ADDI.B  #$37, D0 * A~F
-    JMP     END
-LE  ADDI.B  #$30, D0 * 0~9
-    JMP     END
-
-END MOVE.B  D0, (A4)+
-    RTS
-**************************************************
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 * MESSAGE VARIABLES ******************************
+
+* ASCII values for respective characters
+
 ADDRESS         DC.B    $41
 DATA            DC.B    $44
 
@@ -367,12 +26,779 @@ LF              DC.B    $A
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 * GLOBAL BUFFER **********************************
-G_BUFFER        DS.B    100
+MNEMONIC        DS.B    1 * First four BITS of any instruction
+ 
+TRAILING_SIZE   DS.W    1 * Size of any immediate or
+                          * address values. Immediate or address
+                          * value of a BYTE is still processed as
+                          * WORD because the trailing bytes
+                          * are represented as a word regardless.
+                          * $1 = BYTE, $2 = WORD, $4 = LONG
+
+FIRST_3         DS.B    1 * First, second, third, and fourth bundles of three bits each
+SECOND_3        DS.B    1
+THIRD_3         DS.B    1
+FOURTH_3        DS.B    1
+
+CUR_OP_CODE     DS.W    1 * Used for Daniel's code
+
+START_ADDRESS   EQU     $4000 * Used to parse through the entire instruction
+END_ADDRESS     EQU     $5000
+
+EA_BUFFER       DS.B    80 * Used to load ASCII-converted EA ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+IS_VALID        DS.B    1 * EA-bit validity flag
+                          * $0 = invalid, $1 = valid
+**************************************************
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+ 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+* EXECUTION **************************************
+START: * TEST FOR MOVE.L
+    MOVE.B  #%0011, MNEMONIC
+    MOVE.B  #%001, FIRST_3
+    MOVE.B  #%111, SECOND_3
+    MOVE.B  #%111, THIRD_3
+    MOVE.B  #%100, FOURTH_3
+    MOVEA.L #START_ADDRESS, A5
+    LEA     EA_BUFFER, A4
+
+    JSR     CHECK_XXXX
+EXT SIMHALT * This EXT alias is critical for NOT loading error
 **************************************************
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+* CHECK_MNEMONIC FUNCTIONS ***************
+
+* <EA>
+**********************************************************************************
+* Description: Checks the mnemonic starting from XXXX
+*
+* Registers used: X
+*
+* Precondition: X
+*
+* Postcondition: X
+**********************************************************************************
+CHECK_XXXX:
+    CMPI.B  #$8, MNEMONIC
+    BLT     CHECK_0XXX
+    JMP     CHECK_1XXX
+
+* <EA>
+**********************************************************************************
+* Description: Checks the mnemonic starting from 0XXX
+*
+* Registers used: X
+*
+* Precondition: X
+*
+* Postcondition: X
+**********************************************************************************
+CHECK_0XXX:
+    CMPI.B  #$4, MNEMONIC
+    BLT     CHECK_00XX
+    JMP     CHECK_01XX
+
+* <EA>
+**********************************************************************************
+* Description: Checks the mnemonic starting from 1XXX
+*
+* Registers used: X
+*
+* Precondition: X
+*
+* Postcondition: X
+**********************************************************************************
+CHECK_1XXX:
+    RTS
+
+* <EA>
+**********************************************************************************
+* Description: Checks the mnemonic starting from 00XX
+*
+* Registers used: X
+*
+* Precondition: X
+*
+* Postcondition: X
+**********************************************************************************
+CHECK_00XX:
+    CMPI.B  #$1, MNEMONIC
+    BLT     LOAD_0000
+    BGE     LOAD_00XX
+
+* <EA>
+**********************************************************************************
+* Description: Checks the mnemonic starting from 01XX
+*
+* Registers used: X
+*
+* Precondition: X
+*
+* Postcondition: X
+**********************************************************************************
+CHECK_01XX:
+    RTS
+
+* <EA>
+**********************************************************************************
+* Description: Checks the mnemonic 0011
+*
+* Registers used: X
+*
+* Precondition: X
+*
+* Postcondition: X
+**********************************************************************************
+CHECK_0011:
+    RTS
+**************************************************
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+* LOAD_THIS FUNCTIONS (HIGHEST LEVEL) ************
+
+* <EA>
+**********************************************************************************
+* Description: Once the mnemonic is 0000, it is either BCLR, CMPI, ORI, or Dynamic BCLR.
+*
+* Registers used: D3 for SRC/DST mod, D2 for SRC/DST reg, A3 to get back from the subbranch,
+*                                   D5, D4 for BCLR
+*
+* Precondition: FIRST_3, SECOND_3, THIRD_3, FOURTH_3
+*
+* Postcondition: X
+**********************************************************************************
+LOAD_0000:  * BCLR/CMPI/ORI/Dynamic BCLR
+            CLR.L   D3
+            CLR.L   D2
+            MOVEA.L #0, A3
+
+            CMPI.B  #%000, FIRST_3
+            BEQ     ORI_CMPI
+            CMPI.B  #%110, FIRST_3
+            BEQ     ORI_CMPI
+            CMPI.B  #%010, SECOND_3
+            BEQ     BCLR
+            CMPI.B  #%110, SECOND_3
+            ;BEQ     DYNMC_BCLR
+            
+            JMP     INVALID
+            
+***vvvvvvvvvvvvvvvvvvv***
+ORI_CMPI         MOVEA.W #BACK, A3
+                        CMPI.B     #%000, SECOND_3
+            BEQ     SIZE_B
+            CMPI.B  #%001, SECOND_3
+            BEQ     SIZE_W
+            CMPI.B  #%010, SECOND_3
+            BEQ     SIZE_L
+
+BACK               MOVE.B   #%111, D3
+                        MOVE.B  #%100, D2
+            
+            JSR     LOAD_EA
+            JSR     LOAD_COMMA_SPACE
+            
+            MOVEA.W #BACK2, A3   
+            CMPI.B  #%000, FOURTH_3
+            BEQ     SIZE_W
+            CMPI.B  #%001, FOURTH_3
+            BEQ     SIZE_L
+
+BACK2       MOVE.B  THIRD_3, D3
+            MOVE.B  FOURTH_3, D2
+        
+            JSR     LOAD_EA
+            JSR     LOAD_NEW_LINE
+            RTS
+***^^^^^^^^^^^^^^^^^^^***
+
+***vvvvvvvvvvvvvvvvvvv***
+BCLR               CLR.L   D5
+            CLR.L   D4
+            MOVEA.L #0, A2
+
+            MOVE.W  #END_ADDRESS, D5
+            SUB.W   A5, D5
+            CMPI.W   #$2, D5
+            BLT     INVALID
+
+            MOVE.W  (A5)+, D4
+            ANDI.W  #$00FF, D4
+            MOVEA.L #BACK4, A2
+            JMP     LOAD_IMMDTE
+            
+BACK4       JSR     LOAD_COMMA_SPACE
+            
+            MOVEA.W #BACK3, A3
+            CMPI.B  #%000, FOURTH_3
+            BEQ     SIZE_W
+            CMPI.B  #%001, FOURTH_3
+            BEQ     SIZE_L
+
+BACK3       MOVE.B  THIRD_3, D3
+            MOVE.B  FOURTH_3, D2
+
+            JSR     LOAD_EA
+            JSR     LOAD_NEW_LINE
+
+            RTS
+***^^^^^^^^^^^^^^^^^^^***
+
+* <EA>
+**********************************************************************************
+* Description: Once the mnemonic is 00XX, it is either MOVE or MOVEA. Checks the 3-bit bundles and
+*                            the size of immediate/address values if necessary.
+*
+* Registers used: D3 for SRC/DST mod, D2 for SRC/DST reg, A3 to get back from the subbranch
+*
+* Precondition: FIRST_3, SECOND_3, THIRD_3, FOURTH_3
+*
+* Postcondition: X
+**********************************************************************************
+LOAD_00XX:
+        CLR.L   D3
+        CLR.L   D2
+        MOVEA.L #0, A3
+        
+        MOVEA.W #GOO, A3
+        CMPI.B  #%0011, MNEMONIC
+        BEQ     SIZE_W
+        CMPI.B  #%0010, MNEMONIC
+        BEQ     SIZE_L
+
+GOO     MOVE.B  THIRD_3, D3
+        MOVE.B  FOURTH_3, D2
+    
+        JSR     LOAD_EA
+        JSR     LOAD_COMMA_SPACE
+    
+        MOVEA.W #GOO2, A3
+        CMPI.B  #%000, FIRST_3
+        BEQ     SIZE_W
+        CMPI.B  #%001, FIRST_3
+        BEQ     SIZE_L
+    
+GOO2    MOVE.B  SECOND_3, D3
+        MOVE.B  FIRST_3, D2
+            
+        JSR     LOAD_EA
+        JSR     LOAD_NEW_LINE
+    
+        RTS
+**************************************************
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+* LOAD_THIS FUNCTIONS (HIGH LEVEL) ***************
+
+* <EA>
+**********************************************************************************
+* Description: Checks the SRC/DST mod
+*
+* Registers used: A2 for branching back from subbranches
+*
+* Precondition: D3 for SRC/DST mod
+*
+* Postcondition: X
+**********************************************************************************
+LOAD_EA:
+        MOVEA.W #SAVED, A2 * remember to come back!
+
+        CMPI    #%111, D3
+        BLT     LOAD_LT_111
+        BGE     LOAD_GE_111
+    
+SAVED   RTS
+
+* <EA>
+**********************************************************************************
+* Description: Checks the SRC/DST mod where it is not immediate/address value
+*
+* Registers used: X
+*
+* Precondition: D3 for SRC/DST mod
+*
+* Postcondition: X
+**********************************************************************************
+LOAD_LT_111:
+    CMPI    #%000, D3 * e.g. D3
+    BEQ     LOAD_DATA_REGISTER
+    CMPI    #%001, D3 * e.g. A3
+    BEQ     LOAD_ADDR_REGISTER
+    CMPI    #%010, D3 * e.g. (A3)
+    BEQ     LOAD_ADDRESS
+    CMPI    #%011, D3 * e.g. (A3)+
+    BEQ     LOAD_ADDRESS_W_POST_INC
+    CMPI    #%100, D3 * e.g. -(A3)
+    BEQ     LOAD_ADDRESS_W_PRE_DEC
+    
+    JMP     EXT
+
+* <EA>
+**********************************************************************************
+* Description: Checks the SRC/DST mod where it is immediate/address value
+*
+* Registers used: D5 for SUB.W, D4 for immediate/address value extraction
+*
+* Precondition: A5 for START_ADDRESS iteration, TRAILING_SIZE for size of the immediate/address value
+*
+* Postcondition: IS_INVALID flag set if EA bit not valid
+**********************************************************************************
+LOAD_GE_111:
+            CLR.L   D5
+            CLR.L   D4
+
+            MOVE.W  #END_ADDRESS, D5
+            SUB.W   A5, D5
+            CMP.W   TRAILING_SIZE, D5
+            BLT     INVALID
+
+            CMPI.W  #$1, TRAILING_SIZE
+            BEQ     CHUMP_BYTE
+            CMPI.W  #$2, TRAILING_SIZE
+            BEQ     CHUMP_WORD
+            CMPI.W  #$4, TRAILING_SIZE
+            BEQ     CHUMP_LONG
+
+CHUMP_BYTE  MOVE.W  (A5)+, D4 * Minimum 4 hex (e.g. MOVE.B #1, $2 = XXXX 0001 0002)
+            JMP     GO
+
+CHUMP_WORD  MOVE.W  (A5)+, D4
+            JMP     GO
+            
+CHUMP_LONG  MOVE.L  (A5)+, D4
+            JMP     GO
+
+GO          CMPI    #%000, D2
+            BEQ     LOAD_ABS_SHORT
+            CMPI    #%001, D2
+            BEQ     LOAD_ABS_LONG
+            CMPI    #%100, D2
+            BEQ     LOAD_IMMDTE
+    
+INVALID     MOVE.B  #%0, IS_VALID
+            JMP     EXT
+
+* <EA>
+**********************************************************************************
+* Description: Puts in the proper value in TRAILING_SIZE based on the immediate/address value size
+*
+* Registers used: X
+*
+* Precondition: X
+*
+* Postcondition: Set up TRAILING_SIZE
+**********************************************************************************
+TRAILING_HELPER:            
+SIZE_B  MOVE.W  #$2, TRAILING_SIZE
+        JMP     (A3)
+
+SIZE_W  MOVE.W  #$2, TRAILING_SIZE
+        JMP     (A3)
+        
+SIZE_L  MOVE.W  #$4, TRAILING_SIZE
+        JMP     (A3)
+**************************************************
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+* LOAD_THIS FUNCTIONS (INTERMEDIATE LEVEL) *******
+
+* <EA>
+**********************************************************************************
+* Description: Loads ASCII for e.g. D3 in EA_BUFFER
+*
+* Registers used: D0 for actually loading
+*
+* Precondition: D2 for SRC/DST reg
+*
+* Postcondition: X
+**********************************************************************************
+LOAD_DATA_REGISTER:
+    CLR.L   D0
+    
+    JSR     LOAD_D
+    MOVE.B  D2, D0
+    JSR     LOAD_NUM
+    JMP     (A2)
+
+* <EA>
+**********************************************************************************
+* Description: Loads ASCII for e.g. A3 in EA_BUFFER
+*
+* Registers used: D0 for actually loading
+*
+* Precondition: D2 for SRC/DST reg
+*
+* Postcondition: X
+**********************************************************************************
+LOAD_ADDR_REGISTER:
+    CLR.L   D0
+
+    JSR     LOAD_A
+    MOVE.B  D2, D0
+    JSR     LOAD_NUM
+    JMP     (A2)
+
+* <EA>
+**********************************************************************************
+* Description: Loads ASCII for e.g. (A3) in EA_BUFFER
+*
+* Registers used: X
+*
+* Precondition: X
+*
+* Postcondition: X
+**********************************************************************************
+LOAD_ADDRESS:
+    JSR     LOAD_PTHSIS_OPEN
+    JSR     LOAD_ADDR_REGISTER
+    JSR     LOAD_PTHSIS_CLSD
+    JMP     (A2)
+
+* <EA>
+**********************************************************************************
+* Description: Loads ASCII for e.g. (A3)+ in EA_BUFFER
+*
+* Registers used: X
+*
+* Precondition: X
+*
+* Postcondition: X
+**********************************************************************************
+LOAD_ADDRESS_W_POST_INC:
+    JSR     LOAD_ADDRESS
+    JSR     LOAD_PLUS_SIGN
+    JMP     (A2)
+
+* <EA>
+**********************************************************************************
+* Description: Loads ASCII for e.g. -(A3) in EA_BUFFER
+*
+* Registers used: X
+*
+* Precondition: X
+*
+* Postcondition: X
+**********************************************************************************
+LOAD_ADDRESS_W_PRE_DEC:
+    JSR     LOAD_MINUS_SIGN
+    JSR     LOAD_ADDRESS
+    JMP     (A2)
+
+* <EA>
+**********************************************************************************
+* Description: Loads ASCII for e.g. $1234 in EA_BUFFER
+*
+* Registers used: D0 for actually loading
+*
+* Precondition: D4 for immediate/address value  
+*
+* Postcondition: X
+**********************************************************************************
+LOAD_ABS_SHORT:
+    CLR.L   D0
+
+    JSR     LOAD_HEX_SIGN
+    MOVE.W  D4, D0
+    JSR     LOAD_BYTES
+    JMP     (A2)
+
+* <EA>
+**********************************************************************************
+* Description: Loads ASCII for e.g. $12345678 in EA_BUFFER
+*
+* Registers used: D0 for actually loading
+*
+* Precondition: D4 for immediate/address value  
+*
+* Postcondition: X
+**********************************************************************************
+LOAD_ABS_LONG:
+    CLR.L   D0
+
+    JSR     LOAD_HEX_SIGN
+    MOVE.L  D4, D0
+    JSR     LOAD_BYTES
+    JMP     (A2)
+
+* <EA>
+**********************************************************************************
+* Description: Loads ASCII for e.g. #$1234 in EA_BUFFER
+*
+* Registers used: X
+*
+* Precondition: X 
+*
+* Postcondition: X
+**********************************************************************************
+LOAD_IMMDTE:
+    JSR     LOAD_IMMDTE_VALU
+    JMP     LOAD_ABS_LONG
+
+**************************************************
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+* LOAD_THIS FUNCTIONS (LOW LEVEL) ****************
+
+* <EA>
+**********************************************************************************
+* Description: Shifts the hex to the left and loads from the left-most hex to EA_BUFFER in ASCII
+*
+* Registers used: D5 for the loop counter, D1 for loop assist
+*
+* Precondition: D0 for the immediate/address value  
+*
+* Postcondition: X
+**********************************************************************************
+LOAD_BYTES:
+        CLR.L   D5
+        CLR.L   D1
+
+        MOVE.L  D0, D1
+        MOVE.B  #8, D5
+LOOP    CMPI    #0, D5
+        BGT     ROTATE
+        RTS
+    
+ROTATE  ROL.L   #$04, D1
+        MOVE.B  D1, D0
+        ANDI.L  #$0000000F, D0
+        JSR     LOAD_NUM
+        SUBI    #1, D5
+        JMP     LOOP        
+
+* <EA>
+**********************************************************************************
+* Description: Loads ASCII for CR, LF 
+*
+* Registers used: D0 for actually loading
+*
+* Precondition: CR, LF 
+*
+* Postcondition: X
+**********************************************************************************
+LOAD_NEW_LINE:
+    CLR.L   D0
+
+    MOVE.B  CR, D0
+    JSR     LOAD_THIS_SHIT
+    MOVE.B  LF, D0
+    JSR     LOAD_THIS_SHIT
+    RTS
+
+* <EA>
+**********************************************************************************
+* Description: Loads ASCII for ', ' 
+*
+* Registers used: D0 for actually loading
+*
+* Precondition: COMMA, SPACE
+*
+* Postcondition: X
+**********************************************************************************
+LOAD_COMMA_SPACE:
+    CLR.L   D0
+
+    MOVE.B  COMMA, D0
+    JSR     LOAD_THIS_SHIT
+    MOVE.B  SPACE, D0
+    JSR     LOAD_THIS_SHIT
+    
+    RTS
+
+* <EA>
+**********************************************************************************
+* Description: Loads ASCII for D 
+*
+* Registers used: D0 for actually loading
+*
+* Precondition: DATA
+*
+* Postcondition: X
+**********************************************************************************
+LOAD_D:
+    CLR.L   D0
+
+    MOVE.B  DATA, D0
+    JSR     LOAD_THIS_SHIT
+    RTS
+
+* <EA>
+**********************************************************************************
+* Description: Loads ASCII for A
+*
+* Registers used: D0 for actually loading
+*
+* Precondition: ADDRESS
+*
+* Postcondition: X
+**********************************************************************************
+LOAD_A:
+    CLR.L   D0
+
+    MOVE.B  ADDRESS, D0
+    JSR     LOAD_THIS_SHIT
+    RTS
+
+* <EA>
+**********************************************************************************
+* Description: Loads ASCII for (
+*
+* Registers used: D0 for actually loading
+*
+* Precondition: PTHSIS_OPEN
+*
+* Postcondition: X
+**********************************************************************************
+LOAD_PTHSIS_OPEN:
+    CLR.L   D0
+
+    MOVE.B  PTHSIS_OPEN, D0
+    JSR     LOAD_THIS_SHIT
+    RTS
+
+* <EA>
+**********************************************************************************
+* Description: Loads ASCII for )
+*
+* Registers used: D0 for actually loading
+*
+* Precondition: PTHSIS_CLSD
+*
+* Postcondition: X
+**********************************************************************************
+LOAD_PTHSIS_CLSD:
+    CLR.L   D0
+
+    MOVE.B  PTHSIS_CLSD, D0
+    JSR     LOAD_THIS_SHIT
+    RTS
+
+* <EA>
+**********************************************************************************
+* Description: Loads ASCII for $
+*
+* Registers used: D0 for actually loading
+*
+* Precondition: HEX_SIGN
+*
+* Postcondition: X
+**********************************************************************************
+LOAD_HEX_SIGN:
+    CLR.L   D0
+
+    MOVE.B  HEX_SIGN, D0
+    JSR     LOAD_THIS_SHIT
+    RTS
+
+* <EA>
+**********************************************************************************
+* Description: Loads ASCII for #
+*
+* Registers used: D0 for actually loading
+*
+* Precondition: IMMDTE_VALU
+*
+* Postcondition: X
+**********************************************************************************
+LOAD_IMMDTE_VALU:
+    CLR.L   D0
+
+    MOVE.B  IMMDTE_VALU, D0
+    JSR     LOAD_THIS_SHIT
+    RTS
+
+* <EA>
+**********************************************************************************
+* Description: Loads ASCII for +
+*
+* Registers used: D0 for actually loading
+*
+* Precondition: PLUS_SIGN
+*
+* Postcondition: X
+**********************************************************************************
+LOAD_PLUS_SIGN:
+    CLR.L   D0
+
+    MOVE.B  PLUS_SIGN, D0
+    JSR     LOAD_THIS_SHIT
+    RTS
+
+* <EA>
+**********************************************************************************
+* Description: Loads ASCII for -
+*
+* Registers used: D0 for actually loading
+*
+* Precondition: MINUS_SIGN
+*
+* Postcondition: X
+**********************************************************************************
+LOAD_MINUS_SIGN:
+    CLR.L   D0
+
+    MOVE.B  MINUS_SIGN, D0
+    JSR     LOAD_THIS_SHIT
+    RTS
+**************************************************
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+* LOAD_THIS FUNCTIONS (LOWEST LEVEL) *************
+* <EA>
+**********************************************************************************
+* Description: Loads the hex value from D0 to EA_BUFFER in ASCII
+*
+* Registers used: X
+*
+* Precondition: X
+*
+* Postcondition: X
+**********************************************************************************
+LOAD_THIS_SHIT:
+    MOVE.B  D0, (A4)+
+    RTS
+
+* <EA>
+**********************************************************************************
+* Description: Adds $30 to a number in D0 to make it a hex. If the number is greater
+*                            than 9 (A~F), then adds $37. Then moves the hex value from D0 to EA_BUFFER in ASCII
+*
+* Registers used: X
+*
+* Precondition: X
+*
+* Postcondition: X
+**********************************************************************************
+LOAD_NUM:
+    CMPI.B  #$9, D0
+    BGT     GT
+    BLE     LE
+    
+GT  ADDI.B  #$37, D0 * A~F
+    JMP     END
+LE  ADDI.B  #$30, D0 * 0~9
+    JMP     END
+
+END MOVE.B  D0, (A4)+
+    RTS
+**************************************************
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
     END    START
+
+
 
 *~Font name~Courier New~
 *~Font size~10~
