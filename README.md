@@ -74,4 +74,14 @@ A5: Starting Address
 A6: Ending Address
 A4: G_BUFFER
 ```
-
+Display Tasks
+```
+<ADDRESS> <OPERAND> <EA> $<HEX VALUE>
+Example:
+1000 MOVEA.W A5,A1 $3CBC
+Load Order
+<ADDRESS> - OP person
+<OPERAND> - OP person
+<EA> - EA
+$<HEX VALUE> - EA
+```
