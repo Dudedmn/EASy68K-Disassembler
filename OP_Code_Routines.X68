@@ -30,28 +30,33 @@
 
   ORG $1000 ; Start at Address $1000
 CUR_OP_CODE DS.W 1  ; Current OP Code Word
-;$4E75 -> CUR_OP_CODE
-EA_SIZE     DS.W 1
+EA_SIZE     DS.B 1
 G_BUFFER    DS.B 80
 B_BUFFER    DS.B 80
+MNEMONIC    DS.B 1
+FIRST_3     DS.B 1
+SECOND_3    DS.B 1
+THIRD_3     DS.B 1
+FOURTH_3    DS.B 1
 
 P_OP_MOVEA_L_T  DC.L    'MOVEA.L',0
 P_OP_MOVEA_L_A_L DC.L   'A.L',0
     LEA G_BUFFER,A4
-START
+    
 
+START
     ; Start the op code routine
-    LEA G_BUFFER, A4
+    ;LEA G_BUFFER, A4
     MOVE.B #0, (A4)
     
-    MOVE.L (A5)+, D0
+    ;MOVE.L (A5)+, D0
     
     ; Load the message onto A4
-    MOVE.L #P_OP_MOVEA_L_T, Arg_AddStrToBuffer_String
-    MOVE.L #G_BUFFER, Arg_AddStrToBuffer_Buffer 
+    ;MOVE.L #P_OP_MOVEA_L_T, Arg_AddStrToBuffer_String
+    ;MOVE.L #G_BUFFER, Arg_AddStrToBuffer_Buffer 
     
     
-    JSR AddStrToBuffer
+    ;JSR AddStrToBuffer
     ;LEA G_BUFFER, A4   ; Load the value of the message onto the G_BUFFER
     ;MOVE.L P_OP_MOVEA_L_T,(A4)+
     ;MOVE.L P_OP_MOVEA_L_A_L,(A4)+
@@ -88,16 +93,16 @@ START
     ;MOVE.W #%0000100010000010,CUR_OP_CODE       ;Static BCLR
     ;MOVE.W #%0000111110001110,CUR_OP_CODE       ;Dynamic BCLR
     ;MOVE.W #%0000000001000001,CUR_OP_CODE       ;ORI.W D1
-    
-    ;MOVE.W #%0000111110001110,D0              ;Dynamic BCLR
+        
+    ;MOVE.W #%0000111110001110,CUR_OP_CODE              ;Dynamic BCLR
     ;IN HEX $018E. D7 = 110, D6 = 001, D4 = %110, D5 = 7, (A6) = %0000
-    ;MOVE.W #%0000100010001110,D0              ;Static BCLR
+    ;MOVE.W #%0000100010001110,CUR_OP_CODE              ;Static BCLR
     ;IN HEX $018E. D7 = 110, D6 = 001, D4 = %110, D5 = 7, (A6) = %0000
    
-    ;MOVE.W  #$018E,D0                        ;Dynamic BCLR in hex
-    ;MOVE.W  #$02FF,(A6)                         ;INVALID_OP code
-    ;MOVE.W #%0000110001010111,(A6)
-    ;MOVE.W #%0010011001001101,D0                       ;MOVEA  
+    ;MOVE.W  #$018E,CUR_OP_CODE                        ;Dynamic BCLR in hex
+    ;MOVE.W  #$02FF,CUR_OP_CODE                         ;INVALID_OP code
+    ;MOVE.W #%0000110001010111,CUR_OP_CODE
+    ;MOVE.W #%0010011001001101,CUR_OP_CODE                       ;MOVEA  
      ;MOVE.W #%0010001001001101,CUR_OP_CODE              ;MOVEA.L A5,A1
     ;MOVE.W CUR_OP_CODE,(A6)
     ;MOVE.W #$264D
@@ -109,33 +114,47 @@ START
     ;CHECK IF DST MODE IS %111 or SRC MODE IS %111 for MOVE
     ;(A3), DST TRAIL:  001
     ;(A2), SRC TRAIL: ONLY FOR MOVE
-    ;MOVE.W #%0010000000001101,(A6)              ;MOVE.L A5,A1
-    ;MOVE.W #%0011011001001101,(A6)              ;MOVEA.W A5,A1
-    ;MOVE.W #%0011000000001101,(A6)              ;MOVE.W A5,A1
-    ;MOVE.W #%0000000001000001,(A6)              ;ORI.W D1
+    ;MOVE.W #%0010000000001101,CUR_OP_CODE              ;MOVE.L A5,A1
+    ;MOVE.W #%0011011001001101,CUR_OP_CODE              ;MOVEA.W A5,A1
+    MOVE.W #%1001011001111101,CUR_OP_CODE               ;MOVE TO TEST EA PARSE
+    JSR PARSE_EA_CONSTANT_BITS
+    ;MOVE.W #%0011000000001101,CUR_OP_CODE              ;MOVE.W A5,A1
+    ;MOVE.W #%0000000001000001,CUR_OP_CODE              ;ORI.W D1
     ;MOVE.W CUR_OP_CODE,A6                       ;Loading memory space to address register
     ;MOVE.W CUR_OP_CODE,(A6)                     ;Loading memory value to address value
  
     ****GROUP 4 tests****
-    ;MOVE.W #$4E75,D0                            ;RTS
-    ;MOVE.W #$4E71,D0                            ;NOP
-    ;MOVE.W #$4415,D0                            ;NEG.L D5
-    ;MOVE.W #$43CC,D0                            ;LEA A1,A6
-    ;MOVE.W #%0100100010001110
-    ;MOVE.W #$488E,D0                            ;MOVEM.W Reg to Mem, A6
-    ;OVE.W #$4C8E,D0                             ;MOVEM.W Mem to Reg, A6
-    ;MOVE.W #$4E95,D0                            ;JSR (A5)               
+    ;MOVE.W #$4E75,CUR_OP_CODE                            ;RTS
+    ;MOVE.W #$4E71,CUR_OP_CODE                            ;NOP
+    ;MOVE.W #$4415,CUR_OP_CODE                            ;NEG.L D5
+    ;MOVE.W #$43CC,CUR_OP_CODE                            ;LEA A1,A6
+    ;MOVE.W #%0100100010001110,CUR_OP_CODE
+    ;MOVE.W #$488E,CUR_OP_CODE                            ;MOVEM.W Reg to Mem, A6
+    ;MOVE.W #$4C8E,CUR_OP_CODE                             ;MOVEM.W Mem to Reg, A6
+    ;MOVE.W #$4E95,CUR_OP_CODE                            ;JSR (A5)               
     ****GROUP 5 tests****
     ;MOVE.W #%0101111110001111
-    MOVE.W #$5F8F,D0
+    
+    *****GROUP 5 TESTS****
+    ;#%0101111100000101, SUBQ.B D5
+    ;MOVE.W #$5F05,CUR_OP_CODE ; for SUBQ.B D5
+    ;#%0101111110001110, SUBQ.L A6 
+    ;MOVE.W #$5F8E,CUR_OP_CODE
+    ******GROUP 5 VALIDATION TESTS**********
+    ;MOVE.W #%0101111000001110,CUR_OP_CODE  ; ADDQ
+    ;MOVE.W #%0101010011000110,CUR_OP_CODE ; Scc
+    ;MOVE.W #%0101010011001110,CUR_OP_CODE ; DBcc
    
-   
+    *****GROUP 6 TESTS********* BCS,BGE,BLT,BVC
+    ; DISPLACEMENT, $00 is 16 bits, $FF is 32 bits
+    ; DISPLACEMENT = Last 8 bits
+    MOVE.W #%01100000010101010,CUR_OP_CODE   ;BRA
+    ;MOVE.W #%0110010100000000,CUR_OP_CODE   ;BCS
+    ;MOVE.W #%0110110001010101,CUR_OP_CODE   ;BGE
+    ;MOVE.W #%0110110110101010,CUR_OP_CODE   ;BLT
+    ;MOVE.W #%0110100001010101,CUR_OP_CODE   ;BVC
 ************************************************************************************
-LOAD_OP_CODE:
-    MOVE.W D0,CUR_OP_CODE
-    MOVE.W CUR_OP_CODE,(A6)
-    MOVE.W (A6),D0          ;Load current instruction set into D0
-    JSR OP_JSR_Routine      ;Use the JSR routine to identify the op code
+
 *-----------------------------------------------------------
 *First Nibble Values (15-12)
 *Value                  Operations
@@ -175,6 +194,11 @@ LOAD_OP_CODE:
 **********************************************************************************
 * These valid operand codes refer to the basic supported operand codes
 * Groups refer to the first nibble value that is supported by the operand
+LOAD_OP_CODE:
+    MOVE.W CUR_OP_CODE,D0
+    MOVE.W CUR_OP_CODE,(A6)
+    MOVE.W (A6),D0          ;Load current instruction set into D0
+    JSR OP_JSR_Routine      ;Use the JSR routine to identify the op code
 OP_JSR_Routine:
     MOVEM.L D0-D1, -(SP)           ;Backup registers D0 and D1 by pushing it on the Stack
     MOVE.L #12, D1                 ;Prepare bit shift left for D1   
@@ -309,7 +333,7 @@ OP_JSR_DONE:
 **********************************************************************************
 MOVE_LAST_6_BITS_TO_EA:      ;Move last 6 bits from EA field to relevant registers
    ; MOVEM.L D0-D7/A6, -(SP)  ;Save all changed registers
-    MOVE.W (A6),D0           ;Move current OP code into D0
+    MOVE.W CUR_OP_CODE,D0           ;Move current OP code into D0
     MOVE.W  #10,D1           ;Prepare 10 bit shift to D1
     LSL.W   D1,D0            ;Truncate to find the last 6 bits
     LSR.W   D1,D0            ;Shift back to get the proper 6 bits
@@ -338,7 +362,7 @@ MOVE_LAST_6_BITS_TO_EA:      ;Move last 6 bits from EA field to relevant registe
 **********************************************************************************
 FIND_2_BIT_SIZE_TO_EA:      ;Move the 2 bit size field relevant register
    ; MOVEM.L  D0-D5/A6,-(SP) ;Save all changed registers
-    MOVE.W   (A6),D0        ;Move current OP code into D0
+    MOVE.W   CUR_OP_CODE,D0        ;Move current OP code into D0
     MOVE.W   #8,D1          ;Prepare 8 bit shift to D1
     LSL.W    D1,D0          ;Truncate to find the 2 size bits
     LSR.W    D1,D0          ;Reposition the bits
@@ -363,7 +387,7 @@ FIND_2_BIT_SIZE_TO_EA:      ;Move the 2 bit size field relevant register
 **********************************************************************************
 FIND_3_BIT_REG_TO_EA:       ;Move the 3 bit dynamic register bits to proper register
    ; MOVEM.L  D0-D5/A6,-(SP) ;Save all changed registers
-    MOVE.W   (A6),D0        ;Move current OP code into D0
+    MOVE.W   CUR_OP_CODE,D0        ;Move current OP code into D0
     MOVE.W   #4,D1          ;Prepare 4 bit shift to D1
     LSL.W    D1,D0          ;Truncate to find the 2 size bits
     LSR.W    D1,D0          ;Reposition the bits
@@ -429,7 +453,7 @@ MOVE_AND_MOVEA_PARSE_EA:       ;Move the 3 bit dynamic register bits to proper r
 **********************************************************************************
 FIND_TRAILING_BITS_TO_EA:       ;Move the 3 bit dynamic register bits to proper register
    ; MOVEM.L  D0-D5/A6,-(SP) ;Save all changed registers
-    MOVE.W   (A6),D0        ;Move current OP code into D0
+    MOVE.W   CUR_OP_CODE,D0        ;Move current OP code into D0
     MOVE.W   #7,D1          ;Prepare 4 bit shift to D1
     LSL.W    D1,D0          ;Truncate to find the 2 size bits
     LSR.W    D1,D0          ;Reposition the bits
@@ -440,10 +464,54 @@ FIND_TRAILING_BITS_TO_EA:       ;Move the 3 bit dynamic register bits to proper 
     RTS                    ;Return to stack
 **********************************************************************************
 
-
-
-
-
+*PARSE_EA_CONSTANT_BITS
+**********************************************************************************
+* Definition: Uses CUR_OP_CODE to shift the proper bits into the global constants
+* used for EA (MNEMONIC,FIRST_3,SECOND_3,THIRD_3,FOURTH_3. Where MNEMONIC refers
+* to the first 4 bits of CUR_OP_CODE (15-12), FIRST_3 refers to the first group
+* of 3 bits (11-9), SECOND_3 refers to the second group of 3 bits (8-6), THIRD_3
+* refers to the third group of 3 bits (5-3), and FOURTH_3 refers to the fourth
+* group of 3 bits (2-0). Shifts CUR_OP_CODE bits to initialize constants.
+*
+* Registers used: D0,D1
+*
+* Precondition: CUR_OP_CODE has been set with an 4 hex instruction set
+* 
+* Postcondition: MNEMONIC, FIRST_3, SECOND_3, THIRD_3, FOURTH_3 have been set
+* to the corresponding values.
+**********************************************************************************
+PARSE_EA_CONSTANT_BITS:
+    *MNEMONIC SHIFT
+    MOVE.W CUR_OP_CODE,D0       ;Load in current instruction set into D0
+    MOVE.W #12,D1               ;Prepare a bit shift of 12 into D1
+    LSR.W D1,D0                 ;Shift 12 bits from D0 right
+    MOVE.B D0,MNEMONIC          ;Set MNEMONIC to D0
+    *FIRST_3 SHIFT
+    MOVE.W #9,D1                ;Prepare a bit shift of 9 into D1
+    MOVE.W CUR_OP_CODE,D0       ;Load in current instruction set into D
+    LSL.W #4,D0                 ;Shift out bits 15-12 in D0
+    LSR.W #4,D0                 ;Reposition D0
+    LSR.W  D1,D0                ;Shift D0 9 bits right
+    MOVE.B D0,FIRST_3           ;Set FIRST_3 to D0
+    *SECOND_3 SHIFT
+    MOVE.W CUR_OP_CODE,D0       ;Load in current instruction set into D
+    LSL.W #7,D0                 ;Shift out bits 15-9 in D0
+    LSR.W #7,D0                 ;Reposition D0
+    LSR.W #6,D0                 ;Shift D0 6 bits right
+    MOVE.B D0,SECOND_3          ;Set SECOND_3 to D0
+    *THIRD_3 SHIFT
+    MOVE.W CUR_OP_CODE,D0       ;Load in current instruction set into D
+    LSR.W #3,D0                 ;Shift D0 3 bits right
+    MOVE.W #13,D1               ;Prepare a 13 bit shift into D1
+    LSL.W D1,D0                 ;Truncate first 13 bits of D0
+    LSR.W D1,D0                 ;Reposition D0
+    MOVE.B D0,THIRD_3           ;Set THIRD_3 to D0
+    *FOURTH_3 SHIFT
+    MOVE.W CUR_OP_CODE,D0       ;Load in current instruction set into D
+    LSL.W D1,D0                 ;Grab the fourth 3-bit group
+    LSR.W D1,D0                 ;Shift D0 back into position
+    MOVE.B D0,FOURTH_3          ;Set FOURTH_3 to Do
+    RTS                         ;Return to stack
 ********** End of EA Parsing *****************************************************
 
 *******************JMP LABELS ****************************************************
@@ -661,16 +729,19 @@ CHECK_OP_MOVEM:
 ********************************************************************************
 C_GROUP_5:
 
-CHECK_OP_SUBQ:
+VALID_CHECK_OP_SUBQ:
     MOVE.W CUR_OP_CODE,D0
     ANDI.W #$F1C0,D0        ;Bitmask check for Scc, DBcc and ADDQ
-    CMP.W  #$5100,D0        ;This should be the only valid one for SUBQ
-    BNE    INVALID_OP       ;If not equal it's invalid
+    CMP.W  #$51C0,D0        ;This should be the only valid one for SUBQ
+    BEQ    INVALID_OP       ;If not equal it's invalid
+    BNE    CHECK_OP_SUBQ
+CHECK_OP_SUBQ     
     MOVE.W  CUR_OP_CODE,D0  ;Actual check for SUBQ
     ANDI.W #$F100,D0        ;Bitmask check for SUBQ
     CMP.W  #$5100,D0        ;Compare the proper value
     BEQ    PRINT_OP_SUBQ    ;If equal print it out
     BNE    INVALID_OP       ;Else the operand is invalid
+    
 * GROUP_6
 ********************************************************************************
 * BRA: $60, 7-0 8-Bit Displacement
@@ -680,11 +751,17 @@ CHECK_OP_SUBQ:
 *   BGE: %1100		
 *   BLT: %1101	
 *   BVC: %1000
-
+*   
+*   MOVE.W #%0110010100000000   ;BCS
+*   MOVE.W #%0110110001010101   ;BGE
+*   MVE.W #%0110110110101010    BLT
+*   MOVE.W #%0110100001010101   ;BVC
 ********************************************************************************
 C_GROUP_6:
 
 CHECK_OP_BRA:
+    MOVE.W CUR_OP_CODE,D0
+   ; ANDI.W 
 
 CHECK_OP_BCS:
 
