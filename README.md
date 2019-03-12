@@ -42,7 +42,7 @@ OP Code
 - [ ] Validation testing for OP codes
 
 EA
-- [ ] Finish Trailing Bits
+- [x] Finish Trailing Bits
 - [ ] Use OP code parsings successfully
 - [x] Adhere to commenting format
 
