@@ -33,7 +33,7 @@ IO
 - [ ] Printing overall instruction
 - [ ] Test demo program for all supported commands
 - [ ] Validation testing for I/O
-- [x] Adhere to commenting format
+- [ ] Adhere to commenting format
 
 OP Code
 - [ ] Finish identification for all OP codes
@@ -44,7 +44,7 @@ OP Code
 EA
 - [ ] Finish Trailing Bits
 - [ ] Use OP code parsings successfully
-- [ ] Adhere to commenting format
+- [x] Adhere to commenting format
 
 Commenting Format
 ```
