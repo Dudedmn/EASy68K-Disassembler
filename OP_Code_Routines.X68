@@ -5,21 +5,66 @@
 
 * Description: Op code determining to identify values
 
-  ORG $1500
-CUR_OP_CODE DS.W 1  ; Current OP Code Word
-  ORG $1600
-G_BUFFER_PREP DS.B 80
-  ORG $1700 
-G_BUFFER    DS.B 80
- 
+
+;FAHAD CODE
+; ORG place for G_BUFFER
+; ORG place for CUR_OP_CODE
+; ORG place for VALID_OP_CODE
+; ORG place for all other constants
+; ORG START $1000
+; WE NEED TO SEE APPROX HOW MUCH ADDRESS SPACE ALL OUR ROUTINES COVER
+; ORG OUR CONSTANTS/BUFFERS AT A SAFE DISTANCE BETWEEN ROUTINES AND TEST PROGRAM
+
+; MEMORY_ADDRESS OPCODE $HEX_VALUE
+;G_BUFFER
+; 1254 MOVEA.L A3,A6, $3ASD
+; 1254 RTS $4E75
+;B_BUFFER
+; 1254 DATA $CURRENT_OP
+
+; JSR INVALID_OP
+; 
+
+; 8800 MOVEA.L A3,A6 $3FCA
+; 8800 DATA $3FCA
+
   ORG $1000 ; Start at Address $1000
+CUR_OP_CODE DS.W 1  ; Current OP Code Word
+;$4E75 -> CUR_OP_CODE
+EA_SIZE     DS.W 1
+G_BUFFER    DS.B 80
+B_BUFFER    DS.B 80
+
+P_OP_MOVEA_L_T  DC.L    'MOVEA.L',0
+P_OP_MOVEA_L_A_L DC.L   'A.L',0
+    LEA G_BUFFER,A4
 START
 
- ; Start the op code routine
- 
-   ; LEA P_OP_MOVEA_L,A4    ; Load the message onto A4
-   ; MOVE.L (A4),G_BUFFER   ; Load the value of the message onto the G_BUFFER
-   ; ADDQ.W #4,A4           ; Increment 4 spaces in the address
+    ; Start the op code routine
+    LEA G_BUFFER, A4
+    MOVE.B #0, (A4)
+    
+    MOVE.L (A5)+, D0
+    
+    ; Load the message onto A4
+    MOVE.L #P_OP_MOVEA_L_T, Arg_AddStrToBuffer_String
+    MOVE.L #G_BUFFER, Arg_AddStrToBuffer_Buffer 
+    
+    
+    JSR AddStrToBuffer
+    ;LEA G_BUFFER, A4   ; Load the value of the message onto the G_BUFFER
+    ;MOVE.L P_OP_MOVEA_L_T,(A4)+
+    ;MOVE.L P_OP_MOVEA_L_A_L,(A4)+
+    
+    
+    
+
+    ; AFTER THIS POINT THE BUFFER HAS THIS 'MOVE' + 'A.L'          ; Increment 4 spaces in the address
+    
+    
+       
+    
+   
    ;This is the right area for pointer now, however when I add here it can't go
    ;back 
 *********************************************************************************
@@ -72,15 +117,17 @@ START
     ;MOVE.W CUR_OP_CODE,(A6)                     ;Loading memory value to address value
  
     ****GROUP 4 tests****
-    ;MOVE.W #$4E75,D0                                    ;RTS
-    ;MOVE.W #$4E71,D0                                    ;NOP
-    ;MOVE.W #$4415,D0                                        ;NEG.L D5
-    ;MOVE.W #$43CC,D0                                         ;LEA A1,A6
+    ;MOVE.W #$4E75,D0                            ;RTS
+    ;MOVE.W #$4E71,D0                            ;NOP
+    ;MOVE.W #$4415,D0                            ;NEG.L D5
+    ;MOVE.W #$43CC,D0                            ;LEA A1,A6
     ;MOVE.W #%0100100010001110
-    ;MOVE.W #$488E,D0                                        ;MOVEM.W Reg to Mem, A6
-    MOVE.W #$4C8E,D0                                         ;MOVEM.W Mem to Reg, A6
-    ;MOVE.W #$4E95,D0                                       ;JSR (A5)               
-
+    ;MOVE.W #$488E,D0                            ;MOVEM.W Reg to Mem, A6
+    ;OVE.W #$4C8E,D0                             ;MOVEM.W Mem to Reg, A6
+    ;MOVE.W #$4E95,D0                            ;JSR (A5)               
+    ****GROUP 5 tests****
+    ;MOVE.W #%0101111110001111
+    MOVE.W #$5F8F,D0
    
    
 ************************************************************************************
@@ -96,12 +143,12 @@ LOAD_OP_CODE:
 *$1                     GROUP_1: MOVE.B                             --- Partial, needs trailing bits
 *$2                     GROUP_2: MOVE.L, MOVEA.L                    --- Partial, needs trailing bits
 *$3                     GROUP_3: MOVE.W, MOVEA.W                    --- Partial, needs trailing bits
-*$4                     GROUP_4: LEA,JSR,RTS,NEG,MOVEM              --- Partial, needs SIZE print for NEG, MOVEM
-*$5                     GROUP_5: SUBQ                               --- Not started
+*$4                     GROUP_4: LEA,JSR,RTS,NEG,MOVEM              --- Partial, needs SIZE print for NEG, MOVE
+*$5                     GROUP_5: SUBQ                               --- Partial, needs SIZE pri
 *$6                     GROUP_6: Bcc(BCS,BGE,BLT,BVC), BRA          --- Not started
 *$7                     GROUP_7: INVALID_OP                         --- DONE
 *$8                     GROUP_8: DIVS, OR                           --- Not started
-*$9                     GROUP_7: SUB                                --- Not started
+*$9                     GROUP_9: SUB                                --- Not started
 *$A                     GROUP_A: INVALID_OP                         --- DONE
 *$B                     GROUP_B: EOR, CMP                           --- Not started
 *$C                     GROUP_C: MULS                               --- Not started
@@ -598,7 +645,7 @@ CHECK_OP_NEG:
     CMP.W  #$4400,D0
     BNE    CHECK_OP_MOVEM
     BEQ    PRINT_OP_NEG
- 
+**************** COME BACK TO FINISH UP SIZE **********************************
 CHECK_OP_MOVEM:
     MOVE.W CUR_OP_CODE,D0
     ANDI.W #$FB80,D0
@@ -609,11 +656,21 @@ CHECK_OP_MOVEM:
 * GROUP_5
 ********************************************************************************
 * SUBQ: $5, 11-9 DATA, 8 %1, 7-6 Size, 5-3 EA Mode, 2-0 EA Reg
+* Validation checking:
+* Check against, ADDQ, Scc, DBcc
 ********************************************************************************
 C_GROUP_5:
 
 CHECK_OP_SUBQ:
-
+    MOVE.W CUR_OP_CODE,D0
+    ANDI.W #$F1C0,D0        ;Bitmask check for Scc, DBcc and ADDQ
+    CMP.W  #$5100,D0        ;This should be the only valid one for SUBQ
+    BNE    INVALID_OP       ;If not equal it's invalid
+    MOVE.W  CUR_OP_CODE,D0  ;Actual check for SUBQ
+    ANDI.W #$F100,D0        ;Bitmask check for SUBQ
+    CMP.W  #$5100,D0        ;Compare the proper value
+    BEQ    PRINT_OP_SUBQ    ;If equal print it out
+    BNE    INVALID_OP       ;Else the operand is invalid
 * GROUP_6
 ********************************************************************************
 * BRA: $60, 7-0 8-Bit Displacement
@@ -772,10 +829,20 @@ ADD_PERIOD:
     MOVE.B #$0,D0
     ADDI.B #$46,D0
     MOVE.L (SP)+,D0
-********************** PRINTING ROUTINES ****************************************
+********************** PRINTING ROUTINES **************************************
+* Description: These routines are to print the associated op codes, by placing
+* them in the appropriate area to the buffer
+*
+* Registers used: A1 for loading, A6 for EA parsing.
+*
+* Precondition: The relevant opcode has been identified correctly.
+*
+* Postcondition: Prints out the associated opcode to the buffer.
+*******************************************************************************
+
+****************************** GROUP 0 **************************************** 
 PRINT_OP_ORI:
     LEA P_OP_ORI,A1
-    ;MOVE.W P_OP_ORI,(A4)+
     JSR PRINT_OP
     RTS
 PRINT_OP_CMPI:
@@ -783,7 +850,6 @@ PRINT_OP_CMPI:
     JSR FIND_2_BIT_SIZE_TO_EA
     JSR MOVE_LAST_6_BITS_TO_EA
     LEA P_OP_CMPI,A1
-    ;MOVE.W P_OP_CMPI,(A4)+
     JSR PRINT_OP
     RTS
 PRINT_OP_S_BCLR:
@@ -792,7 +858,6 @@ PRINT_OP_S_BCLR:
 	MOVE.W #$0,(A6)
 	MOVE.W #%000, D4
     LEA P_OP_S_BCLR,A1
-    ;MOVE.W P_OP_S_BCLR,(A4)+
     JSR PRINT_OP
     RTS
 PRINT_OP_D_BCLR:
@@ -801,16 +866,20 @@ PRINT_OP_D_BCLR:
 	MOVE.W #$0,(A6)
 	MOVE.W #%110, D4
     LEA P_OP_D_BCLR,A1
-    ;MOVE.W P_OP_D_BCLR,(A4)+
     JSR PRINT_OP
-    RTS    
+    RTS
+******************************* END OF GROUP 0 ********************************
+
+****************************** GROUP 1 ****************************************    
 PRINT_OP_MOVEB:
     JSR MOVE_AND_MOVEA_PARSE_EA
     MOVE.W #$1,(A6)
     LEA P_OP_MOVEB,A1
-    ;MOVE.W P_OP_MOVEB,(A4)+
     JSR PRINT_OP
     RTS
+******************************* END OF GROUP 1 ********************************
+    
+****************************** GROUP 2 **************************************** 
 PRINT_OP_MOVEA_L:
     JSR MOVE_AND_MOVEA_PARSE_EA
     MOVE.W #$2,(A6)
@@ -826,23 +895,26 @@ PRINT_OP_MOVE_L:
     JSR MOVE_AND_MOVEA_PARSE_EA
     MOVE.W #$2,(A6)
     LEA P_OP_MOVE_L,A1
-    ;MOVE.W P_OP_MOVE_L,(A4)+
     JSR PRINT_OP
     RTS
+******************************* END OF GROUP 2 ********************************
+    
+****************************** GROUP 3 ****************************************    
 PRINT_OP_MOVEA_W:
     JSR MOVE_AND_MOVEA_PARSE_EA
     MOVE.W #$3,(A6)
     LEA P_OP_MOVEA_W,A1
-    ;MOVE.W P_OP_MOVEA_W,(A4)+
     JSR PRINT_OP
     RTS
 PRINT_OP_MOVE_W:
     JSR MOVE_AND_MOVEA_PARSE_EA
     MOVE.W #$3,(A6)
     LEA P_OP_MOVE_W,A1
-    ;MOVE.W P_OP_MOVE_W,(A4)+
     JSR PRINT_OP
     RTS
+******************************* END OF GROUP 3 ********************************
+
+****************************** GROUP 4 ****************************************
 PRINT_OP_NOP:
     LEA P_OP_NOP,A1
     JSR PRINT_OP
@@ -871,16 +943,137 @@ PRINT_OP_MOVEM_L:
     LEA P_OP_MOVEM_L,A1
     JSR PRINT_OP
     RTS
+******************************* END OF GROUP 4 ********************************
+    
+****************************** GROUP 5 ****************************************
+PRINT_OP_SUBQ:
+    LEA P_OP_SUBQ,A1
+    JSR PRINT_OP
+    RTS
+******************************* END OF GROUP 5 ********************************
+
+****************************** GROUP 6 ****************************************
+PRINT_OP_BCS:
+    LEA P_OP_BCS,A1
+    JSR PRINT_OP
+    RTS
+PRINT_OP_BGE:
+    LEA P_OP_BGE,A1
+    JSR PRINT_OP
+    RTS
+PRINT_OP_BLT:
+    LEA P_OP_BLT,A1
+    JSR PRINT_OP
+    RTS
+PRINT_OP_BVC:
+    LEA P_OP_BVC,A1
+    JSR PRINT_OP
+    RTS
+PRINT_OP_BRA:
+    LEA P_OP_BRA,A1
+    JSR PRINT_OP
+    RTS
+******************************* END OF GROUP 6 ********************************
+
+****************************** GROUP 7 ****************************************
+* No currently supported OP codes to print here.
+******************************* END OF GROUP 7 ********************************
+
+****************************** GROUP 8 ****************************************
+PRINT_OP_DIVS:
+    LEA P_OP_DIVS,A1
+    JSR PRINT_OP
+    RTS
+PRINT_OP_OR:
+    LEA P_OP_OR,A1
+    JSR PRINT_OP
+    RTS
+******************************* END OF GROUP 8 ********************************
+
+****************************** GROUP 9 ****************************************
+PRINT_OP_SUB:
+    LEA P_OP_SUB,A1
+    JSR PRINT_OP
+    RTS
+******************************* END OF GROUP 9 ********************************
+
+****************************** GROUP A ****************************************
+* No currently supported OP codes to print here.
+******************************* END OF GROUP A ********************************
+
+****************************** GROUP B ****************************************
+PRINT_OP_EOR:
+    LEA P_OP_EOR,A1
+    JSR PRINT_OP
+    RTS
+PRINT_OP_CMP:
+    LEA P_OP_CMP,A1
+    JSR PRINT_OP
+    RTS
+******************************* END OF GROUP B ********************************
+
+****************************** GROUP C ****************************************
+PRINT_OP_MULS:
+    LEA P_OP_MULS,A1
+    JSR PRINT_OP
+    RTS
+******************************* END OF GROUP C ********************************
+
+****************************** GROUP D ****************************************
+PRINT_OP_ADD:
+    LEA P_OP_ADD,A1
+    JSR PRINT_OP
+    RTS
+PRINT_OP_ADDA:
+    LEA P_OP_ADDA,A1
+    JSR PRINT_OP
+    RTS
+
+******************************* END OF GROUP D ********************************
+
+****************************** GROUP E ****************************************
+PRINT_OP_LSL:
+    LEA P_OP_LSL,A1
+    JSR PRINT_OP
+    RTS
+PRINT_OP_LSR:
+    LEA P_OP_LSR,A1
+    JSR PRINT_OP
+    RTS
+PRINT_OP_ASR:
+    LEA P_OP_ASR,A1
+    JSR PRINT_OP
+    RTS
+PRINT_OP_ASL:
+    LEA P_OP_ASL,A1
+    JSR PRINT_OP
+    RTS
+PRINT_OP_ROL:
+    LEA P_OP_ROL,A1
+    JSR PRINT_OP
+    RTS
+PRINT_OP_ROR:
+    LEA P_OP_ROR,A1
+    JSR PRINT_OP
+    RTS
+******************************* END OF GROUP E ********************************
+
+****************************** GROUP F ****************************************
+* No currently supported OP codes to print here.
+******************************* END OF GROUP F ********************************
+
+
+
 PRINT_OP:   ;Prints current op code byte
     ;MOVE.W (A4),(A1)       ; NEEDS TO USE G_BUFFER LATER
     MOVE.B #13,D0
     TRAP #15
     RTS
-******************* END OF PRINTING ROUTINES ***********************************
+******************* END OF PRINTING ROUTINES **********************************
 
-******************* END OF JMP LABELS ******************************************
+******************* END OF JMP LABELS *****************************************
 
-******************* DATA CONSTANT PRINTS ***************************************
+******************* DATA CONSTANT PRINTS **************************************
 * Formatting is as follows: P_OP_<OPCODE>, where P = Print, OP = Operation,
 * <OPCODE> is any valid operand
 
@@ -926,7 +1119,78 @@ P_OP_ASL        DC.B    'ASL',0
 P_OP_ROR        DC.B    'ROR',0
 P_OP_ROL        DC.B    'ROL',0
 ***************** END OF DATA CONSTANT PRINTS ***********************************
+ 
+
+**
+* AddStrToBuffer
+**
+* Adds the given NULL-terminated string to the specified buffer.
+*
+* Default buffer length is 80 characters, but can be modified in the argument
+* variables.
+*
+* If the buffer length is exceeded, either due to lack of a NULL character or
+* an incorrectly specified length, 1 is returned. Otherwise, 0 is returned to
+* indicate success.
+*
+**
+* @param Arg_AddStrToBuffer_String              Pointer to string
+* @param Arg_AddStrToBuffer_Buffer              Pointer to buffer
+* @param Arg_AddStrToBuffer_BufferLength        Length of buffer (default 80 chars)
+* @return Ret_AddStrToBuffer_Success            0 if successful, 1 otherwise.
+* @branch _AddStrToBuffer_FindBufferNullLoop    Loop to find NULL in buffer
+* @branch _AddStrToBuffer_AddLoop               Loop to add string to buffer
+* @branch _AddStrToBuffer_Success               Branch when string successfully added
+* @branch _AddStrToBuffer_StringLengthExceeded  Branch when length exceeded (either string or buffer)
+* @branch _AddStrToBuffer_End                   End of subroutine
+**
+Arg_AddStrToBuffer_String           DS.L    1
+Arg_AddStrToBuffer_Buffer           DS.L    1
+Arg_AddStrToBuffer_BufferLength     DC.L    80
+Ret_AddStrToBuffer_Success          DS.B    1
+
+AddStrToBuffer:                     DS.W    0
+    MOVEM.L     D0-D1/A0-A1, -(SP)                  * Backup registers to stack
+
+    MOVE.L      Arg_AddStrToBuffer_String, A0       * Load string pointer
+    MOVE.L      Arg_AddStrToBuffer_Buffer, A1       * Load buffer pointer
+    MOVE.L      Arg_AddStrToBuffer_BufferLength, D0 * Load buffer length
+    CLR.W       Ret_AddStrToBuffer_Success          * Clear success bit
+    CLR.L       D1                                  * Clear loop counter
+
+_AddStrToBuffer_BufferLoop
+    CMPI.B      #0, (A1)                            * If buffer char is NULL
+    BEQ         _AddStrToBuffer_AddLoop             * Start adding string to bufer
     
+    CMP.L       D0, D1                              * If counter >= max length
+    BGE         _AddStrToBuffer_LengthExceeded      * Error, return
+    
+    ADDQ.L      #1, A1                              * Go to next character
+    ADDQ.B      #1, D1                              * Increment counter
+    BRA         _AddStrToBuffer_BufferLoop          * Loop back
+    
+_AddStrToBuffer_AddLoop
+    CMPI.B      #0, (A0)                            * If string char is NULL
+    BEQ         _AddStrToBuffer_Success             * String successfully added
+    
+    CMP.B       D0, D1                              * If counter >= max length
+    BGE         _AddStrToBuffer_LengthExceeded      * Error, return
+    
+    MOVE.B      (A0)+, (A1)+                        * Move string char to buffer char
+    ADDQ.B      #1, D1                              * Increment counter
+    BRA         _AddStrToBuffer_AddLoop             * Loop back
+
+_AddStrToBuffer_Success
+    MOVE.B      #0, (A1)                            * Add NULL to end of string
+    BRA         _AddStrToBuffer_End                 * Finish subroutine
+
+_AddStrToBuffer_LengthExceeded
+    MOVE.W      #1, Ret_AddStrToBuffer_Success      * Invalidate success bit
+
+_AddStrToBuffer_End
+    MOVEM.L     (SP)+, D0-D1/A0-A1                  * Restore registers from stack
+    RTS                  
+   
     END START
 
 
