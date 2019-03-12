@@ -37,6 +37,27 @@ START
     
 ***************************** Input Tests ********************************************
     ***GROUP 0 tests**** SUPPORTED: ORI, BCLR (static, dynamic), CMPI
+    ;MOVE.W #%0000000000111100,CUR_OP_CODE      ;ORI TO CCR             SHOULD FAIL
+    ;MOVE.W #%0000000001111100,CUR_OP_CODE      ;ORI TO SR              SHOULD FAIL
+    ;MOVE.W #%0000000010000101,CUR_OP_CODE      ;ORI.W D5               SHOULD PASS
+    ;MOVE.W #%0000001001111100,CUR_OP_CODE      ;ANDI TO CCR            SHOULD FAIL
+    ;MOVE.W #%0000001001111100,CUR_OP_CODE      ;ANDI TO SR             SHOULD FAIL
+    ;MOVE.W #%0000001010000101,CUR_OP_CODE      ;ANDI.W D5              SHOULD FAIL
+    ;MOVE.W #%0000010010000101,CUR_OP_CODE      ;SUBI.W D5              SHOULD FAIL
+    ;MOVE.W #%0000011010000101,CUR_OP_CODE      ;ADDI.W D5              SHOULD FAIL
+    ;MOVE.W #%0000101000111100,CUR_OP_CODE      ;EORI TO CCR            SHOULD FAIL
+    ;MOVE.W #%0000101001111100,CUR_OP_CODE      ;EORI TO SR             SHOULD FAIL
+    ;MOVE.W #%0000101010000101,CUR_OP_CODE      ;EORI.W D5              SHOULD FAIL
+    ;MOVE.W #%0000100000000101,CUR_OP_CODE      ;STATIC BTST.B D5       SHOULD FAIL
+    ;MOVE.W #%0000100001000101,CUR_OP_CODE      ;STATIC BCHG.B D5       SHOULD FAIL
+    *MOVE.W #%0000100011000101,CUR_OP_CODE      ;STATIC BSET.B D5       SHOULD FAIL
+    *MOVE.W #%0000111100000101,CUR_OP_CODE      ;DYNAMIC BTST.B D7,D5   SHOULD FAIL
+    *MOVE.W #%0000111101000101,CUR_OP_CODE      ;DYNAMIC BCHG.B,D7,D5   SHOULD FAIL
+    *MOVE.W #%0000111111000101,CUR_OP_CODE      ;DYNAMIC BSET.B D7,D5   SHOULD FAIL
+    *MOVE.W #%0000111111001101,CUR_OP_CODE      ;MOVEP.L MEM TO REG, A5 SHOULD FAIL
+        
+    
+    
     
     ***GROUP 1 tests**** SUPPORTED: MOVE.B
     
@@ -107,7 +128,7 @@ START
     ;MOVE.W #%0110000001010101,CUR_OP_CODE   ;BRA
     ;MOVE.W #%0110010100000001,CUR_OP_CODE   ;BCS
     ;MOVE.W #%0110110001010100,CUR_OP_CODE   ;BGE
-    MOVE.W #%0110110110101010,CUR_OP_CODE   ;BLT
+    ;MOVE.W #%0110110110101010,CUR_OP_CODE   ;BLT
     ;MOVE.W #%0110100001010100,CUR_OP_CODE   ;BVC
     
     *****GROUP 7 TESTS**********        ;Should be ALL INVALID
@@ -518,7 +539,7 @@ PARSE_EA_CONSTANT_BITS:
 * GROUP_0                      
 ********************************************************************************
 * Description: Checks for the following listed OP codes to be present or not
-*
+* Supported OP codes:
 * ORI: $00, 7-6 Size, 5-3 EA Mode, 2-0 EA Reg
 * CMPI: $0C, 7-6 Size, 5-3 EA Mode, 2-0 EA Reg
 * Dynamic BCLR: $0, 11-9 Register, 8-6 %110, 5-3 EA Mode, 2-0 EA Reg
@@ -531,38 +552,157 @@ PARSE_EA_CONSTANT_BITS:
 * Postcondition: Parses proper OP code with a nibble value of $0 or finds an
 * invalid OP code. After a successful parse loading for EA values will be done
 * through a subroutine.
+* 
+* Unsupported OP codes:
+* ORI_TO_CCR, ORI_TO_SR, ANDI_TO_CCR, ANDI_TO_SR, ANDI, SUBI, ADDI, EORI_TO_CCR
+* EORI_TO_SR, EORI, STATIC_BTST, STATIC_BCHG, STATIC_BSET, DYNAMIC_BTST,
+* DYNAMIC_BCHG, DYNAMIC_BSET, MOVEP 
 ********************************************************************************
 C_GROUP_0:
     MOVEM.L D0-D1, -(SP)        ;Backup registers
+*Unsupported OP codes that are fully static in bits
+CHECK_OP_ORI_TO_CCR:
+    MOVE.W CUR_OP_CODE,D0      ;Move current instruction set into D0
+    CMP.W #$003C,D0
+    BEQ INVALID_OP
+    BNE CHECK_OP_ORI_TO_SR
     
+CHECK_OP_ORI_TO_SR:
+    MOVE.W CUR_OP_CODE,D0      ;Move current instruction set into D0
+    CMP.W #$007C,D0
+    BEQ INVALID_OP
+    BNE CHECK_OP_ANDI_TO_CCR
+    
+CHECK_OP_ANDI_TO_CCR:
+    MOVE.W CUR_OP_CODE,D0      ;Move current instruction set into D0
+    CMP.W #$023C,D0
+    BEQ INVALID_OP
+    BNE CHECK_OP_ANDI_TO_SR
+    
+CHECK_OP_ANDI_TO_SR:
+    MOVE.W CUR_OP_CODE,D0      ;Move current instruction set into D0
+    CMP.W #$027C,D0
+    BEQ INVALID_OP
+    BNE CHECK_OP_ANDI
+
+CHECK_OP_EORI_TO_CCR:
+    MOVE.W CUR_OP_CODE,D0      ;Move current instruction set into D0
+    CMP.W #$0A3C,D0
+    BEQ INVALID_OP
+    BNE CHECK_OP_EORI_TO_SR
+    
+CHECK_OP_EORI_TO_SR:
+    MOVE.W CUR_OP_CODE,D0      ;Move current instruction set into D0
+    CMP.W #$0A7C,D0
+    BEQ INVALID_OP
+    BNE CHECK_OP_ANDI
+    
+*Unsupported OP codes to check with partial static bits
+CHECK_OP_ANDI:
+    MOVE.W CUR_OP_CODE,D0      ;Move current instruction set into D0
+    ANDI.W #$FF00,D0
+    CMP.W #$0200,D0
+    BEQ INVALID_OP
+    BNE CHECK_OP_SUBI
+    
+CHECK_OP_SUBI:
+    MOVE.W CUR_OP_CODE,D0      ;Move current instruction set into D0
+    ANDI.W #$FF00,D0
+    CMP.W #$0400,D0
+    BEQ INVALID_OP
+    BNE CHECK_OP_ADDI
+
+CHECK_OP_ADDI:
+    MOVE.W CUR_OP_CODE,D0      ;Move current instruction set into D0
+    ANDI.W #$FF00,D0
+    CMP.W #$0600,D0
+    BEQ INVALID_OP
+    BNE CHECK_OP_EORI
+
+CHECK_OP_EORI:
+    MOVE.W CUR_OP_CODE,D0      ;Move current instruction set into D0
+    ANDI.W #$FF00,D0
+    CMP.W #$0A00,D0
+    BEQ INVALID_OP
+    BNE CHECK_OP_STATIC_BTST
+    
+CHECK_OP_STATIC_BTST:
+    MOVE.W CUR_OP_CODE,D0      ;Move current instruction set into D0
+    ANDI.W #$FFC0,D0
+    CMP.W #$0800,D0
+    BEQ INVALID_OP
+    BNE CHECK_OP_STATIC_BCHG
+    
+CHECK_OP_STATIC_BCHG:
+    MOVE.W CUR_OP_CODE,D0      ;Move current instruction set into D0
+    ANDI.W #$FFC0,D0
+    CMP.W #$0840,D0
+    BEQ INVALID_OP
+    BNE CHECK_OP_STATIC_BSET
+    
+CHECK_OP_STATIC_BSET:
+    MOVE.W CUR_OP_CODE,D0      ;Move current instruction set into D0
+    ANDI.W #$FFC0,D0
+    CMP.W #$08C0,D0
+    BEQ INVALID_OP
+    BNE CHECK_OP_DYNAMIC_BTST
+
+CHECK_OP_DYNAMIC_BTST:
+    MOVE.W CUR_OP_CODE,D0      ;Move current instruction set into D0
+    ANDI.W #$F1C0,D0
+    CMP.W #$0100,D0
+    BEQ INVALID_OP
+    BNE CHECK_OP_DYNAMIC_BCHG
+
+CHECK_OP_DYNAMIC_BCHG:
+    MOVE.W CUR_OP_CODE,D0      ;Move current instruction set into D0
+    ANDI.W #$F1C0,D0
+    CMP.W #$0140,D0
+    BEQ INVALID_OP
+    BNE CHECK_OP_DYNAMIC_BSET
+
+CHECK_OP_DYNAMIC_BSET:
+    MOVE.W CUR_OP_CODE,D0      ;Move current instruction set into D0
+    ANDI.W #$F1C0,D0
+    CMP.W #$01C0,D0
+    BEQ INVALID_OP
+    BNE CHECK_OP_MOVEP
+    
+CHECK_OP_MOVEP:
+    MOVE.W CUR_OP_CODE,D0
+    ANDI.W #$F138,D0
+    CMP.W #$0108,D0
+    BEQ INVALID_OP
+    BNE CHECK_OP_ORI
+
+*Supported OP code checks
 CHECK_OP_ORI:
-    MOVE.W  CUR_OP_CODE,D0      ;Move current instruction set into D
+    MOVE.W  CUR_OP_CODE,D0      ;Move current instruction set into D0
     ANDI.W  #$FF00,D0           ;Mask relevant bits to D0
     CMP.W   #$0000,D0           ;Compare the appropriate masked bits     
     BNE     CHECK_OP_CMPI       ;Branch to next comparison if not equal
     JSR     PRINT_OP_ORI        ;Print the OP code if equal    
     BRA     CG0_C               ;Finish routine
 CHECK_OP_CMPI:
-    MOVE.W  CUR_OP_CODE,D0      ;Move current instruction set into D
+    MOVE.W  CUR_OP_CODE,D0      ;Move current instruction set into D0
     ANDI.W  #$FF00,D0           ;Mask relevant bits to D0
     CMP.W   #$0C00,D0           ;Compare the appropriate masked bits   
-    BNE     CHECK_OP_S_BCLR     ;Branch to next comparison if not equal       
+    BNE     CHECK_OP_STATIC_BCLR     ;Branch to next comparison if not equal       
     JSR     PRINT_OP_CMPI       ;Print the OP code if equal
     BRA     CG0_C               ;Finish routine
-CHECK_OP_S_BCLR:
-    MOVE.W  CUR_OP_CODE,D0      ;Move current instruction set into D
+CHECK_OP_STATIC_BCLR:
+    MOVE.W  CUR_OP_CODE,D0      ;Move current instruction set into D0
     ANDI.W  #$FF00,D0           ;Mask relevant bits to D0
     CMP.W   #$0800,D0           ;Compare the appropriate masked bits
-    BNE     CHECK_OP_D_BCLR     ;Branch to next comparison if not equal
-    JSR     PRINT_OP_S_BCLR     ;Print the OP code if equal
-    ;MOVEM.L (SP)+,D6-D7        ;POP STACK
+    BNE     CHECK_OP_DYNAMIC_BCLR     ;Branch to next comparison if not equal
+    JSR     PRINT_OP_STATIC_BCLR     ;Print the OP code if equal
     BRA     CG0_C               ;Finish routine
-CHECK_OP_D_BCLR:
-    MOVE.W  CUR_OP_CODE,D0        ;Move current instruction set into D
+CHECK_OP_DYNAMIC_BCLR:
+    MOVE.W  CUR_OP_CODE,D0        ;Move current instruction set into D0
     ANDI.W  #%0000000110000000,D0 ;Do a direct binary bitmask to see which bits are needed
     CMP.W   #%0000000110000000,D0 ;Compare the expected binary value
     BNE     CG0_F                 ;If not equal this must be an invalid OP code
-    JSR     PRINT_OP_D_BCLR       ;Print the OP code if equal
+    JSR     PRINT_OP_DYNAMIC_BCLR       ;Print the OP code if equal
     BRA     CG0_C                 ;Finish routine
 CG0_F:                            ;Checks have been finished, invalid OP code has been found
     BRA INVALID_OP    
@@ -571,6 +711,7 @@ CG0_C:                            ;Checks have been finished,a valid OP code has
     
 * GROUP_1                      
 ********************************************************************************
+* Supported OP code:
 * MOVE.B: $1, 11-9 DST Reg, 8-6 DST Mode, 5-3 SRC Mode, 2-0 SRC Reg
 ********************************************************************************
 C_GROUP_1:
@@ -584,6 +725,7 @@ CHECK_OP_MOVE_B:
     RTS                             ;Return to stack
 * GROUP_2
 ********************************************************************************
+* Supported OP codes:
 * MOVEA.L: $2, 11-9 DST Reg, 8-6 %001, 5-3 SRC Mode, 2-0 SRC Reg
 * MOVE.L: $2, 11-9 DST Reg, 8-6 DST Mode, 5-3 SRC Mode, 2-0 SRC Reg
 ********************************************************************************
@@ -618,6 +760,7 @@ CHECK_OP_MOVE_L:
     
 * GROUP_3
 ********************************************************************************
+* Supported OP codes:
 * MOVEA.W: $3, 11-9 DST Reg, 8-6 %001, 5-3 SRC Mode, 2-0 SRC Reg
 * MOVE.W: $3, 11-9 DST Reg, 8-6 DST Mode, 5-3 SRC Mode, 2-0 SRC Reg
 ********************************************************************************
@@ -652,25 +795,195 @@ CHECK_OP_MOVE_W:
 
 * GROUP_4
 ********************************************************************************
+* Supported OP codes:
 * LEA: $4, 11-9 Reg, 8-6 %111, 5-3 EA Mode, 2-0 EA Reg
 * JSR: $4E, 7-6 %10, 5-3 EA Mode, 2-0 EA Reg 
 * RTS: $4E75
 * NEG: $44, 7-6 Size, 5-3 EA Mode, 2-0 EA Reg
 * MOVEM: $4, 11 %1, 10 %D, 9-7 %001, 6 S, 5-3 EA Mode, 2-0 EA Reg
 * %D = 0 , Register to Memory, 1 Memory to Register
+* Unsupported OP codes: MOVE_FROM_SR, MOVE_TO_CCR, MOVE_TO_SR, NEGX, CLR, NOT
+* EXT, NBCD, SWAP, PEA, ILLEGAL, TAS, TST, TRAP, LINK, UNLK, MOVE_USP, RESET,
+* NOP, STOP, RTE, TRAPV, RTR, JMP, CHK
 ********************************************************************************
 C_GROUP_4:
+*Unsupported OP codes to check that are full static bits
+CHECK_OP_STOP:
+    MOVE.W CUR_OP_CODE,D0    ;Move current instruction set into D0
+    CMP.W  #$4E72,D0
+    BEQ    INVALID_OP
+    BNE    CHECK_OP_RESET
+    
+CHECK_OP_RESET:
+    MOVE.W CUR_OP_CODE,D0    ;Move current instruction set into D0
+    CMP.W  #$4E70,D0
+    BEQ    INVALID_OP
+    BNE    CHECK_OP_NOP
+    
+CHECK_OP_NOP:
+    MOVE.W CUR_OP_CODE,D0   ;Move current instruction set into D0
+    CMP.W  #$4E71,D0
+    BEQ    INVALID_OP 
+    BNE    CHECK_OP_ILLEGAL
+    
+CHECK_OP_ILLEGAL:
+    MOVE.W CUR_OP_CODE,D0    ;Move current instruction set into D0
+    CMP.W  #$4AFC,D0
+    BEQ    INVALID_OP
+    BNE    CHECK_OP_MOVE_FROM_CCR
+    
+CHECK_OP_RTE:    
+    MOVE.W CUR_OP_CODE,D0    ;Move current instruction set into D0
+    CMP.W #$4E73,D0
+    BEQ   INVALID_OP
+    BNE   CHECK_OP_TRAPV
+    
+CHECK_OP_TRAPV:
+    MOVE.W CUR_OP_CODE,D0    ;Move current instruction set into D0
+    CMP.W  #$4E76,D0
+    BEQ    INVALID_OP
+    BNE    CHECK_OP_RTR
+    
+CHECK_OP_RTR:
+    MOVE.W CUR_OP_CODE,D0    ;Move current instruction set into D0
+    CMP.W #$4E77,D0
+    BEQ    INVALID_OP
+    BNE    CHECK_OP_MOVE_FROM_SR
+
+
+*Unsupported OP codes to check that have partial static bits
+CHECK_OP_MOVE_FROM_SR:
+    MOVE.W CUR_OP_CODE,D0    ;Move current instruction set into D0
+    ANDI.W #$FFC0,D0
+    CMP.W  #$40C0,D0
+    BEQ    INVALID_OP
+    BNE    CHECK_OP_MOVE_FROM_CCR
+    
+CHECK_OP_MOVE_FROM_CCR:
+    MOVE.W CUR_OP_CODE,D0    ;Move current instruction set into D0
+    ANDI.W #$FFC0,D0
+    CMP.W  #$44C0,D0
+    BEQ    INVALID_OP
+    BNE    CHECK_OP_MOVE_TO_SR
+    
+CHECK_OP_MOVE_TO_SR:
+    MOVE.W CUR_OP_CODE,D0    ;Move current instruction set into D0
+    ANDI.W #$FFC0,D0
+    CMP.W  #$46C0,D0
+    BEQ    INVALID_OP
+    BNE    CHECK_OP_NEGX
+    
+CHECK_OP_NEGX:
+    MOVE.W CUR_OP_CODE,D0    ;Move current instruction set into D0
+    ANDI.W #$FF00,D0
+    CMP.W  #$4000,D0
+    BEQ    INVALID_OP
+    BNE    CHECK_OP_CLR
+    
+CHECK_OP_CLR:
+    MOVE.W CUR_OP_CODE,D0    ;Move current instruction set into D0
+    ANDI.W #$FF00,D0
+    CMP.W  #$4200,D0
+    BEQ    INVALID_OP
+    BNE    CHECK_OP_NOT
+    
+CHECK_OP_NOT:
+    MOVE.W CUR_OP_CODE,D0    ;Move current instruction set into D0
+    ANDI.W #$FF00,D0
+    CMP.W  #$4600,D0
+    BEQ    INVALID_OP
+    BNE    CHECK_OP_EXT
+    
+CHECK_OP_EXT:
+    MOVE.W CUR_OP_CODE,D0    ;Move current instruction set into D0
+    ANDI.W #$FFF8,D0
+    CMP.W  #$4E80,D0
+    BEQ    INVALID_OP
+    BNE    CHECK_OP_NBCD
+
+CHECK_OP_NBCD:
+    MOVE.W CUR_OP_CODE,D0    ;Move current instruction set into D0
+    ANDI.W #$FFC0,D0
+    CMP.W  #$4800,D0
+    BEQ    INVALID_OP
+    BNE    CHECK_OP_SWAP
+    
+CHECK_OP_SWAP:                  ; This must go before CHECK_OP PEA as first 3 nibbles can be equivalent
+    MOVE.W CUR_OP_CODE,D0       ;Move current instruction set into D0
+    ANDI.W #$FF48,D0
+    CMP.W  #$4840,D0
+    BEQ    INVALID_OP
+    BNE    CHECK_OP_PEA
+ 
+CHECK_OP_PEA:               ; This must go after CHECK_OP_SWAP as first 3 nibbles can be equivalent
+    MOVE.W CUR_OP_CODE,D0    ;Move current instruction set into D0
+    ANDI.W #$FF40,D0
+    CMP.W  #$4840,D0
+    BEQ    INVALID_OP
+    BNE    CHECK_OP_TAS
+    
+CHECK_OP_TAS:
+    MOVE.W CUR_OP_CODE,D0    ;Move current instruction set into D0
+    ANDI.W #$FFC0,D0
+    CMP.W  #$45C0,D0
+    BEQ    INVALID_OP
+    BNE    CHECK_OP_TST
+
+CHECK_OP_TST:               ; This must go after CHECK_OP_TAS as first 2 nibbles are equivalent
+    MOVE.W CUR_OP_CODE,D0    ;Move current instruction set into D0
+    ANDI.W #$FF00,D0
+    CMP.W  #$4500,D0
+    BEQ    INVALID_OP
+    BNE    CHECK_OP_TRAP
+    
+CHECK_OP_TRAP:
+    MOVE.W CUR_OP_CODE,D0    ;Move current instruction set into D0
+    ANDI.W #$FFF0,D0
+    CMP.W  #$4E40,D0
+    BEQ    INVALID_OP
+    BNE    CHECK_OP_LINK
+    
+CHECK_OP_LINK:
+    MOVE.W CUR_OP_CODE,D0    ;Move current instruction set into D0
+    ANDI.W #$FFF8,D0
+    CMP.W  #$4E50,D0
+    BEQ    INVALID_OP
+    BNE    CHECK_OP_UNLK
+
+CHECK_OP_UNLK:
+    MOVE.W CUR_OP_CODE,D0    ;Move current instruction set into D0
+    ANDI.W #$FFF8,D0
+    CMP.W  #$4E58,D0
+    BEQ    INVALID_OP
+    BNE    CHECK_OP_MOVE_USP
+    
+CHECK_OP_MOVE_USP:
+    MOVE.W CUR_OP_CODE,D0    ;Move current instruction set into D0
+    ANDI.W #$FFF0,D0
+    CMP.W  #$4E60,D0
+    BEQ    INVALID_OP
+    BNE    CHECK_OP_RTS
+
+CHECK_OP_JMP:
+     MOVE.W CUR_OP_CODE,D0    ;Move current instruction set into D0
+     ANDI.W #$FFC0,D0
+     CMP.W  #$4EC0,D0
+     BEQ    INVALID_OP
+     BNE    CHECK_OP_CHK
+     
+CHECK_OP_CHK:
+    MOVE.W  CUR_OP_CODE,D0    ;Move current instruction set into D0
+    ANDI.W  #$F180,D0
+    CMP.W   #$4180,D0
+    BEQ     INVALID_OP
+    BNE     CHECK_OP_RTS
+
+*Supported OP codes to check
 CHECK_OP_RTS:
     MOVE.W CUR_OP_CODE,D0    ;Move current instruction set into D0
     CMP.W  #$4E75,D0
     BNE    CHECK_OP_NOP
     BEQ    PRINT_OP_RTS
-    
-CHECK_OP_NOP:
-    MOVE.W CUR_OP_CODE,D0   ;Move current instruction set into D0
-    CMP.W  #$4E71,D0
-    BNE    CHECK_OP_LEA
-    BEQ    PRINT_OP_NOP
     
 CHECK_OP_LEA:
     MOVE.W CUR_OP_CODE,D0   ;Move current instruction set into D0
@@ -692,28 +1005,55 @@ CHECK_OP_NEG:
     CMP.W  #$4400,D0
     BNE    CHECK_OP_MOVEM
     BEQ    PRINT_OP_NEG
+    
 **************** COME BACK TO FINISH UP SIZE **********************************
 CHECK_OP_MOVEM:
     MOVE.W CUR_OP_CODE,D0   ;Move current instruction set into D0
     ANDI.W #$FB80,D0
     CMP.W  #$4880,D0
-    BNE    INVALID_OP
+    BNE    INVALID_OP       ;If no code is found, it is invalid
     BEQ    PRINT_OP_MOVEM_W
     
 * GROUP_5
 ********************************************************************************
+* Supported OP code:
 * SUBQ: $5, 11-9 DATA, 8 %1, 7-6 Size, 5-3 EA Mode, 2-0 EA Reg
+* Unsupported OP codes: ADDQ, Scc, DBcc
 * Validation checking:
 * Check against, ADDQ, Scc, DBcc
 ********************************************************************************
 C_GROUP_5:
 
-VALID_CHECK_OP_SUBQ:
-    MOVE.W CUR_OP_CODE,D0   ;Move current instruction set into D0
-    ANDI.W #$F1C0,D0        ;Bitmask check for Scc, DBcc and ADDQ
-    CMP.W  #$51C0,D0        ;This should be the only valid one for SUBQ
-    BEQ    INVALID_OP       ;If not equal it's invalid
-    BNE    CHECK_OP_SUBQ
+*Unsupported OP codes
+CHECK_OP_ADDQ:
+    MOVE.W CUR_OP_CODE,D0    ;Move current instruction set into D0
+    ANDI.W #$F100,D0
+    CMP.W  #$5100,D0
+    BEQ    INVALID_OP
+    BNE    CHECK_OP_Scc
+    
+CHECK_OP_DBcc:
+    MOVE.W CUR_OP_CODE,D0    ;Move current instruction set into D0
+    ANDI.W #$F0C8,D0
+    CMP.W  #$50C8,D0
+    BEQ    INVALID_OP
+    BNE    CHECK_OP_Scc 
+
+CHECK_OP_Scc:
+    MOVE.W CUR_OP_CODE,D0    ;Move current instruction set into D0
+    ANDI.W #$F0C0,D0 
+    CMP.W  #$50C0,D0
+    BEQ     INVALID_OP
+    BNE     CHECK_OP_SUBQ
+    
+;VALID_CHECK_OP_SUBQ:
+;    MOVE.W CUR_OP_CODE,D0   ;Move current instruction set into D0
+;    ANDI.W #$F1C0,D0        ;Bitmask check for Scc, DBcc and ADDQ
+;    CMP.W  #$51C0,D0        ;This should be the only valid one for SUBQ
+;    BEQ    INVALID_OP       ;If not equal it's invalid
+;    BNE    CHECK_OP_SUBQ
+
+*Supported OP code   
 CHECK_OP_SUBQ     
     MOVE.W  CUR_OP_CODE,D0  ;Actual check for SUBQ
     ANDI.W #$F100,D0        ;Bitmask check for SUBQ
@@ -723,6 +1063,7 @@ CHECK_OP_SUBQ
     
 * GROUP_6
 ********************************************************************************
+* Supported OP codes
 * BRA: $60, 7-0 8-Bit Displacement
 * Bcc: $6, 11-8 Condition, 7-0 8-Bit Displacement
 *   Branch: <Condition>   
@@ -735,9 +1076,19 @@ CHECK_OP_SUBQ
 *   MOVE.W #%0110110001010101   ;BGE
 *   MVE.W #%0110110110101010    ;BLT
 *   MOVE.W #%0110100001010101   ;BVC
+* Unsupported OP code: BSR
 ********************************************************************************
 C_GROUP_6:
 
+*Unsupported OP code
+CHECK_OP_BSR:
+    MOVE.W CUR_OP_CODE,D0
+    ANDI.W #$FF00,D0
+    CMP.W  #$6100,D0
+    BEQ     INVALID_OP
+    BNE     CHECK_OP_BRA
+    
+*Supported OP codes
 CHECK_OP_BRA:
     MOVE.W CUR_OP_CODE,D0   ;Move current instruction set into D0       
     ANDI.W #$FF00,D0
@@ -776,60 +1127,67 @@ CHECK_OP_BVC:
     
 *GROUP_7
 ********************************************************************************
-* Currently no OP codes here are supported.
+* Currently no OP codes here are supported. MOVEQ is the only code in this group
+* Unsupported OP code: MOVEQ
 ********************************************************************************
 C_GROUP_7:
-    JMP INVALID_OP
+CHECK_OP_MOVEQ
+    MOVE.W CUR_OP_CODE,D0
+    ANDI.W #$F100,D0
+    CMP.W  #$7000,D0
+    JMP    INVALID_OP
 
 * GROUP_8
 ********************************************************************************
-* Supported:
+* Supported OP code:
 * DIVS: $8, 11-9 Reg, 8-6 %111, 5-3 EA Mode, 2-0 EA Reg
 * OR: $80, 7-6 Size, 5-3 EA Mode, 2-0 EA Register
-* Unsupported: DIVU, SBCD
+* Unsupported OP codes: DIVU, SBCD
 ********************************************************************************
 C_GROUP_8:
 
+*Unsupported OP codes
+CHECK_OP_DIVU:
+    MOVE.W CUR_OP_CODE,D0   ;Move current instruction set into D0
+    ANDI.W #$F1C0,D0
+    CMP.W #$80C0,D0
+    BEQ   INVALID_OP
+    BNE   CHECK_OP_SBCD 
+
+CHECK_OP_SBCD:
+    MOVE.W  CUR_OP_CODE,D0   ;Move current instruction set into D0
+    ANDI.W  #$F100,D0
+    CMP.W   #$8100,D0
+    BEQ     INVALID_OP
+    BNE     CHECK_OP_DIVS
+    
+*Supported OP codes
 CHECK_OP_DIVS:
-    MOVE CUR_OP_CODE,D0   ;Move current instruction set into D0
+    MOVE.W CUR_OP_CODE,D0   ;Move current instruction set into D0
     ANDI.W #$F1C0,D0
     CMP.W #$81C0,D0
     BEQ PRINT_OP_DIVS
-    BNE CHECK_OP_OR
-    
-CHECK_OP_DIVU:
-    MOVE CUR_OP_CODE,D0   ;Move current instruction set into D0
-    ANDI.W #$F1C0,D0
-    CMP.W #$80C0,D0
-    BEQ INVALID_OP
-    BNE CHECK_OP_SBCD
-    
-CHECK_OP_SBCD:
-    MOVE CUR_OP_CODE,D0   ;Move current instruction set into D0
-    ANDI.W #$F100,D0
-    CMP.W #$8100,D0
-    BEQ INVALID_OP
     BNE CHECK_OP_OR
     
 CHECK_OP_OR:              ;At this point only remaining $8 code is OR
     JMP PRINT_OP_OR
 * GROUP_9                      
 ********************************************************************************
-* Supported
+* Supported OP code:
 * SUB: $9, 11-9 Reg, 8-6 OPMODE, 5-3 EA Mode, 2-0 EA Reg
-* Unsupported: SUBX, SUBA
+* Unsupported OP codes: SUBX, SUBA
 ********************************************************************************
 C_GROUP_9:
 
 CHECK_OP_SUBA:             ;Check SUBA first as it has static bits
-    MOVE CUR_OP_CODE,D0    ;Move current instruction set into D0
+    MOVE.W CUR_OP_CODE,D0    ;Move current instruction set into D0
     ANDI.W #$F0C0,D0
     CMP.W #$90C0,D0
     BEQ INVALID_OP
     BNE CHECK_OP_SUBX
 
 CHECK_OP_SUBX:
-    MOVE CUR_OP_CODE,D0    ;Move current instruction set into D0
+    MOVE.W CUR_OP_CODE,D0    ;Move current instruction set into D0
     ANDI.W #$F130,D0
     CMP.W #$9100,D0
     BEQ INVALID_OP
@@ -847,37 +1205,37 @@ C_GROUP_A:
 
 * GROUP_B                     
 ********************************************************************************
-* Supported:
+* Supported OP codes:
 * EOR: $B, 11-9 Reg, 8 %1, 8-6 OPMODE, 5-3 EA Mode, 2-0 EA Reg
 * CMP: $B, 11-9 Reg, 8 %0, 8-6 OPMODE, 5-3 EA Mode, 2-0 EA Reg
 * The specific bit difference is listed 
-* Unsupported: CMPM, CMPA
+* Unsupported OP codes: CMPM, CMPA
 ********************************************************************************
 C_GROUP_B:
 
 CHECK_OP_CMPM
-    MOVE CUR_OP_CODE,D0    ;Move current instruction set into D0
+    MOVE.W CUR_OP_CODE,D0    ;Move current instruction set into D0
     ANDI.W #$F138,D0
     CMP.W  #$B108,D0
     BEQ INVALID_OP
     BNE CHECK_OP_CMPA
     
 CHECK_OP_CMPA:
-    MOVE CUR_OP_CODE,D0    ;Move current instruction set into D0
+    MOVE.W CUR_OP_CODE,D0    ;Move current instruction set into D0
     ANDI.W #$F0C0,D0
     CMP.W  #$B0C0,D0
     BEQ INVALID_OP
     BNE CHECK_OP_EOR
     
 CHECK_OP_EOR:
-    MOVE CUR_OP_CODE,D0    ;Move current instruction set into D0
+    MOVE.W CUR_OP_CODE,D0    ;Move current instruction set into D0
     ANDI.W #$F100,D0
     CMP.W #$B100,D0
     BEQ PRINT_OP_EOR
     BNE CHECK_OP_CMP
     
 CHECK_OP_CMP:
-    MOVE CUR_OP_CODE,D0    ;Move current instruction set into D0
+    MOVE.W CUR_OP_CODE,D0    ;Move current instruction set into D0
     ANDI.W #$F100,D0
     CMP.W #$B000,D0
     BEQ PRINT_OP_CMP
@@ -885,24 +1243,53 @@ CHECK_OP_CMP:
     
 * GROUP_C                     
 ********************************************************************************
-* Supported:
+* Supported OP code:
 * MULS: $C, 11-8 Reg, 8-6 %111, 5-3 EA Mode, 2-0 EA Reg
-* Unsupported: MULU, ABCD, EXG, AND
 * Note: EXG OP mode has to be 01000, 01001, 10001, as such can never be 11 for
 * bits 7-6
+* Unsupported OP codes: MULU, ABCD, EXG, AND
 ********************************************************************************
 C_GROUP_C:
-
+*Unsupported OP codes
+CHECK_OP_MULU:
+    MOVE.W  CUR_OP_CODE,D0    ;Move current instruction set into D0
+    ANDI.W  #$F1C0,D0
+    CMP.W   #$C0C0,D0
+    BEQ     INVALID_OP
+    BNE     CHECK_OP_ABCD
+ 
+CHECK_OP_ABCD:
+    MOVE.W  CUR_OP_CODE,D0    ;Move current instruction set into D0
+    ANDI.W  #$F1F0,D0
+    CMP.W   #$C100,D0
+    BEQ     INVALID_OP
+    BNE     CHECK_OP_EXG
+ 
+CHECK_OP_EXG:
+    MOVE.W  CUR_OP_CODE,D0    ;Move current instruction set into D0
+    ANDI.W  #$F130,D0
+    CMP.W   #$C100,D0
+    BEQ     INVALID_OP
+    BNE     CHECK_OP_AND
+       
+*Supported OP code
 CHECK_OP_MULS:
-    MOVE CUR_OP_CODE,D0    ;Move current instruction set into D0
+    MOVE.W CUR_OP_CODE,D0    ;Move current instruction set into D0
     ANDI.W #$F1C0,D0
-    CMP.W #$C1C0,D0
-    BEQ PRINT_OP_MULS
-    BNE INVALID_OP          ; This can only be the supported operand
+    CMP.W  #$C1C0,D0
+    BEQ    PRINT_OP_MULS
+    BNE    CHECK_OP_AND          ; OP_AND is completely dynamic outside of first nibble
+
+*Odd completely dynamic unsupported OP code    
+CHECK_OP_AND:                 ;This would be the only possible OP code left after CHECK_OP_MULS
+    MOVE.W  CUR_OP_CODE,D0    ;Move current instruction set into D0
+    ANDI.W  #$F000,D0
+    CMP.W   #$C000,D0
+    BEQ     INVALID_OP
 
 * GROUP_D                     
 ********************************************************************************
-* Supported:
+* Supported OP codes:
 * ADD: $D, 11-9 Reg, 8-6 OPMODE, 5-3 EA Mode, 2-0 EA Reg
 * ADDA: $D, 11- 9 Reg, 8-6 OPMODE, 7-6 %11, 5-3 EA Mode, 2-0 EA Reg
 * The specific bit difference is listed out in the OPMODE field.
@@ -926,6 +1313,7 @@ CHECK_OP_ADDA:
 
 CHECK_OP_ADD:
     JMP PRINT_OP_ADD        ;Only remaining OP in $D is ADD
+    
 * GROUP_E                     
 ********************************************************************************
 * Supported:
@@ -1078,6 +1466,7 @@ INVALID_OP:  ; Prints DATA for invalid op
     MOVE.B #13,D0
     TRAP #15
     SIMHALT
+    
 READ_NEXT_INSTRUCTION: ; Needs to read next instruction set {PLACEHOLDER}
     SIMHALT
 
@@ -1122,12 +1511,12 @@ PRINT_OP_CMPI:
     LEA P_OP_CMPI,A1
     JSR PRINT_OP
     RTS
-PRINT_OP_S_BCLR:
-    LEA P_OP_S_BCLR,A1
+PRINT_OP_STATIC_BCLR:
+    LEA P_OP_STATIC_BCLR,A1
     JSR PRINT_OP
     RTS
-PRINT_OP_D_BCLR:
-    LEA P_OP_D_BCLR,A1
+PRINT_OP_DYNAMIC_BCLR:
+    LEA P_OP_DYNAMIC_BCLR,A1
     JSR PRINT_OP
     RTS
 ******************************* END OF GROUP 0 ********************************
@@ -1331,8 +1720,8 @@ P_SIZE_W        DC.B    '.W',0
 P_SIZE_L        DC.B    '.L',0
 P_OP_ORI        DC.B    'ORI',0
 P_OP_CMPI       DC.B    'CMPI',0
-P_OP_S_BCLR     DC.B    'BCLR',0
-P_OP_D_BCLR     DC.B    'BCLR',0
+P_OP_STATIC_BCLR     DC.B    'BCLR',0
+P_OP_DYNAMIC_BCLR     DC.B    'BCLR',0
 P_OP_MOVEB      DC.B    'MOVE.B',0
 P_OP_MOVEA_L    DC.B    'MOVEA.L',0 
 P_OP_MOVE_L     DC.B    'MOVE.L',0
@@ -1439,6 +1828,8 @@ _AddStrToBuffer_End
     RTS                  
    
     END START
+
+
 
 
 
