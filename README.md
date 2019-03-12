@@ -67,7 +67,12 @@ Constants:
 CUR_OP_CODE - refers to current 16 bit instruction set
 EA_SIZE - refers to current size of the CUR_OP_CODE (used for immediates as well)
 G_BUFFER - good buffer to print to
-L_BUFFER - bad buffer to print to
+B_BUFFER - bad buffer to print to
+OP_BUFFER - Specific buffer for OP code
+EA_BUFFER - Specific buffer for EA code
+IS_VALID - Flag set to determine if it's a valid code. 0 is invalid, 1 is valid code.
+
+FOR EA:
 MNEMONIC - First 4 op code bits   (15-12)
 FIRST_3 - First '3' bits          (11-9)
 SECOND_3 - Second '3' bits        (8-6)
