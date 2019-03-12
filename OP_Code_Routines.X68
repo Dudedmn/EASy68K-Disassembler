@@ -90,6 +90,15 @@ START
     ;MOVE.L (A4),G_BUFFER_PREP
     
 ***************************** Input Tests ********************************************
+    ***GROUP 0 tests**** SUPPORTED: ORI, BCLR (static, dynamic), CMPI
+    
+    ***GROUP 1 tests**** SUPPORTED: MOVE.B
+    
+    ***GROUP 2 tests**** SUPPORTED: MOVEA.L, MOVE.L
+    
+    ***GROUP 3 tests**** SUPPORTED: MOVEA.W, MOVE.W
+    
+    ***CATEGORIZE THESE TESTS INTO APPROPRIATE AREA****************
     ;MOVE.W #%0000100010000010,CUR_OP_CODE       ;Static BCLR
     ;MOVE.W #%0000111110001110,CUR_OP_CODE       ;Dynamic BCLR
     ;MOVE.W #%0000000001000001,CUR_OP_CODE       ;ORI.W D1
@@ -121,8 +130,10 @@ START
     ;MOVE.W #%0000000001000001,CUR_OP_CODE              ;ORI.W D1
     ;MOVE.W CUR_OP_CODE,A6                              ;Loading memory space to address register
     ;MOVE.W CUR_OP_CODE,(A6)                            ;Loading memory value to address value
- 
-    ****GROUP 4 tests****
+    ***CATEGORIZE THESE TESTS INTO APPROPRIATE AREA***************
+    
+    
+    ****GROUP 4 tests**** SUPPORTED: LEA, JSR, RTS, NEG, MOVEM
     ;MOVE.W #$4E75,CUR_OP_CODE                            ;RTS
     ;MOVE.W #$4E71,CUR_OP_CODE                            ;NOP
     ;MOVE.W #$4415,CUR_OP_CODE                            ;NEG.L D5
@@ -134,7 +145,7 @@ START
     ****GROUP 5 tests****
     ;MOVE.W #%0101111110001111
     
-    *****GROUP 5 TESTS****
+    *****GROUP 5 TESTS**** SUPPORTED: SUBQ
     ;#%0101111100000101, SUBQ.B D5
     ;MOVE.W #$5F05,CUR_OP_CODE ; for SUBQ.B D5
     ;#%0101111110001110, SUBQ.L A6 
@@ -144,7 +155,7 @@ START
     ;MOVE.W #%0101010011000110,CUR_OP_CODE ; Scc
     ;MOVE.W #%0101010011001110,CUR_OP_CODE ; DBcc
    
-    *****GROUP 6 TESTS********* BCS,BGE,BLT,BVC
+    *****GROUP 6 TESTS********* SUPPORTED: BCS,BGE,BLT,BVC
     ; DISPLACEMENT, $00 is 16 bits, $FF is 32 bits
     ; DISPLACEMENT = Last 8 bits
     ;MOVE.W #%0110000001010101,CUR_OP_CODE   ;BRA
@@ -152,6 +163,27 @@ START
     ;MOVE.W #%0110110001010100,CUR_OP_CODE   ;BGE
     MOVE.W #%0110110110101010,CUR_OP_CODE   ;BLT
     ;MOVE.W #%0110100001010100,CUR_OP_CODE   ;BVC
+    
+    *****GROUP 7 TESTS**********        ;Should be ALL INVALID
+    
+    *****GROUP 8 TESTS********** SUPPORTED: DIVS, OR
+    
+    *****GROUP 9 TESTS********** SUPPORTED: SUB
+    
+    *****GROUP A TESTS**********        ;Should be ALL INVALID
+    
+    *****GROUP B TESTS********** SUPPORTED: EOR, CMP
+    
+    *****GROUP C TESTS********** SUPPORTED: MULS
+    
+    *****GROUP D TESTS********** SUPPORTED: ADD, ADDA
+    
+    *****GROUP E TESTS********** SUPPORTED: LSX, ASX, ROX
+    
+    *****GROUP F TESTS**********        ;Should be ALL INVALID
+    
+    
+    
 ************************************************************************************
 * PRINTING BUFFER FUNCTION HAS BEEN FINISHED
 *-----------------------------------------------------------
@@ -801,7 +833,7 @@ CHECK_OP_BVC:
 * Currently no OP codes here are supported.
 ********************************************************************************
 C_GROUP_7:
-    JSR INVALID_OP
+    JMP INVALID_OP
 
 * GROUP_8
 ********************************************************************************
@@ -865,7 +897,7 @@ CHECK_OP_SUB:           ;At this point only remaining $9 is SUB
 * Currently no OP codes here are supported. There are no current OP codes here.
 ********************************************************************************
 C_GROUP_A:
-    JSR INVALID_OP
+    JMP INVALID_OP
 
 * GROUP_B                     
 ********************************************************************************
@@ -1085,7 +1117,7 @@ CHECK_OP_ASL:
 * Currently no OP codes here are supported. There are no OP codes here
 ********************************************************************************
 C_GROUP_F:
-    JSR INVALID_OP
+    JMP INVALID_OP
     
 * INVALID_OP                     
 ********************************************************************************
@@ -1131,6 +1163,8 @@ ADD_PERIOD:
 * Precondition: The relevant opcode has been identified correctly.
 *
 * Postcondition: Prints out the associated opcode to the buffer.
+
+* THIS NEEDS TO BE RETOOLED TO PRINT TO BUFFER NOT TO CONSOLE
 *******************************************************************************
 
 ****************************** GROUP 0 **************************************** 
@@ -1139,25 +1173,14 @@ PRINT_OP_ORI:
     JSR PRINT_OP
     RTS
 PRINT_OP_CMPI:
-    JSR FIND_3_BIT_REG_TO_EA
-    JSR FIND_2_BIT_SIZE_TO_EA
-    JSR MOVE_LAST_6_BITS_TO_EA
     LEA P_OP_CMPI,A1
     JSR PRINT_OP
     RTS
 PRINT_OP_S_BCLR:
-    JSR MOVE_LAST_6_BITS_TO_EA
-	JSR FIND_3_BIT_REG_TO_EA
-	MOVE.W #$0,(A6)
-	MOVE.W #%000, D4
     LEA P_OP_S_BCLR,A1
     JSR PRINT_OP
     RTS
 PRINT_OP_D_BCLR:
-	JSR MOVE_LAST_6_BITS_TO_EA
-	JSR FIND_3_BIT_REG_TO_EA
-	MOVE.W #$0,(A6)
-	MOVE.W #%110, D4
     LEA P_OP_D_BCLR,A1
     JSR PRINT_OP
     RTS
@@ -1165,8 +1188,6 @@ PRINT_OP_D_BCLR:
 
 ****************************** GROUP 1 ****************************************    
 PRINT_OP_MOVEB:
-    JSR MOVE_AND_MOVEA_PARSE_EA
-    MOVE.W #$1,(A6)
     LEA P_OP_MOVEB,A1
     JSR PRINT_OP
     RTS
@@ -1174,19 +1195,10 @@ PRINT_OP_MOVEB:
     
 ****************************** GROUP 2 **************************************** 
 PRINT_OP_MOVEA_L:
-    JSR MOVE_AND_MOVEA_PARSE_EA
-    MOVE.W #$2,(A6)
     LEA P_OP_MOVEA_L,A1
-    ;MOVE.L A1,G_BUFFER_PREP
-    ;MOVE.B (A1)+,D0
-    ;CMPI.B #$FF,D0
-    ;BNE MAKE_VAL_ASCII
-    ;MOVE.W P_OP_MOVEA_L,(A4)+
     JSR PRINT_OP
     RTS
 PRINT_OP_MOVE_L:
-    JSR MOVE_AND_MOVEA_PARSE_EA
-    MOVE.W #$2,(A6)
     LEA P_OP_MOVE_L,A1
     JSR PRINT_OP
     RTS
@@ -1194,14 +1206,10 @@ PRINT_OP_MOVE_L:
     
 ****************************** GROUP 3 ****************************************    
 PRINT_OP_MOVEA_W:
-    JSR MOVE_AND_MOVEA_PARSE_EA
-    MOVE.W #$3,(A6)
     LEA P_OP_MOVEA_W,A1
     JSR PRINT_OP
     RTS
 PRINT_OP_MOVE_W:
-    JSR MOVE_AND_MOVEA_PARSE_EA
-    MOVE.W #$3,(A6)
     LEA P_OP_MOVE_W,A1
     JSR PRINT_OP
     RTS
