@@ -33,7 +33,7 @@ IO
 - [ ] Printing overall instruction
 - [ ] Test demo program for all supported commands
 - [ ] Validation testing for I/O
-- [ ] Adhere to commenting format
+- [x] Adhere to commenting format
 
 OP Code
 - [ ] Finish identification for all OP codes
