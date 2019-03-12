@@ -153,13 +153,13 @@ START
     MOVE.W #%0110110110101010,CUR_OP_CODE   ;BLT
     ;MOVE.W #%0110100001010100,CUR_OP_CODE   ;BVC
 ************************************************************************************
-
+* PRINTING BUFFER FUNCTION HAS BEEN FINISHED
 *-----------------------------------------------------------
 *First Nibble Values (15-12)
 *Value                  Operations
-*$0                     GROUP_0: ORI,BCLR (static and dynamic),CMPI --- Partial, needs SIZE print for ORI, BCLR, CMPI
-*$1                     GROUP_1: MOVE.B                             --- Partial, needs trailing bits
-*$2                     GROUP_2: MOVE.L, MOVEA.L                    --- Partial, needs trailing bits
+*$0                     GROUP_0: ORI,BCLR (static and dynamic),CMPI --- DONE, need validation testing
+*$1                     GROUP_1: MOVE.B                             --- DONE, need validation testing
+*$2                     GROUP_2: MOVE.L, MOVEA.L                    --- DONE, need validation testing
 *$3                     GROUP_3: MOVE.W, MOVEA.W                    --- Partial, needs trailing bits
 *$4                     GROUP_4: LEA,JSR,RTS,NEG,MOVEM              --- Partial, needs SIZE print for NEG, MOVE
 *$5                     GROUP_5: SUBQ                               --- Partial, needs SIZE pri
@@ -546,48 +546,50 @@ PARSE_EA_CONSTANT_BITS:
 * Dynamic BCLR: $0, 11-9 Register, 8-6 %110, 5-3 EA Mode, 2-0 EA Reg
 * Static BCLR: $01, 7-6 10, 5-3 EA Mode, 2-0 EA Reg
 *
+* Registers used: D0
+*
 * Precondition: First nibble has been identified as $0
+*
 * Postcondition: Parses proper OP code with a nibble value of $0 or finds an
 * invalid OP code. After a successful parse loading for EA values will be done
 * through a subroutine.
 ********************************************************************************
 C_GROUP_0:
-    MOVEM.L D0-D1, -(SP) ; Backup registers
+    MOVEM.L D0-D1, -(SP)        ;Backup registers
     
 CHECK_OP_ORI:
-    MOVE.W  CUR_OP_CODE,D0         ;Move current instruction set into D
-    ANDI.W  #$FF00,D0       ;Mask relevant bits to D0
-    CMP.W   #$0000,D0       ;Compare the appropriate masked bits     
-    BNE     CHECK_OP_CMPI   ;Branch to next comparison if not equal
-    JSR     PRINT_OP_ORI    ;Print the OP code if equal
-    JSR     FIND_2_BIT_SIZE_TO_EA         
-    BRA     CG0_C           ;Finish routine
+    MOVE.W  CUR_OP_CODE,D0      ;Move current instruction set into D
+    ANDI.W  #$FF00,D0           ;Mask relevant bits to D0
+    CMP.W   #$0000,D0           ;Compare the appropriate masked bits     
+    BNE     CHECK_OP_CMPI       ;Branch to next comparison if not equal
+    JSR     PRINT_OP_ORI        ;Print the OP code if equal    
+    BRA     CG0_C               ;Finish routine
 CHECK_OP_CMPI:
-    MOVE.W  CUR_OP_CODE,D0         ;Move current instruction set into D
-    ANDI.W  #$FF00,D0       ;Mask relevant bits to D0
-    CMP.W   #$0C00,D0       ;Compare the appropriate masked bits   
-    BNE     CHECK_OP_S_BCLR ;Branch to next comparison if not equal       
-    JSR     PRINT_OP_CMPI   ;Print the OP code if equal
-    BRA     CG0_C           ;Finish routine
+    MOVE.W  CUR_OP_CODE,D0      ;Move current instruction set into D
+    ANDI.W  #$FF00,D0           ;Mask relevant bits to D0
+    CMP.W   #$0C00,D0           ;Compare the appropriate masked bits   
+    BNE     CHECK_OP_S_BCLR     ;Branch to next comparison if not equal       
+    JSR     PRINT_OP_CMPI       ;Print the OP code if equal
+    BRA     CG0_C               ;Finish routine
 CHECK_OP_S_BCLR:
-    MOVE.W  CUR_OP_CODE,D0         ;Move current instruction set into D
-    ANDI.W  #$FF00,D0       ;Mask relevant bits to D0
-    CMP.W   #$0800,D0       ;Compare the appropriate masked bits
-    BNE     CHECK_OP_D_BCLR ;Branch to next comparison if not equal
-    JSR     PRINT_OP_S_BCLR ;Print the OP code if equal
-    ;MOVEM.L (SP)+,D6-D7     ;POP STACK
-    BRA     CG0_C           ;Finish routine
+    MOVE.W  CUR_OP_CODE,D0      ;Move current instruction set into D
+    ANDI.W  #$FF00,D0           ;Mask relevant bits to D0
+    CMP.W   #$0800,D0           ;Compare the appropriate masked bits
+    BNE     CHECK_OP_D_BCLR     ;Branch to next comparison if not equal
+    JSR     PRINT_OP_S_BCLR     ;Print the OP code if equal
+    ;MOVEM.L (SP)+,D6-D7        ;POP STACK
+    BRA     CG0_C               ;Finish routine
 CHECK_OP_D_BCLR:
-    MOVE.W  CUR_OP_CODE,D0                ;Move current instruction set into D
+    MOVE.W  CUR_OP_CODE,D0        ;Move current instruction set into D
     ANDI.W  #%0000000110000000,D0 ;Do a direct binary bitmask to see which bits are needed
     CMP.W   #%0000000110000000,D0 ;Compare the expected binary value
     BNE     CG0_F                 ;If not equal this must be an invalid OP code
     JSR     PRINT_OP_D_BCLR       ;Print the OP code if equal
-    BRA     CG0_C                ;Finish routine
-CG0_F:                       ;Checks have been finished, invalid OP code has been found
+    BRA     CG0_C                 ;Finish routine
+CG0_F:                            ;Checks have been finished, invalid OP code has been found
     BRA INVALID_OP    
-CG0_C:                       ;Checks have been finished,a valid OP code has been found
-    RTS                      ;Return to stack
+CG0_C:                            ;Checks have been finished,a valid OP code has been found
+    RTS                           ;Return to stack
     
 * GROUP_1                      
 ********************************************************************************
@@ -659,7 +661,6 @@ FIND_MOVEA_W_DIFFERENCE:      ;Finds difference between MOVEA and MOVE
     LSR.W    D1,D0          ;Truncate to shift 3 bits to a register
     MOVE.W   D0,D6          ;Move 3 address mode bits into D6
     CMP.W   #$1,D6          ;Check if the address mode value is MOVEA
-    JSR     MOVE_AND_MOVEA_PARSE_EA
     BNE     CHECK_OP_MOVE_W 
     BEQ     PRINT_OP_MOVEA_W  
     
@@ -754,7 +755,7 @@ CHECK_OP_SUBQ
 *   
 *   MOVE.W #%0110010100000000   ;BCS
 *   MOVE.W #%0110110001010101   ;BGE
-*   MVE.W #%0110110110101010    BLT
+*   MVE.W #%0110110110101010    ;BLT
 *   MOVE.W #%0110100001010101   ;BVC
 ********************************************************************************
 C_GROUP_6:
