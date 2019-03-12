@@ -76,6 +76,7 @@ A4: G_BUFFER
 ```
 Display Tasks
 ```
+All loads are done to G_BUFFER
 <ADDRESS> <OPERAND> <EA> $<HEX VALUE>
 Example:
 1000 MOVEA.W A5,A1 $3CBC
@@ -84,4 +85,11 @@ Load Order
 <OPERAND> - OP person
 <EA> - EA
 $<HEX VALUE> - EA
+IO then puts a null terminating string '0' to print out the G_BUFFER.
+```
+For a BAD operand, the following will be printed to the B_BUFFER
+```
+<ADDRESS> DATA $<HEX VALUE>
+Example:
+1000 DATA $FFFF
 ```
