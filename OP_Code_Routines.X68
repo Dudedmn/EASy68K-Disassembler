@@ -805,64 +805,152 @@ C_GROUP_7:
 
 * GROUP_8
 ********************************************************************************
+* Supported:
 * DIVS: $8, 11-9 Reg, 8-6 %111, 5-3 EA Mode, 2-0 EA Reg
 * OR: $80, 7-6 Size, 5-3 EA Mode, 2-0 EA Register
+* Unsupported: DIVU, SBCD
 ********************************************************************************
 C_GROUP_8:
 
 CHECK_OP_DIVS:
-
-CHECK_OP_OR:
-
+    MOVE CUR_OP_CODE,D0   ;Move current instruction set into D0
+    ANDI.W #$F1C0,D0
+    CMP.W #$81C0,D0
+    BEQ PRINT_OP_DIVS
+    BNE CHECK_OP_OR
+    
+CHECK_OP_DIVU:
+    MOVE CUR_OP_CODE,D0   ;Move current instruction set into D0
+    ANDI.W #$F1C0,D0
+    CMP.W #$80C0,D0
+    BEQ INVALID_OP
+    BNE CHECK_OP_SBCD
+    
+CHECK_OP_SBCD:
+    MOVE CUR_OP_CODE,D0   ;Move current instruction set into D0
+    ANDI.W #$F100,D0
+    CMP.W #$8100,D0
+    BEQ INVALID_OP
+    BNE CHECK_OP_OR
+    
+CHECK_OP_OR:              ;At this point only remaining $8 code is OR
+    JMP PRINT_OP_OR
 * GROUP_9                      
 ********************************************************************************
+* Supported
 * SUB: $9, 11-9 Reg, 8-6 OPMODE, 5-3 EA Mode, 2-0 EA Reg
+* Unsupported: SUBX, SUBA
 ********************************************************************************
 C_GROUP_9:
 
-CHECK_OP_SUB:
+CHECK_OP_SUBA:             ;Check SUBA first as it has static bits
+    MOVE CUR_OP_CODE,D0    ;Move current instruction set into D0
+    ANDI.W #$F0C0,D0
+    CMP.W #$90C0,D0
+    BEQ INVALID_OP
+    BNE CHECK_OP_SUBX
+
+CHECK_OP_SUBX:
+    MOVE CUR_OP_CODE,D0    ;Move current instruction set into D0
+    ANDI.W #$F130,D0
+    CMP.W #$9100,D0
+    BEQ INVALID_OP
+    BNE CHECK_OP_SUB
+
+CHECK_OP_SUB:           ;At this point only remaining $9 is SUB
+    JMP PRINT_OP_SUB
 
 *GROUP_A
 ********************************************************************************
-* Currently no OP codes here are supported.
+* Currently no OP codes here are supported. There are no current OP codes here.
 ********************************************************************************
 C_GROUP_A:
     JSR INVALID_OP
 
 * GROUP_B                     
 ********************************************************************************
+* Supported:
 * EOR: $B, 11-9 Reg, 8 %1, 8-6 OPMODE, 5-3 EA Mode, 2-0 EA Reg
 * CMP: $B, 11-9 Reg, 8 %0, 8-6 OPMODE, 5-3 EA Mode, 2-0 EA Reg
 * The specific bit difference is listed 
+* Unsupported: CMPM, CMPA
 ********************************************************************************
 C_GROUP_B:
 
+CHECK_OP_CMPM
+    MOVE CUR_OP_CODE,D0    ;Move current instruction set into D0
+    ANDI.W #$F138,D0
+    CMP.W  #$B108,D0
+    BEQ INVALID_OP
+    BNE CHECK_OP_CMPA
+    
+CHECK_OP_CMPA:
+    MOVE CUR_OP_CODE,D0    ;Move current instruction set into D0
+    ANDI.W #$F0C0,D0
+    CMP.W  #$B0C0,D0
+    BEQ INVALID_OP
+    BNE CHECK_OP_EOR
+    
 CHECK_OP_EOR:
-
+    MOVE CUR_OP_CODE,D0    ;Move current instruction set into D0
+    ANDI.W #$F100,D0
+    CMP.W #$B100,D0
+    BEQ PRINT_OP_EOR
+    BNE CHECK_OP_CMP
+    
 CHECK_OP_CMP:
-
+    MOVE CUR_OP_CODE,D0    ;Move current instruction set into D0
+    ANDI.W #$F100,D0
+    CMP.W #$B000,D0
+    BEQ PRINT_OP_CMP
+    BNE INVALID_OP
+    
 * GROUP_C                     
 ********************************************************************************
+* Supported:
 * MULS: $C, 11-8 Reg, 8-6 %111, 5-3 EA Mode, 2-0 EA Reg
+* Unsupported: MULU, ABCD, EXG, AND
+* Note: EXG OP mode has to be 01000, 01001, 10001, as such can never be 11 for
+* bits 7-6
 ********************************************************************************
 C_GROUP_C:
 
 CHECK_OP_MULS:
+    MOVE CUR_OP_CODE,D0    ;Move current instruction set into D0
+    ANDI.W #$F1C0,D0
+    CMP.W #$C1C0,D0
+    BEQ PRINT_OP_MULS
+    BNE INVALID_OP          ; This can only be the supported operand
 
 * GROUP_D                     
 ********************************************************************************
+* Supported:
 * ADD: $D, 11-9 Reg, 8-6 OPMODE, 5-3 EA Mode, 2-0 EA Reg
 * ADDA: $D, 11- 9 Reg, 8-6 OPMODE, 7-6 %11, 5-3 EA Mode, 2-0 EA Reg
 * The specific bit difference is listed out in the OPMODE field.
+* Unsupported: ADDX
 ********************************************************************************
 C_GROUP_D:
 
+CHECK_OP_ADDX:
+    MOVE CUR_OP_CODE,D0    ;Move current instruction set into D0
+    ANDI.W #$F130,D0
+    CMP.W #$D100,D0
+    BEQ   INVALID_OP
+    BNE CHECK_OP_ADDA
+
 CHECK_OP_ADDA:
+    MOVE CUR_OP_CODE,D0    ;Move current instruction set into D0
+    ANDI.W #$F0C0,D0
+    CMP.W #$D0C0,D0
+    BEQ   PRINT_OP_ADDA
+    BNE   CHECK_OP_ADD
 
 CHECK_OP_ADD:
-
+    JMP PRINT_OP_ADD        ;Only remaining OP in $D is ADD
 * GROUP_E                     
 ********************************************************************************
+* Supported:
 * LSR: $E, 11-9 Count/Reg, 8 %0, 7-6 Size, 5 i/r, 4-3 %01, 2-0 Reg
 * LSL: $E, 11-9 Count/Reg, 8 %1, 7-6 Size, 5 i/r, 4-3 %01, 2-0 Reg
 * ASR: $E, $0, 8 %0, 7-6 %11, 5-3 EA Mode, 2-0 EA reg
@@ -872,26 +960,129 @@ CHECK_OP_ADD:
 * Count/Reg for LSR/LSL refers to shift count, where 0 = shift count of 8, 1-7 
 * refers to the respective value when i/r = 0. If i/r = 1, data register in the 
 * Count/Reg field specifies the shift count.  
-* 
+* For directional bit at 8, R = 0, L = 1
 * Count/Reg for ROR/ROL specifies rotate count instead of shift count.
+*
+* Unsupported: ROXL, ROXR
 ********************************************************************************
 C_GROUP_E:
 
-CHECK_OP_LSR:
+CHECK_OP_ROXR_NO_ROT:
+    MOVE CUR_OP_CODE,D0    ;Move current instruction set into D0
+    ANDI.W #$F4C0,D0
+    CMP.W #$E4C0,D0
+    BEQ   INVALID_OP
+    BNE   CHECK_OP_ROXL_NO_ROT
 
-CHECK_OP_LSL:
+CHECK_OP_ROXL_NO_ROT:
+    MOVE CUR_OP_CODE,D0    ;Move current instruction set into D0
+    ANDI.W #$F5C0,D0
+    CMP.W #$E5C0,D0
+    BEQ   INVALID_OP
+    BNE   CHECK_OP_LSR_NO_ROT
 
-CHECK_OP_ASL:
+CHECK_OP_ROR_NO_ROT:
+    MOVE CUR_OP_CODE,D0    ;Move current instruction set into D0
+    ANDI.W #$F7C0,D0
+    CMP.W #$E6C0,D0
+    BEQ   PRINT_OP_ROR
+    BNE   CHECK_OP_ROL_NO_ROT
+    
+CHECK_OP_ROL_NO_ROT:
+    MOVE CUR_OP_CODE,D0    ;Move current instruction set into D0
+    ANDI.W #$F7C0,D0
+    CMP.W #$E7C0,D0
+    BEQ   PRINT_OP_ROL
+    BNE   CHECK_OP_LSR_NO_ROT
+ 
+CHECK_OP_LSR_NO_ROT:
+    MOVE CUR_OP_CODE,D0    ;Move current instruction set into D0
+    ANDI.W #$F2C0,D0
+    CMP.W #$E2C0,D0
+    BEQ   PRINT_OP_LSR
+    BNE   CHECK_OP_LSL_NO_ROT
 
-CHECK_OP_ASR:
+CHECK_OP_LSL_NO_ROT:
+    MOVE CUR_OP_CODE,D0    ;Move current instruction set into D0
+    ANDI.W #$F3C0,D0
+    CMP.W #$E3C0,D0
+    BEQ   PRINT_OP_LSL
+    BNE   CHECK_OP_ASL_NO_ROT
 
-CHECK_OP_ROL:
+CHECK_OP_ASR_NO_ROT:
+    MOVE CUR_OP_CODE,D0    ;Move current instruction set into D0
+    ANDI.W #$F1C0,D0
+    CMP.W #$E0C0,D0
+    BEQ   PRINT_OP_ASR
+    BNE   CHECK_OP_ASL_NO_ROT
+
+CHECK_OP_ASL_NO_ROT:
+    MOVE CUR_OP_CODE,D0    ;Move current instruction set into D0
+    ANDI.W #$F1C0,D0
+    CMP.W #$01C0,D0
+    BEQ   PRINT_OP_ASL
+    BNE   CHECK_OP_ROR_NO_ROT
+
+CHECK_OP_ROXR:
+    MOVE CUR_OP_CODE,D0    ;Move current instruction set into D0
+    ANDI.W #$F118,D0
+    CMP.W  #$E010,D0
+    BEQ    INVALID_OP
+    BNE    CHECK_OP_ROXL
+    
+CHECK_OP_ROXL:
+    MOVE CUR_OP_CODE,D0    ;Move current instruction set into D0
+    ANDI.W #$F118,D0
+    CMP.W  #$E110,D0
+    BEQ    INVALID_OP
+    BNE    CHECK_OP_ROR
 
 CHECK_OP_ROR:
+    MOVE CUR_OP_CODE,D0    ;Move current instruction set into D0
+    ANDI.W #$F118,D0
+    CMP.W  #$E018,D0
+    BEQ    PRINT_OP_ROR
+    BNE    CHECK_OP_ROL
+
+CHECK_OP_ROL:
+    MOVE CUR_OP_CODE,D0    ;Move current instruction set into D0
+    ANDI.W #$F118,D0
+    CMP.W  #$E118,D0
+    BEQ    PRINT_OP_ROL
+    BNE    CHECK_OP_LSR
+    
+CHECK_OP_LSR:
+    MOVE CUR_OP_CODE,D0    ;Move current instruction set into D0
+    ANDI.W #$F118,D0
+    CMP.W  #$E008,D0
+    BEQ    PRINT_OP_LSR
+    BNE    CHECK_OP_LSL
+
+CHECK_OP_LSL:
+    MOVE CUR_OP_CODE,D0    ;Move current instruction set into D0
+    ANDI.W #$F118,D0
+    CMP.W  #$E108,D0
+    BEQ    PRINT_OP_LSL
+    BNE    CHECK_OP_ASR
+
+CHECK_OP_ASR:
+    MOVE CUR_OP_CODE,D0    ;Move current instruction set into D0
+    ANDI.W #$F118,D0
+    CMP.W  #$E000,D0
+    BEQ    PRINT_OP_ASR
+    BNE    CHECK_OP_ASL
+
+CHECK_OP_ASL:
+    MOVE CUR_OP_CODE,D0    ;Move current instruction set into D0
+    ANDI.W #$F118,D0
+    CMP.W  #$E100,D0
+    BEQ    PRINT_OP_ASL
+    BNE    INVALID_OP      ;Last possible OP code
+
 
 * GROUP_F
 ********************************************************************************
-* Currently no OP codes here are supported.
+* Currently no OP codes here are supported. There are no OP codes here
 ********************************************************************************
 C_GROUP_F:
     JSR INVALID_OP
@@ -1294,6 +1485,7 @@ _AddStrToBuffer_End
     RTS                  
    
     END START
+
 
 
 
