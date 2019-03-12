@@ -68,6 +68,11 @@ CUR_OP_CODE - refers to current 16 bit instruction set
 EA_SIZE - refers to current size of the CUR_OP_CODE (used for immediates as well)
 G_BUFFER - good buffer to print to
 L_BUFFER - bad buffer to print to
+MNEMONIC - First 4 op code bits   (15-12)
+FIRST_3 - First '3' bits          (11-9)
+SECOND_3 - Second '3' bits        (8-6)
+THIRD_3 - Third '3' bits          (5-2)
+FOURTH_3 - Fourth '3' bits        (2-0)
 
 Registers:
 A5: Starting Address
