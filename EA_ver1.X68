@@ -54,11 +54,11 @@ IS_VALID        DS.B    1 * EA-bit validity flag
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 * EXECUTION **************************************
 START: * TEST FOR MOVE.L
-    MOVE.B  #%0011, MNEMONIC
-    MOVE.B  #%001, FIRST_3
-    MOVE.B  #%111, SECOND_3
+    MOVE.B  #%0000, MNEMONIC
+    MOVE.B  #%000, FIRST_3
+    MOVE.B  #%110, SECOND_3
     MOVE.B  #%111, THIRD_3
-    MOVE.B  #%100, FOURTH_3
+    MOVE.B  #%001, FOURTH_3
     MOVEA.L #START_ADDRESS, A5
     LEA     EA_BUFFER, A4
 
@@ -178,13 +178,15 @@ LOAD_0000:  * BCLR/CMPI/ORI/Dynamic BCLR
             MOVEA.L #0, A3
 
             CMPI.B  #%000, FIRST_3
-            BEQ     ORI_CMPI
-            CMPI.B  #%110, FIRST_3
+            BNE     LATER
+            CMPI.B  #%110, SECOND_3
+            BNE     ORI_CMPI
+LATER       CMPI.B  #%110, FIRST_3
             BEQ     ORI_CMPI
             CMPI.B  #%010, SECOND_3
             BEQ     BCLR
             CMPI.B  #%110, SECOND_3
-            ;BEQ     DYNMC_BCLR
+            BEQ     DYNMC_BCLR
             
             JMP     INVALID
             
@@ -246,6 +248,28 @@ BACK3       MOVE.B  THIRD_3, D3
             JSR     LOAD_EA
             JSR     LOAD_NEW_LINE
 
+            RTS
+***^^^^^^^^^^^^^^^^^^^***
+
+***vvvvvvvvvvvvvvvvvvv***
+DYNMC_BCLR  MOVE.B  #%000, D3
+            MOVE.B  FIRST_3, D2
+            
+            JSR     LOAD_EA
+            JSR     LOAD_COMMA_SPACE
+
+            MOVEA.W #BACK5, A3
+            CMPI.B  #%000, FOURTH_3
+            BEQ     SIZE_W
+            CMPI.B  #%001, FOURTH_3
+            BEQ     SIZE_L
+            
+BACK5              MOVE.B   THIRD_3, D3
+            MOVE.B  FOURTH_3, D2
+            
+            JSR     LOAD_EA
+            JSR     LOAD_NEW_LINE
+            
             RTS
 ***^^^^^^^^^^^^^^^^^^^***
 
