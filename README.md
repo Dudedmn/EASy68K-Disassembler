@@ -37,7 +37,7 @@ IO
 
 OP Code
 - [X] Finish identification for all OP codes (supported and unsupported)
-- [ ] Load messages into buffer successfully
+- [X] Load messages into buffer successfully
 - [ ] Finish up comments for all lines and methods, WIP up to $4
 - [X] Validation testing for ALL OP codes
 
