@@ -1,4 +1,3 @@
-
     ORG    $1000
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 * MESSAGE VARIABLES ******************************
@@ -112,6 +111,17 @@ CHECK_0XXX:
 * Postcondition: X
 **********************************************************************************
 CHECK_1XXX:
+    CMPI.B  #$8, MNEMONIC
+    BEQ     LOAD_1000
+    CMPI.B  #$9, MNEMONIC
+    BEQ     LOAD_1001
+    CMPI.B  #$11, MNEMONIC
+    BEQ     LOAD_1011
+    CMPI.B  #$12, MNEMONIC
+    BEQ     LOAD_1100
+    CMPI.B  #$13, MNEMONIC
+    BEQ     LOAD_1101
+    
     RTS
 
 * <EA>
@@ -152,6 +162,171 @@ CHECK_01XX:
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 * LOAD_THIS FUNCTIONS (HIGHEST LEVEL) ************
+* <EA>
+**********************************************************************************
+* Description: Once the mnemonic is 1001, it is either ADD or ADDA.
+*
+* Registers used: If ADDA, D3 for SRC/DST mod, D2 for SRC/DST reg, A3 to get back from the subbranch.
+*                 If ADD, basically recycling the algorithm for DIVS/OR
+*
+* Precondition: FIRST_3, SECOND_3, THIRD_3, FOURTH_3
+*
+* Postcondition: X
+**********************************************************************************
+LOAD_1101:
+            CMPI.B  #%011, SECOND_3
+            BEQ     ADDA
+            CMPI.B  #%111, SECOND_3
+            BEQ     ADDA
+            
+            JMP     LOAD_1000
+            
+ADDA        MOVEA.W #ADDA_BACK, A3
+            CMPI.B  #%000, FOURTH_3
+            BEQ     SIZE_W
+            CMPI.B  #%001, FOURTH_3
+            BEQ     SIZE_L
+            
+ADDA_BACK   MOVE.B  THIRD_3, D3
+            MOVE.B  FOURTH_3, D2
+
+            JSR     LOAD_EA
+            JSR     LOAD_COMMA_SPACE
+            
+            MOVE.B  #%001, D3
+            MOVE.B  FIRST_3, D2
+            
+            JSR     LOAD_EA
+            JSR     LOAD_NEW_LINE
+            RTS
+
+* <EA>
+**********************************************************************************
+* Description: Once the mnemonic is 1001, it is MULS.
+*
+* Registers used: X. Basically recycling the algorithm for DIVS/OR
+*
+* Precondition: X
+*
+* Postcondition: X
+**********************************************************************************
+LOAD_1100:
+    JMP     LOAD_1000
+    
+* <EA>
+**********************************************************************************
+* Description: Once the mnemonic is 1001, it is either EOR or CMP.
+*
+* Registers used: X. Basically recycling the algorithm for DIVS/OR
+*
+* Precondition: X
+*
+* Postcondition: X
+**********************************************************************************
+LOAD_1011:
+    JMP     LOAD_1000
+
+
+* <EA>
+**********************************************************************************
+* Description: Once the mnemonic is 1001, it is SUB.
+*
+* Registers used: X. Basically recycling the algorithm for DIVS/OR
+*
+* Precondition: X
+*
+* Postcondition: X
+**********************************************************************************
+LOAD_1001:
+    JMP     LOAD_1000
+
+
+* <EA>
+**********************************************************************************
+* Description: Once the mnemonic is 1000, it is either DIVS or OR.
+*
+* Registers used: D3 for SRC/DST mod, D2 for SRC/DST reg, A3 to get back from the subbranch.
+*
+* Precondition: FIRST_3, SECOND_3, THIRD_3, FOURTH_3
+*
+* Postcondition: X
+**********************************************************************************
+LOAD_1000:
+            CLR.L   D3
+            CLR.L   D2
+            MOVEA.L #0, A3
+            
+            CMPI.B  #%111, SECOND_3
+            BEQ     DIVS
+            
+            CMPI.B  #%011, SECOND_3
+            BEQ     INVALID
+            
+***vvvvvvvvvvvvvvvvvvv***
+            CMPI.B  #%100, SECOND_3
+            BLT     DIR_0 * direction bit 0
+            BGE     DIR_1 * direction bit 1
+            
+DIR_0       MOVEA.W #OR_BACK, A3
+            CMPI.B  #%000, FOURTH_3
+            BEQ     SIZE_W
+            CMPI.B  #%001, FOURTH_3
+            BEQ     SIZE_L
+            
+OR_BACK     MOVE.B  THIRD_3, D3
+            MOVE.B  FOURTH_3, D2
+
+            JSR     LOAD_EA
+            JSR     LOAD_COMMA_SPACE
+            
+            MOVE.B  #%000, D3
+            MOVE.B  FIRST_3, D2
+            
+            JSR     LOAD_EA
+            JSR     LOAD_NEW_LINE
+            RTS
+            
+DIR_1       MOVE.B  #%000, D3
+            MOVE.B  FIRST_3, D2
+            
+            JSR     LOAD_EA
+            JSR     LOAD_COMMA_SPACE
+            
+            MOVEA.W #OR_BACK2, A3
+            CMPI.B  #%000, FOURTH_3
+            BEQ     SIZE_W
+            CMPI.B  #%001, FOURTH_3
+            BEQ     SIZE_L
+            
+OR_BACK2    MOVE.B  THIRD_3, D3
+            MOVE.B  FOURTH_3, D2
+
+            JSR     LOAD_EA
+            JSR     LOAD_NEW_LINE
+            RTS    
+***^^^^^^^^^^^^^^^^^^^***
+            
+***vvvvvvvvvvvvvvvvvvv***
+DIVS        MOVE.B  #%000, D3
+            MOVE.B  FIRST_3, D2
+
+            JSR     LOAD_EA
+            JSR     LOAD_COMMA_SPACE
+            
+            MOVEA.W #DIVS_BACK, A3
+            CMPI.B  #%000, FOURTH_3
+            BEQ     SIZE_W
+            CMPI.B  #%001, FOURTH_3
+            BEQ     SIZE_L
+            
+DIVS_BACK   MOVE.B  THIRD_3, D3
+            MOVE.B  FOURTH_3, D2
+            
+            JSR     LOAD_EA
+            JSR     LOAD_NEW_LINE
+            RTS
+***^^^^^^^^^^^^^^^^^^^***
+
 
 * <EA>
 **********************************************************************************
