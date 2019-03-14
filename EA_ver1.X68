@@ -54,11 +54,11 @@ IS_VALID        DS.B    1 * EA-bit validity flag
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 * EXECUTION **************************************
 START: * TEST FOR MOVE.L
-    MOVE.B  #%0000, MNEMONIC
-    MOVE.B  #%000, FIRST_3
-    MOVE.B  #%110, SECOND_3
+    MOVE.B  #%0100, MNEMONIC
+    MOVE.B  #%001, FIRST_3
+    MOVE.B  #%111, SECOND_3
     MOVE.B  #%111, THIRD_3
-    MOVE.B  #%001, FOURTH_3
+    MOVE.B  #%000, FOURTH_3
     MOVEA.L #START_ADDRESS, A5
     LEA     EA_BUFFER, A4
 
@@ -140,20 +140,12 @@ CHECK_00XX:
 * Postcondition: X
 **********************************************************************************
 CHECK_01XX:
+    CMPI.B  #%0100, MNEMONIC
+    BEQ     LOAD_0100
+    CMPI.B  #%0101, MNEMONIC
+    BEQ     LOAD_0101
     RTS
 
-* <EA>
-**********************************************************************************
-* Description: Checks the mnemonic 0011
-*
-* Registers used: X
-*
-* Precondition: X
-*
-* Postcondition: X
-**********************************************************************************
-CHECK_0011:
-    RTS
 **************************************************
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -163,44 +155,218 @@ CHECK_0011:
 
 * <EA>
 **********************************************************************************
-* Description: Once the mnemonic is 0000, it is either BCLR, CMPI, ORI, or Dynamic BCLR.
+* Description: Once the mnemonic is 0101, it is SUBQ
 *
-* Registers used: D3 for SRC/DST mod, D2 for SRC/DST reg, A3 to get back from the subbranch,
-*                                   D5, D4 for BCLR
+* Registers used: D4 to load the data within the EA bits, and A2 to come back
 *
 * Precondition: FIRST_3, SECOND_3, THIRD_3, FOURTH_3
 *
 * Postcondition: X
 **********************************************************************************
-LOAD_0000:  * BCLR/CMPI/ORI/Dynamic BCLR
+LOAD_0101:
+            CLR.L   D3
+            CLR.L   D2
+            MOVEA.L #0, A3
+
+            CMPI.B  #%111, FIRST_3
+            BLE     MYBE_SUBQ1
+            JMP     INVALID
+            
+MYBE_SUBQ1  CMPI.B  #%011, SECOND_3
+            BGT     MYBE_SUBQ2
+            JMP     INVALID
+
+MYBE_SUBQ2  CMPI.B  #%111, SECOND_3
+            BLT     SUBQ
+            JMP     INVALID
+
+SUBQ        ADDI.B  #%1, FIRST_3
+            MOVE.B  FIRST_3, D4
+            
+            MOVEA.W #SUBQ_SAVED, A2
+            JMP     LOAD_IMMDTE
+            
+SUBQ_SAVED  JSR     LOAD_COMMA_SPACE
+
+            MOVEA.W #SUBQ_BACK, A3
+            CMPI.B  #%100, SECOND_3
+            BEQ     SIZE_B
+            CMPI.B  #%101, SECOND_3
+            BEQ     SIZE_W
+            CMPI.B  #%110, SECOND_3
+            BEQ     SIZE_L
+            
+SUBQ_BACK   MOVE.B  THIRD_3, D3
+            MOVE.B  FOURTH_3, D2
+
+            JSR     LOAD_EA
+            JSR     LOAD_NEW_LINE
+            RTS
+
+* <EA>
+**********************************************************************************
+* Description: Once the mnemonic is 0100, it is either NEG, RTS, JSR, MOVEM, or LEA.
+*
+* Registers used: D3 for SRC/DST mod, D2 for SRC/DST reg, A3 to get back from the subbranch,
+*                 D5, D4 for BCLR, D6 for recognizing MOVEM
+*
+* Precondition: FIRST_3, SECOND_3, THIRD_3, FOURTH_3
+*
+* Postcondition: X
+**********************************************************************************
+LOAD_0100:
+            CLR.L   D3
+            CLR.L   D2
+            MOVEA.L #0, A3
+
+            CMPI.B  #%010, FIRST_3
+            BEQ     MYBE_NEG
+            BNE     NOT_NEG
+MYBE_NEG    CMPI.B  #%011, SECOND_3
+            BLT     NEG
+
+NOT_NEG     CMPI.B  #%111, FIRST_3
+            BEQ     MYBE_RTS1
+            BNE     NOT_RTS
+MYBE_RTS1   CMPI.B  #%001, SECOND_3
+            BEQ     MYBE_RTS2
+            BNE     NOT_RTS
+MYBE_RTS2   CMPI.B  #%110, THIRD_3
+            BEQ     MYBE_RTS3
+            BNE     NOT_RTS
+MYBE_RTS3   CMPI.B  #%101, FOURTH_3
+            BEQ     RTS
+            
+NOT_RTS     CMPI.B  #%111, FIRST_3
+            BEQ     MYBE_JSR
+            BNE     NOT_JSR
+MYBE_JSR    CMPI.B  #%010, SECOND_3
+            BEQ     JSR
+
+NOT_JSR     CLR.L   D6
+            MOVE.B  FIRST_3, D6
+            ANDI.B  #%101, D6 * Making %1X0 -> %100
+            CMPI.B  #%100, D6
+            BEQ     MYBE_MOVEM
+            BNE     NOT_MOVEM
+            
+MYBE_MOVEM  MOVE.B  SECOND_3, D6
+            ANDI.B  #%110, D6
+            CMPI.B  #%010, D6
+            BEQ     MOVEM
+            
+NOT_MOVEM   CMPI.B  #%111, SECOND_3
+            BEQ     LEA
+            
+            JMP     INVALID
+
+NEG:
+            MOVEA.W #NEG_BACK, A3
+            CMPI.B  #%000, SECOND_3
+            BEQ     SIZE_B
+            CMPI.B  #%001, SECOND_3
+            BEQ     SIZE_W
+            CMPI.B  #%010, SECOND_3
+            BEQ     SIZE_L
+            
+NEG_BACK    MOVE.B  THIRD_3, D3
+            MOVE.B  FOURTH_3, D2
+
+            JSR     LOAD_EA
+            JSR     LOAD_NEW_LINE
+            RTS
+            
+RTS:
+            JSR     LOAD_NEW_LINE
+            RTS
+
+JSR:
+            MOVEA.W #JSR_BACK, A3
+            CMPI.B  #%000, FOURTH_3
+            BEQ     SIZE_W
+            CMPI.B  #%001, FOURTH_3
+            BEQ     SIZE_L
+            
+JSR_BACK    MOVE.B  THIRD_3, D3
+            MOVE.B  FOURTH_3, D2
+            
+            JSR     LOAD_EA
+            JSR     LOAD_NEW_LINE
+            RTS
+
+MOVEM:
+    SIMHALT
+    
+LEA:
+            MOVEA.W #LEA_BACK, A3
+            CMPI.B  #%000, FOURTH_3
+            BEQ     SIZE_W
+            CMPI.B  #%001, FOURTH_3
+            BEQ     SIZE_L
+            
+LEA_BACK    MOVE.B  THIRD_3, D3
+            MOVE.B  FOURTH_3, D2
+            
+            JSR     LOAD_EA
+            JSR     LOAD_COMMA_SPACE
+            
+            MOVE.B  #%001, D3
+            MOVE.B  FIRST_3, D2
+            
+            JSR     LOAD_EA
+            JSR     LOAD_NEW_LINE
+            RTS
+
+* <EA>
+**********************************************************************************
+* Description: Once the mnemonic is 0000, it is either BCLR, CMPI, ORI, or Dynamic BCLR.
+*
+* Registers used: D3 for SRC/DST mod, D2 for SRC/DST reg, A3 to get back from the subbranch,
+*                 D5, D4 for BCLR
+*
+* Precondition: FIRST_3, SECOND_3, THIRD_3, FOURTH_3
+*
+* Postcondition: X
+**********************************************************************************
+LOAD_0000:
             CLR.L   D3
             CLR.L   D2
             MOVEA.L #0, A3
 
             CMPI.B  #%000, FIRST_3
-            BNE     LATER
-            CMPI.B  #%110, SECOND_3
-            BNE     ORI_CMPI
-LATER       CMPI.B  #%110, FIRST_3
-            BEQ     ORI_CMPI
-            CMPI.B  #%010, SECOND_3
+            BEQ     MYBE_ORI
+            BNE     NOT_ORI
+MYBE_ORI    CMPI.B  #%011, SECOND_3
+            BLT     ORI_CMPI            
+
+NOT_ORI     CMPI.B  #%110, FIRST_3
+            BEQ     MYBE_CMPI
+            BNE     NOT_CMPI
+MYBE_CMPI   CMPI.B  #%011, SECOND_3
+            BLT     ORI_CMPI
+            
+NOT_CMPI    CMPI.B  #%100, FIRST_3
+            BEQ     MYBE_BCLR
+            BNE     NOT_BCLR
+MYBE_BCLR   CMPI.B  #%010, SECOND_3
             BEQ     BCLR
-            CMPI.B  #%110, SECOND_3
+
+NOT_BCLR    CMPI.B  #%110, SECOND_3
             BEQ     DYNMC_BCLR
             
             JMP     INVALID
             
 ***vvvvvvvvvvvvvvvvvvv***
-ORI_CMPI         MOVEA.W #BACK, A3
-                        CMPI.B     #%000, SECOND_3
+ORI_CMPI    MOVEA.W #BACK, A3
+            CMPI.B  #%000, SECOND_3
             BEQ     SIZE_B
             CMPI.B  #%001, SECOND_3
             BEQ     SIZE_W
             CMPI.B  #%010, SECOND_3
             BEQ     SIZE_L
 
-BACK               MOVE.B   #%111, D3
-                        MOVE.B  #%100, D2
+BACK        MOVE.B  #%111, D3
+            MOVE.B  #%100, D2
             
             JSR     LOAD_EA
             JSR     LOAD_COMMA_SPACE
@@ -220,13 +386,13 @@ BACK2       MOVE.B  THIRD_3, D3
 ***^^^^^^^^^^^^^^^^^^^***
 
 ***vvvvvvvvvvvvvvvvvvv***
-BCLR               CLR.L   D5
+BCLR        CLR.L   D5
             CLR.L   D4
             MOVEA.L #0, A2
 
             MOVE.W  #END_ADDRESS, D5
             SUB.W   A5, D5
-            CMPI.W   #$2, D5
+            CMPI.W  #$2, D5
             BLT     INVALID
 
             MOVE.W  (A5)+, D4
@@ -264,7 +430,7 @@ DYNMC_BCLR  MOVE.B  #%000, D3
             CMPI.B  #%001, FOURTH_3
             BEQ     SIZE_L
             
-BACK5              MOVE.B   THIRD_3, D3
+BACK5       MOVE.B  THIRD_3, D3
             MOVE.B  FOURTH_3, D2
             
             JSR     LOAD_EA
@@ -276,7 +442,7 @@ BACK5              MOVE.B   THIRD_3, D3
 * <EA>
 **********************************************************************************
 * Description: Once the mnemonic is 00XX, it is either MOVE or MOVEA. Checks the 3-bit bundles and
-*                            the size of immediate/address values if necessary.
+*              the size of immediate/address values if necessary.
 *
 * Registers used: D3 for SRC/DST mod, D2 for SRC/DST reg, A3 to get back from the subbranch
 *
@@ -362,8 +528,8 @@ LOAD_LT_111:
     CMPI    #%100, D3 * e.g. -(A3)
     BEQ     LOAD_ADDRESS_W_PRE_DEC
     
-    JMP     EXT
-
+    JMP     INVALID
+    
 * <EA>
 **********************************************************************************
 * Description: Checks the SRC/DST mod where it is immediate/address value
@@ -406,9 +572,7 @@ GO          CMPI    #%000, D2
             CMPI    #%100, D2
             BEQ     LOAD_IMMDTE
     
-INVALID     MOVE.B  #%0, IS_VALID
-            JMP     EXT
-
+            JMP     INVALID
 * <EA>
 **********************************************************************************
 * Description: Puts in the proper value in TRAILING_SIZE based on the immediate/address value size
@@ -797,7 +961,7 @@ LOAD_THIS_SHIT:
 * <EA>
 **********************************************************************************
 * Description: Adds $30 to a number in D0 to make it a hex. If the number is greater
-*                            than 9 (A~F), then adds $37. Then moves the hex value from D0 to EA_BUFFER in ASCII
+*              than 9 (A~F), then adds $37. Then moves the hex value from D0 to EA_BUFFER in ASCII
 *
 * Registers used: X
 *
@@ -817,10 +981,29 @@ LE  ADDI.B  #$30, D0 * 0~9
 
 END MOVE.B  D0, (A4)+
     RTS
+
+* <EA>
+**********************************************************************************
+* Description: Execution goes here if even one of the EA bit is invalid. Flags the invalid-bit and
+*              entirely exits the EA process.
+*
+* Registers used: X
+*
+* Precondition: X
+*
+* Postcondition: X
+**********************************************************************************
+INVALID:
+            MOVE.B  #%0, IS_VALID
+            JMP     EXT
 **************************************************
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
     END    START
+
+
+
+
 
 
 
