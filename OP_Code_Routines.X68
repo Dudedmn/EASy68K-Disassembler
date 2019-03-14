@@ -6,21 +6,71 @@
 * Description: Disassembler routines to identify any valid
 * OP code dependent on current supported list.
 *------------------------------------------------------------
-  ORG $1000 ; Start at Address $1000
-CUR_OP_CODE DS.W 1  ; Current OP Code Word
-IS_VALID    DS.B 1  ; Tells if the current OP code is valid or not
-EA_SIZE     DS.B 1
-G_BUFFER    DS.B 80
-B_BUFFER    DS.B 80
-MNEMONIC    DS.B 1
-FIRST_3     DS.B 1
-SECOND_3    DS.B 1
-THIRD_3     DS.B 1
-FOURTH_3    DS.B 1
+    ORG $4000
+ 
+CUR_OP_CODE     DS.W    1 * Used for Daniel's code
+   MOVE.B $12, $4002
+   MOVE.B #$34, $4004
+   MOVE.B #$12, $4006
+   MOVE.B #$34, $4008
+    ORG $4100
+G_BUFFER    DS.B 80 
+    ORG $1000 ; Start at Address $1000
+  
 
-P_OP_MOVEA_L_T  DC.L    'MOVEA.L',0
-P_OP_MOVEA_L_A_L DC.L   'A.L',0
-    
+
+MNEMONIC        DS.B    1 * First four BITS of any instruction
+ 
+TRAILING_SIZE   DS.W    1 * Size of any immediate or
+                          * address values. Immediate or address
+                          * value of a BYTE is still processed as
+                          * WORD because the trailing bytes
+                          * are represented as a word regardless.
+                          * $1 = BYTE, $2 = WORD, $4 = LONG
+
+FIRST_3         DS.B    1 * First, second, third, and fourth bundles of three bits each
+SECOND_3        DS.B    1
+THIRD_3         DS.B    1
+FOURTH_3        DS.B    1
+
+EA_SIZE     DS.B 1
+
+B_BUFFER    DS.B 80
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+* MESSAGE VARIABLES ******************************
+
+* ASCII values for respective characters
+
+ADDRESS         DC.B    $41
+DATA            DC.B    $44
+
+PTHSIS_OPEN     DC.B    $28
+PTHSIS_CLSD     DC.B    $29
+HEX_SIGN        DC.B    $24
+IMMDTE_VALU     DC.B    $23
+PLUS_SIGN       DC.B    $2B
+MINUS_SIGN      DC.B    $2D
+
+COMMA           DC.B    $2C
+SPACE           DC.B    $20
+
+CR              DC.B    $D
+LF              DC.B    $A
+**************************************************
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+* GLOBAL BUFFER **********************************
+
+
+START_ADDRESS   EQU     $4000 * Used to parse through the entire instruction
+END_ADDRESS     EQU     $5000
+
+EA_BUFFER       DS.B    80 * Used to load ASCII-converted EA ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+IS_VALID        DS.B    1 * EA-bit validity flag
+                          * $0 = invalid, $1 = valid
 
 START:
     
@@ -66,11 +116,12 @@ START:
         
     ***GROUP 1 tests**** SUPPORTED: MOVE.B
     ;MOVE.W #%0001101000000111,CUR_OP_CODE       ;MOVE.B D5,D7           SHOULD PASS
-    
     ***GROUP 2 tests**** SUPPORTED: MOVEA.L, MOVE.L
     ;MOVE.W #%0010101000000111,CUR_OP_CODE       ;MOVE.L D5,D7           SHOULD PASS
     ;MOVE.W #%0010101001000111,CUR_OP_CODE       ;MOVEA.L D5,D7          SHOULD PASS
-        
+    ;MOVE.W #%0010 101 000 111 100, MOVE.L #imm,D5
+      MOVE.W #%0010101000111100,CUR_OP_CODE       ;MOVE.L #immed,D5 
+       
     ***GROUP 3 tests**** SUPPORTED: MOVEA.W, MOVE.W
     ;MOVE.W #%0011101000000111,CUR_OP_CODE       ;MOVE.W D5,D7           SHOULD PASS
     ;MOVE.W #%0011101001000111,CUR_OP_CODE       ;MOVEA.W D5,D7          SHOULD PASS
@@ -190,7 +241,7 @@ START:
 * STATUS: 
 * IDENTIFICATION FOR ALL OP CODES: 		DONE
 * VALIDATION TESTING FOR ALL OP CODES: 	DONE
-* PRINTING ALL OP CODES TO BUFFER: 		NOT DONE
+* PRINTING ALL OP CODES TO BUFFER: 		DONE
 * PRINTING SIZE BITS OF ALL OP CODES: 	NOT DONE
 *-----------------------------------------------------------
 *First Nibble Values (15-12)
@@ -350,7 +401,8 @@ GROUP_F:                ;$F| Display: DATA, $WXYZ (Unsupported)
 
 OP_JSR_DONE:
          MOVEM.L (SP)+,D0-D1       ;Recover register D0
-         JMP READ_NEXT_INSTRUCTION
+         SIMHALT
+         ;JMP EA_ROUTINE        ;This runs EA's routines after OP code portion is finished
 **********************************************************************************
 
 ********** EA Parsing ************************************************************
@@ -829,7 +881,7 @@ GROUP2_INVALID:
     JSR INVALID_OP                  ;Invalid OP code found
     
 GROUP2_SUCCESS:
-    MOVEM.L (SP)+,D0-D1             ;Restore register
+    MOVEM.L (SP)+,D0-D2             ;Restore register
     RTS                             ;Return to stack
 * GROUP_3
 ********************************************************************************
@@ -1738,8 +1790,8 @@ PRINT_OP_MOVEA_L:
     JSR PRINT_TO_BUFFER
     RTS
 PRINT_OP_MOVE_L:
-    LEA P_OP_MOVE_L,A1
-    JSR PRINT_OP
+    MOVE.L #P_OP_MOVE_L, Arg_AddStrToBuffer_String
+    JSR PRINT_TO_BUFFER
     RTS
 ******************************* END OF GROUP 2 ********************************
     
@@ -1749,8 +1801,8 @@ PRINT_OP_MOVEA_W:
     JSR PRINT_TO_BUFFER
     RTS
 PRINT_OP_MOVE_W:
-    LEA P_OP_MOVE_W,A1
-    JSR PRINT_OP
+    MOVE.L #P_OP_MOVE_W, Arg_AddStrToBuffer_String
+    JSR PRINT_TO_BUFFER
     RTS
 ******************************* END OF GROUP 3 ********************************
 
@@ -1913,22 +1965,22 @@ PRINT_OP:   ;Prints current op code byte
 * Formatting is as follows: P_OP_<OPCODE>, where P = Print, OP = Operation,
 * <OPCODE> is any valid operand
 
-P_INVALID_OP    DC.B    'DATA',0
+P_INVALID_OP    DC.B    'DATA   ',0
 OP_FOUND        DC.B    'Found OP',0 ; this should be taken out later
-P_SIZE_B        DC.B    '.B',0
-P_SIZE_W        DC.B    '.W',0
-P_SIZE_L        DC.B    '.L',0
+P_SIZE_B        DC.B    '.B ',0
+P_SIZE_W        DC.B    '.W ',0
+P_SIZE_L        DC.B    '.L ',0
 P_OP_ORI        DC.B    'ORI',0
 P_OP_CMPI       DC.B    'CMPI',0
 P_OP_STATIC_BCLR     DC.B    'BCLR',0
 P_OP_DYNAMIC_BCLR     DC.B    'BCLR',0
-P_OP_MOVEB      DC.B    'MOVE.B',0
-P_OP_MOVEA_L    DC.B    'MOVEA.L',0 
-P_OP_MOVE_L     DC.B    'MOVE.L',0
-P_OP_MOVEA_W    DC.B    'MOVEA.W',0
-P_OP_MOVE_W     DC.B    'MOVE.W',0
-P_OP_MOVEM_W    DC.B    'MOVEM.W',0
-P_OP_MOVEM_L    DC.B    'MOVEM.L',0
+P_OP_MOVEB      DC.B    'MOVE.B ',0
+P_OP_MOVEA_L    DC.B    'MOVEA.L    ',0 
+P_OP_MOVE_L     DC.B    'MOVE.L ',0
+P_OP_MOVEA_W    DC.B    'MOVEA.W    ',0
+P_OP_MOVE_W     DC.B    'MOVE.W ',0
+P_OP_MOVEM_W    DC.B    'MOVEM.W    ',0
+P_OP_MOVEM_L    DC.B    'MOVEM.L    ',0
 P_OP_LEA        DC.B    'LEA',0
 P_OP_JSR        DC.B    'JSR',0
 P_OP_NOP        DC.B    'NOP',0
@@ -2013,6 +2065,7 @@ _AddStrToBuffer_AddLoop
     BGE         _AddStrToBuffer_LengthExceeded      * Error, return
     
     MOVE.B      (A0)+, (A1)+                        * Move string char to buffer char
+    ADDQ.L      #1, A4
     ADDQ.B      #1, D1                              * Increment counter
     BRA         _AddStrToBuffer_AddLoop             * Loop back
 
@@ -2026,27 +2079,9 @@ _AddStrToBuffer_LengthExceeded
 _AddStrToBuffer_End
     MOVEM.L     (SP)+, D0-D1/A0-A1                  * Restore registers from stack
     RTS                  
+    
+    END START                                   ; THIS SHOULD BE REMOVED FOR FULL INTEGRATION
    
-    END START
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 *~Font name~Courier New~
 *~Font size~10~
 *~Tab type~1~

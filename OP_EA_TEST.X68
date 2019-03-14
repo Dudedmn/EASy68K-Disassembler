@@ -241,7 +241,7 @@ START:
 * STATUS: 
 * IDENTIFICATION FOR ALL OP CODES: 		DONE
 * VALIDATION TESTING FOR ALL OP CODES: 	DONE
-* PRINTING ALL OP CODES TO BUFFER: 		NOT DONE
+* PRINTING ALL OP CODES TO BUFFER: 		DONE
 * PRINTING SIZE BITS OF ALL OP CODES: 	NOT DONE
 *-----------------------------------------------------------
 *First Nibble Values (15-12)
@@ -401,7 +401,7 @@ GROUP_F:                ;$F| Display: DATA, $WXYZ (Unsupported)
 
 OP_JSR_DONE:
          MOVEM.L (SP)+,D0-D1       ;Recover register D0
-         JMP DENNY_EA_SHIT
+         JMP EA_ROUTINE
 **********************************************************************************
 
 ********** EA Parsing ************************************************************
@@ -2080,7 +2080,7 @@ _AddStrToBuffer_End
     RTS                  
    
    
-;DENNY_EA_SHIT:
+;EA_ROUTINE:
 
 ;    MOVEA.L #0, A5
  ;   MOVEA.L #START_ADDRESS, A5
@@ -2104,7 +2104,7 @@ _AddStrToBuffer_End
     ;CHECK IF IS_VALID = 0
     ;IF SO SKIP TO RUN_FAHAD_CODE
 
-DENNY_EA_SHIT:
+EA_ROUTINE:
 
     MOVEA.L #0, A5
     MOVEA.L #START_ADDRESS, A5
@@ -3242,6 +3242,7 @@ INVALID:
 *~Font size~10~
 *~Tab type~1~
 *~Tab size~4~
+
 
 
 
