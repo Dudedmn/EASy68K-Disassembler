@@ -22,10 +22,11 @@ P_OP_MOVEA_L_T  DC.L    'MOVEA.L',0
 P_OP_MOVEA_L_A_L DC.L   'A.L',0
     
 
-START
-    LEA G_BUFFER,A4
-    MOVE.B #0, (A4)
+START:
     
+    LEA G_BUFFER,A4         ;Load G_BUFFER into A4, put a pointer to it as A4
+    MOVE.B #0, (A4)         ;Move 0 to indicate where to put the loaded buffer word
+
     ;MOVE.L (A5)+, D0
 ************** BUFFER PRINTING/LOADING EXAMPLES *************************************
     ; Load the message onto A4
@@ -37,11 +38,14 @@ START
     ;MOVE.L P_OP_MOVEA_L_A_L,(A4)+
     
 ***************************** Input Tests ********************************************
+    ; indicates a test has been finished
+    * indicates a test hasn't been finished
+    
     ***GROUP 0 tests**** SUPPORTED: ORI, BCLR (static, dynamic), CMPI
     ;MOVE.W #%0000000000111100,CUR_OP_CODE      ;ORI TO CCR              SHOULD FAIL
     ;MOVE.W #%0000000001111100,CUR_OP_CODE      ;ORI TO SR               SHOULD FAIL
     ;MOVE.W #%0000000010000101,CUR_OP_CODE      ;ORI.W D5                SHOULD PASS
-    ;MOVE.W #%0000001001111100,CUR_OP_CODE      ;ANDI TO CCR             SHOULD FAIL
+    MOVE.W #%0000001001111100,CUR_OP_CODE      ;ANDI TO CCR             SHOULD FAIL
     ;MOVE.W #%0000001001111100,CUR_OP_CODE      ;ANDI TO SR              SHOULD FAIL
     ;MOVE.W #%0000001010000101,CUR_OP_CODE      ;ANDI.W D5               SHOULD FAIL
     ;MOVE.W #%0000010010000101,CUR_OP_CODE      ;SUBI.W D5               SHOULD FAIL
@@ -138,6 +142,7 @@ START
     ;MOVE.W #%1001101011001101,CUR_OP_CODE    ;SUBA                      SHOULD FAIL
     
     *****GROUP A TESTS********** NONE SUPPORTED
+    ;MOVE.W #%1010110101010011,CUR_OP_CODE    ;INVALID_OP                SHOULD FAIL
     
     *****GROUP B TESTS********** SUPPORTED: EOR, CMP
     *MOVE.W #%1011101101000110,CUR_OP_CODE    ;EOR                       SHOULD PASS
@@ -176,9 +181,8 @@ START
     ;MOVE.W #%1110011001011101,CUR_OP_CODE    ;ROR                       SHOULD PASS
     ;MOVE.W #%1110011101011101,CUR_OP_CODE    ;ROL                       SHOULD PASS    
         
-    
     *****GROUP F TESTS********** NONE SUPPORTED
-    
+    ;MOVE.W #%1111010110101011,CUR_OP_CODE    ;INVALID_OP                SHOULD FAIL
     
     
 ************************************************************************************
@@ -621,7 +625,6 @@ CHECK_OP_ANDI_TO_SR:
     BEQ GROUP0_INVALID         		;INVALID OP code found
     BNE CHECK_OP_ANDI          		;Check next routine
 
-
 CHECK_OP_EORI_TO_CCR:
     MOVE.W CUR_OP_CODE,D0      		;Move current instruction set into D0
     CMP.W #$0A3C,D0            		;Compare the direct full bits
@@ -706,8 +709,7 @@ CHECK_OP_DYNAMIC_BSET:
     BEQ     BIT_CHECK_MOVEP     	;Check special case for MOVEP
     BNE     CHECK_OP_MOVEP      	;Check next routine
 
-BIT_CHECK_MOVEP:
-									;This is a special case check for MOVEP
+BIT_CHECK_MOVEP:								;This is a special case check for MOVEP
     MOVE.W  CUR_OP_CODE,D0      	;Move current instruction set into D0
     MOVE.W  #10,D1              	;Prepare a 10-bit shift
     LSL.W   D1,D0               	;Shift out 10 bits left 
@@ -930,7 +932,7 @@ CHECK_OP_RTR:
     MOVE.W CUR_OP_CODE,D0    		;Move current instruction set into D0
     CMP.W #$4E77,D0	     	 		;Compare the appropriate bits
     BEQ    GROUP4_INVALID	 		;INVALID OP code found
-    BNE    CHECK_OP_MOVE_FROM   	;Check next OP code_SR
+    BNE    CHECK_OP_MOVE_FROM_SR   	;Check next OP code
 
 
 *Unsupported OP codes to check that have partial static bits
@@ -939,49 +941,49 @@ CHECK_OP_MOVE_FROM_SR:
     ANDI.W #$FFC0,D0				;Mask relevant bits to D0
     CMP.W  #$40C0,D0				;Compare the appropriate masked bits
     BEQ    GROUP4_INVALID			;INVALID OP code found	
-    BNE    CHECK_OP_MOVE_TO_CCR		;Check next OP code_SR
+    BNE    CHECK_OP_MOVE_TO_CCR		;Check next OP code
     
 CHECK_OP_MOVE_TO_CCR:
     MOVE.W CUR_OP_CODE,D0    		;Move current instruction set into D0
     ANDI.W #$FFC0,D0				;Mask relevant bits to D0
     CMP.W  #$44C0,D0				;Compare the appropriate masked bits
     BEQ    GROUP4_INVALID			;INVALID OP code found
-    BNE    CHECK_OP_MOVE_TO_SR		;Check next OP code_SR
+    BNE    CHECK_OP_MOVE_TO_SR		;Check next OP code
     
 CHECK_OP_MOVE_TO_SR:
     MOVE.W CUR_OP_CODE,D0    		;Move current instruction set into D0
     ANDI.W #$FFC0,D0				;Mask relevant bits to D0
     CMP.W  #$46C0,D0				;Compare the appropriate masked bits
-    BEQ    GROUP4_INVALID			;INVALID OP code foun
-    BNE    CHECK_OP_NEGX			;Check next OP code_S
+    BEQ    GROUP4_INVALID			;INVALID OP code found
+    BNE    CHECK_OP_NEGX			;Check next OP code
     
 CHECK_OP_NEGX:
     MOVE.W CUR_OP_CODE,D0   		 ;Move current instruction set into D0
     ANDI.W #$FF00,D0				;Mask relevant bits to D0
     CMP.W  #$4000,D0				;Compare the appropriate masked bits
-    BEQ    GROUP4_INVALID			;INVALID OP code fou
-    BNE    CHECK_OP_CLR				;Check next OP code_
+    BEQ    GROUP4_INVALID			;INVALID OP code found
+    BNE    CHECK_OP_CLR				;Check next OP code
     
 CHECK_OP_CLR:
     MOVE.W CUR_OP_CODE,D0    		;Move current instruction set into D0
     ANDI.W #$FF00,D0				;Mask relevant bits to D0
     CMP.W  #$4200,D0				;Compare the appropriate masked bits
-    BEQ    GROUP4_INVALID			;INVALID OP code fo
+    BEQ    GROUP4_INVALID			;INVALID OP code found
     BNE    CHECK_OP_NOT				;Check next OP code
     
 CHECK_OP_NOT:
     MOVE.W CUR_OP_CODE,D0    		;Move current instruction set into D0
     ANDI.W #$FF00,D0				;Mask relevant bits to D0
     CMP.W  #$4600,D0				;Compare the appropriate masked bits
-    BEQ    GROUP4_INVALID			;INVALID OP code f
-    BNE    CHECK_OP_EXT				;Check next OP cod
+    BEQ    GROUP4_INVALID			;INVALID OP code found
+    BNE    CHECK_OP_EXT				;Check next OP code
     
 CHECK_OP_EXT:
     MOVE.W CUR_OP_CODE,D0    		;Move current instruction set into D0
     ANDI.W #$FF80,D0				;Mask relevant bits to D0
     CMP.W  #$4880,D0				;Compare the appropriate masked bits
     BEQ    GROUP4_INVALID			;INVALID OP code BIT_CHECK_EXT
-    BNE    CHECK_OP_NBCD			;Check next OP cod
+    BNE    CHECK_OP_NBCD			;Check next OP code
 
 BIT_CHECK_EXT:    
     MOVE.W CUR_OP_CODE,D0    		;This is a special case to check against MOVEM
@@ -1676,34 +1678,14 @@ C_GROUP_F:
 * THIS WILL NEED TO BE CHANGED TO DISPLAY: 1000 DATA $WXYZ IN THE FUTURE
 ********************************************************************************
 INVALID_OP:  ; Prints DATA for invalid op, THIS SHOULD BE SETTING THE IS_VALID BIT TO 0
-    LEA P_INVALID_OP,A1
-    MOVE.B #13,D0
-    TRAP #15
+    MOVE.L #P_INVALID_OP, Arg_AddStrToBuffer_String
+    JSR PRINT_TO_BUFFER
     MOVE.B #0,IS_VALID
     RTS
     
 READ_NEXT_INSTRUCTION: ; Needs to read next instruction set {PLACEHOLDER}
     SIMHALT
 
-MAKE_VAL_ASCII:
-    CMPI.B  #$9,D0
-    BGT     LETTER_ASCII
-    BLE     NUMBER_ASCII
-    RTS
-    
-LETTER_ASCII:
-    ADDI.B #$37,D0 ; A-F
-    RTS
-    
-NUMBER_ASCII
-    ADDI.B #$30,D0 ; 0-9
-    RTS
-    
-ADD_PERIOD:
-    MOVE.L D0,-(SP)
-    MOVE.B #$0,D0
-    ADDI.B #$46,D0
-    MOVE.L (SP)+,D0
 ********************** PRINTING ROUTINES **************************************
 * Description: These routines are to print the associated op codes, by placing
 * them in the appropriate area to the buffer
@@ -1717,36 +1699,43 @@ ADD_PERIOD:
 * THIS NEEDS TO BE RETOOLED TO PRINT TO BUFFER NOT TO CONSOLE
 *******************************************************************************
 
+* Prints the loaded item into G_BUFFER
+PRINT_TO_BUFFER:
+    MOVE.L #G_BUFFER, Arg_AddStrToBuffer_Buffer
+    JSR AddStrToBuffer
+    RTS
+    
+
 ****************************** GROUP 0 **************************************** 
 PRINT_OP_ORI:
-    LEA P_OP_ORI,A1
-    JSR PRINT_OP
+    MOVE.L #P_OP_ORI, Arg_AddStrToBuffer_String
+    JSR PRINT_TO_BUFFER
     RTS
 PRINT_OP_CMPI:
-    LEA P_OP_CMPI,A1
-    JSR PRINT_OP
+    MOVE.L #P_OP_CMPI, Arg_AddStrToBuffer_String
+    JSR PRINT_TO_BUFFER
     RTS
 PRINT_OP_STATIC_BCLR:
-    LEA P_OP_STATIC_BCLR,A1
-    JSR PRINT_OP
+    MOVE.L #P_OP_STATIC_BCLR, Arg_AddStrToBuffer_String
+    JSR PRINT_TO_BUFFER
     RTS
 PRINT_OP_DYNAMIC_BCLR:
-    LEA P_OP_DYNAMIC_BCLR,A1
-    JSR PRINT_OP
+    MOVE.L #P_OP_DYNAMIC_BCLR, Arg_AddStrToBuffer_String
+    JSR PRINT_TO_BUFFER
     RTS
 ******************************* END OF GROUP 0 ********************************
 
 ****************************** GROUP 1 ****************************************    
 PRINT_OP_MOVEB:
-    LEA P_OP_MOVEB,A1
-    JSR PRINT_OP
+    MOVE.L #P_OP_MOVEB, Arg_AddStrToBuffer_String
+    JSR PRINT_TO_BUFFER
     RTS
 ******************************* END OF GROUP 1 ********************************
     
 ****************************** GROUP 2 **************************************** 
 PRINT_OP_MOVEA_L:
-    LEA P_OP_MOVEA_L,A1
-    JSR PRINT_OP
+    MOVE.L #P_OP_MOVEA_L, Arg_AddStrToBuffer_String
+    JSR PRINT_TO_BUFFER
     RTS
 PRINT_OP_MOVE_L:
     LEA P_OP_MOVE_L,A1
@@ -1756,8 +1745,8 @@ PRINT_OP_MOVE_L:
     
 ****************************** GROUP 3 ****************************************    
 PRINT_OP_MOVEA_W:
-    LEA P_OP_MOVEA_W,A1
-    JSR PRINT_OP
+    MOVE.L #P_OP_MOVEA_W, Arg_AddStrToBuffer_String
+    JSR PRINT_TO_BUFFER
     RTS
 PRINT_OP_MOVE_W:
     LEA P_OP_MOVE_W,A1
@@ -1766,63 +1755,59 @@ PRINT_OP_MOVE_W:
 ******************************* END OF GROUP 3 ********************************
 
 ****************************** GROUP 4 ****************************************
-PRINT_OP_NOP:
-    LEA P_OP_NOP,A1
-    JSR PRINT_OP
-    RTS
 PRINT_OP_JSR:
-    LEA P_OP_JSR,A1
-    JSR PRINT_OP
+    MOVE.L #P_OP_JSR, Arg_AddStrToBuffer_String
+    JSR PRINT_TO_BUFFER
     RTS
 PRINT_OP_RTS:
-    LEA P_OP_RTS,A1
-    JSR PRINT_OP
+    MOVE.L #P_OP_RTS, Arg_AddStrToBuffer_String
+    JSR PRINT_TO_BUFFER
     RTS
 PRINT_OP_LEA:
-    LEA P_OP_LEA,A1
-    JSR PRINT_OP
+    MOVE.L #P_OP_LEA, Arg_AddStrToBuffer_String
+    JSR PRINT_TO_BUFFER
     RTS
 PRINT_OP_NEG:
-    LEA P_OP_NEG,A1
-    JSR PRINT_OP
+    MOVE.L #P_OP_NEG, Arg_AddStrToBuffer_String
+    JSR PRINT_TO_BUFFER
     RTS
 PRINT_OP_MOVEM_W:
-    LEA P_OP_MOVEM_W,A1
-    JSR PRINT_OP
+    MOVE.L #P_OP_MOVEM_W, Arg_AddStrToBuffer_String
+    JSR PRINT_TO_BUFFER
     RTS
 PRINT_OP_MOVEM_L:
-    LEA P_OP_MOVEM_L,A1
-    JSR PRINT_OP
+    MOVE.L #P_OP_MOVEM_L, Arg_AddStrToBuffer_String
+    JSR PRINT_TO_BUFFER
     RTS
 ******************************* END OF GROUP 4 ********************************
     
 ****************************** GROUP 5 ****************************************
 PRINT_OP_SUBQ:
-    LEA P_OP_SUBQ,A1
-    JSR PRINT_OP
+    MOVE.L #P_OP_SUBQ, Arg_AddStrToBuffer_String
+    JSR PRINT_TO_BUFFER
     RTS
 ******************************* END OF GROUP 5 ********************************
 
 ****************************** GROUP 6 ****************************************
 PRINT_OP_BCS:
-    LEA P_OP_BCS,A1
-    JSR PRINT_OP
+    MOVE.L #P_OP_BCS, Arg_AddStrToBuffer_String
+    JSR PRINT_TO_BUFFER
     RTS
 PRINT_OP_BGE:
-    LEA P_OP_BGE,A1
-    JSR PRINT_OP
+    MOVE.L #P_OP_BGE, Arg_AddStrToBuffer_String
+    JSR PRINT_TO_BUFFER
     RTS
 PRINT_OP_BLT:
-    LEA P_OP_BLT,A1
-    JSR PRINT_OP
+    MOVE.L #P_OP_BLT, Arg_AddStrToBuffer_String
+    JSR PRINT_TO_BUFFER
     RTS
 PRINT_OP_BVC:
-    LEA P_OP_BVC,A1
-    JSR PRINT_OP
+    MOVE.L #P_OP_BVC, Arg_AddStrToBuffer_String
+    JSR PRINT_TO_BUFFER
     RTS
 PRINT_OP_BRA:
-    LEA P_OP_BRA,A1
-    JSR PRINT_OP
+    MOVE.L #P_OP_BRA, Arg_AddStrToBuffer_String
+    JSR PRINT_TO_BUFFER
     RTS
 ******************************* END OF GROUP 6 ********************************
 
@@ -1832,19 +1817,19 @@ PRINT_OP_BRA:
 
 ****************************** GROUP 8 ****************************************
 PRINT_OP_DIVS:
-    LEA P_OP_DIVS,A1
-    JSR PRINT_OP
+    MOVE.L #P_OP_DIVS, Arg_AddStrToBuffer_String
+    JSR PRINT_TO_BUFFER
     RTS
 PRINT_OP_OR:
-    LEA P_OP_OR,A1
-    JSR PRINT_OP
+    MOVE.L #P_OP_OR, Arg_AddStrToBuffer_String
+    JSR PRINT_TO_BUFFER
     RTS
 ******************************* END OF GROUP 8 ********************************
 
 ****************************** GROUP 9 ****************************************
 PRINT_OP_SUB:
-    LEA P_OP_SUB,A1
-    JSR PRINT_OP
+    MOVE.L #P_OP_SUB, Arg_AddStrToBuffer_String
+    JSR PRINT_TO_BUFFER
     RTS
 ******************************* END OF GROUP 9 ********************************
 
@@ -1854,58 +1839,58 @@ PRINT_OP_SUB:
 
 ****************************** GROUP B ****************************************
 PRINT_OP_EOR:
-    LEA P_OP_EOR,A1
-    JSR PRINT_OP
+    MOVE.L #P_OP_EOR, Arg_AddStrToBuffer_String
+    JSR PRINT_TO_BUFFER
     RTS
 PRINT_OP_CMP:
-    LEA P_OP_CMP,A1
-    JSR PRINT_OP
+    MOVE.L #P_OP_CMP, Arg_AddStrToBuffer_String
+    JSR PRINT_TO_BUFFER
     RTS
 ******************************* END OF GROUP B ********************************
 
 ****************************** GROUP C ****************************************
 PRINT_OP_MULS:
-    LEA P_OP_MULS,A1
-    JSR PRINT_OP
+    MOVE.L #P_OP_MULS, Arg_AddStrToBuffer_String
+    JSR PRINT_TO_BUFFER
     RTS
 ******************************* END OF GROUP C ********************************
 
 ****************************** GROUP D ****************************************
 PRINT_OP_ADD:
-    LEA P_OP_ADD,A1
-    JSR PRINT_OP
+    MOVE.L #P_OP_ADD, Arg_AddStrToBuffer_String
+    JSR PRINT_TO_BUFFER
     RTS
 PRINT_OP_ADDA:
-    LEA P_OP_ADDA,A1
-    JSR PRINT_OP
+    MOVE.L #P_OP_ADDA, Arg_AddStrToBuffer_String
+    JSR PRINT_TO_BUFFER
     RTS
 
 ******************************* END OF GROUP D ********************************
 
 ****************************** GROUP E ****************************************
 PRINT_OP_LSL:
-    LEA P_OP_LSL,A1
-    JSR PRINT_OP
+    MOVE.L #P_OP_LSL, Arg_AddStrToBuffer_String
+    JSR PRINT_TO_BUFFER
     RTS
 PRINT_OP_LSR:
-    LEA P_OP_LSR,A1
-    JSR PRINT_OP
+    MOVE.L #P_OP_LSR, Arg_AddStrToBuffer_String
+    JSR PRINT_TO_BUFFER
     RTS
 PRINT_OP_ASR:
-    LEA P_OP_ASR,A1
-    JSR PRINT_OP
+    MOVE.L #P_OP_ASR, Arg_AddStrToBuffer_String
+    JSR PRINT_TO_BUFFER
     RTS
 PRINT_OP_ASL:
-    LEA P_OP_ASL,A1
-    JSR PRINT_OP
+    MOVE.L #P_OP_ASL, Arg_AddStrToBuffer_String
+    JSR PRINT_TO_BUFFER
     RTS
 PRINT_OP_ROL:
-    LEA P_OP_ROL,A1
-    JSR PRINT_OP
+    MOVE.L #P_OP_ROL, Arg_AddStrToBuffer_String
+    JSR PRINT_TO_BUFFER
     RTS
 PRINT_OP_ROR:
-    LEA P_OP_ROR,A1
-    JSR PRINT_OP
+    MOVE.L #P_OP_ROR, Arg_AddStrToBuffer_String
+    JSR PRINT_TO_BUFFER
     RTS
 ******************************* END OF GROUP E ********************************
 
