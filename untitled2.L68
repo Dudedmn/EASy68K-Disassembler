@@ -1,6 +1,6 @@
 00001000 Starting Address
 Assembler used: EASy68K Editor/Assembler v5.16.01
-Created On: 3/11/2019 8:31:28 PM
+Created On: 3/13/2019 9:47:05 PM
 
 00000000                             1  *-----------------------------------------------------------
 00000000                             2  * Title      :
@@ -8,27 +8,16 @@ Created On: 3/11/2019 8:31:28 PM
 00000000                             4  * Date       :
 00000000                             5  * Description:
 00000000                             6  *-----------------------------------------------------------
-00000500                             7      ORG $500    
-00000500                             8  GOBACKHOME:
-00000500  4EF9 00001004              9      JMP  START2  
-00000506                            10  GOBACKHOMEREALLYFAST
-00000506  4EF9 00001008             11      JMP START3
-0000050C                            12  GOHOME
-0000050C  4EF9 00001000             13      JMP START  
-00001000                            14      ORG    $1000
-00001000                            15  START:                  ; first instruction of program
-00001000  6000 F4FE                 16      BRA  GOBACKHOME
-00001004                            17  START2
-00001004  6000 04FA                 18      BRA $1500
-00001008                            19  START3
-00001008  6000 F502                 20      BRA GOHOME    
-0000100C                            21  * Put program code here
-0000100C                            22  
-0000100C  FFFF FFFF                 23      SIMHALT             ; halt simulator
-00001010                            24  
-00001010                            25  * Put variables and constants here
-00001010                            26  
-00001010                            27      END    START        ; last line of source
+00001000                             7      ORG    $1000
+00001000                             8  START:                  ; first instruction of program
+00001000                             9  
+00001000                            10  * Put program code here
+00001000  283C 12341234             11      MOVE.L  #$12341234, D4
+00001006  FFFF FFFF                 12      SIMHALT             ; halt simulator
+0000100A                            13  
+0000100A                            14  * Put variables and constants here
+0000100A                            15  
+0000100A                            16      END    START        ; last line of source
 
 No errors detected
 No warnings generated
@@ -37,9 +26,4 @@ No warnings generated
 SYMBOL TABLE INFORMATION
 Symbol-name         Value
 -------------------------
-GOBACKHOME          500
-GOBACKHOMEREALLYFAST  506
-GOHOME              50C
 START               1000
-START2              1004
-START3              1008
