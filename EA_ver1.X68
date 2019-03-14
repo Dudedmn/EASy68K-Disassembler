@@ -571,6 +571,8 @@ BCLR        CLR.L   D5
             BLT     INVALID
 
             MOVE.W  (A5)+, D4
+            CLR.L   D4
+            MOVE.W  (A5)+, D4
             ANDI.W  #$00FF, D4
             MOVEA.L #BACK4, A2
             JMP     LOAD_IMMDTE
@@ -724,6 +726,9 @@ LOAD_GE_111:
             CMP.W   TRAILING_SIZE, D5
             BLT     INVALID
 
+            MOVE.W  (A5)+, D4
+            CLR.L   D4
+            
             CMPI.W  #$1, TRAILING_SIZE
             BEQ     CHUMP_BYTE
             CMPI.W  #$2, TRAILING_SIZE
@@ -1175,10 +1180,6 @@ INVALID:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
     END    START
-
-
-
-
 
 
 
