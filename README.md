@@ -65,7 +65,7 @@ Global Constants and Registers
 ```
 Constants:
 CUR_OP_CODE - refers to current 16 bit instruction set
-EA_SIZE - refers to current size of the CUR_OP_CODE (used for immediates as well)
+OP_SIZE - refers to current size of the CUR_OP_CODE (used for immediates as well)
 G_BUFFER - good buffer to print to
 B_BUFFER - bad buffer to print to
 OP_BUFFER - Specific buffer for OP code
