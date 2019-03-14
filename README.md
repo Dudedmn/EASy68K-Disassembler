@@ -37,9 +37,9 @@ IO
 
 OP Code
 - [X] Finish identification for all OP codes (supported and unsupported)
-- [ ] Load messages into buffer successfully, WIP after identification
-- [ ] Adhere to commenting format, WIP with identification
-- [ ] Validation testing for OP codes, currently up to $4
+- [ ] Load messages into buffer successfully
+- [ ] Adhere to commenting format, up to $4
+- [X] Validation testing for ALL OP codes
 
 EA
 - [x] Finish Trailing Bits
