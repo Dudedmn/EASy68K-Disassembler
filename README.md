@@ -103,3 +103,18 @@ For a BAD operand, the following will be printed to the B_BUFFER
 Example:
 1000 DATA $FFFF
 ```
+
+
+File Header commenting format
+```
+*--------------------------------------------------------------------------
+* Title      : Disassembler Skeleton 
+* Written by : You, and you should change all default comments
+* Date       : 3/9/2019 
+* TEAM REEE Denny, Daniel, Fahad
+* 
+* Description: This code contains a method for you to use
+* with your Disassembler project IO, and a short demo of 
+* how to call this method in the body of the "START" code.
+*
+```
