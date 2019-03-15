@@ -1,6 +1,6 @@
 000010AA Starting Address
 Assembler used: EASy68K Editor/Assembler v5.16.01
-Created On: 3/14/2019 10:20:29 PM
+Created On: 3/14/2019 10:38:47 PM
 
 00000000                             1  *-----------------------------------------------------------
 00000000                             2  * Title      : OP Code routines for Disassembler
@@ -167,39 +167,39 @@ Created On: 3/14/2019 10:20:29 PM
 000010B2                           163      *****GROUP B TESTS********** SUPPORTED: EOR, CMP
 000010B2                           164      ;MOVE.W #%1011101101000110,CUR_OP_CODE    ;EOR                       SHOULD PASS
 000010B2                           165      ;MOVE.W #%1011110101001101,CUR_OP_CODE    ;CMPM                      SHOULD FAIL
-000010B2  31FC B445 1000           166      MOVE.W #%1011010001000101,CUR_OP_CODE    ;CMP                       SHOULD PASS
-000010B8                           167      *MOVE.W #%1011110011000101,CUR_OP_CODE    ;CMPA                      SHOULD FAIL
-000010B8                           168      
-000010B8                           169      *****GROUP C TESTS********** SUPPORTED: MULS
-000010B8                           170      ;MOVE.W #%1100101011000110,CUR_OP_CODE    ;MULU                      SHOULD FAIL
-000010B8                           171      ;MOVE.W #%1100101111000101,CUR_OP_CODE    ;MULS                      SHOULD PASS
-000010B8                           172      ;MOVE.W #%1100101100000101,CUR_OP_CODE    ;ABCD                      SHOULD FAIL
-000010B8                           173      ;MOVE.W #%1100101110001110,CUR_OP_CODE    ;EXG                       SHOULD FAIL
-000010B8                           174      ;MOVE.W #%1100101001000101,CUR_OP_CODE    ;AND                       SHOULD FAIL   
-000010B8                           175       
-000010B8                           176      *****GROUP D TESTS********** SUPPORTED: ADD, ADDA
-000010B8                           177      ;MOVE.W #%1101101101000101,CUR_OP_CODE    ;ADDX                      SHOULD FAIL
-000010B8                           178      ;MOVE.W #%1101101011001101,CUR_OP_CODE    ;ADDA                      SHOULD FAIL
-000010B8                           179      ;MOVE.W #%1101101001001101,CUR_OP_CODE    ;ADD                       SHOULD PASS
-000010B8                           180      
-000010B8                           181      *****GROUP E TESTS********** SUPPORTED: LSX, ASX, ROX
-000010B8                           182      ;MOVE.W #%1110000011000101,CUR_OP_CODE    ;ASR NO_ROT                SHOULD PASS
-000010B8                           183      ;MOVE.W #%1110000111000101,CUR_OP_CODE    ;ASL NO_ROT                SHOULD PASS
-000010B8                           184      ;MOVE.W #%1110001011000101,CUR_OP_CODE    ;LSR NO_ROT                SHOULD PASS
-000010B8                           185      ;MOVE.W #%1110001111000101,CUR_OP_CODE    ;LSL NO_ROT                SHOULD PASS
-000010B8                           186      ;MOVE.W #%1110010011000101,CUR_OP_CODE    ;ROXR NO_ROT               SHOULD FAIL
-000010B8                           187      ;MOVE.W #%1110010111000101,CUR_OP_CODE    ;ROXL NO_ROT               SHOULD FAIL
-000010B8                           188      ;MOVE.W #%1110011011000101,CUR_OP_CODE    ;ROR NO_ROT                SHOULD PASS
-000010B8                           189      ;MOVE.W #%1110011111000101,CUR_OP_CODE    ;ROL NO_ROT                SHOULD PASS    
-000010B8                           190      
-000010B8                           191      ;MOVE.W #%1110000001000101,CUR_OP_CODE    ;ASR                       SHOULD PASS
-000010B8                           192      ;MOVE.W #%1110000101000101,CUR_OP_CODE    ;ASL                       SHOULD PASS
-000010B8                           193      ;MOVE.W #%1110001001001101,CUR_OP_CODE    ;LSR                       SHOULD PASS
-000010B8                           194      ;MOVE.W #%1110001101001101,CUR_OP_CODE    ;LSL                       SHOULD PASS
-000010B8                           195      ;MOVE.W #%1110010001010101,CUR_OP_CODE    ;ROXR                      SHOULD FAIL
-000010B8                           196      ;MOVE.W #%1110010101010101,CUR_OP_CODE    ;ROXL                      SHOULD FAIL
-000010B8                           197      ;MOVE.W #%1110011001011101,CUR_OP_CODE    ;ROR                       SHOULD PASS
-000010B8                           198      ;MOVE.W #%1110011101011101,CUR_OP_CODE    ;ROL                       SHOULD PASS    
+000010B2                           166      ;MOVE.W #%1011010001000101,CUR_OP_CODE    ;CMP                       SHOULD PASS
+000010B2                           167      *MOVE.W #%1011110011000101,CUR_OP_CODE    ;CMPA                      SHOULD FAIL
+000010B2                           168      
+000010B2                           169      *****GROUP C TESTS********** SUPPORTED: MULS
+000010B2                           170      ;MOVE.W #%1100101011000110,CUR_OP_CODE    ;MULU                      SHOULD FAIL
+000010B2                           171      ;MOVE.W #%1100101111000101,CUR_OP_CODE    ;MULS                      SHOULD PASS
+000010B2                           172      ;MOVE.W #%1100101100000101,CUR_OP_CODE    ;ABCD                      SHOULD FAIL
+000010B2                           173      ;MOVE.W #%1100101110001110,CUR_OP_CODE    ;EXG                       SHOULD FAIL
+000010B2                           174      ;MOVE.W #%1100101001000101,CUR_OP_CODE    ;AND                       SHOULD FAIL   
+000010B2                           175       
+000010B2                           176      *****GROUP D TESTS********** SUPPORTED: ADD, ADDA
+000010B2                           177      ;MOVE.W #%1101101101000101,CUR_OP_CODE    ;ADDX                      SHOULD FAIL
+000010B2                           178      ;MOVE.W #%1101101011001101,CUR_OP_CODE    ;ADDA                      SHOULD FAIL
+000010B2                           179      ;MOVE.W #%1101101001001101,CUR_OP_CODE    ;ADD                       SHOULD PASS
+000010B2                           180      
+000010B2                           181      *****GROUP E TESTS********** SUPPORTED: LSX, ASX, ROX
+000010B2                           182      ;MOVE.W #%1110000011000101,CUR_OP_CODE    ;ASR NO_ROT                SHOULD PASS
+000010B2                           183      ;MOVE.W #%1110000111000101,CUR_OP_CODE    ;ASL NO_ROT                SHOULD PASS
+000010B2                           184      ;MOVE.W #%1110001011000101,CUR_OP_CODE    ;LSR NO_ROT                SHOULD PASS
+000010B2                           185      ;MOVE.W #%1110001111000101,CUR_OP_CODE    ;LSL NO_ROT                SHOULD PASS
+000010B2                           186      ;MOVE.W #%1110010011000101,CUR_OP_CODE    ;ROXR NO_ROT               SHOULD FAIL
+000010B2                           187      ;MOVE.W #%1110010111000101,CUR_OP_CODE    ;ROXL NO_ROT               SHOULD FAIL
+000010B2                           188      ;MOVE.W #%1110011011000101,CUR_OP_CODE    ;ROR NO_ROT                SHOULD PASS
+000010B2                           189      ;MOVE.W #%1110011111000101,CUR_OP_CODE    ;ROL NO_ROT                SHOULD PASS    
+000010B2                           190      
+000010B2                           191      ;MOVE.W #%1110000001000101,CUR_OP_CODE    ;ASR                       SHOULD PASS
+000010B2                           192      ;MOVE.W #%1110000101000101,CUR_OP_CODE    ;ASL                       SHOULD PASS
+000010B2                           193      ;MOVE.W #%1110001001001101,CUR_OP_CODE    ;LSR                       SHOULD PASS
+000010B2                           194      ;MOVE.W #%1110001101001101,CUR_OP_CODE    ;LSL                       SHOULD PASS
+000010B2                           195      ;MOVE.W #%1110010001010101,CUR_OP_CODE    ;ROXR                      SHOULD FAIL
+000010B2                           196      ;MOVE.W #%1110010101010101,CUR_OP_CODE    ;ROXL                      SHOULD FAIL
+000010B2                           197      ;MOVE.W #%1110011001011101,CUR_OP_CODE    ;ROR                       SHOULD PASS
+000010B2  31FC E75D 1000           198      MOVE.W #%1110011101011101,CUR_OP_CODE    ;ROL                       SHOULD PASS    
 000010B8                           199          
 000010B8                           200      *****GROUP F TESTS********** NONE SUPPORTED
 000010B8                           201      ;MOVE.W #%1111010110101011,CUR_OP_CODE    ;INVALID_OP                SHOULD FAIL
@@ -362,7 +362,7 @@ Created On: 3/14/2019 10:20:29 PM
 000011D8                           358  
 000011D8                           359  GROUP_F:                ;$F| Display: DATA, $WXYZ (Unsupported)
 000011D8  B03C 000F                360      CMP.B   #$F,D0                 ;Compare first nibble
-000011DC  4EB9 00001D68            361      JSR     C_GROUP_F              ;Jump to group F checking if nibble value is $F
+000011DC  4EB9 00001D80            361      JSR     C_GROUP_F              ;Jump to group F checking if nibble value is $F
 000011E2  6000 0002                362      BRA     OP_JSR_DONE            ;Finish subroutine once checking is finished
 000011E6                           363  
 000011E6                           364  
@@ -794,7 +794,7 @@ Created On: 3/14/2019 10:20:29 PM
 00001476  3038 1000                790      MOVE.W CUR_OP_CODE,D0           ;Move current instruction set into D0
 0000147A  0240 F138                791      ANDI.W #$F138,D0                ;Mask relevant bits to D0
 0000147E  B07C 0108                792      CMP.W #$0108,D0                 ;Compare the appropriate masked bits
-00001482  6700 08EC                793      BEQ INVALID_OP                  ;INVALID OP code found
+00001482  6700 0904                793      BEQ INVALID_OP                  ;INVALID OP code found
 00001486  6600 0002                794      BNE CHECK_OP_ORI                ;Check next routine
 0000148A                           795  
 0000148A                           796  *Supported OP code checks
@@ -804,7 +804,7 @@ Created On: 3/14/2019 10:20:29 PM
 00001492  B07C 0000                800      CMP.W   #$0000,D0               ;Compare the appropriate masked bits     
 00001496  6600 0010                801      BNE     CHECK_OP_CMPI           ;Branch to next comparison if not equal
 0000149A  4EB8 1210                802      JSR     FIND_2_BIT_SIZE_7_TO_6
-0000149E  4EB9 00001D9A            803      JSR     PRINT_OP_ORI            ;Print the OP code if equal    
+0000149E  4EB9 00001DB2            803      JSR     PRINT_OP_ORI            ;Print the OP code if equal    
 000014A4  6000 0062                804      BRA     GROUP0_SUCCESS          ;Finish routine
 000014A8                           805      
 000014A8                           806  CHECK_OP_CMPI:
@@ -813,7 +813,7 @@ Created On: 3/14/2019 10:20:29 PM
 000014B0  B07C 0C00                809      CMP.W   #$0C00,D0               ;Compare the appropriate masked bits   
 000014B4  6600 0010                810      BNE     CHECK_OP_STATIC_BCLR    ;Branch to next comparison if not equal       
 000014B8  4EB8 1210                811      JSR     FIND_2_BIT_SIZE_7_TO_6
-000014BC  4EB9 00001DB0            812      JSR     PRINT_OP_CMPI           ;Print the OP code if equal
+000014BC  4EB9 00001DC8            812      JSR     PRINT_OP_CMPI           ;Print the OP code if equal
 000014C2  6000 0044                813      BRA     GROUP0_SUCCESS          ;Finish routine
 000014C6                           814      
 000014C6                           815  CHECK_OP_STATIC_BCLR:
@@ -822,7 +822,7 @@ Created On: 3/14/2019 10:20:29 PM
 000014CE  B07C 0800                818      CMP.W   #$0800,D0               ;Compare the appropriate masked bits
 000014D2  6600 0010                819      BNE     CHECK_OP_DYNAMIC_BCLR   ;Branch to next comparison if not equal
 000014D6  4EB8 1210                820      JSR     FIND_2_BIT_SIZE_7_TO_6
-000014DA  4EB9 00001DC6            821      JSR     PRINT_OP_STATIC_BCLR    ;Print the OP code if equal
+000014DA  4EB9 00001DDE            821      JSR     PRINT_OP_STATIC_BCLR    ;Print the OP code if equal
 000014E0  6000 0026                822      BRA     GROUP0_SUCCESS          ;Finish routine
 000014E4                           823      
 000014E4                           824  CHECK_OP_DYNAMIC_BCLR:
@@ -831,11 +831,11 @@ Created On: 3/14/2019 10:20:29 PM
 000014EC  B07C 0180                827      CMP.W   #$0180,D0               ;Compare the appropriate masked bits
 000014F0  6600 0010                828      BNE     GROUP0_INVALID          ;If not equal this must be an invalid OP code
 000014F4  4EB8 1210                829      JSR     FIND_2_BIT_SIZE_7_TO_6
-000014F8  4EB9 00001DDC            830      JSR     PRINT_OP_DYNAMIC_BCLR   ;Print the OP code if equal
+000014F8  4EB9 00001DF4            830      JSR     PRINT_OP_DYNAMIC_BCLR   ;Print the OP code if equal
 000014FE  6000 0008                831      BRA     GROUP0_SUCCESS          ;Finish routine
 00001502                           832  
 00001502                           833  GROUP0_INVALID:                     ;Checks have been finished, invalid OP code has been found
-00001502  4EB9 00001D70            834      JSR INVALID_OP                  ;INVALID OP code found
+00001502  4EB9 00001D88            834      JSR INVALID_OP                  ;INVALID OP code found
 00001508                           835      
 00001508                           836  GROUP0_SUCCESS:                     ;Checks have been finished,a valid OP code has been found
 00001508  4CDF 0003                837      MOVEM.L (SP)+,D0-D1             ;Restore registers
@@ -854,11 +854,11 @@ Created On: 3/14/2019 10:20:29 PM
 00001516  0240 F000                850      ANDI.W  #$F000,D0               ;Mask relevant bits to D0
 0000151A  B07C 1000                851      CMP.W   #$1000,D0               ;Compare the appropriate masked bits 
 0000151E  6600 000C                852      BNE     GROUP1_INVALID          ;Invalid OP code has been found
-00001522  4EB9 00001DF2            853      JSR     PRINT_OP_MOVEB          ;Print the OP code if equal
+00001522  4EB9 00001E0A            853      JSR     PRINT_OP_MOVEB          ;Print the OP code if equal
 00001528  6000 0008                854      BRA     GROUP1_SUCCESS          ;Finish routine
 0000152C                           855      
 0000152C                           856  GROUP1_INVALID:
-0000152C  4EB9 00001D70            857      JSR INVALID_OP                  ;Invalid OP code found
+0000152C  4EB9 00001D88            857      JSR INVALID_OP                  ;Invalid OP code found
 00001532                           858      
 00001532                           859  GROUP1_SUCCESS:
 00001532  4CDF 0003                860      MOVEM.L (SP)+,D0-D1             ;Restore register
@@ -888,7 +888,7 @@ Created On: 3/14/2019 10:20:29 PM
 00001560  3400                     884      MOVE.W   D0,D2                  ;Move 3 address mode bits into D6
 00001562  B47C 0001                885      CMP.W   #$1,D2                  ;Check if the address mode value is MOVEA
 00001566  6600 000C                886      BNE     CHECK_OP_MOVE_L         ;Branch if not equal to check MOVE
-0000156A  4EB9 00001E08            887      JSR     PRINT_OP_MOVEA_L        ;Print the OP code if it's a match
+0000156A  4EB9 00001E20            887      JSR     PRINT_OP_MOVEA_L        ;Print the OP code if it's a match
 00001570  6000 0022                888      BRA     GROUP2_SUCCESS          ;Finish routine
 00001574                           889      
 00001574                           890      
@@ -897,11 +897,11 @@ Created On: 3/14/2019 10:20:29 PM
 00001578  0240 F000                893      ANDI.W #$F000,D0                ;Mask relevant bits to D0
 0000157C  B07C 2000                894      CMP.W #$2000,D0                 ;Compare the appropriate masked bits
 00001580  6600 000C                895      BNE GROUP2_INVALID              ;If not equal, OP code is invalid
-00001584  4EB9 00001E1E            896      JSR PRINT_OP_MOVE_L             ;Print out MOVE.L
+00001584  4EB9 00001E36            896      JSR PRINT_OP_MOVE_L             ;Print out MOVE.L
 0000158A  6000 0008                897      BRA GROUP2_SUCCESS              ;Finish routine
 0000158E                           898      
 0000158E                           899  GROUP2_INVALID:    
-0000158E  4EB9 00001D70            900      JSR INVALID_OP                  ;Invalid OP code found
+0000158E  4EB9 00001D88            900      JSR INVALID_OP                  ;Invalid OP code found
 00001594                           901      
 00001594                           902  GROUP2_SUCCESS:
 00001594  4CDF 0007                903      MOVEM.L (SP)+,D0-D2             ;Restore register
@@ -932,7 +932,7 @@ Created On: 3/14/2019 10:20:29 PM
 000015C2  3400                     928      MOVE.W   D0,D2                 ;Move 3 address mode bits into D6
 000015C4  B47C 0001                929      CMP.W    #$1,D2                ;Check if the address mode value is MOVEA
 000015C8  6600 000C                930      BNE      CHECK_OP_MOVE_W       ;If bits do not match, try MOVE 
-000015CC  4EB9 00001E34            931      JSR      PRINT_OP_MOVEA_W      ;Print the OP code if it's a match
+000015CC  4EB9 00001E4C            931      JSR      PRINT_OP_MOVEA_W      ;Print the OP code if it's a match
 000015D2  6000 0022                932      BRA      GROUP3_SUCCESS        ;Finish routine
 000015D6                           933      
 000015D6                           934  CHECK_OP_MOVE_W:
@@ -940,11 +940,11 @@ Created On: 3/14/2019 10:20:29 PM
 000015DA  0240 F000                936      ANDI.W   #$F000,D0             ;Mask relevant bits to D0
 000015DE  B07C 3000                937      CMP.W    #$3000,D0             ;Compare the appropriate masked bits
 000015E2  6600 000C                938      BNE      GROUP3_INVALID        ;INVALID OP code found
-000015E6  4EB9 00001E44            939      JSR      PRINT_OP_MOVE_W       ;Print the OP code if it's a match
+000015E6  4EB9 00001E5C            939      JSR      PRINT_OP_MOVE_W       ;Print the OP code if it's a match
 000015EC  6000 0008                940      BRA      GROUP3_SUCCESS        ;Finish routine
 000015F0                           941      
 000015F0                           942  GROUP3_INVALID:
-000015F0  4EB9 00001D70            943      JSR INVALID_OP                 ;INVALID OP code found
+000015F0  4EB9 00001D88            943      JSR INVALID_OP                 ;INVALID OP code found
 000015F6                           944  
 000015F6                           945  GROUP3_SUCCESS:
 000015F6  4CDF 0007                946      MOVEM.L (SP)+,D0-D2            ;Restore registers from stack
@@ -1144,7 +1144,7 @@ Created On: 3/14/2019 10:20:29 PM
 000017DC  3038 1000               1140      MOVE.W  CUR_OP_CODE,D0    ;Move current instruction set into D0
 000017E0  0240 F1C0               1141      ANDI.W  #$F1C0,D0
 000017E4  B07C 4180               1142      CMP.W   #$4180,D0
-000017E8  6700 0586               1143      BEQ     INVALID_OP
+000017E8  6700 059E               1143      BEQ     INVALID_OP
 000017EC  6600 0002               1144      BNE     CHECK_OP_RTS
 000017F0                          1145  
 000017F0                          1146  *Supported OP codes to check
@@ -1152,7 +1152,7 @@ Created On: 3/14/2019 10:20:29 PM
 000017F0  3038 1000               1148      MOVE.W CUR_OP_CODE,D0    ;Move current instruction set into D0
 000017F4  B07C 4E75               1149      CMP.W  #$4E75,D0
 000017F8  6600 000C               1150      BNE    CHECK_OP_LEA
-000017FC  4EB9 00001E70           1151      JSR    PRINT_OP_RTS
+000017FC  4EB9 00001E88           1151      JSR    PRINT_OP_RTS
 00001802  6000 0074               1152      BRA    GROUP4_SUCCESS              ;Finish routine
 00001806                          1153   
 00001806                          1154  CHECK_OP_LEA:
@@ -1160,7 +1160,7 @@ Created On: 3/14/2019 10:20:29 PM
 0000180A  0240 F1C0               1156      ANDI.W #$F1C0,D0
 0000180E  B07C 41C0               1157      CMP.W  #$41C0,D0
 00001812  6600 000C               1158      BNE    CHECK_OP_JSR
-00001816  4EB9 00001E86           1159      JSR    PRINT_OP_LEA
+00001816  4EB9 00001E9E           1159      JSR    PRINT_OP_LEA
 0000181C  6000 005A               1160      BRA    GROUP4_SUCCESS              ;Finish routine
 00001820                          1161   
 00001820                          1162  CHECK_OP_JSR:
@@ -1168,7 +1168,7 @@ Created On: 3/14/2019 10:20:29 PM
 00001824  0240 FFC0               1164      ANDI.W #$FFC0,D0
 00001828  B07C 4E80               1165      CMP.W  #$4E80,D0
 0000182C  6600 000C               1166      BNE    CHECK_OP_NEG
-00001830  4EB9 00001E5A           1167      JSR    PRINT_OP_JSR
+00001830  4EB9 00001E72           1167      JSR    PRINT_OP_JSR
 00001836  6000 0040               1168      BRA    GROUP4_SUCCESS              ;Finish routine
 0000183A                          1169      
 0000183A                          1170  CHECK_OP_NEG:
@@ -1177,7 +1177,7 @@ Created On: 3/14/2019 10:20:29 PM
 00001842  B07C 4400               1173      CMP.W  #$4400,D0
 00001846  6600 0010               1174      BNE    CHECK_OP_MOVEM
 0000184A  4EB8 1210               1175      JSR     FIND_2_BIT_SIZE_7_TO_6
-0000184E  4EB9 00001E9C           1176      JSR    PRINT_OP_NEG
+0000184E  4EB9 00001EB4           1176      JSR    PRINT_OP_NEG
 00001854  6000 0022               1177      BRA    GROUP4_SUCCESS              ;Finish routine
 00001858                          1178  
 00001858                          1179      
@@ -1186,12 +1186,12 @@ Created On: 3/14/2019 10:20:29 PM
 00001858  3038 1000               1182      MOVE.W CUR_OP_CODE,D0   ;Move current instruction set into D0
 0000185C  0240 FB80               1183      ANDI.W #$FB80,D0
 00001860  B07C 4880               1184      CMP.W  #$4880,D0
-00001864  6600 050A               1185      BNE    INVALID_OP       ;If no code is found, it is invalid
-00001868  4EB9 00001EB2           1186      JSR    PRINT_OP_MOVEM_W
+00001864  6600 0522               1185      BNE    INVALID_OP       ;If no code is found, it is invalid
+00001868  4EB9 00001ECA           1186      JSR    PRINT_OP_MOVEM_W
 0000186E  6000 0008               1187      BRA    GROUP4_SUCCESS
 00001872                          1188      
 00001872                          1189  GROUP4_INVALID:
-00001872  4EB9 00001D70           1190      JSR INVALID_OP
+00001872  4EB9 00001D88           1190      JSR INVALID_OP
 00001878                          1191  
 00001878                          1192  GROUP4_SUCCESS:
 00001878  4CDF 0001               1193      MOVEM.L (SP)+,D0 
@@ -1235,11 +1235,11 @@ Created On: 3/14/2019 10:20:29 PM
 000018C6  B07C 5100               1231      CMP.W  #$5100,D0        ;Compare the proper value
 000018CA  6600 0010               1232      BNE    GROUP5_INVALID       ;Else the operand is invalid
 000018CE  4EB8 1210               1233      JSR     FIND_2_BIT_SIZE_7_TO_6
-000018D2  4EB9 00001ED2           1234      JSR    PRINT_OP_SUBQ    ;If equal print it out
+000018D2  4EB9 00001EEA           1234      JSR    PRINT_OP_SUBQ    ;If equal print it out
 000018D8  6000 0008               1235      BRA    GROUP5_SUCCESS   ;Finish routine
 000018DC                          1236      
 000018DC                          1237  GROUP5_INVALID: 
-000018DC  4EB9 00001D70           1238      JSR INVALID_OP          ;INVALID OP has been found
+000018DC  4EB9 00001D88           1238      JSR INVALID_OP          ;INVALID OP has been found
 000018E2                          1239  
 000018E2                          1240  GROUP5_SUCCESS:
 000018E2  4CDF 0001               1241      MOVEM.L (SP)+,D0        ;Restore registers from stack
@@ -1278,7 +1278,7 @@ Created On: 3/14/2019 10:20:29 PM
 00001904  0240 FF00               1274      ANDI.W  #$FF00,D0
 00001908  B07C 6000               1275      CMP.W   #$6000,D0
 0000190C  6600 000C               1276      BNE     CHECK_OP_BCS
-00001910  4EB9 00001F40           1277      JSR     PRINT_OP_BRA
+00001910  4EB9 00001F58           1277      JSR     PRINT_OP_BRA
 00001916  6000 0070               1278      BRA     GROUP6_SUCCESS
 0000191A                          1279      
 0000191A                          1280  CHECK_OP_BCS:
@@ -1286,7 +1286,7 @@ Created On: 3/14/2019 10:20:29 PM
 0000191E  0240 FF00               1282      ANDI.W #$FF00,D0
 00001922  B07C 6500               1283      CMP.W  #$6500,D0 
 00001926  6600 000C               1284      BNE    CHECK_OP_BGE
-0000192A  4EB9 00001EE8           1285      JSR    PRINT_OP_BCS
+0000192A  4EB9 00001F00           1285      JSR    PRINT_OP_BCS
 00001930  6000 0056               1286      BRA    GROUP6_SUCCESS
 00001934                          1287  
 00001934                          1288      
@@ -1295,7 +1295,7 @@ Created On: 3/14/2019 10:20:29 PM
 00001938  0240 FF00               1291      ANDI.W #$FF00,D0
 0000193C  B07C 6C00               1292      CMP.W  #$6C00,D0 
 00001940  6600 000C               1293      BNE    CHECK_OP_BLT
-00001944  4EB9 00001EFE           1294      JSR    PRINT_OP_BGE
+00001944  4EB9 00001F16           1294      JSR    PRINT_OP_BGE
 0000194A  6000 003C               1295      BRA    GROUP6_SUCCESS
 0000194E                          1296      
 0000194E                          1297      
@@ -1304,7 +1304,7 @@ Created On: 3/14/2019 10:20:29 PM
 00001952  0240 FF00               1300      ANDI.W #$FF00,D0
 00001956  B07C 6D00               1301      CMP.W  #$6D00,D0 
 0000195A  6600 000C               1302      BNE    CHECK_OP_BVC
-0000195E  4EB9 00001F14           1303      JSR    PRINT_OP_BLT
+0000195E  4EB9 00001F2C           1303      JSR    PRINT_OP_BLT
 00001964  6000 0022               1304      BRA    GROUP6_SUCCESS
 00001968                          1305      
 00001968                          1306  CHECK_OP_BVC:
@@ -1312,11 +1312,11 @@ Created On: 3/14/2019 10:20:29 PM
 0000196C  0240 FF00               1308      ANDI.W #$FF00,D0
 00001970  B07C 6800               1309      CMP.W  #$6800,D0 
 00001974  6600 000C               1310      BNE    GROUP6_INVALID
-00001978  4EB9 00001F2A           1311      JSR    PRINT_OP_BVC
+00001978  4EB9 00001F42           1311      JSR    PRINT_OP_BVC
 0000197E  6000 0008               1312      BRA    GROUP6_SUCCESS
 00001982                          1313      
 00001982                          1314  GROUP6_INVALID:
-00001982  4EB9 00001D70           1315      JSR    INVALID_OP    
+00001982  4EB9 00001D88           1315      JSR    INVALID_OP    
 00001988                          1316          
 00001988                          1317  GROUP6_SUCCESS:
 00001988  4CDF 0001               1318      MOVEM.L (SP)+,D0
@@ -1338,7 +1338,7 @@ Created On: 3/14/2019 10:20:29 PM
 000019A2  6700 0008               1334      BEQ    GROUP7_SUCCESS
 000019A6                          1335      
 000019A6                          1336  GROUP7_INVALID:
-000019A6  4EB9 00001D70           1337      JSR INVALID_OP
+000019A6  4EB9 00001D88           1337      JSR INVALID_OP
 000019AC                          1338      
 000019AC                          1339  GROUP7_SUCCESS:    
 000019AC  4CDF 0001               1340      MOVEM.L (SP)+,D0
@@ -1372,15 +1372,15 @@ Created On: 3/14/2019 10:20:29 PM
 000019DE  3038 1000               1368      MOVE.W  CUR_OP_CODE,D0   ;Move current instruction set into D0
 000019E2  0240 F1C0               1369      ANDI.W  #$F1C0,D0
 000019E6  B07C 81C0               1370      CMP.W   #$81C0,D0
-000019EA  6700 056A               1371      BEQ     PRINT_OP_DIVS
+000019EA  6700 0582               1371      BEQ     PRINT_OP_DIVS
 000019EE  6600 0002               1372      BNE     CHECK_OP_OR
 000019F2                          1373      
 000019F2                          1374  CHECK_OP_OR:              ;At this point only remaining $8 code is OR
 000019F2  4EB8 1210               1375      JSR     FIND_2_BIT_SIZE_7_TO_6
-000019F6  4EB9 00001F6C           1376      JSR     PRINT_OP_OR
+000019F6  4EB9 00001F84           1376      JSR     PRINT_OP_OR
 000019FC  6000 0008               1377      BRA     GROUP8_SUCCESS
 00001A00                          1378  GROUP8_INVALID:
-00001A00  4EB9 00001D70           1379       JSR    INVALID_OP
+00001A00  4EB9 00001D88           1379       JSR    INVALID_OP
 00001A06                          1380       
 00001A06                          1381  GROUP8_SUCCESS:
 00001A06  4CDF 0001               1382       MOVEM.L (SP)+,D0
@@ -1399,7 +1399,7 @@ Created On: 3/14/2019 10:20:29 PM
 00001A10  3038 1000               1395      MOVE.W  CUR_OP_CODE,D0    ;Move current instruction set into D0
 00001A14  0240 F0C0               1396      ANDI.W  #$F0C0,D0
 00001A18  B07C 90C0               1397      CMP.W   #$90C0,D0
-00001A1C  6700 0352               1398      BEQ     INVALID_OP
+00001A1C  6700 036A               1398      BEQ     INVALID_OP
 00001A20  6600 0002               1399      BNE     CHECK_OP_SUBX
 00001A24                          1400  
 00001A24                          1401  CHECK_OP_SUBX:
@@ -1423,11 +1423,11 @@ Created On: 3/14/2019 10:20:29 PM
 00001A56                          1419  *Supported OP code 
 00001A56                          1420  CHECK_OP_SUB:                   ;At this point only remaining $9 is SUB
 00001A56  4EB8 1210               1421      JSR     FIND_2_BIT_SIZE_7_TO_6
-00001A5A  4EB9 00001F82           1422      JSR     PRINT_OP_SUB
+00001A5A  4EB9 00001F9A           1422      JSR     PRINT_OP_SUB
 00001A60  6000 0006               1423      BRA     GROUP9_SUCCESS
 00001A64                          1424      
 00001A64                          1425  GROUP9_INVALID:
-00001A64  6000 030A               1426      BRA     INVALID_OP
+00001A64  6000 0322               1426      BRA     INVALID_OP
 00001A68                          1427      
 00001A68                          1428  GROUP9_SUCCESS:
 00001A68  4CDF 0003               1429      MOVEM.L (SP)+,D0-D1         ;Restore registers
@@ -1438,7 +1438,7 @@ Created On: 3/14/2019 10:20:29 PM
 00001A6E                          1434  * Currently no OP codes here are supported. There are no current OP codes here.
 00001A6E                          1435  ********************************************************************************
 00001A6E                          1436  C_GROUP_A:
-00001A6E  4EB9 00001D70           1437      JSR INVALID_OP
+00001A6E  4EB9 00001D88           1437      JSR INVALID_OP
 00001A74  4E75                    1438      RTS
 00001A76                          1439      
 00001A76                          1440  * GROUP_B                     
@@ -1473,7 +1473,7 @@ Created On: 3/14/2019 10:20:29 PM
 00001AAA  B07C B100               1469      CMP.W   #$B100,D0
 00001AAE  6600 0010               1470      BNE     CHECK_OP_CMP
 00001AB2  4EB8 1210               1471      JSR     FIND_2_BIT_SIZE_7_TO_6
-00001AB6  4EB9 00001F98           1472      JSR     PRINT_OP_EOR
+00001AB6  4EB9 00001FB0           1472      JSR     PRINT_OP_EOR
 00001ABC  6000 0026               1473      BRA     GROUPB_SUCCESS
 00001AC0                          1474      
 00001AC0                          1475  CHECK_OP_CMP:
@@ -1482,11 +1482,11 @@ Created On: 3/14/2019 10:20:29 PM
 00001AC8  B07C B000               1478      CMP.W   #$B000,D0
 00001ACC  6600 0010               1479      BNE     GROUPB_INVALID
 00001AD0  4EB8 1210               1480      JSR     FIND_2_BIT_SIZE_7_TO_6
-00001AD4  4EB9 00001FAE           1481      JSR     PRINT_OP_CMP
+00001AD4  4EB9 00001FC6           1481      JSR     PRINT_OP_CMP
 00001ADA  6000 0008               1482      BRA     GROUPB_SUCCESS
 00001ADE                          1483      
 00001ADE                          1484  GROUPB_INVALID:
-00001ADE  4EB9 00001D70           1485      JSR     INVALID_OP           ;INVALID OP has been found 
+00001ADE  4EB9 00001D88           1485      JSR     INVALID_OP           ;INVALID OP has been found 
 00001AE4                          1486   
 00001AE4                          1487  GROUPB_SUCCESS:
 00001AE4  4CDF 0001               1488      MOVEM.L (SP)+,D0         ;Restore registers from stack
@@ -1541,7 +1541,7 @@ Created On: 3/14/2019 10:20:29 PM
 00001B50  3038 1000               1537      MOVE.W CUR_OP_CODE,D0    ;Move current instruction set into D0
 00001B54  0240 F1C0               1538      ANDI.W #$F1C0,D0
 00001B58  B07C C1C0               1539      CMP.W  #$C1C0,D0
-00001B5C  6700 0466               1540      BEQ    PRINT_OP_MULS
+00001B5C  6700 047E               1540      BEQ    PRINT_OP_MULS
 00001B60  6600 0002               1541      BNE    CHECK_OP_AND          ; OP_AND is completely dynamic outside of first nibble
 00001B64                          1542  
 00001B64                          1543  *Odd completely dynamic unsupported OP code    
@@ -1552,7 +1552,7 @@ Created On: 3/14/2019 10:20:29 PM
 00001B70  6700 0002               1548      BEQ     GROUPC_INVALID
 00001B74                          1549      
 00001B74                          1550  GROUPC_INVALID:
-00001B74  4EB9 00001D70           1551      JSR     INVALID_OP
+00001B74  4EB9 00001D88           1551      JSR     INVALID_OP
 00001B7A                          1552      
 00001B7A                          1553  GROUPC_SUCCESS:
 00001B7A  4CDF 0003               1554      MOVEM.L (SP)+,D0-D1
@@ -1582,16 +1582,16 @@ Created On: 3/14/2019 10:20:29 PM
 00001BA0  B07C D0C0               1578      CMP.W  #$D0C0,D0
 00001BA4  6600 0010               1579      BNE    CHECK_OP_ADD
 00001BA8  4EB8 1250               1580      JSR    FIND_1_BIT_SIZE_8
-00001BAC  4EB9 00001FF0           1581      JSR    PRINT_OP_ADDA
+00001BAC  4EB9 00002008           1581      JSR    PRINT_OP_ADDA
 00001BB2  6000 0016               1582      BRA    GROUPD_SUCCESS
 00001BB6                          1583  
 00001BB6                          1584  CHECK_OP_ADD:
 00001BB6  4EB8 1210               1585      JSR FIND_2_BIT_SIZE_7_TO_6
-00001BBA  4EB9 00001FDA           1586      JSR PRINT_OP_ADD        ;Only remaining OP in $D is ADD
+00001BBA  4EB9 00001FF2           1586      JSR PRINT_OP_ADD        ;Only remaining OP in $D is ADD
 00001BC0  6000 0008               1587      BRA GROUPD_SUCCESS
 00001BC4                          1588      
 00001BC4                          1589  GROUPD_INVALID:
-00001BC4  4EB9 00001D70           1590      JSR INVALID_OP
+00001BC4  4EB9 00001D88           1590      JSR INVALID_OP
 00001BCA                          1591      
 00001BCA                          1592  GROUPD_SUCCESS:
 00001BCA  4CDF 0001               1593      MOVEM.L (SP)+,D0        ;Restore registers from stack
@@ -1622,14 +1622,14 @@ Created On: 3/14/2019 10:20:29 PM
 00001BD4  3038 1000               1618      MOVE CUR_OP_CODE,D0    ;Move current instruction set into D0
 00001BD8  0240 FFC0               1619      ANDI.W #$FFC0,D0
 00001BDC  B07C E4C0               1620      CMP.W  #$E4C0,D0
-00001BE0  6700 017A               1621      BEQ    GROUPE_INVALID
+00001BE0  6700 0192               1621      BEQ    GROUPE_INVALID
 00001BE4  6600 0002               1622      BNE    CHECK_OP_ROXL_NO_ROT
 00001BE8                          1623  
 00001BE8                          1624  CHECK_OP_ROXL_NO_ROT:
 00001BE8  3038 1000               1625      MOVE CUR_OP_CODE,D0    ;Move current instruction set into D0
 00001BEC  0240 FFC0               1626      ANDI.W #$FFC0,D0
 00001BF0  B07C E5C0               1627      CMP.W  #$E5C0,D0
-00001BF4  6700 0166               1628      BEQ    GROUPE_INVALID
+00001BF4  6700 017E               1628      BEQ    GROUPE_INVALID
 00001BF8  6600 0002               1629      BNE    CHECK_OP_ROR_NO_ROT
 00001BFC                          1630  
 00001BFC                          1631  *Supported OP codes
@@ -1638,62 +1638,62 @@ Created On: 3/14/2019 10:20:29 PM
 00001C00  0240 FFC0               1634      ANDI.W #$FFC0,D0
 00001C04  B07C E6C0               1635      CMP.W  #$E6C0,D0
 00001C08  6600 000C               1636      BNE    CHECK_OP_ROL_NO_ROT
-00001C0C  4EB9 0000206E           1637      JSR    PRINT_OP_ROR
-00001C12  6000 014E               1638      BRA    GROUPE_SUCCESS
+00001C0C  4EB9 0000208C           1637      JSR    PRINT_OP_ROR
+00001C12  6000 0166               1638      BRA    GROUPE_SUCCESS
 00001C16                          1639      
 00001C16                          1640  CHECK_OP_ROL_NO_ROT:
 00001C16  3038 1000               1641      MOVE CUR_OP_CODE,D0    ;Move current instruction set into D0
 00001C1A  0240 FFC0               1642      ANDI.W #$FFC0,D0
 00001C1E  B07C E7C0               1643      CMP.W  #$E7C0,D0
 00001C22  6600 000C               1644      BNE    CHECK_OP_LSR_NO_ROT
-00001C26  4EB9 00002058           1645      JSR    PRINT_OP_ROL
-00001C2C  6000 0134               1646      BRA    GROUPE_SUCCESS
+00001C26  4EB9 00002076           1645      JSR    PRINT_OP_ROL
+00001C2C  6000 014C               1646      BRA    GROUPE_SUCCESS
 00001C30                          1647   
 00001C30                          1648  CHECK_OP_LSR_NO_ROT:
 00001C30  3038 1000               1649      MOVE CUR_OP_CODE,D0    ;Move current instruction set into D0
 00001C34  0240 FFC0               1650      ANDI.W #$FFC0,D0
 00001C38  B07C E2C0               1651      CMP.W  #$E2C0,D0
 00001C3C  6600 000C               1652      BNE    CHECK_OP_LSL_NO_ROT
-00001C40  4EB9 00002016           1653      JSR    PRINT_OP_LSR
-00001C46  6000 011A               1654      BRA    GROUPE_SUCCESS
+00001C40  4EB9 00002034           1653      JSR    PRINT_OP_LSR
+00001C46  6000 0132               1654      BRA    GROUPE_SUCCESS
 00001C4A                          1655  
 00001C4A                          1656  CHECK_OP_LSL_NO_ROT:
 00001C4A  3038 1000               1657      MOVE CUR_OP_CODE,D0    ;Move current instruction set into D0
 00001C4E  0240 FFC0               1658      ANDI.W #$FFC0,D0
 00001C52  B07C E3C0               1659      CMP.W  #$E3C0,D0
 00001C56  6600 000C               1660      BNE    CHECK_OP_ASR_NO_ROT
-00001C5A  4EB9 00002006           1661      JSR    PRINT_OP_LSL
-00001C60  6000 0100               1662      BRA    GROUPE_SUCCESS
+00001C5A  4EB9 0000201E           1661      JSR    PRINT_OP_LSL
+00001C60  6000 0118               1662      BRA    GROUPE_SUCCESS
 00001C64                          1663  
 00001C64                          1664  CHECK_OP_ASR_NO_ROT:
 00001C64  3038 1000               1665      MOVE CUR_OP_CODE,D0    ;Move current instruction set into D0
 00001C68  0240 FFC0               1666      ANDI.W #$FFC0,D0
 00001C6C  B07C E0C0               1667      CMP.W  #$E0C0,D0
 00001C70  6600 000C               1668      BNE    CHECK_OP_ASL_NO_ROT
-00001C74  4EB9 0000202C           1669      JSR    PRINT_OP_ASR
-00001C7A  6000 00E6               1670      BRA    GROUPE_SUCCESS
+00001C74  4EB9 0000204A           1669      JSR    PRINT_OP_ASR
+00001C7A  6000 00FE               1670      BRA    GROUPE_SUCCESS
 00001C7E                          1671              
 00001C7E                          1672  CHECK_OP_ASL_NO_ROT:
 00001C7E  3038 1000               1673      MOVE CUR_OP_CODE,D0    ;Move current instruction set into D0
 00001C82  0240 FFC0               1674      ANDI.W #$FFC0,D0
 00001C86  B07C E1C0               1675      CMP.W  #$E1C0,D0
 00001C8A  6600 000C               1676      BNE    CHECK_OP_ROXR
-00001C8E  4EB9 00002042           1677      JSR    PRINT_OP_ASL
-00001C94  6000 00CC               1678      BRA    GROUPE_SUCCESS
+00001C8E  4EB9 00002060           1677      JSR    PRINT_OP_ASL
+00001C94  6000 00E4               1678      BRA    GROUPE_SUCCESS
 00001C98                          1679  
 00001C98                          1680  *Unsupported OP codes
 00001C98                          1681  CHECK_OP_ROXR:
 00001C98  3038 1000               1682      MOVE CUR_OP_CODE,D0    ;Move current instruction set into D0
 00001C9C  0240 F118               1683      ANDI.W #$F118,D0
 00001CA0  B07C E010               1684      CMP.W  #$E010,D0
-00001CA4  6700 00B6               1685      BEQ    GROUPE_INVALID
+00001CA4  6700 00CE               1685      BEQ    GROUPE_INVALID
 00001CA8  6600 0002               1686      BNE    CHECK_OP_ROXL
 00001CAC                          1687      
 00001CAC                          1688  CHECK_OP_ROXL:
 00001CAC  3038 1000               1689      MOVE CUR_OP_CODE,D0    ;Move current instruction set into D0
 00001CB0  0240 F118               1690      ANDI.W #$F118,D0
 00001CB4  B07C E110               1691      CMP.W  #$E110,D0
-00001CB8  6700 00A2               1692      BEQ    GROUPE_INVALID
+00001CB8  6700 00BA               1692      BEQ    GROUPE_INVALID
 00001CBC  6600 0002               1693      BNE    CHECK_OP_ROR
 00001CC0                          1694      
 00001CC0                          1695  *Supported OP codes
@@ -1701,469 +1701,476 @@ Created On: 3/14/2019 10:20:29 PM
 00001CC0  3038 1000               1697      MOVE CUR_OP_CODE,D0    ;Move current instruction set into D0
 00001CC4  0240 F118               1698      ANDI.W #$F118,D0
 00001CC8  B07C E018               1699      CMP.W  #$E018,D0
-00001CCC  6600 000C               1700      BNE    CHECK_OP_ROL
-00001CD0  4EB9 0000206E           1701      JSR    PRINT_OP_ROR
-00001CD6  6000 008A               1702      BRA    GROUPE_SUCCESS
-00001CDA                          1703  
-00001CDA                          1704  CHECK_OP_ROL:
-00001CDA  3038 1000               1705      MOVE CUR_OP_CODE,D0    ;Move current instruction set into D0
-00001CDE  0240 F118               1706      ANDI.W #$F118,D0
-00001CE2  B07C E118               1707      CMP.W  #$E118,D0
-00001CE6  6600 000C               1708      BNE    CHECK_OP_LSR
-00001CEA  4EB9 00002058           1709      JSR    PRINT_OP_ROL
-00001CF0  6000 0070               1710      BRA    GROUPE_SUCCESS
-00001CF4                          1711      
-00001CF4                          1712  CHECK_OP_LSR:
-00001CF4  3038 1000               1713      MOVE CUR_OP_CODE,D0    ;Move current instruction set into D0
-00001CF8  0240 F118               1714      ANDI.W #$F118,D0
-00001CFC  B07C E008               1715      CMP.W  #$E008,D0
-00001D00  6600 000C               1716      BNE    CHECK_OP_LSL
-00001D04  4EB9 00002016           1717      JSR    PRINT_OP_LSR
-00001D0A  6000 0056               1718      BRA    GROUPE_SUCCESS
-00001D0E                          1719  
-00001D0E                          1720  CHECK_OP_LSL:
-00001D0E  3038 1000               1721      MOVE CUR_OP_CODE,D0    ;Move current instruction set into D0
-00001D12  0240 F118               1722      ANDI.W #$F118,D0
-00001D16  B07C E108               1723      CMP.W  #$E108,D0
-00001D1A  6600 000C               1724      BNE    CHECK_OP_ASR
-00001D1E  4EB9 00002006           1725      JSR    PRINT_OP_LSL
-00001D24  6000 003C               1726      BRA    GROUPE_SUCCESS
-00001D28                          1727  
-00001D28                          1728  CHECK_OP_ASR:
-00001D28  3038 1000               1729      MOVE CUR_OP_CODE,D0    ;Move current instruction set into D0
-00001D2C  0240 F118               1730      ANDI.W #$F118,D0
-00001D30  B07C E000               1731      CMP.W  #$E000,D0
-00001D34  6600 000C               1732      BNE    CHECK_OP_ASL
-00001D38  4EB9 0000202C           1733      JSR    PRINT_OP_ASR
-00001D3E  6000 0022               1734      BRA    GROUPE_SUCCESS
-00001D42                          1735  
-00001D42                          1736  CHECK_OP_ASL:
-00001D42  3038 1000               1737      MOVE CUR_OP_CODE,D0    ;Move current instruction set into D0
-00001D46  0240 F118               1738      ANDI.W #$F118,D0
-00001D4A  B07C E100               1739      CMP.W  #$E100,D0
-00001D4E  6600 000C               1740      BNE    GROUPE_INVALID      ;Last possible OP code
-00001D52  4EB9 00002042           1741      JSR    PRINT_OP_ASL
-00001D58  6000 0008               1742      BRA    GROUPE_SUCCESS
-00001D5C                          1743  
-00001D5C                          1744  GROUPE_INVALID:
-00001D5C  4EB9 00001D70           1745      JSR     INVALID_OP
-00001D62                          1746      
-00001D62                          1747  GROUPE_SUCCESS:
-00001D62  4CDF 0001               1748      MOVEM.L (SP)+,D0
-00001D66  4E75                    1749      RTS
-00001D68                          1750  * GROUP_F
-00001D68                          1751  ********************************************************************************
-00001D68                          1752  * Currently no OP codes here are supported. There are no OP codes here
-00001D68                          1753  ********************************************************************************
-00001D68                          1754  C_GROUP_F:
-00001D68  4EB9 00001D70           1755      JSR INVALID_OP
-00001D6E  4E75                    1756      RTS
-00001D70                          1757      
-00001D70                          1758  * INVALID_OP                     
-00001D70                          1759  ********************************************************************************
-00001D70                          1760  * Any value that is not covered in the above groups would be considered invalid. 
-00001D70                          1761  * The following values in the first nibble would also indicate that the 
-00001D70                          1762  * operand codes is already invalid: $7, $A, $F.
-00001D70                          1763  * For unsupported OP codes, display DATA $WXYZ   
-00001D70                          1764  * THIS WILL NEED TO BE CHANGED TO DISPLAY: 1000 DATA $WXYZ IN THE FUTURE
-00001D70                          1765  ********************************************************************************
-00001D70                          1766  INVALID_OP:  ; Prints DATA for invalid op, THIS SHOULD BE SETTING THE IS_VALID BIT TO 0
-00001D70  23FC 000020CE 000021AE  1767      MOVE.L #P_INVALID_OP, Arg_AddStrToBuffer_String
-00001D7A  4EB9 00001D88           1768      JSR PRINT_TO_BUFFER
-00001D80  11FC 0000 10A9          1769      MOVE.B #0,IS_VALID
-00001D86  4E75                    1770      RTS
-00001D88                          1771  
-00001D88                          1772  ********************** PRINTING ROUTINES **************************************
-00001D88                          1773  * Description: These routines are to print the associated op codes, by placing
-00001D88                          1774  * them in the appropriate area to the buffer
-00001D88                          1775  *
-00001D88                          1776  * Registers used: A1 for loading, A6 for EA parsing.
-00001D88                          1777  *
-00001D88                          1778  * Precondition: The relevant opcode has been identified correctly.
-00001D88                          1779  *
-00001D88                          1780  * Postcondition: Prints out the associated opcode to the buffer.
-00001D88                          1781  
-00001D88                          1782  * THIS NEEDS TO BE RETOOLED TO PRINT TO BUFFER NOT TO CONSOLE
-00001D88                          1783  *******************************************************************************
-00001D88                          1784  
-00001D88                          1785  * Prints the loaded item into G_BUFFER
-00001D88                          1786  PRINT_TO_BUFFER:
-00001D88  23FC 00001003 000021B2  1787      MOVE.L #G_BUFFER, Arg_AddStrToBuffer_Buffer
-00001D92  4EB9 000021BC           1788      JSR AddStrToBuffer
-00001D98  4E75                    1789      RTS
-00001D9A                          1790      
-00001D9A                          1791  ****************************** GROUP 0 **************************************** 
-00001D9A                          1792  PRINT_OP_ORI:
-00001D9A  23FC 000020EB 000021AE  1793      MOVE.L #P_OP_ORI, Arg_AddStrToBuffer_String
-00001DA4  4EB8 1D88               1794      JSR PRINT_TO_BUFFER
-00001DA8  4EB9 000020B4           1795      JSR PRINT_OP_SIZE
-00001DAE  4E75                    1796      RTS
-00001DB0                          1797  PRINT_OP_CMPI:
-00001DB0  23FC 000020EF 000021AE  1798      MOVE.L #P_OP_CMPI, Arg_AddStrToBuffer_String
-00001DBA  4EB8 1D88               1799      JSR PRINT_TO_BUFFER
-00001DBE  4EB9 000020B4           1800      JSR PRINT_OP_SIZE
-00001DC4  4E75                    1801      RTS
-00001DC6                          1802  PRINT_OP_STATIC_BCLR:
-00001DC6  23FC 000020F4 000021AE  1803      MOVE.L #P_OP_STATIC_BCLR, Arg_AddStrToBuffer_String
-00001DD0  4EB8 1D88               1804      JSR PRINT_TO_BUFFER
-00001DD4  4EB9 000020B4           1805      JSR PRINT_OP_SIZE
-00001DDA  4E75                    1806      RTS
-00001DDC                          1807  PRINT_OP_DYNAMIC_BCLR:
-00001DDC  23FC 000020F9 000021AE  1808      MOVE.L #P_OP_DYNAMIC_BCLR, Arg_AddStrToBuffer_String
-00001DE6  4EB8 1D88               1809      JSR PRINT_TO_BUFFER
-00001DEA  4EB9 000020B4           1810      JSR PRINT_OP_SIZE
-00001DF0  4E75                    1811      RTS
-00001DF2                          1812  ******************************* END OF GROUP 0 ********************************
-00001DF2                          1813  
-00001DF2                          1814  ****************************** GROUP 1 ****************************************    
-00001DF2                          1815  PRINT_OP_MOVEB:
-00001DF2  23FC 000020FE 000021AE  1816      MOVE.L #P_OP_MOVEB, Arg_AddStrToBuffer_String
-00001DFC  4EB8 1D88               1817      JSR PRINT_TO_BUFFER
-00001E00  4EB9 000020B4           1818      JSR PRINT_OP_SIZE
-00001E06  4E75                    1819      RTS
-00001E08                          1820  ******************************* END OF GROUP 1 ********************************
-00001E08                          1821      
-00001E08                          1822  ****************************** GROUP 2 **************************************** 
-00001E08                          1823  PRINT_OP_MOVEA_L:
-00001E08  23FC 00002106 000021AE  1824      MOVE.L #P_OP_MOVEA_L, Arg_AddStrToBuffer_String
-00001E12  4EB8 1D88               1825      JSR PRINT_TO_BUFFER
-00001E16  4EB9 000020B4           1826      JSR PRINT_OP_SIZE
-00001E1C  4E75                    1827      RTS
-00001E1E                          1828  PRINT_OP_MOVE_L:
-00001E1E  23FC 00002112 000021AE  1829      MOVE.L #P_OP_MOVE_L, Arg_AddStrToBuffer_String
-00001E28  4EB8 1D88               1830      JSR PRINT_TO_BUFFER
-00001E2C  4EB9 000020B4           1831      JSR PRINT_OP_SIZE
-00001E32  4E75                    1832      RTS
-00001E34                          1833  ******************************* END OF GROUP 2 ********************************
-00001E34                          1834      
-00001E34                          1835  ****************************** GROUP 3 ****************************************    
-00001E34                          1836  PRINT_OP_MOVEA_W:
-00001E34  23FC 0000211A 000021AE  1837      MOVE.L #P_OP_MOVEA_W, Arg_AddStrToBuffer_String
-00001E3E  4EB8 1D88               1838      JSR PRINT_TO_BUFFER
-00001E42  4E75                    1839      RTS
-00001E44                          1840  PRINT_OP_MOVE_W:
-00001E44  23FC 00002126 000021AE  1841      MOVE.L #P_OP_MOVE_W, Arg_AddStrToBuffer_String
-00001E4E  4EB8 1D88               1842      JSR PRINT_TO_BUFFER
-00001E52  4EB9 000020B4           1843      JSR PRINT_OP_SIZE
-00001E58  4E75                    1844      RTS
-00001E5A                          1845  ******************************* END OF GROUP 3 ********************************
-00001E5A                          1846  
-00001E5A                          1847  ****************************** GROUP 4 ****************************************
-00001E5A                          1848  PRINT_OP_JSR:
-00001E5A  23FC 0000214A 000021AE  1849      MOVE.L #P_OP_JSR, Arg_AddStrToBuffer_String
-00001E64  4EB8 1D88               1850      JSR PRINT_TO_BUFFER
-00001E68  4EB9 000020B4           1851      JSR PRINT_OP_SIZE
-00001E6E  4E75                    1852      RTS
-00001E70                          1853  PRINT_OP_RTS:
-00001E70  23FC 00002152 000021AE  1854      MOVE.L #P_OP_RTS, Arg_AddStrToBuffer_String
-00001E7A  4EB8 1D88               1855      JSR PRINT_TO_BUFFER
-00001E7E  4EB9 000020B4           1856      JSR PRINT_OP_SIZE
-00001E84  4E75                    1857      RTS
-00001E86                          1858  PRINT_OP_LEA:
-00001E86  23FC 00002146 000021AE  1859      MOVE.L #P_OP_LEA, Arg_AddStrToBuffer_String
-00001E90  4EB8 1D88               1860      JSR PRINT_TO_BUFFER
-00001E94  4EB9 000020B4           1861      JSR PRINT_OP_SIZE
-00001E9A  4E75                    1862      RTS
-00001E9C                          1863  PRINT_OP_NEG:
-00001E9C  23FC 00002156 000021AE  1864      MOVE.L #P_OP_NEG, Arg_AddStrToBuffer_String
-00001EA6  4EB8 1D88               1865      JSR PRINT_TO_BUFFER
-00001EAA  4EB9 000020B4           1866      JSR PRINT_OP_SIZE
-00001EB0  4E75                    1867      RTS
-00001EB2                          1868  PRINT_OP_MOVEM_W:
-00001EB2  23FC 0000212E 000021AE  1869      MOVE.L #P_OP_MOVEM_W, Arg_AddStrToBuffer_String
-00001EBC  4EB8 1D88               1870      JSR PRINT_TO_BUFFER
-00001EC0  4E75                    1871      RTS
-00001EC2                          1872  PRINT_OP_MOVEM_L:
-00001EC2  23FC 0000213A 000021AE  1873      MOVE.L #P_OP_MOVEM_L, Arg_AddStrToBuffer_String
-00001ECC  4EB8 1D88               1874      JSR PRINT_TO_BUFFER
-00001ED0  4E75                    1875      RTS
-00001ED2                          1876  ******************************* END OF GROUP 4 ********************************
-00001ED2                          1877      
-00001ED2                          1878  ****************************** GROUP 5 ****************************************
-00001ED2                          1879  PRINT_OP_SUBQ:
-00001ED2  23FC 0000215A 000021AE  1880      MOVE.L #P_OP_SUBQ, Arg_AddStrToBuffer_String
-00001EDC  4EB8 1D88               1881      JSR PRINT_TO_BUFFER
-00001EE0  4EB9 000020B4           1882      JSR PRINT_OP_SIZE
-00001EE6  4E75                    1883      RTS
-00001EE8                          1884  ******************************* END OF GROUP 5 ********************************
-00001EE8                          1885  
-00001EE8                          1886  ****************************** GROUP 6 ****************************************
-00001EE8                          1887  PRINT_OP_BCS:
-00001EE8  23FC 00002163 000021AE  1888      MOVE.L #P_OP_BCS, Arg_AddStrToBuffer_String
-00001EF2  4EB8 1D88               1889      JSR PRINT_TO_BUFFER
-00001EF6  4EB9 000020B4           1890      JSR PRINT_OP_SIZE
-00001EFC  4E75                    1891      RTS
-00001EFE                          1892  PRINT_OP_BGE:
-00001EFE  23FC 00002167 000021AE  1893      MOVE.L #P_OP_BGE, Arg_AddStrToBuffer_String
-00001F08  4EB8 1D88               1894      JSR PRINT_TO_BUFFER
-00001F0C  4EB9 000020B4           1895      JSR PRINT_OP_SIZE
-00001F12  4E75                    1896      RTS
-00001F14                          1897  PRINT_OP_BLT:
-00001F14  23FC 0000216B 000021AE  1898      MOVE.L #P_OP_BLT, Arg_AddStrToBuffer_String
-00001F1E  4EB8 1D88               1899      JSR PRINT_TO_BUFFER
-00001F22  4EB9 000020B4           1900      JSR PRINT_OP_SIZE
-00001F28  4E75                    1901      RTS
-00001F2A                          1902  PRINT_OP_BVC:
-00001F2A  23FC 0000216F 000021AE  1903      MOVE.L #P_OP_BVC, Arg_AddStrToBuffer_String
-00001F34  4EB8 1D88               1904      JSR PRINT_TO_BUFFER
-00001F38  4EB9 000020B4           1905      JSR PRINT_OP_SIZE
-00001F3E  4E75                    1906      RTS
-00001F40                          1907  PRINT_OP_BRA:
-00001F40  23FC 0000215F 000021AE  1908      MOVE.L #P_OP_BRA, Arg_AddStrToBuffer_String
-00001F4A  4EB8 1D88               1909      JSR PRINT_TO_BUFFER
-00001F4E  4EB9 000020B4           1910      JSR PRINT_OP_SIZE
-00001F54  4E75                    1911      RTS
-00001F56                          1912  ******************************* END OF GROUP 6 ********************************
-00001F56                          1913  
-00001F56                          1914  ****************************** GROUP 7 ****************************************
-00001F56                          1915  * No currently supported OP codes to print here.
-00001F56                          1916  ******************************* END OF GROUP 7 ********************************
-00001F56                          1917  
-00001F56                          1918  ****************************** GROUP 8 ****************************************
-00001F56                          1919  PRINT_OP_DIVS:
-00001F56  23FC 00002173 000021AE  1920      MOVE.L #P_OP_DIVS, Arg_AddStrToBuffer_String
-00001F60  4EB8 1D88               1921      JSR PRINT_TO_BUFFER
-00001F64  4EB9 000020B4           1922      JSR PRINT_OP_SIZE
-00001F6A  4E75                    1923      RTS
-00001F6C                          1924  PRINT_OP_OR:
-00001F6C  23FC 00002178 000021AE  1925      MOVE.L #P_OP_OR, Arg_AddStrToBuffer_String
-00001F76  4EB8 1D88               1926      JSR PRINT_TO_BUFFER
-00001F7A  4EB9 000020B4           1927      JSR PRINT_OP_SIZE
-00001F80  4E75                    1928      RTS
-00001F82                          1929  ******************************* END OF GROUP 8 ********************************
-00001F82                          1930  
-00001F82                          1931  ****************************** GROUP 9 ****************************************
-00001F82                          1932  PRINT_OP_SUB:
-00001F82  23FC 0000217B 000021AE  1933      MOVE.L #P_OP_SUB, Arg_AddStrToBuffer_String
-00001F8C  4EB8 1D88               1934      JSR PRINT_TO_BUFFER
-00001F90  4EB9 000020B4           1935      JSR PRINT_OP_SIZE
-00001F96  4E75                    1936      RTS
-00001F98                          1937  ******************************* END OF GROUP 9 ********************************
-00001F98                          1938  
-00001F98                          1939  ****************************** GROUP A ****************************************
-00001F98                          1940  * No currently supported OP codes to print here.
-00001F98                          1941  ******************************* END OF GROUP A ********************************
-00001F98                          1942  
-00001F98                          1943  ****************************** GROUP B ****************************************
-00001F98                          1944  PRINT_OP_EOR:
-00001F98  23FC 0000217F 000021AE  1945      MOVE.L #P_OP_EOR, Arg_AddStrToBuffer_String
-00001FA2  4EB8 1D88               1946      JSR PRINT_TO_BUFFER
-00001FA6  4EB9 000020B4           1947      JSR PRINT_OP_SIZE
-00001FAC  4E75                    1948      RTS
-00001FAE                          1949  PRINT_OP_CMP:
-00001FAE  23FC 00002183 000021AE  1950      MOVE.L #P_OP_CMP, Arg_AddStrToBuffer_String
-00001FB8  4EB8 1D88               1951      JSR PRINT_TO_BUFFER
-00001FBC  4EB9 000020B4           1952      JSR PRINT_OP_SIZE
-00001FC2  4E75                    1953      RTS
-00001FC4                          1954  ******************************* END OF GROUP B ********************************
-00001FC4                          1955  
-00001FC4                          1956  ****************************** GROUP C ****************************************
-00001FC4                          1957  PRINT_OP_MULS:
-00001FC4  23FC 00002187 000021AE  1958      MOVE.L #P_OP_MULS, Arg_AddStrToBuffer_String
-00001FCE  4EB8 1D88               1959      JSR PRINT_TO_BUFFER
-00001FD2  4EB9 000020B4           1960      JSR PRINT_OP_SIZE
-00001FD8  4E75                    1961      RTS
-00001FDA                          1962  ******************************* END OF GROUP C ********************************
-00001FDA                          1963  
-00001FDA                          1964  ****************************** GROUP D ****************************************
-00001FDA                          1965  PRINT_OP_ADD:
-00001FDA  23FC 00002191 000021AE  1966      MOVE.L #P_OP_ADD, Arg_AddStrToBuffer_String
-00001FE4  4EB8 1D88               1967      JSR PRINT_TO_BUFFER
-00001FE8  4EB9 000020B4           1968      JSR PRINT_OP_SIZE
-00001FEE  4E75                    1969      RTS
-00001FF0                          1970  PRINT_OP_ADDA:
-00001FF0  23FC 0000218C 000021AE  1971      MOVE.L #P_OP_ADDA, Arg_AddStrToBuffer_String
-00001FFA  4EB8 1D88               1972      JSR PRINT_TO_BUFFER
-00001FFE  4EB9 000020B4           1973      JSR PRINT_OP_SIZE
-00002004  4E75                    1974      RTS
-00002006                          1975  
-00002006                          1976  ******************************* END OF GROUP D ********************************
-00002006                          1977  
-00002006                          1978  ****************************** GROUP E ****************************************
-00002006                          1979  PRINT_OP_LSL:
-00002006  23FC 00002199 000021AE  1980      MOVE.L #P_OP_LSL, Arg_AddStrToBuffer_String
-00002010  4EB8 1D88               1981      JSR PRINT_TO_BUFFER
-00002014  4E75                    1982      RTS
-00002016                          1983  PRINT_OP_LSR:
-00002016  23FC 00002195 000021AE  1984      MOVE.L #P_OP_LSR, Arg_AddStrToBuffer_String
-00002020  4EB8 1D88               1985      JSR PRINT_TO_BUFFER
-00002024  4EB9 000020B4           1986      JSR PRINT_OP_SIZE
-0000202A  4E75                    1987      RTS
-0000202C                          1988  PRINT_OP_ASR:
-0000202C  23FC 0000219D 000021AE  1989      MOVE.L #P_OP_ASR, Arg_AddStrToBuffer_String
-00002036  4EB8 1D88               1990      JSR PRINT_TO_BUFFER
-0000203A  4EB9 000020B4           1991      JSR PRINT_OP_SIZE
-00002040  4E75                    1992      RTS
-00002042                          1993  PRINT_OP_ASL:
-00002042  23FC 000021A1 000021AE  1994      MOVE.L #P_OP_ASL, Arg_AddStrToBuffer_String
-0000204C  4EB8 1D88               1995      JSR PRINT_TO_BUFFER
-00002050  4EB9 000020B4           1996      JSR PRINT_OP_SIZE
-00002056  4E75                    1997      RTS
-00002058                          1998  PRINT_OP_ROL:
-00002058  23FC 000021A9 000021AE  1999      MOVE.L #P_OP_ROL, Arg_AddStrToBuffer_String
-00002062  4EB8 1D88               2000      JSR PRINT_TO_BUFFER
-00002066  4EB9 000020B4           2001      JSR PRINT_OP_SIZE
-0000206C  4E75                    2002      RTS
-0000206E                          2003  PRINT_OP_ROR:
-0000206E  23FC 000021A5 000021AE  2004      MOVE.L #P_OP_ROR, Arg_AddStrToBuffer_String
-00002078  4EB8 1D88               2005      JSR PRINT_TO_BUFFER
-0000207C  4EB9 000020B4           2006      JSR PRINT_OP_SIZE
-00002082  4E75                    2007      RTS
-00002084                          2008  ******************************* END OF GROUP E ********************************
-00002084                          2009  
-00002084                          2010  ****************************** GROUP F ****************************************
-00002084                          2011  * No currently supported OP codes to print here.
-00002084                          2012  ******************************* END OF GROUP F ********************************
-00002084                          2013  
-00002084                          2014  ****************************** SIZE PRINTS ************************************
-00002084                          2015  PRINT_SIZE_BYTE:
-00002084  23FC 000020DF 000021AE  2016      MOVE.L #P_SIZE_B, Arg_AddStrToBuffer_String
-0000208E  4EB8 1D88               2017      JSR PRINT_TO_BUFFER
-00002092  4E75                    2018      RTS    
-00002094                          2019  
-00002094                          2020  PRINT_SIZE_WORD:
-00002094  23FC 000020E3 000021AE  2021      MOVE.L #P_SIZE_W, Arg_AddStrToBuffer_String
-0000209E  4EB8 1D88               2022      JSR PRINT_TO_BUFFER
-000020A2  4E75                    2023      RTS
-000020A4                          2024      
-000020A4                          2025  PRINT_SIZE_LONG:
-000020A4  23FC 000020E7 000021AE  2026      MOVE.L #P_SIZE_L, Arg_AddStrToBuffer_String
-000020AE  4EB8 1D88               2027      JSR PRINT_TO_BUFFER
-000020B2  4E75                    2028      RTS
-000020B4                          2029  
-000020B4                          2030  PRINT_OP_SIZE:                     ;Prints current OP code byte size if applicable
-000020B4  0C38 0000 1002          2031      CMP.B  #%00,OP_SIZE         ;Checks for byte size
-000020BA  67C8                    2032      BEQ    PRINT_SIZE_BYTE      ;Print .B to buffer
-000020BC  0C38 0001 1002          2033      CMP.B  #%01,OP_SIZE         ;Check for word size
-000020C2  67D0                    2034      BEQ    PRINT_SIZE_WORD      ;Print .W to buffer
-000020C4  0C38 0002 1002          2035      CMP.B  #%10,OP_SIZE         ;Check for long size
-000020CA  67D8                    2036      BEQ    PRINT_SIZE_LONG      ;Print .L to buffer
-000020CC  4E75                    2037      RTS
-000020CE                          2038  ******************* END OF SIZE PRINTS ****************************************
-000020CE                          2039  
-000020CE                          2040  ******************* END OF PRINTING ROUTINES **********************************
-000020CE                          2041  
-000020CE                          2042  ******************* END OF JMP LABELS *****************************************
-000020CE                          2043  
-000020CE                          2044  ******************* DATA CONSTANT PRINTS **************************************
-000020CE                          2045  * Formatting is as follows: P_OP_<OPCODE>, where P = Print, OP = Operation,
-000020CE                          2046  * <OPCODE> is any valid operand
-000020CE                          2047  
-000020CE= 44 41 54 41 20 20 ...   2048  P_INVALID_OP    DC.B    'DATA   ',0
-000020D6= 46 6F 75 6E 64 20 ...   2049  OP_FOUND        DC.B    'Found OP',0 ; this should be taken out later
-000020DF= 2E 42 20 00             2050  P_SIZE_B        DC.B    '.B ',0
-000020E3= 2E 57 20 00             2051  P_SIZE_W        DC.B    '.W ',0
-000020E7= 2E 4C 20 00             2052  P_SIZE_L        DC.B    '.L ',0
-000020EB= 4F 52 49 00             2053  P_OP_ORI        DC.B    'ORI',0
-000020EF= 43 4D 50 49 00          2054  P_OP_CMPI       DC.B    'CMPI',0
-000020F4= 42 43 4C 52 00          2055  P_OP_STATIC_BCLR     DC.B    'BCLR',0
-000020F9= 42 43 4C 52 00          2056  P_OP_DYNAMIC_BCLR     DC.B    'BCLR',0
-000020FE= 4D 4F 56 45 2E 42 ...   2057  P_OP_MOVEB      DC.B    'MOVE.B ',0
-00002106= 4D 4F 56 45 41 2E ...   2058  P_OP_MOVEA_L    DC.B    'MOVEA.L    ',0 
-00002112= 4D 4F 56 45 2E 4C ...   2059  P_OP_MOVE_L     DC.B    'MOVE.L ',0
-0000211A= 4D 4F 56 45 41 2E ...   2060  P_OP_MOVEA_W    DC.B    'MOVEA.W    ',0
-00002126= 4D 4F 56 45 2E 57 ...   2061  P_OP_MOVE_W     DC.B    'MOVE.W ',0
-0000212E= 4D 4F 56 45 4D 2E ...   2062  P_OP_MOVEM_W    DC.B    'MOVEM.W    ',0
-0000213A= 4D 4F 56 45 4D 2E ...   2063  P_OP_MOVEM_L    DC.B    'MOVEM.L    ',0
-00002146= 4C 45 41 00             2064  P_OP_LEA        DC.B    'LEA',0
-0000214A= 4A 53 52 00             2065  P_OP_JSR        DC.B    'JSR',0
-0000214E= 4E 4F 50 00             2066  P_OP_NOP        DC.B    'NOP',0
-00002152= 52 54 53 00             2067  P_OP_RTS        DC.B    'RTS',0
-00002156= 4E 45 47 00             2068  P_OP_NEG        DC.B    'NEG',0
-0000215A= 53 55 42 51 00          2069  P_OP_SUBQ       DC.B    'SUBQ',0
-0000215F= 42 52 41 00             2070  P_OP_BRA        DC.B    'BRA',0
-00002163= 42 43 53 00             2071  P_OP_BCS        DC.B    'BCS',0
-00002167= 42 47 45 00             2072  P_OP_BGE        DC.B    'BGE',0
-0000216B= 42 4C 54 00             2073  P_OP_BLT        DC.B    'BLT',0
-0000216F= 42 56 43 00             2074  P_OP_BVC        DC.B    'BVC',0
-00002173= 44 49 56 53 00          2075  P_OP_DIVS       DC.B    'DIVS',0
-00002178= 4F 52 00                2076  P_OP_OR         DC.B    'OR',0
-0000217B= 53 55 42 00             2077  P_OP_SUB        DC.B    'SUB',0
-0000217F= 45 4F 52 00             2078  P_OP_EOR        DC.B    'EOR',0
-00002183= 43 4D 50 00             2079  P_OP_CMP        DC.B    'CMP',0
-00002187= 4D 55 4C 53 00          2080  P_OP_MULS       DC.B    'MULS',0
-0000218C= 41 44 44 41 00          2081  P_OP_ADDA       DC.B    'ADDA',0
-00002191= 41 44 44 00             2082  P_OP_ADD        DC.B    'ADD',0
-00002195= 4C 53 52 00             2083  P_OP_LSR        DC.B    'LSR',0
-00002199= 4C 53 4C 00             2084  P_OP_LSL        DC.B    'LSL',0
-0000219D= 41 53 52 00             2085  P_OP_ASR        DC.B    'ASR',0
-000021A1= 41 53 4C 00             2086  P_OP_ASL        DC.B    'ASL',0
-000021A5= 52 4F 52 00             2087  P_OP_ROR        DC.B    'ROR',0
-000021A9= 52 4F 4C 00             2088  P_OP_ROL        DC.B    'ROL',0
-000021AD                          2089  ***************** END OF DATA CONSTANT PRINTS ***********************************
-000021AD                          2090   
-000021AD                          2091  
-000021AD                          2092  **
-000021AD                          2093  * AddStrToBuffer
-000021AD                          2094  **
-000021AD                          2095  * Adds the given NULL-terminated string to the specified buffer.
-000021AD                          2096  *
-000021AD                          2097  * Default buffer length is 80 characters, but can be modified in the argument
-000021AD                          2098  * variables.
-000021AD                          2099  *
-000021AD                          2100  * If the buffer length is exceeded, either due to lack of a NULL character or
-000021AD                          2101  * an incorrectly specified length, 1 is returned. Otherwise, 0 is returned to
-000021AD                          2102  * indicate success.
-000021AD                          2103  *
-000021AD                          2104  **
-000021AD                          2105  * @param Arg_AddStrToBuffer_String              Pointer to string
-000021AD                          2106  * @param Arg_AddStrToBuffer_Buffer              Pointer to buffer
-000021AD                          2107  * @param Arg_AddStrToBuffer_BufferLength        Length of buffer (default 80 chars)
-000021AD                          2108  * @return Ret_AddStrToBuffer_Success            0 if successful, 1 otherwise.
-000021AD                          2109  * @branch _AddStrToBuffer_FindBufferNullLoop    Loop to find NULL in buffer
-000021AD                          2110  * @branch _AddStrToBuffer_AddLoop               Loop to add string to buffer
-000021AD                          2111  * @branch _AddStrToBuffer_Success               Branch when string successfully added
-000021AD                          2112  * @branch _AddStrToBuffer_StringLengthExceeded  Branch when length exceeded (either string or buffer)
-000021AD                          2113  * @branch _AddStrToBuffer_End                   End of subroutine
-000021AD                          2114  **
-000021AE                          2115  Arg_AddStrToBuffer_String           DS.L    1
-000021B2                          2116  Arg_AddStrToBuffer_Buffer           DS.L    1
-000021B6= 00000050                2117  Arg_AddStrToBuffer_BufferLength     DC.L    80
-000021BA                          2118  Ret_AddStrToBuffer_Success          DS.B    1
-000021BB                          2119  
-000021BC                          2120  AddStrToBuffer:                     DS.W    0
-000021BC  48E7 C0C0               2121      MOVEM.L     D0-D1/A0-A1, -(SP)                  * Backup registers to stack
-000021C0                          2122  
-000021C0  2078 21AE               2123      MOVE.L      Arg_AddStrToBuffer_String, A0       * Load string pointer
-000021C4  2278 21B2               2124      MOVE.L      Arg_AddStrToBuffer_Buffer, A1       * Load buffer pointer
-000021C8  2038 21B6               2125      MOVE.L      Arg_AddStrToBuffer_BufferLength, D0 * Load buffer length
-000021CC  4278 21BA               2126      CLR.W       Ret_AddStrToBuffer_Success          * Clear success bit
-000021D0  4281                    2127      CLR.L       D1                                  * Clear loop counter
-000021D2                          2128  
-000021D2                          2129  _AddStrToBuffer_BufferLoop
-000021D2  0C11 0000               2130      CMPI.B      #0, (A1)                            * If buffer char is NULL
-000021D6  6700 000E               2131      BEQ         _AddStrToBuffer_AddLoop             * Start adding string to bufer
-000021DA                          2132      
-000021DA  B280                    2133      CMP.L       D0, D1                              * If counter >= max length
-000021DC  6C00 0026               2134      BGE         _AddStrToBuffer_LengthExceeded      * Error, return
-000021E0                          2135      
-000021E0  5289                    2136      ADDQ.L      #1, A1                              * Go to next character
-000021E2  5201                    2137      ADDQ.B      #1, D1                              * Increment counter
-000021E4  60EC                    2138      BRA         _AddStrToBuffer_BufferLoop          * Loop back
-000021E6                          2139      
-000021E6                          2140  _AddStrToBuffer_AddLoop
-000021E6  0C10 0000               2141      CMPI.B      #0, (A0)                            * If string char is NULL
-000021EA  6700 0010               2142      BEQ         _AddStrToBuffer_Success             * String successfully added
-000021EE                          2143      
-000021EE  B200                    2144      CMP.B       D0, D1                              * If counter >= max length
-000021F0  6C00 0012               2145      BGE         _AddStrToBuffer_LengthExceeded      * Error, return
-000021F4                          2146      
-000021F4  12D8                    2147      MOVE.B      (A0)+, (A1)+                        * Move string char to buffer char
-000021F6  528C                    2148      ADDQ.L      #1, A4
-000021F8  5201                    2149      ADDQ.B      #1, D1                              * Increment counter
-000021FA  60EA                    2150      BRA         _AddStrToBuffer_AddLoop             * Loop back
-000021FC                          2151  
-000021FC                          2152  _AddStrToBuffer_Success
-000021FC  12BC 0000               2153      MOVE.B      #0, (A1)                            * Add NULL to end of string
-00002200  6000 0008               2154      BRA         _AddStrToBuffer_End                 * Finish subroutine
-00002204                          2155  
-00002204                          2156  _AddStrToBuffer_LengthExceeded
-00002204  31FC 0001 21BA          2157      MOVE.W      #1, Ret_AddStrToBuffer_Success      * Invalidate success bit
-0000220A                          2158  
-0000220A                          2159  _AddStrToBuffer_End
-0000220A  4CDF 0303               2160      MOVEM.L     (SP)+, D0-D1/A0-A1                  * Restore registers from stack
-0000220E  4E75                    2161      RTS                  
-00002210                          2162      END START                                   ; THIS SHOULD BE REMOVED FOR FULL INTEGRATION
+00001CCC  6600 0010               1700      BNE    CHECK_OP_ROL
+00001CD0  4EB8 1210               1701      JSR    FIND_2_BIT_SIZE_7_TO_6     
+00001CD4  4EB9 0000208C           1702      JSR    PRINT_OP_ROR
+00001CDA  6000 009E               1703      BRA    GROUPE_SUCCESS
+00001CDE                          1704  
+00001CDE                          1705  CHECK_OP_ROL:
+00001CDE  3038 1000               1706      MOVE CUR_OP_CODE,D0    ;Move current instruction set into D0
+00001CE2  0240 F118               1707      ANDI.W #$F118,D0
+00001CE6  B07C E118               1708      CMP.W  #$E118,D0
+00001CEA  6600 0010               1709      BNE    CHECK_OP_LSR
+00001CEE  4EB8 1210               1710      JSR    FIND_2_BIT_SIZE_7_TO_6     
+00001CF2  4EB9 00002076           1711      JSR    PRINT_OP_ROL
+00001CF8  6000 0080               1712      BRA    GROUPE_SUCCESS
+00001CFC                          1713      
+00001CFC                          1714  CHECK_OP_LSR:
+00001CFC  3038 1000               1715      MOVE CUR_OP_CODE,D0    ;Move current instruction set into D0
+00001D00  0240 F118               1716      ANDI.W #$F118,D0
+00001D04  B07C E008               1717      CMP.W  #$E008,D0
+00001D08  6600 0010               1718      BNE    CHECK_OP_LSL
+00001D0C  4EB8 1210               1719      JSR    FIND_2_BIT_SIZE_7_TO_6     
+00001D10  4EB9 00002034           1720      JSR    PRINT_OP_LSR
+00001D16  6000 0062               1721      BRA    GROUPE_SUCCESS
+00001D1A                          1722  
+00001D1A                          1723  CHECK_OP_LSL:
+00001D1A  3038 1000               1724      MOVE CUR_OP_CODE,D0    ;Move current instruction set into D0
+00001D1E  0240 F118               1725      ANDI.W #$F118,D0
+00001D22  B07C E108               1726      CMP.W  #$E108,D0
+00001D26  6600 0010               1727      BNE    CHECK_OP_ASR
+00001D2A  4EB8 1210               1728      JSR    FIND_2_BIT_SIZE_7_TO_6     
+00001D2E  4EB9 0000201E           1729      JSR    PRINT_OP_LSL
+00001D34  6000 0044               1730      BRA    GROUPE_SUCCESS
+00001D38                          1731  
+00001D38                          1732  CHECK_OP_ASR:
+00001D38  3038 1000               1733      MOVE CUR_OP_CODE,D0    ;Move current instruction set into D0
+00001D3C  0240 F118               1734      ANDI.W #$F118,D0
+00001D40  B07C E000               1735      CMP.W  #$E000,D0
+00001D44  6600 0010               1736      BNE    CHECK_OP_ASL
+00001D48  4EB8 1210               1737      JSR    FIND_2_BIT_SIZE_7_TO_6     
+00001D4C  4EB9 0000204A           1738      JSR    PRINT_OP_ASR
+00001D52  6000 0026               1739      BRA    GROUPE_SUCCESS
+00001D56                          1740  
+00001D56                          1741  CHECK_OP_ASL:
+00001D56  3038 1000               1742      MOVE CUR_OP_CODE,D0    ;Move current instruction set into D0
+00001D5A  0240 F118               1743      ANDI.W #$F118,D0
+00001D5E  B07C E100               1744      CMP.W  #$E100,D0
+00001D62  6600 0010               1745      BNE    GROUPE_INVALID      ;Last possible OP code
+00001D66  4EB8 1210               1746      JSR    FIND_2_BIT_SIZE_7_TO_6     
+00001D6A  4EB9 00002060           1747      JSR    PRINT_OP_ASL
+00001D70  6000 0008               1748      BRA    GROUPE_SUCCESS
+00001D74                          1749  
+00001D74                          1750  GROUPE_INVALID:
+00001D74  4EB9 00001D88           1751      JSR     INVALID_OP
+00001D7A                          1752      
+00001D7A                          1753  GROUPE_SUCCESS:
+00001D7A  4CDF 0001               1754      MOVEM.L (SP)+,D0
+00001D7E  4E75                    1755      RTS
+00001D80                          1756  * GROUP_F
+00001D80                          1757  ********************************************************************************
+00001D80                          1758  * Currently no OP codes here are supported. There are no OP codes here
+00001D80                          1759  ********************************************************************************
+00001D80                          1760  C_GROUP_F:
+00001D80  4EB9 00001D88           1761      JSR INVALID_OP
+00001D86  4E75                    1762      RTS
+00001D88                          1763      
+00001D88                          1764  * INVALID_OP                     
+00001D88                          1765  ********************************************************************************
+00001D88                          1766  * Any value that is not covered in the above groups would be considered invalid. 
+00001D88                          1767  * The following values in the first nibble would also indicate that the 
+00001D88                          1768  * operand codes is already invalid: $7, $A, $F.
+00001D88                          1769  * For unsupported OP codes, display DATA $WXYZ   
+00001D88                          1770  * THIS WILL NEED TO BE CHANGED TO DISPLAY: 1000 DATA $WXYZ IN THE FUTURE
+00001D88                          1771  ********************************************************************************
+00001D88                          1772  INVALID_OP:  ; Prints DATA for invalid op, THIS SHOULD BE SETTING THE IS_VALID BIT TO 0
+00001D88  23FC 000020EC 000021CC  1773      MOVE.L #P_INVALID_OP, Arg_AddStrToBuffer_String
+00001D92  4EB9 00001DA0           1774      JSR PRINT_TO_BUFFER
+00001D98  11FC 0000 10A9          1775      MOVE.B #0,IS_VALID
+00001D9E  4E75                    1776      RTS
+00001DA0                          1777  
+00001DA0                          1778  ********************** PRINTING ROUTINES **************************************
+00001DA0                          1779  * Description: These routines are to print the associated op codes, by placing
+00001DA0                          1780  * them in the appropriate area to the buffer
+00001DA0                          1781  *
+00001DA0                          1782  * Registers used: A1 for loading, A6 for EA parsing.
+00001DA0                          1783  *
+00001DA0                          1784  * Precondition: The relevant opcode has been identified correctly.
+00001DA0                          1785  *
+00001DA0                          1786  * Postcondition: Prints out the associated opcode to the buffer.
+00001DA0                          1787  
+00001DA0                          1788  * THIS NEEDS TO BE RETOOLED TO PRINT TO BUFFER NOT TO CONSOLE
+00001DA0                          1789  *******************************************************************************
+00001DA0                          1790  
+00001DA0                          1791  * Prints the loaded item into G_BUFFER
+00001DA0                          1792  PRINT_TO_BUFFER:
+00001DA0  23FC 00001003 000021D0  1793      MOVE.L #G_BUFFER, Arg_AddStrToBuffer_Buffer
+00001DAA  4EB9 000021DA           1794      JSR AddStrToBuffer
+00001DB0  4E75                    1795      RTS
+00001DB2                          1796      
+00001DB2                          1797  ****************************** GROUP 0 **************************************** 
+00001DB2                          1798  PRINT_OP_ORI:
+00001DB2  23FC 00002109 000021CC  1799      MOVE.L #P_OP_ORI, Arg_AddStrToBuffer_String
+00001DBC  4EB8 1DA0               1800      JSR PRINT_TO_BUFFER
+00001DC0  4EB9 000020D2           1801      JSR PRINT_OP_SIZE
+00001DC6  4E75                    1802      RTS
+00001DC8                          1803  PRINT_OP_CMPI:
+00001DC8  23FC 0000210D 000021CC  1804      MOVE.L #P_OP_CMPI, Arg_AddStrToBuffer_String
+00001DD2  4EB8 1DA0               1805      JSR PRINT_TO_BUFFER
+00001DD6  4EB9 000020D2           1806      JSR PRINT_OP_SIZE
+00001DDC  4E75                    1807      RTS
+00001DDE                          1808  PRINT_OP_STATIC_BCLR:
+00001DDE  23FC 00002112 000021CC  1809      MOVE.L #P_OP_STATIC_BCLR, Arg_AddStrToBuffer_String
+00001DE8  4EB8 1DA0               1810      JSR PRINT_TO_BUFFER
+00001DEC  4EB9 000020D2           1811      JSR PRINT_OP_SIZE
+00001DF2  4E75                    1812      RTS
+00001DF4                          1813  PRINT_OP_DYNAMIC_BCLR:
+00001DF4  23FC 00002117 000021CC  1814      MOVE.L #P_OP_DYNAMIC_BCLR, Arg_AddStrToBuffer_String
+00001DFE  4EB8 1DA0               1815      JSR PRINT_TO_BUFFER
+00001E02  4EB9 000020D2           1816      JSR PRINT_OP_SIZE
+00001E08  4E75                    1817      RTS
+00001E0A                          1818  ******************************* END OF GROUP 0 ********************************
+00001E0A                          1819  
+00001E0A                          1820  ****************************** GROUP 1 ****************************************    
+00001E0A                          1821  PRINT_OP_MOVEB:
+00001E0A  23FC 0000211C 000021CC  1822      MOVE.L #P_OP_MOVEB, Arg_AddStrToBuffer_String
+00001E14  4EB8 1DA0               1823      JSR PRINT_TO_BUFFER
+00001E18  4EB9 000020D2           1824      JSR PRINT_OP_SIZE
+00001E1E  4E75                    1825      RTS
+00001E20                          1826  ******************************* END OF GROUP 1 ********************************
+00001E20                          1827      
+00001E20                          1828  ****************************** GROUP 2 **************************************** 
+00001E20                          1829  PRINT_OP_MOVEA_L:
+00001E20  23FC 00002124 000021CC  1830      MOVE.L #P_OP_MOVEA_L, Arg_AddStrToBuffer_String
+00001E2A  4EB8 1DA0               1831      JSR PRINT_TO_BUFFER
+00001E2E  4EB9 000020D2           1832      JSR PRINT_OP_SIZE
+00001E34  4E75                    1833      RTS
+00001E36                          1834  PRINT_OP_MOVE_L:
+00001E36  23FC 00002130 000021CC  1835      MOVE.L #P_OP_MOVE_L, Arg_AddStrToBuffer_String
+00001E40  4EB8 1DA0               1836      JSR PRINT_TO_BUFFER
+00001E44  4EB9 000020D2           1837      JSR PRINT_OP_SIZE
+00001E4A  4E75                    1838      RTS
+00001E4C                          1839  ******************************* END OF GROUP 2 ********************************
+00001E4C                          1840      
+00001E4C                          1841  ****************************** GROUP 3 ****************************************    
+00001E4C                          1842  PRINT_OP_MOVEA_W:
+00001E4C  23FC 00002138 000021CC  1843      MOVE.L #P_OP_MOVEA_W, Arg_AddStrToBuffer_String
+00001E56  4EB8 1DA0               1844      JSR PRINT_TO_BUFFER
+00001E5A  4E75                    1845      RTS
+00001E5C                          1846  PRINT_OP_MOVE_W:
+00001E5C  23FC 00002144 000021CC  1847      MOVE.L #P_OP_MOVE_W, Arg_AddStrToBuffer_String
+00001E66  4EB8 1DA0               1848      JSR PRINT_TO_BUFFER
+00001E6A  4EB9 000020D2           1849      JSR PRINT_OP_SIZE
+00001E70  4E75                    1850      RTS
+00001E72                          1851  ******************************* END OF GROUP 3 ********************************
+00001E72                          1852  
+00001E72                          1853  ****************************** GROUP 4 ****************************************
+00001E72                          1854  PRINT_OP_JSR:
+00001E72  23FC 00002168 000021CC  1855      MOVE.L #P_OP_JSR, Arg_AddStrToBuffer_String
+00001E7C  4EB8 1DA0               1856      JSR PRINT_TO_BUFFER
+00001E80  4EB9 000020D2           1857      JSR PRINT_OP_SIZE
+00001E86  4E75                    1858      RTS
+00001E88                          1859  PRINT_OP_RTS:
+00001E88  23FC 00002170 000021CC  1860      MOVE.L #P_OP_RTS, Arg_AddStrToBuffer_String
+00001E92  4EB8 1DA0               1861      JSR PRINT_TO_BUFFER
+00001E96  4EB9 000020D2           1862      JSR PRINT_OP_SIZE
+00001E9C  4E75                    1863      RTS
+00001E9E                          1864  PRINT_OP_LEA:
+00001E9E  23FC 00002164 000021CC  1865      MOVE.L #P_OP_LEA, Arg_AddStrToBuffer_String
+00001EA8  4EB8 1DA0               1866      JSR PRINT_TO_BUFFER
+00001EAC  4EB9 000020D2           1867      JSR PRINT_OP_SIZE
+00001EB2  4E75                    1868      RTS
+00001EB4                          1869  PRINT_OP_NEG:
+00001EB4  23FC 00002174 000021CC  1870      MOVE.L #P_OP_NEG, Arg_AddStrToBuffer_String
+00001EBE  4EB8 1DA0               1871      JSR PRINT_TO_BUFFER
+00001EC2  4EB9 000020D2           1872      JSR PRINT_OP_SIZE
+00001EC8  4E75                    1873      RTS
+00001ECA                          1874  PRINT_OP_MOVEM_W:
+00001ECA  23FC 0000214C 000021CC  1875      MOVE.L #P_OP_MOVEM_W, Arg_AddStrToBuffer_String
+00001ED4  4EB8 1DA0               1876      JSR PRINT_TO_BUFFER
+00001ED8  4E75                    1877      RTS
+00001EDA                          1878  PRINT_OP_MOVEM_L:
+00001EDA  23FC 00002158 000021CC  1879      MOVE.L #P_OP_MOVEM_L, Arg_AddStrToBuffer_String
+00001EE4  4EB8 1DA0               1880      JSR PRINT_TO_BUFFER
+00001EE8  4E75                    1881      RTS
+00001EEA                          1882  ******************************* END OF GROUP 4 ********************************
+00001EEA                          1883      
+00001EEA                          1884  ****************************** GROUP 5 ****************************************
+00001EEA                          1885  PRINT_OP_SUBQ:
+00001EEA  23FC 00002178 000021CC  1886      MOVE.L #P_OP_SUBQ, Arg_AddStrToBuffer_String
+00001EF4  4EB8 1DA0               1887      JSR PRINT_TO_BUFFER
+00001EF8  4EB9 000020D2           1888      JSR PRINT_OP_SIZE
+00001EFE  4E75                    1889      RTS
+00001F00                          1890  ******************************* END OF GROUP 5 ********************************
+00001F00                          1891  
+00001F00                          1892  ****************************** GROUP 6 ****************************************
+00001F00                          1893  PRINT_OP_BCS:
+00001F00  23FC 00002181 000021CC  1894      MOVE.L #P_OP_BCS, Arg_AddStrToBuffer_String
+00001F0A  4EB8 1DA0               1895      JSR PRINT_TO_BUFFER
+00001F0E  4EB9 000020D2           1896      JSR PRINT_OP_SIZE
+00001F14  4E75                    1897      RTS
+00001F16                          1898  PRINT_OP_BGE:
+00001F16  23FC 00002185 000021CC  1899      MOVE.L #P_OP_BGE, Arg_AddStrToBuffer_String
+00001F20  4EB8 1DA0               1900      JSR PRINT_TO_BUFFER
+00001F24  4EB9 000020D2           1901      JSR PRINT_OP_SIZE
+00001F2A  4E75                    1902      RTS
+00001F2C                          1903  PRINT_OP_BLT:
+00001F2C  23FC 00002189 000021CC  1904      MOVE.L #P_OP_BLT, Arg_AddStrToBuffer_String
+00001F36  4EB8 1DA0               1905      JSR PRINT_TO_BUFFER
+00001F3A  4EB9 000020D2           1906      JSR PRINT_OP_SIZE
+00001F40  4E75                    1907      RTS
+00001F42                          1908  PRINT_OP_BVC:
+00001F42  23FC 0000218D 000021CC  1909      MOVE.L #P_OP_BVC, Arg_AddStrToBuffer_String
+00001F4C  4EB8 1DA0               1910      JSR PRINT_TO_BUFFER
+00001F50  4EB9 000020D2           1911      JSR PRINT_OP_SIZE
+00001F56  4E75                    1912      RTS
+00001F58                          1913  PRINT_OP_BRA:
+00001F58  23FC 0000217D 000021CC  1914      MOVE.L #P_OP_BRA, Arg_AddStrToBuffer_String
+00001F62  4EB8 1DA0               1915      JSR PRINT_TO_BUFFER
+00001F66  4EB9 000020D2           1916      JSR PRINT_OP_SIZE
+00001F6C  4E75                    1917      RTS
+00001F6E                          1918  ******************************* END OF GROUP 6 ********************************
+00001F6E                          1919  
+00001F6E                          1920  ****************************** GROUP 7 ****************************************
+00001F6E                          1921  * No currently supported OP codes to print here.
+00001F6E                          1922  ******************************* END OF GROUP 7 ********************************
+00001F6E                          1923  
+00001F6E                          1924  ****************************** GROUP 8 ****************************************
+00001F6E                          1925  PRINT_OP_DIVS:
+00001F6E  23FC 00002191 000021CC  1926      MOVE.L #P_OP_DIVS, Arg_AddStrToBuffer_String
+00001F78  4EB8 1DA0               1927      JSR PRINT_TO_BUFFER
+00001F7C  4EB9 000020D2           1928      JSR PRINT_OP_SIZE
+00001F82  4E75                    1929      RTS
+00001F84                          1930  PRINT_OP_OR:
+00001F84  23FC 00002196 000021CC  1931      MOVE.L #P_OP_OR, Arg_AddStrToBuffer_String
+00001F8E  4EB8 1DA0               1932      JSR PRINT_TO_BUFFER
+00001F92  4EB9 000020D2           1933      JSR PRINT_OP_SIZE
+00001F98  4E75                    1934      RTS
+00001F9A                          1935  ******************************* END OF GROUP 8 ********************************
+00001F9A                          1936  
+00001F9A                          1937  ****************************** GROUP 9 ****************************************
+00001F9A                          1938  PRINT_OP_SUB:
+00001F9A  23FC 00002199 000021CC  1939      MOVE.L #P_OP_SUB, Arg_AddStrToBuffer_String
+00001FA4  4EB8 1DA0               1940      JSR PRINT_TO_BUFFER
+00001FA8  4EB9 000020D2           1941      JSR PRINT_OP_SIZE
+00001FAE  4E75                    1942      RTS
+00001FB0                          1943  ******************************* END OF GROUP 9 ********************************
+00001FB0                          1944  
+00001FB0                          1945  ****************************** GROUP A ****************************************
+00001FB0                          1946  * No currently supported OP codes to print here.
+00001FB0                          1947  ******************************* END OF GROUP A ********************************
+00001FB0                          1948  
+00001FB0                          1949  ****************************** GROUP B ****************************************
+00001FB0                          1950  PRINT_OP_EOR:
+00001FB0  23FC 0000219D 000021CC  1951      MOVE.L #P_OP_EOR, Arg_AddStrToBuffer_String
+00001FBA  4EB8 1DA0               1952      JSR PRINT_TO_BUFFER
+00001FBE  4EB9 000020D2           1953      JSR PRINT_OP_SIZE
+00001FC4  4E75                    1954      RTS
+00001FC6                          1955  PRINT_OP_CMP:
+00001FC6  23FC 000021A1 000021CC  1956      MOVE.L #P_OP_CMP, Arg_AddStrToBuffer_String
+00001FD0  4EB8 1DA0               1957      JSR PRINT_TO_BUFFER
+00001FD4  4EB9 000020D2           1958      JSR PRINT_OP_SIZE
+00001FDA  4E75                    1959      RTS
+00001FDC                          1960  ******************************* END OF GROUP B ********************************
+00001FDC                          1961  
+00001FDC                          1962  ****************************** GROUP C ****************************************
+00001FDC                          1963  PRINT_OP_MULS:
+00001FDC  23FC 000021A5 000021CC  1964      MOVE.L #P_OP_MULS, Arg_AddStrToBuffer_String
+00001FE6  4EB8 1DA0               1965      JSR PRINT_TO_BUFFER
+00001FEA  4EB9 000020D2           1966      JSR PRINT_OP_SIZE
+00001FF0  4E75                    1967      RTS
+00001FF2                          1968  ******************************* END OF GROUP C ********************************
+00001FF2                          1969  
+00001FF2                          1970  ****************************** GROUP D ****************************************
+00001FF2                          1971  PRINT_OP_ADD:
+00001FF2  23FC 000021AF 000021CC  1972      MOVE.L #P_OP_ADD, Arg_AddStrToBuffer_String
+00001FFC  4EB8 1DA0               1973      JSR PRINT_TO_BUFFER
+00002000  4EB9 000020D2           1974      JSR PRINT_OP_SIZE
+00002006  4E75                    1975      RTS
+00002008                          1976  PRINT_OP_ADDA:
+00002008  23FC 000021AA 000021CC  1977      MOVE.L #P_OP_ADDA, Arg_AddStrToBuffer_String
+00002012  4EB8 1DA0               1978      JSR PRINT_TO_BUFFER
+00002016  4EB9 000020D2           1979      JSR PRINT_OP_SIZE
+0000201C  4E75                    1980      RTS
+0000201E                          1981  
+0000201E                          1982  ******************************* END OF GROUP D ********************************
+0000201E                          1983  
+0000201E                          1984  ****************************** GROUP E ****************************************
+0000201E                          1985  PRINT_OP_LSL:
+0000201E  23FC 000021B7 000021CC  1986      MOVE.L #P_OP_LSL, Arg_AddStrToBuffer_String
+00002028  4EB8 1DA0               1987      JSR PRINT_TO_BUFFER
+0000202C  4EB9 000020D2           1988      JSR PRINT_OP_SIZE
+00002032  4E75                    1989      RTS
+00002034                          1990  PRINT_OP_LSR:
+00002034  23FC 000021B3 000021CC  1991      MOVE.L #P_OP_LSR, Arg_AddStrToBuffer_String
+0000203E  4EB8 1DA0               1992      JSR PRINT_TO_BUFFER
+00002042  4EB9 000020D2           1993      JSR PRINT_OP_SIZE
+00002048  4E75                    1994      RTS
+0000204A                          1995  PRINT_OP_ASR:
+0000204A  23FC 000021BB 000021CC  1996      MOVE.L #P_OP_ASR, Arg_AddStrToBuffer_String
+00002054  4EB8 1DA0               1997      JSR PRINT_TO_BUFFER
+00002058  4EB9 000020D2           1998      JSR PRINT_OP_SIZE
+0000205E  4E75                    1999      RTS
+00002060                          2000  PRINT_OP_ASL:
+00002060  23FC 000021BF 000021CC  2001      MOVE.L #P_OP_ASL, Arg_AddStrToBuffer_String
+0000206A  4EB8 1DA0               2002      JSR PRINT_TO_BUFFER
+0000206E  4EB9 000020D2           2003      JSR PRINT_OP_SIZE
+00002074  4E75                    2004      RTS
+00002076                          2005  PRINT_OP_ROL:
+00002076  23FC 000021C7 000021CC  2006      MOVE.L #P_OP_ROL, Arg_AddStrToBuffer_String
+00002080  4EB8 1DA0               2007      JSR PRINT_TO_BUFFER
+00002084  4EB9 000020D2           2008      JSR PRINT_OP_SIZE
+0000208A  4E75                    2009      RTS
+0000208C                          2010  PRINT_OP_ROR:
+0000208C  23FC 000021C3 000021CC  2011      MOVE.L #P_OP_ROR, Arg_AddStrToBuffer_String
+00002096  4EB8 1DA0               2012      JSR PRINT_TO_BUFFER
+0000209A  4EB9 000020D2           2013      JSR PRINT_OP_SIZE
+000020A0  4E75                    2014      RTS
+000020A2                          2015  ******************************* END OF GROUP E ********************************
+000020A2                          2016  
+000020A2                          2017  ****************************** GROUP F ****************************************
+000020A2                          2018  * No currently supported OP codes to print here.
+000020A2                          2019  ******************************* END OF GROUP F ********************************
+000020A2                          2020  
+000020A2                          2021  ****************************** SIZE PRINTS ************************************
+000020A2                          2022  PRINT_SIZE_BYTE:
+000020A2  23FC 000020FD 000021CC  2023      MOVE.L #P_SIZE_B, Arg_AddStrToBuffer_String
+000020AC  4EB8 1DA0               2024      JSR PRINT_TO_BUFFER
+000020B0  4E75                    2025      RTS    
+000020B2                          2026  
+000020B2                          2027  PRINT_SIZE_WORD:
+000020B2  23FC 00002101 000021CC  2028      MOVE.L #P_SIZE_W, Arg_AddStrToBuffer_String
+000020BC  4EB8 1DA0               2029      JSR PRINT_TO_BUFFER
+000020C0  4E75                    2030      RTS
+000020C2                          2031      
+000020C2                          2032  PRINT_SIZE_LONG:
+000020C2  23FC 00002105 000021CC  2033      MOVE.L #P_SIZE_L, Arg_AddStrToBuffer_String
+000020CC  4EB8 1DA0               2034      JSR PRINT_TO_BUFFER
+000020D0  4E75                    2035      RTS
+000020D2                          2036  
+000020D2                          2037  PRINT_OP_SIZE:                     ;Prints current OP code byte size if applicable
+000020D2  0C38 0000 1002          2038      CMP.B  #%00,OP_SIZE         ;Checks for byte size
+000020D8  67C8                    2039      BEQ    PRINT_SIZE_BYTE      ;Print .B to buffer
+000020DA  0C38 0001 1002          2040      CMP.B  #%01,OP_SIZE         ;Check for word size
+000020E0  67D0                    2041      BEQ    PRINT_SIZE_WORD      ;Print .W to buffer
+000020E2  0C38 0002 1002          2042      CMP.B  #%10,OP_SIZE         ;Check for long size
+000020E8  67D8                    2043      BEQ    PRINT_SIZE_LONG      ;Print .L to buffer
+000020EA  4E75                    2044      RTS
+000020EC                          2045  ******************* END OF SIZE PRINTS ****************************************
+000020EC                          2046  
+000020EC                          2047  ******************* END OF PRINTING ROUTINES **********************************
+000020EC                          2048  
+000020EC                          2049  ******************* END OF JMP LABELS *****************************************
+000020EC                          2050  
+000020EC                          2051  ******************* DATA CONSTANT PRINTS **************************************
+000020EC                          2052  * Formatting is as follows: P_OP_<OPCODE>, where P = Print, OP = Operation,
+000020EC                          2053  * <OPCODE> is any valid operand
+000020EC                          2054  
+000020EC= 44 41 54 41 20 20 ...   2055  P_INVALID_OP    DC.B    'DATA   ',0
+000020F4= 46 6F 75 6E 64 20 ...   2056  OP_FOUND        DC.B    'Found OP',0 ; this should be taken out later
+000020FD= 2E 42 20 00             2057  P_SIZE_B        DC.B    '.B ',0
+00002101= 2E 57 20 00             2058  P_SIZE_W        DC.B    '.W ',0
+00002105= 2E 4C 20 00             2059  P_SIZE_L        DC.B    '.L ',0
+00002109= 4F 52 49 00             2060  P_OP_ORI        DC.B    'ORI',0
+0000210D= 43 4D 50 49 00          2061  P_OP_CMPI       DC.B    'CMPI',0
+00002112= 42 43 4C 52 00          2062  P_OP_STATIC_BCLR     DC.B    'BCLR',0
+00002117= 42 43 4C 52 00          2063  P_OP_DYNAMIC_BCLR     DC.B    'BCLR',0
+0000211C= 4D 4F 56 45 2E 42 ...   2064  P_OP_MOVEB      DC.B    'MOVE.B ',0
+00002124= 4D 4F 56 45 41 2E ...   2065  P_OP_MOVEA_L    DC.B    'MOVEA.L    ',0 
+00002130= 4D 4F 56 45 2E 4C ...   2066  P_OP_MOVE_L     DC.B    'MOVE.L ',0
+00002138= 4D 4F 56 45 41 2E ...   2067  P_OP_MOVEA_W    DC.B    'MOVEA.W    ',0
+00002144= 4D 4F 56 45 2E 57 ...   2068  P_OP_MOVE_W     DC.B    'MOVE.W ',0
+0000214C= 4D 4F 56 45 4D 2E ...   2069  P_OP_MOVEM_W    DC.B    'MOVEM.W    ',0
+00002158= 4D 4F 56 45 4D 2E ...   2070  P_OP_MOVEM_L    DC.B    'MOVEM.L    ',0
+00002164= 4C 45 41 00             2071  P_OP_LEA        DC.B    'LEA',0
+00002168= 4A 53 52 00             2072  P_OP_JSR        DC.B    'JSR',0
+0000216C= 4E 4F 50 00             2073  P_OP_NOP        DC.B    'NOP',0
+00002170= 52 54 53 00             2074  P_OP_RTS        DC.B    'RTS',0
+00002174= 4E 45 47 00             2075  P_OP_NEG        DC.B    'NEG',0
+00002178= 53 55 42 51 00          2076  P_OP_SUBQ       DC.B    'SUBQ',0
+0000217D= 42 52 41 00             2077  P_OP_BRA        DC.B    'BRA',0
+00002181= 42 43 53 00             2078  P_OP_BCS        DC.B    'BCS',0
+00002185= 42 47 45 00             2079  P_OP_BGE        DC.B    'BGE',0
+00002189= 42 4C 54 00             2080  P_OP_BLT        DC.B    'BLT',0
+0000218D= 42 56 43 00             2081  P_OP_BVC        DC.B    'BVC',0
+00002191= 44 49 56 53 00          2082  P_OP_DIVS       DC.B    'DIVS',0
+00002196= 4F 52 00                2083  P_OP_OR         DC.B    'OR',0
+00002199= 53 55 42 00             2084  P_OP_SUB        DC.B    'SUB',0
+0000219D= 45 4F 52 00             2085  P_OP_EOR        DC.B    'EOR',0
+000021A1= 43 4D 50 00             2086  P_OP_CMP        DC.B    'CMP',0
+000021A5= 4D 55 4C 53 00          2087  P_OP_MULS       DC.B    'MULS',0
+000021AA= 41 44 44 41 00          2088  P_OP_ADDA       DC.B    'ADDA',0
+000021AF= 41 44 44 00             2089  P_OP_ADD        DC.B    'ADD',0
+000021B3= 4C 53 52 00             2090  P_OP_LSR        DC.B    'LSR',0
+000021B7= 4C 53 4C 00             2091  P_OP_LSL        DC.B    'LSL',0
+000021BB= 41 53 52 00             2092  P_OP_ASR        DC.B    'ASR',0
+000021BF= 41 53 4C 00             2093  P_OP_ASL        DC.B    'ASL',0
+000021C3= 52 4F 52 00             2094  P_OP_ROR        DC.B    'ROR',0
+000021C7= 52 4F 4C 00             2095  P_OP_ROL        DC.B    'ROL',0
+000021CB                          2096  ***************** END OF DATA CONSTANT PRINTS ***********************************
+000021CB                          2097   
+000021CB                          2098  
+000021CB                          2099  **
+000021CB                          2100  * AddStrToBuffer
+000021CB                          2101  **
+000021CB                          2102  * Adds the given NULL-terminated string to the specified buffer.
+000021CB                          2103  *
+000021CB                          2104  * Default buffer length is 80 characters, but can be modified in the argument
+000021CB                          2105  * variables.
+000021CB                          2106  *
+000021CB                          2107  * If the buffer length is exceeded, either due to lack of a NULL character or
+000021CB                          2108  * an incorrectly specified length, 1 is returned. Otherwise, 0 is returned to
+000021CB                          2109  * indicate success.
+000021CB                          2110  *
+000021CB                          2111  **
+000021CB                          2112  * @param Arg_AddStrToBuffer_String              Pointer to string
+000021CB                          2113  * @param Arg_AddStrToBuffer_Buffer              Pointer to buffer
+000021CB                          2114  * @param Arg_AddStrToBuffer_BufferLength        Length of buffer (default 80 chars)
+000021CB                          2115  * @return Ret_AddStrToBuffer_Success            0 if successful, 1 otherwise.
+000021CB                          2116  * @branch _AddStrToBuffer_FindBufferNullLoop    Loop to find NULL in buffer
+000021CB                          2117  * @branch _AddStrToBuffer_AddLoop               Loop to add string to buffer
+000021CB                          2118  * @branch _AddStrToBuffer_Success               Branch when string successfully added
+000021CB                          2119  * @branch _AddStrToBuffer_StringLengthExceeded  Branch when length exceeded (either string or buffer)
+000021CB                          2120  * @branch _AddStrToBuffer_End                   End of subroutine
+000021CB                          2121  **
+000021CC                          2122  Arg_AddStrToBuffer_String           DS.L    1
+000021D0                          2123  Arg_AddStrToBuffer_Buffer           DS.L    1
+000021D4= 00000050                2124  Arg_AddStrToBuffer_BufferLength     DC.L    80
+000021D8                          2125  Ret_AddStrToBuffer_Success          DS.B    1
+000021D9                          2126  
+000021DA                          2127  AddStrToBuffer:                     DS.W    0
+000021DA  48E7 C0C0               2128      MOVEM.L     D0-D1/A0-A1, -(SP)                  * Backup registers to stack
+000021DE                          2129  
+000021DE  2078 21CC               2130      MOVE.L      Arg_AddStrToBuffer_String, A0       * Load string pointer
+000021E2  2278 21D0               2131      MOVE.L      Arg_AddStrToBuffer_Buffer, A1       * Load buffer pointer
+000021E6  2038 21D4               2132      MOVE.L      Arg_AddStrToBuffer_BufferLength, D0 * Load buffer length
+000021EA  4278 21D8               2133      CLR.W       Ret_AddStrToBuffer_Success          * Clear success bit
+000021EE  4281                    2134      CLR.L       D1                                  * Clear loop counter
+000021F0                          2135  
+000021F0                          2136  _AddStrToBuffer_BufferLoop
+000021F0  0C11 0000               2137      CMPI.B      #0, (A1)                            * If buffer char is NULL
+000021F4  6700 000E               2138      BEQ         _AddStrToBuffer_AddLoop             * Start adding string to bufer
+000021F8                          2139      
+000021F8  B280                    2140      CMP.L       D0, D1                              * If counter >= max length
+000021FA  6C00 0026               2141      BGE         _AddStrToBuffer_LengthExceeded      * Error, return
+000021FE                          2142      
+000021FE  5289                    2143      ADDQ.L      #1, A1                              * Go to next character
+00002200  5201                    2144      ADDQ.B      #1, D1                              * Increment counter
+00002202  60EC                    2145      BRA         _AddStrToBuffer_BufferLoop          * Loop back
+00002204                          2146      
+00002204                          2147  _AddStrToBuffer_AddLoop
+00002204  0C10 0000               2148      CMPI.B      #0, (A0)                            * If string char is NULL
+00002208  6700 0010               2149      BEQ         _AddStrToBuffer_Success             * String successfully added
+0000220C                          2150      
+0000220C  B200                    2151      CMP.B       D0, D1                              * If counter >= max length
+0000220E  6C00 0012               2152      BGE         _AddStrToBuffer_LengthExceeded      * Error, return
+00002212                          2153      
+00002212  12D8                    2154      MOVE.B      (A0)+, (A1)+                        * Move string char to buffer char
+00002214  528C                    2155      ADDQ.L      #1, A4
+00002216  5201                    2156      ADDQ.B      #1, D1                              * Increment counter
+00002218  60EA                    2157      BRA         _AddStrToBuffer_AddLoop             * Loop back
+0000221A                          2158  
+0000221A                          2159  _AddStrToBuffer_Success
+0000221A  12BC 0000               2160      MOVE.B      #0, (A1)                            * Add NULL to end of string
+0000221E  6000 0008               2161      BRA         _AddStrToBuffer_End                 * Finish subroutine
+00002222                          2162  
+00002222                          2163  _AddStrToBuffer_LengthExceeded
+00002222  31FC 0001 21D8          2164      MOVE.W      #1, Ret_AddStrToBuffer_Success      * Invalidate success bit
+00002228                          2165  
+00002228                          2166  _AddStrToBuffer_End
+00002228  4CDF 0303               2167      MOVEM.L     (SP)+, D0-D1/A0-A1                  * Restore registers from stack
+0000222C  4E75                    2168      RTS                  
+0000222E                          2169      END START                                   ; THIS SHOULD BE REMOVED FOR FULL INTEGRATION
 
 No errors detected
 No warnings generated
@@ -2172,10 +2179,10 @@ No warnings generated
 SYMBOL TABLE INFORMATION
 Symbol-name         Value
 -------------------------
-ADDSTRTOBUFFER      21BC
-ARG_ADDSTRTOBUFFER_BUFFER  21B2
-ARG_ADDSTRTOBUFFER_BUFFERLENGTH  21B6
-ARG_ADDSTRTOBUFFER_STRING  21AE
+ADDSTRTOBUFFER      21DA
+ARG_ADDSTRTOBUFFER_BUFFER  21D0
+ARG_ADDSTRTOBUFFER_BUFFERLENGTH  21D4
+ARG_ADDSTRTOBUFFER_STRING  21CC
 BIT_CHECK_EXG       1B2A
 BIT_CHECK_EXT       16FA
 BIT_CHECK_MOVEP     145C
@@ -2191,9 +2198,9 @@ CHECK_OP_AND        1B64
 CHECK_OP_ANDI       1394
 CHECK_OP_ANDI_TO_CCR  1354
 CHECK_OP_ANDI_TO_SR  1364
-CHECK_OP_ASL        1D42
+CHECK_OP_ASL        1D56
 CHECK_OP_ASL_NO_ROT  1C7E
-CHECK_OP_ASR        1D28
+CHECK_OP_ASR        1D38
 CHECK_OP_ASR_NO_ROT  1C64
 CHECK_OP_BCS        191A
 CHECK_OP_BGE        1934
@@ -2225,9 +2232,9 @@ CHECK_OP_JMP        17C8
 CHECK_OP_JSR        1820
 CHECK_OP_LEA        1806
 CHECK_OP_LINK       178C
-CHECK_OP_LSL        1D0E
+CHECK_OP_LSL        1D1A
 CHECK_OP_LSL_NO_ROT  1C4A
-CHECK_OP_LSR        1CF4
+CHECK_OP_LSR        1CFC
 CHECK_OP_LSR_NO_ROT  1C30
 CHECK_OP_MOVEA_L    153C
 CHECK_OP_MOVEA_W    159E
@@ -2254,7 +2261,7 @@ CHECK_OP_ORI_TO_CCR  1334
 CHECK_OP_ORI_TO_SR  1344
 CHECK_OP_PEA        173C
 CHECK_OP_RESET      160E
-CHECK_OP_ROL        1CDA
+CHECK_OP_ROL        1CDE
 CHECK_OP_ROL_NO_ROT  1C16
 CHECK_OP_ROR        1CC0
 CHECK_OP_ROR_NO_ROT  1BFC
@@ -2299,7 +2306,7 @@ C_GROUP_B           1A76
 C_GROUP_C           1AEA
 C_GROUP_D           1B80
 C_GROUP_E           1BD0
-C_GROUP_F           1D68
+C_GROUP_F           1D80
 FIND_1_BIT_SIZE_6   1230
 FIND_1_BIT_SIZE_8   1250
 FIND_2_BIT_SIZE_7_TO_6  1210
@@ -2335,8 +2342,8 @@ GROUPC_INVALID      1B74
 GROUPC_SUCCESS      1B7A
 GROUPD_INVALID      1BC4
 GROUPD_SUCCESS      1BCA
-GROUPE_INVALID      1D5C
-GROUPE_SUCCESS      1D62
+GROUPE_INVALID      1D74
+GROUPE_SUCCESS      1D7A
 GROUP_0             10CA
 GROUP_1             10DC
 GROUP_2             10EE
@@ -2354,102 +2361,102 @@ GROUP_D             11B4
 GROUP_E             11C6
 GROUP_F             11D8
 G_BUFFER            1003
-INVALID_OP          1D70
+INVALID_OP          1D88
 IS_VALID            10A9
 MNEMONIC            1053
 MOVE_AND_MOVEA_PARSE_EA  1286
 MOVE_LAST_6_BITS_TO_EA  11EE
-OP_FOUND            20D6
+OP_FOUND            20F4
 OP_JSR_DONE         11E6
 OP_JSR_ROUTINE      10B8
 OP_SIZE             1002
 PARSE_EA_CONSTANT_BITS  12E2
-PRINT_OP_ADD        1FDA
-PRINT_OP_ADDA       1FF0
-PRINT_OP_ASL        2042
-PRINT_OP_ASR        202C
-PRINT_OP_BCS        1EE8
-PRINT_OP_BGE        1EFE
-PRINT_OP_BLT        1F14
-PRINT_OP_BRA        1F40
-PRINT_OP_BVC        1F2A
-PRINT_OP_CMP        1FAE
-PRINT_OP_CMPI       1DB0
-PRINT_OP_DIVS       1F56
-PRINT_OP_DYNAMIC_BCLR  1DDC
-PRINT_OP_EOR        1F98
-PRINT_OP_JSR        1E5A
-PRINT_OP_LEA        1E86
-PRINT_OP_LSL        2006
-PRINT_OP_LSR        2016
-PRINT_OP_MOVEA_L    1E08
-PRINT_OP_MOVEA_W    1E34
-PRINT_OP_MOVEB      1DF2
-PRINT_OP_MOVEM_L    1EC2
-PRINT_OP_MOVEM_W    1EB2
-PRINT_OP_MOVE_L     1E1E
-PRINT_OP_MOVE_W     1E44
-PRINT_OP_MULS       1FC4
-PRINT_OP_NEG        1E9C
-PRINT_OP_OR         1F6C
-PRINT_OP_ORI        1D9A
-PRINT_OP_ROL        2058
-PRINT_OP_ROR        206E
-PRINT_OP_RTS        1E70
-PRINT_OP_SIZE       20B4
-PRINT_OP_STATIC_BCLR  1DC6
-PRINT_OP_SUB        1F82
-PRINT_OP_SUBQ       1ED2
-PRINT_SIZE_BYTE     2084
-PRINT_SIZE_LONG     20A4
-PRINT_SIZE_WORD     2094
-PRINT_TO_BUFFER     1D88
-P_INVALID_OP        20CE
-P_OP_ADD            2191
-P_OP_ADDA           218C
-P_OP_ASL            21A1
-P_OP_ASR            219D
-P_OP_BCS            2163
-P_OP_BGE            2167
-P_OP_BLT            216B
-P_OP_BRA            215F
-P_OP_BVC            216F
-P_OP_CMP            2183
-P_OP_CMPI           20EF
-P_OP_DIVS           2173
-P_OP_DYNAMIC_BCLR   20F9
-P_OP_EOR            217F
-P_OP_JSR            214A
-P_OP_LEA            2146
-P_OP_LSL            2199
-P_OP_LSR            2195
-P_OP_MOVEA_L        2106
-P_OP_MOVEA_W        211A
-P_OP_MOVEB          20FE
-P_OP_MOVEM_L        213A
-P_OP_MOVEM_W        212E
-P_OP_MOVE_L         2112
-P_OP_MOVE_W         2126
-P_OP_MULS           2187
-P_OP_NEG            2156
-P_OP_NOP            214E
-P_OP_OR             2178
-P_OP_ORI            20EB
-P_OP_ROL            21A9
-P_OP_ROR            21A5
-P_OP_RTS            2152
-P_OP_STATIC_BCLR    20F4
-P_OP_SUB            217B
-P_OP_SUBQ           215A
-P_SIZE_B            20DF
-P_SIZE_L            20E7
-P_SIZE_W            20E3
-RET_ADDSTRTOBUFFER_SUCCESS  21BA
+PRINT_OP_ADD        1FF2
+PRINT_OP_ADDA       2008
+PRINT_OP_ASL        2060
+PRINT_OP_ASR        204A
+PRINT_OP_BCS        1F00
+PRINT_OP_BGE        1F16
+PRINT_OP_BLT        1F2C
+PRINT_OP_BRA        1F58
+PRINT_OP_BVC        1F42
+PRINT_OP_CMP        1FC6
+PRINT_OP_CMPI       1DC8
+PRINT_OP_DIVS       1F6E
+PRINT_OP_DYNAMIC_BCLR  1DF4
+PRINT_OP_EOR        1FB0
+PRINT_OP_JSR        1E72
+PRINT_OP_LEA        1E9E
+PRINT_OP_LSL        201E
+PRINT_OP_LSR        2034
+PRINT_OP_MOVEA_L    1E20
+PRINT_OP_MOVEA_W    1E4C
+PRINT_OP_MOVEB      1E0A
+PRINT_OP_MOVEM_L    1EDA
+PRINT_OP_MOVEM_W    1ECA
+PRINT_OP_MOVE_L     1E36
+PRINT_OP_MOVE_W     1E5C
+PRINT_OP_MULS       1FDC
+PRINT_OP_NEG        1EB4
+PRINT_OP_OR         1F84
+PRINT_OP_ORI        1DB2
+PRINT_OP_ROL        2076
+PRINT_OP_ROR        208C
+PRINT_OP_RTS        1E88
+PRINT_OP_SIZE       20D2
+PRINT_OP_STATIC_BCLR  1DDE
+PRINT_OP_SUB        1F9A
+PRINT_OP_SUBQ       1EEA
+PRINT_SIZE_BYTE     20A2
+PRINT_SIZE_LONG     20C2
+PRINT_SIZE_WORD     20B2
+PRINT_TO_BUFFER     1DA0
+P_INVALID_OP        20EC
+P_OP_ADD            21AF
+P_OP_ADDA           21AA
+P_OP_ASL            21BF
+P_OP_ASR            21BB
+P_OP_BCS            2181
+P_OP_BGE            2185
+P_OP_BLT            2189
+P_OP_BRA            217D
+P_OP_BVC            218D
+P_OP_CMP            21A1
+P_OP_CMPI           210D
+P_OP_DIVS           2191
+P_OP_DYNAMIC_BCLR   2117
+P_OP_EOR            219D
+P_OP_JSR            2168
+P_OP_LEA            2164
+P_OP_LSL            21B7
+P_OP_LSR            21B3
+P_OP_MOVEA_L        2124
+P_OP_MOVEA_W        2138
+P_OP_MOVEB          211C
+P_OP_MOVEM_L        2158
+P_OP_MOVEM_W        214C
+P_OP_MOVE_L         2130
+P_OP_MOVE_W         2144
+P_OP_MULS           21A5
+P_OP_NEG            2174
+P_OP_NOP            216C
+P_OP_OR             2196
+P_OP_ORI            2109
+P_OP_ROL            21C7
+P_OP_ROR            21C3
+P_OP_RTS            2170
+P_OP_STATIC_BCLR    2112
+P_OP_SUB            2199
+P_OP_SUBQ           2178
+P_SIZE_B            20FD
+P_SIZE_L            2105
+P_SIZE_W            2101
+RET_ADDSTRTOBUFFER_SUCCESS  21D8
 SECOND_3            1055
 START               10AA
 THIRD_3             1056
-_ADDSTRTOBUFFER_ADDLOOP  21E6
-_ADDSTRTOBUFFER_BUFFERLOOP  21D2
-_ADDSTRTOBUFFER_END  220A
-_ADDSTRTOBUFFER_LENGTHEXCEEDED  2204
-_ADDSTRTOBUFFER_SUCCESS  21FC
+_ADDSTRTOBUFFER_ADDLOOP  2204
+_ADDSTRTOBUFFER_BUFFERLOOP  21F0
+_ADDSTRTOBUFFER_END  2228
+_ADDSTRTOBUFFER_LENGTHEXCEEDED  2222
+_ADDSTRTOBUFFER_SUCCESS  221A
