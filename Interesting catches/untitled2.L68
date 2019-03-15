@@ -1,0 +1,81 @@
+00001000 Starting Address
+Assembler used: EASy68K Editor/Assembler v5.16.01
+Created On: 3/14/2019 5:40:29 PM
+
+00000000                             1  *-----------------------------------------------------------
+00000000                             2  * Title      :
+00000000                             3  * Written by :
+00000000                             4  * Date       :
+00000000                             5  * Description:
+00000000                             6  *-----------------------------------------------------------
+00001000                             7      ORG    $1000
+00001000                             8  START:                  ; first instruction of program
+00001000                             9  
+00001000                            10  * Put program code here
+00001000  4479 0000FFEE             11      NEG $FFEE
+00001006  6000 0008                 12      BRA SUBROUTINE_A
+00001010                            13      ORG $1010
+00001010                            14  SUBROUTINE_A:
+00001010  6000 FFEE                 15      BRA SUBROUTINE_B
+00001000                            16      ORG $1000
+00001000                            17  SUBROUTINE_B:
+00001000  6000 001E                 18      BRA SUBROUTINE_C
+00001020                            19      ORG $1020
+00001020                            20  SUBROUTINE_C:
+00001020  6000 2FE0                 21      BRA SUBROUTINE_D
+00000980                            22      ORG $980
+00000980                            23  SUBROUTINE_E:
+00000980  6000 06AE                 24      BRA SUBROUTINE_F
+00001030                            25      ORG $1030
+00001030                            26  SUBROUTINE_F:
+00001030  6000 F93E                 27      BRA SUBROUTINE_G
+00000970                            28      ORG $970
+00000970                            29  SUBROUTINE_G:
+00000970  6000 06CE                 30      BRA SUBROUTINE_H
+00001040                            31      ORG $1040
+00001040                            32  SUBROUTINE_H:
+00001040  6000 F91E                 33      BRA SUBROUTINE_I
+00000960                            34      ORG $960
+00000960                            35  SUBROUTINE_I:
+00000960  6000 06DE                 36      BRA SUBROUTINE_J
+00001040                            37      ORG $1040
+00001040                            38  SUBROUTINE_J:
+00001040  6000 F00E                 39      BRA SUBROUTINE_K
+00000050                            40      ORG $050
+00000050                            41  SUBROUTINE_K:
+00000050  6000 500E                 42      BRA SUBROUTINE_L
+00005060                            43      ORG $5060
+00005060                            44  SUBROUTINE_L
+00005060  6000 EFA0                 45      BRA SUBROUTINE_D
+Line 46 WARNING: Origin value is odd (Location counter set to next highest address)
+00004002                            46      ORG $4001
+00004002                            47  
+00004002                            48      
+00004002                            49      
+00004002                            50  SUBROUTINE_D:
+00004002  FFFF FFFF                 51      SIMHALT             ; halt simulator
+00004006                            52  
+00004006                            53  * Put variables and constants here
+00004006                            54  
+00004006                            55      END    START        ; last line of source
+
+No errors detected
+1 warning generated
+
+
+SYMBOL TABLE INFORMATION
+Symbol-name         Value
+-------------------------
+START               1000
+SUBROUTINE_A        1010
+SUBROUTINE_B        1000
+SUBROUTINE_C        1020
+SUBROUTINE_D        4002
+SUBROUTINE_E        980
+SUBROUTINE_F        1030
+SUBROUTINE_G        970
+SUBROUTINE_H        1040
+SUBROUTINE_I        960
+SUBROUTINE_J        1040
+SUBROUTINE_K        50
+SUBROUTINE_L        5060

@@ -33,7 +33,7 @@ SECOND_3        DS.B    1
 THIRD_3         DS.B    1
 FOURTH_3        DS.B    1
 
-EA_SIZE     DS.B 1
+OP_SIZE     DS.B 1        ;This constant refers to the size of the current OP code, 
 
 B_BUFFER    DS.B 80
 
@@ -437,30 +437,80 @@ MOVE_LAST_6_BITS_TO_EA:      ;Move last 6 bits from EA field to relevant registe
    ; MOVEM.L (SP)+,D0-D7/A6   ;Restore registers
     RTS                      ;Return to stack
     
-* FIND_2_BIT_SIZE_TO_EA
+* FIND_2_BIT_SIZE_7_TO_6
 **********************************************************************************
 * Description: For OP codes with 2 bit size fields, the 2 relevant bits (7-6) will 
 * be parsed and moved to the appropriate registers.
 *
-* Registers used: A6,D0,D1,D5
+* Registers used: D0,D1
 *
-* Precondition: OP code has been identified with 2 size bit field for EA, current
-* instruction set for OP code is stored in to A6.
+* Precondition: OP code has been identified with 2 size bit field for CUR_OP_CODE.
 *
-* Postcondition: 2 bit size field has been isolated and stored into D5.
+* Postcondition: 2 bit size field has been isolated and stored into OP_SIZE.
 **********************************************************************************
-FIND_2_BIT_SIZE_TO_EA:      ;Move the 2 bit size field relevant register
-   ; MOVEM.L  D0-D5/A6,-(SP) ;Save all changed registers
-    MOVE.W   CUR_OP_CODE,D0        ;Move current OP code into D0
-    MOVE.W   #8,D1          ;Prepare 8 bit shift to D1
-    LSL.W    D1,D0          ;Truncate to find the 2 size bits
-    LSR.W    D1,D0          ;Reposition the bits
-    MOVE.W   #6,D1          ;Prepare 6 bit shift to D1
-    LSR.W    D1,D0          ;Truncate to shift 2 bits to a byte
-    MOVE.W   D0,D4          ;Move 2 size bits into D5
-  ;  MOVEM.L (SP)+,D0-D5/A6  ;Restore registers
-    RTS                     ;Return to stack
+FIND_2_BIT_SIZE_7_TO_6:         ;Move the 2 bit size field relevant register
+    MOVEM.L  D0-D1,-(SP)        ;Save all changed registers
+    MOVE.W   CUR_OP_CODE,D0     ;Move current OP code into D0
+    MOVE.W   #8,D1              ;Prepare 8 bit shift to D1
+    LSL.W    D1,D0              ;Truncate to find the 2 size bits
+    LSR.W    D1,D0              ;Reposition the bits
+    MOVE.W   #6,D1              ;Prepare 6 bit shift to D1
+    LSR.W    D1,D0              ;Truncate to shift 2 bits to a byte
+    MOVE.B   D0,OP_SIZE         ;Move 2 size bits into D5
+    MOVEM.L (SP)+,D0-D1         ;Restore registers
+    RTS                         ;Return to stack
 **********************************************************************************
+
+* FIND_1_BIT_SIZE_6
+**********************************************************************************
+* Description: For OP codes with 1 bit size fields, the 2 relevant bit 6 will 
+* be parsed and moved to the appropriate registers.
+*
+* Registers used: D0,D1
+*
+* Precondition: OP code has been identified with 2 size bit field for CUR_OP_CODE.
+*
+* Postcondition: 1 bit size field has been isolated and stored into OP_SIZE.
+**********************************************************************************
+FIND_1_BIT_SIZE_6:         ;Move the 2 bit size field relevant register
+    MOVEM.L  D0-D1,-(SP)        ;Save all changed registers
+    MOVE.W   CUR_OP_CODE,D0     ;Move current OP code into D0
+    MOVE.W   #9,D1              ;Prepare 8 bit shift to D1
+    LSL.W    D1,D0              ;Truncate to find the 2 size bits
+    LSR.W    D1,D0              ;Reposition the bits
+    MOVE.W   #6,D1              ;Prepare 6 bit shift to D1
+    LSR.W    D1,D0              ;Truncate to shift 2 bits to a byte
+    MOVE.B   D0,OP_SIZE         ;Move 2 size bits into D5
+    MOVEM.L (SP)+,D0-D1         ;Restore registers
+    RTS                         ;Return to stack
+**********************************************************************************
+
+
+* FIND_1_BIT_SIZE_8
+**********************************************************************************
+* Description: For OP codes with 1 bit size fields, the 1 relevant bits 8 will 
+* be parsed and moved to the appropriate registers.
+*
+* Registers used: D0,D1
+*
+* Precondition: OP code has been identified with 2 size bit field for CUR_OP_CODE.
+*
+* Postcondition: 1 bit size field has been isolated and stored into OP_SIZE.
+**********************************************************************************
+FIND_1_BIT_SIZE_8:         ;Move the 2 bit size field relevant register
+    MOVEM.L  D0-D1,-(SP)        ;Save all changed registers
+    MOVE.W   CUR_OP_CODE,D0     ;Move current OP code into D0
+    MOVE.W   #8,D1              ;Prepare 8 bit shift to D1
+    LSL.W    D1,D0              ;Truncate to find the 2 size bits
+    LSR.W    D1,D0              ;Reposition the bits
+    MOVE.W   #6,D1              ;Prepare 6 bit shift to D1
+    LSR.W    D1,D0              ;Truncate to shift 2 bits to a byte
+    MOVE.B   D0,OP_SIZE         ;Move 2 size bits into D5
+    MOVEM.L (SP)+,D0-D1         ;Restore registers
+    RTS                         ;Return to stack
+**********************************************************************************
+
+
 
 * FIND_3_BIT_REG_TO_EA
 **********************************************************************************
@@ -1950,13 +2000,32 @@ PRINT_OP_ROR:
 * No currently supported OP codes to print here.
 ******************************* END OF GROUP F ********************************
 
+****************************** SIZE PRINTS ************************************
+PRINT_SIZE_BYTE:
+    MOVE.L #P_SIZE_B, Arg_AddStrToBuffer_String
+    JSR PRINT_TO_BUFFER
+    RTS    
 
-
-PRINT_OP:   ;Prints current op code byte
-    ;MOVE.W (A4),(A1)       ; NEEDS TO USE G_BUFFER LATER
-    MOVE.B #13,D0
-    TRAP #15
+PRINT_SIZE_WORD:
+    MOVE.L #P_SIZE_W, Arg_AddStrToBuffer_String
+    JSR PRINT_TO_BUFFER
     RTS
+    
+PRINT_SIZE_LONG:
+    MOVE.L #P_SIZE_L, Arg_AddStrToBuffer_String
+    JSR PRINT_TO_BUFFER
+    RTS
+
+PRINT_SIZE:                     ;Prints current OP code byte size if applicable
+    CMP.B  #%00,OP_SIZE         ;Checks for byte size
+    BEQ    PRINT_SIZE_BYTE      ;Print .B to buffer
+    CMP.B  #%01,OP_SIZE         ;Check for word size
+    BEQ    PRINT_SIZE_WORD      ;Print .W to buffer
+    CMP.B  #%10,OP_SIZE         ;Check for long size
+    BEQ    PRINT_SIZE_LONG      ;Print .L to buffer
+    RTS
+******************* END OF SIZE PRINTS ****************************************
+
 ******************* END OF PRINTING ROUTINES **********************************
 
 ******************* END OF JMP LABELS *****************************************
@@ -2082,6 +2151,7 @@ _AddStrToBuffer_End
     
     END START                                   ; THIS SHOULD BE REMOVED FOR FULL INTEGRATION
    
+
 *~Font name~Courier New~
 *~Font size~10~
 *~Tab type~1~
