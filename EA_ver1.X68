@@ -207,7 +207,7 @@ BRA_BYTE_BK JSR     LOAD_NEW_LINE
 
 ***vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv***
 ***222222222BRA_BYTE_NEGATIVE222222222***
-NEG_BYTE    MOVE.W  BRA_BYT_BK2, A2
+NEG_BYTE    MOVE.W  #BRA_BYT_BK2, A2
             NEG     D6 * D6 now has twos-comp'ed $E
             SUB.W   D6, D5 * D5 now has $1002 - 2cmp'ed $E    *<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
             MOVE.W  D5, D4
@@ -233,19 +233,25 @@ BRA_WORD    MOVE.W  A5, D5 * D5 now has $1002
 
 ***vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv***
 ***222222222BRA_WORD_POSITIVE222222222***
-POS_WORD    ADD.W   D5, D4 * D4 now has $1010
+POS_WORD    MOVE.W  #BRA_WORD_BK, A2
+            ADD.W   D5, D4 * D4 now has $1010
 
-            MOVE.B  #%111, D3
-            MOVE.B  #%000, D2
-            JSR     LOAD_EA
-            JSR     LOAD_NEW_LINE
+            JMP     LOAD_ABS_SHORT
+BRA_WORD_BK JSR     LOAD_NEW_LINE
             RTS
 ***222222222BRA_WORD_POSITIVE222222222***
 ***^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^***
 
 ***vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv***
 ***222222222BRA_WORD_NEGATIVE222222222***
-NEG_WORD    ...
+NEG_WORD    MOVE.W  #BRA_WRD_BK2, A2
+            NEG     D4 * D4 now has twos-comp'ed $000E
+            SUB.W   D4, D5 * D5 now has $1002 - 2cmp'ed $000E
+            MOVE.W  D5, D4
+            JMP     LOAD_ABS_SHORT
+BRA_WRD_BK2 JSR     LOAD_NEW_LINE
+            RTS
+
 ***222222222BRA_WORD_NEGATIVE222222222***
 ***^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^***
 
@@ -256,29 +262,34 @@ NEG_WORD    ...
             
 ***vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv***
 ***111111111BRA_LONG111111111***
-BRA_LONG    MOVE.W  A5, D5 * D5 now has $1004
+BRA_LONG    MOVE.W  A5, D5 * D5 now has $1002
             MOVE.L  (A5)+, D4 * D4 now has $000E000E
             CMPI.L  #$7FFFFFFF, D4
             BLE     POS_LONG
-            BGT     NEG_LONG *<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+            BGT     NEG_LONG
 
 
 
 ***vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv***
 ***222222222BRA_LONG_POSITIVE222222222***
-POS_LONG    ADD.L   D5, D4 * D4 now has $1004 + 000E000E
+POS_LONG    MOVE.W  #BRA_LONG_BK, A2
+            ADD.L   D5, D4 * D4 now has $1002+ 000E000E
 
-            MOVE.B  #%111, D3
-            MOVE.B  #%001, D2
-            JSR     LOAD_EA
-            JSR     LOAD_NEW_LINE
+            JMP     LOAD_ABS_LONG
+BRA_LONG_BK JSR     LOAD_NEW_LINE
             RTS
 ***222222222BRA_LONG_POSITIVE222222222***
 ***^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^***
 
 ***vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv***
 ***222222222BRA_LONG_NEGATIVE222222222***
-NEG_LONG    ...
+NEG_LONG    MOVE.W  #BRA_LNG_BK2, A2
+            NEG     D4 * D4 now has twos-comp'ed $000E000E
+            SUB.L   D4, D5 * D5 now has $1002 - 2cmp'ed $000E000E
+            MOVE.L  D5, D4
+            JMP     LOAD_ABS_LONG
+BRA_LNG_BK2 JSR     LOAD_NEW_LINE
+            RTS
 ***222222222BRA_LONG_NEGATIVE222222222***
 ***^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^***
 
