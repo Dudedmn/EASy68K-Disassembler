@@ -3,12 +3,11 @@ START:
 
 **************************************************
 *   [NOTICE]
-*   Data Register for Mode = D3
-*   Data Register for Register# = D2
-*   Address Register for Trailing Bits = A3
-*   D0 is used for string printing
-*   D1 is used for number printing
+*   Data Register for Mode => D3
+*   Data Register for Register# => D2
+*   Address Register for Trailing Bits => A3
 **************************************************
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 * EXECUTION **************************************
@@ -18,7 +17,8 @@ START:
     MOVE.B  #%001, D6
     MOVE.B  #%111, D5
     MOVE.B  #%100, D4
-    MOVEA.W #$000E, A3
+    MOVEA.W #$00EF, A3
+    LEA     G_BUFFER, A4
 
     JSR     CHECK_XXXX
     SIMHALT
@@ -121,14 +121,14 @@ PRINT_GE_111:
 PRINT_DATA_REGISTER:
     * e.g. D3
     JSR     PRINT_D
-    MOVE.L  D2, D1 * Loading D2(=Dreg to D1 for number printing)
+    MOVE.L  D2, D0 * Loading D2(=Dreg to D0 for number printing)
     JSR     PRINT_NUM
     JMP     (A2)
 
 PRINT_ADDR_REGISTER:
     * e.g. A3
     JSR     PRINT_A
-    MOVE.L  D2, D1
+    MOVE.L  D2, D0
     JSR     PRINT_NUM
     JMP     (A2)
 
@@ -153,14 +153,14 @@ PRINT_ADDRESS_W_PRE_DEC:
 
 PRINT_ABS_SHORT:
     JSR     PRINT_HEX_SIGN
-    MOVE.W  A3, D1
-    JSR     PRINT_NUM
+    MOVE.W  A3, D0
+    JSR     PRINT_BYTES
     JMP     (A2)
 
 PRINT_ABS_LONG:
     JSR     PRINT_HEX_SIGN
-    MOVE.L  A3, D1
-    JSR     PRINT_NUM
+    MOVE.L  A3, D0
+    JSR     PRINT_BYTES
     JMP     (A2)
     
 PRINT_IMMDTE:
@@ -172,53 +172,74 @@ PRINT_IMMDTE:
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 * PRINT_THIS FUNCTIONS (LOW LEVEL) ***************
+* Shifts the bits to the left and prints the
+* left-most bit
+PRINT_BYTES:
+        MOVE.B  D0, D1
+        MOVEA.W #8, A5
+LOOP    CMPA    #0, A5
+        BGT     ROTATE
+        RTS
+    
+ROTATE  ROL.L   #$04, D1
+        MOVE.B  D1, D0
+        ANDI.L  #$0000000F, D0
+        JSR     PRINT_NUM
+        SUBA    #1, A5
+        JMP     LOOP        
+
 PRINT_NEW_LINE:
-    LEA     NEW_LINE, A1
+    MOVE.B  CR, D0
+    JSR     PRINT_THIS_SHIT
+    MOVE.B  LF, D0
     JSR     PRINT_THIS_SHIT
     RTS
 
 PRINT_COMMA_SPACE:
-    LEA     COMMA_SPACE, A1
+    MOVE.B  COMMA, D0
     JSR     PRINT_THIS_SHIT
+    MOVE.B  SPACE, D0
+    JSR     PRINT_THIS_SHIT
+    
     RTS
     
 PRINT_D:
-    LEA     DATA, A1
+    MOVE.B  DATA, D0
     JSR     PRINT_THIS_SHIT
     RTS
     
 PRINT_A:
-    LEA     ADDRESS, A1
+    MOVE.B  ADDRESS, D0
     JSR     PRINT_THIS_SHIT
     RTS
 
 PRINT_PTHSIS_OPEN:    
-    LEA     PTHSIS_OPEN, A1
+    MOVE.B  PTHSIS_OPEN, D0
     JSR     PRINT_THIS_SHIT
     RTS
     
 PRINT_PTHSIS_CLSD:
-    LEA     PTHSIS_CLSD, A1
+    MOVE.B  PTHSIS_CLSD, D0
     JSR     PRINT_THIS_SHIT
     RTS
     
 PRINT_HEX_SIGN:
-    LEA     HEX_SIGN, A1
+    MOVE.B  HEX_SIGN, D0
     JSR     PRINT_THIS_SHIT
     RTS
 
 PRINT_IMMDTE_VALU:
-    LEA     IMMDTE_VALU, A1
+    MOVE.B  IMMDTE_VALU, D0
     JSR     PRINT_THIS_SHIT
     RTS
 
 PRINT_PLUS_SIGN:
-    LEA     PLUS_SIGN, A1
+    MOVE.B  PLUS_SIGN, D0
     JSR     PRINT_THIS_SHIT
     RTS
     
 PRINT_MINUS_SIGN:
-    LEA     MINUS_SIGN, A1
+    MOVE.B  MINUS_SIGN, D0
     JSR     PRINT_THIS_SHIT
     RTS
 **************************************************
@@ -227,14 +248,26 @@ PRINT_MINUS_SIGN:
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 * PRINT_THIS FUNCTIONS (LOWEST LEVEL) ************
+
+* Moves the hex value from D0 to G_BUFFER in A4
 PRINT_THIS_SHIT:
-    MOVE.B  #14, D0
-    TRAP    #15
+    MOVE.B  D0, (A4)+
     RTS
 
+* Adds $30 to a number in D0 to make it a hex
+* If the number is greater than 9 (A~F), then adds $37
+* Then moves the hex value from D0 to G_BUFFER in A4
 PRINT_NUM:
-    MOVE.B  #3, D0
-    TRAP    #15
+    CMPI.B  #$9, D0
+    BGT     GT
+    BLE     LE
+    
+GT  ADDI.B  #$37, D0 * A~F
+    JMP     EXT
+LE  ADDI.B  #$30, D0 * 0~9
+    JMP     EXT
+
+EXT MOVE.B  D0, (A4)+
     RTS
 **************************************************
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -242,31 +275,35 @@ PRINT_NUM:
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 * MESSAGE VARIABLES ******************************
-ADDRESS         DC.B    'A',0
-DATA            DC.B    'D',0
+ADDRESS         DC.B    $41
+DATA            DC.B    $44
 
-PTHSIS_OPEN     DC.B    '(',0
-PTHSIS_CLSD     DC.B    ')',0
-HEX_SIGN        DC.B    '$',0
-IMMDTE_VALU     DC.B    '#',0
-PLUS_SIGN       DC.B    '+',0
-MINUS_SIGN      DC.B    '-',0
+PTHSIS_OPEN     DC.B    $28
+PTHSIS_CLSD     DC.B    $29
+HEX_SIGN        DC.B    $24
+IMMDTE_VALU     DC.B    $23
+PLUS_SIGN       DC.B    $2B
+MINUS_SIGN      DC.B    $2D
 
-COMMA_SPACE     DC.B    ', ',0
-NEW_LINE        DC.B    CR,LF,0
+COMMA           DC.B    $2C
+SPACE           DC.B    $20
+
+CR              DC.B    $D
+LF              DC.B    $A
 **************************************************
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-* CONSTANTS **************************************
-CR              EQU     $0D
-LF              EQU     $0A
+* GLOBAL BUFFER **********************************
+G_BUFFER        DS.B    100
 **************************************************
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
     END    START
+
+
 
 *~Font name~Courier New~
 *~Font size~10~
