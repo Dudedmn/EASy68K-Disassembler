@@ -1925,7 +1925,6 @@ PRINT_OP_BRA:
 PRINT_OP_DIVS:
     MOVE.L #P_OP_DIVS, Arg_AddStrToBuffer_String
     JSR PRINT_TO_BUFFER
-    JSR PRINT_OP_SIZE
     RTS
 PRINT_OP_OR:
     MOVE.L #P_OP_OR, Arg_AddStrToBuffer_String
@@ -1963,7 +1962,6 @@ PRINT_OP_CMP:
 PRINT_OP_MULS:
     MOVE.L #P_OP_MULS, Arg_AddStrToBuffer_String
     JSR PRINT_TO_BUFFER
-    JSR PRINT_OP_SIZE
     RTS
 ******************************* END OF GROUP C ********************************
 
@@ -2079,12 +2077,12 @@ P_OP_BCS        DC.B    'BCS',0
 P_OP_BGE        DC.B    'BGE',0
 P_OP_BLT        DC.B    'BLT',0
 P_OP_BVC        DC.B    'BVC',0
-P_OP_DIVS       DC.B    'DIVS',0
+P_OP_DIVS       DC.B    'DIVS.W ',0
 P_OP_OR         DC.B    'OR',0
 P_OP_SUB        DC.B    'SUB',0
 P_OP_EOR        DC.B    'EOR',0
 P_OP_CMP        DC.B    'CMP',0
-P_OP_MULS       DC.B    'MULS',0
+P_OP_MULS       DC.B    'MULS.W ',0
 P_OP_ADDA       DC.B    'ADDA',0
 P_OP_ADD        DC.B    'ADD',0
 P_OP_LSR        DC.B    'LSR',0
