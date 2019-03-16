@@ -721,7 +721,8 @@ JSR_BACK    MOVE.B  THIRD_3, D3
             RTS
 
 MOVEM:
-            JMP     INVALID
+            JSR     LOAD_NEW_LINE
+            RTS
     
 LEA:
             MOVEA.W #LEA_BACK, A3
@@ -1428,6 +1429,7 @@ INVALID:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
     END    START
+
 
 
 
