@@ -24,190 +24,13 @@ START:
     LEA G_BUFFER,A4         ;Load G_BUFFER into A4, put a pointer to it as A4
     MOVE.B #0, (A4)         ;Move 0 to indicate where to put the loaded buffer word
 
-    ;MOVE.L (A5)+, D0
-************** BUFFER PRINTING/LOADING EXAMPLES *************************************
-    ; Load the message onto A4
-    ;MOVE.L #P_OP_MOVEA_L_T, Arg_AddStrToBuffer_String
-    ;MOVE.L #G_BUFFER, Arg_AddStrToBuffer_Buffer 
-    ;JSR AddStrToBuffer
-    ;LEA G_BUFFER, A4   ; Load the value of the message onto the G_BUFFER
-    ;MOVE.L P_OP_MOVEA_L_T,(A4)+
-    ;MOVE.L P_OP_MOVEA_L_A_L,(A4)+
-    
-***************************** Input Tests ********************************************
-    ; indicates a test has been finished
-    * indicates a test hasn't been finished
-    
-    ****SIZE PARSING TESTS********************************************************** 
-    *SIZE CHECKING OP CODES EXCEPTIONS:
-    *$0   BLCR (B,L)
-    *$2-3 MOVEA (W,L), 
-    *$4   RTS (NONE), JSR(NONE), MOVEM (W,L), LEA (L only),
-    *$8   DIVS (W only)
-    *$C   MULS (W only)
-    ;MOVE.W #%00000000010000101,CUR_OP_CODE     ;ORI.L D5                SHOULD BE 2
-    ;MOVE.W #%00000000000000101,CUR_OP_CODE     ;ORI.B D5                SHOULD BE 0
-    ;MOVE.W #%00000000001000101,CUR_OP_CODE     ;ORI.W D5                SHOULD BE 1
-    ;JSR FIND_2_BIT_SIZE_7_TO_6                 ;Testing Routine
-    ;MOVE.W #%00000000001000101,CUR_OP_CODE     ;Testing bit 6           SHOULD BE 1
-    ;MOVE.W #%00000000000000101,CUR_OP_CODE     ;Testing bit 6           SHOULD BE 0
-    ;JSR   FIND_1_BIT_SIZE_6
-    ;MOVE.W #$F1FF,CUR_OP_CODE                  ;Testing bit 8           SHOULD BE 1
-    ;MOVE.W #$FEFF,CUR_OP_CODE                  ;Testing bit 8           SHOULD BE 0
-    ;JSR    FIND_1_BIT_SIZE_8
-    ****END OF SIZE PARSING TESTS***************************************************
-    
-    ***GROUP 0 tests**** SUPPORTED: ORI, BCLR (static, dynamic), CMPI
-    ;MOVE.W #%0000000000111100,CUR_OP_CODE      ;ORI TO CCR              SHOULD FAIL
-    ;MOVE.W #%0000000001111100,CUR_OP_CODE      ;ORI TO SR               SHOULD FAIL
-    ;MOVE.W #%0000000010000101,CUR_OP_CODE      ;ORI.L D5                SHOULD PASS
-    ;MOVE.W #%0000001001111100,CUR_OP_CODE      ;ANDI TO CCR             SHOULD FAIL
-    ;MOVE.W #%0000001001111100,CUR_OP_CODE      ;ANDI TO SR              SHOULD FAIL
-    ;MOVE.W #%0000001010000101,CUR_OP_CODE      ;ANDI.W D5               SHOULD FAIL
-    ;MOVE.W #%0000010010000101,CUR_OP_CODE      ;SUBI.W D5               SHOULD FAIL
-    ;MOVE.W #%0000011010000101,CUR_OP_CODE      ;ADDI.W D5               SHOULD FAIL
-    ;MOVE.W #%0000101000111100,CUR_OP_CODE      ;EORI TO CCR             SHOULD FAIL
-    ;MOVE.W #%0000101001111100,CUR_OP_CODE      ;EORI TO SR              SHOULD FAIL
-    ;MOVE.W #%0000101010000101,CUR_OP_CODE      ;EORI.W D5               SHOULD FAIL
-    ;MOVE.W #%0000110010000101,CUR_OP_CODE      ;CMPI.L D5               SHOULD PASS
-    ;MOVE.W #%0000100000000101,CUR_OP_CODE      ;STATIC BTST. B D5       SHOULD FAIL
-    ;MOVE.W #%0000100001000101,CUR_OP_CODE      ;STATIC BCHG .B D5       SHOULD FAIL
-    ;MOVE.W #%0000100010000101,CUR_OP_CODE      ;STATIC BCLR D5          SHOULD PASS
-    ;MOVE.W #%0000100011000101,CUR_OP_CODE      ;STATIC BSET.B D5        SHOULD FAIL
-    ;MOVE.W #%0000111100000101,CUR_OP_CODE      ;DYNAMIC BTST.B D7,D5    SHOULD FAIL
-    ;MOVE.W #%0000111101000101,CUR_OP_CODE      ;DYNAMIC BCHG.B,D7,D5    SHOULD FAIL
-    ;MOVE.W #%0000101110000111,CUR_OP_CODE      ;DYNAMIC BCLR.L D7,D5    SHOULD PASS
-    ;MOVE.W #%0000111111000101,CUR_OP_CODE      ;DYNAMIC BSET.B D7,D5    SHOULD FAIL
-    ;MOVE.W #%0000111111001101,CUR_OP_CODE      ;MOVEP.L MEM TO REG, A5  SHOULD FAIL, MADE A SPECIAL CASE FOR DYNAMIC BSET BIT SHIFTING
-        
-    ***GROUP 1 tests**** SUPPORTED: MOVE.B
-    ;MOVE.W #%0001101000000111,CUR_OP_CODE       ;MOVE.B D5,D7           SHOULD PASS
-    ***GROUP 2 tests**** SUPPORTED: MOVEA.L, MOVE.L
-    ;MOVE.W #%0010101000000111,CUR_OP_CODE       ;MOVE.L D5,D7           SHOULD PASS
-    ;MOVE.W #%0010101001000111,CUR_OP_CODE       ;MOVEA.L D5,D7          SHOULD PASS
-       
-    ***GROUP 3 tests**** SUPPORTED: MOVEA.W, MOVE.W
-    ;MOVE.W #%0011101000000111,CUR_OP_CODE       ;MOVE.W D5,D7           SHOULD PASS
-    ;MOVE.W #%0011101001000111,CUR_OP_CODE       ;MOVEA.W D5,D7          SHOULD PASS
-    
-    ****GROUP 4 tests**** SUPPORTED: LEA, JSR, RTS, NEG, MOVEM  
-    ;MOVE.W #%0100000011000101,CUR_OP_CODE       ;MOVE_FROM_SR           SHOULD FAIL
-    ;MOVE.W #%0100010011000101,CUR_OP_CODE       ;MOVE_TO_CCR            SHOULD FAIL
-    ;MOVE.W #%0100011011000101,CUR_OP_CODE       ;MOVE_TO_SR             SHOULD FAIL
-    ;MOVE.W #%0100000010000101,CUR_OP_CODE       ;NEGX                   SHOULD FAIL
-    ;MOVE.W #%0100001010000101,CUR_OP_CODE       ;CLR                    SHOULD FAIL
-    ;MOVE.W #%0100010001000101,CUR_OP_CODE       ;NEG                    SHOULD PASS
-    ;MOVE.W #%0100011010000101,CUR_OP_CODE       ;NOT                    SHOULD FAIL
-    ;MOVE.W #%0100100011000101,CUR_OP_CODE       ;EXT                    SHOULD FAIL
-    ;MOVE.W #%0100100000000101,CUR_OP_CODE       ;NBCD                   SHOULD FAIL
-    ;MOVE.W #%0100100001000101,CUR_OP_CODE       ;SWAP                   SHOULD FAIL
-    ;MOVE.W #%0100100001000101,CUR_OP_CODE       ;PEA                    SHOULD FAIL
-    ;MOVE.W #%0100101011111100,CUR_OP_CODE       ;ILLEGAL                SHOULD FAIL
-    ;MOVE.W #%0100101011000101,CUR_OP_CODE       ;TAS                    SHOULD FAIL
-    ;MOVE.W #%0100101010000101,CUR_OP_CODE       ;TST                    SHOULD FAIL
-    ;MOVE.W #%0100111001000111,CUR_OP_CODE       ;TRAP                   SHOULD FAIL
-    ;MOVE.W #%0100111001010101,CUR_OP_CODE       ;LINK                   SHOULD FAIL
-    ;MOVE.W #%0100111001011101,CUR_OP_CODE       ;UNLK                   SHOULD FAIL
-    ;MOVE.W #%0100111001101101,CUR_OP_CODE       ;MOVE_USP               SHOULD FAIL
-    ;MOVE.W #%0100111001110000,CUR_OP_CODE       ;RESET                  SHOULD FAIL
-    ;MOVE.W #%0100111001110001,CUR_OP_CODE       ;NOP                    SHOULD FAIL
-    ;MOVE.W #%0100111001110010,CUR_OP_CODE       ;STOP                   SHOULD FAIL
-    ;MOVE.W #%0100111001110011,CUR_OP_CODE       ;RTE                    SHOULD FAIL
-    ;MOVE.W #%0100111001110101,CUR_OP_CODE       ;RTS                    SHOULD PASS
-    ;MOVE.W #%0100111001110110,CUR_OP_CODE       ;TRAPV                  SHOULD FAIL
-    ;MOVE.W #%0100111001110111,CUR_OP_CODE       ;RTR                    SHOULD FAIL
-    ;MOVE.W #%0100111010000101,CUR_OP_CODE       ;JSR                    SHOULD PASS
-    ;MOVE.W #%0100111011000101,CUR_OP_CODE       ;JMP                    SHOULD FAIL
-    ;MOVE.W #$488E,CUR_OP_CODE                   ;MOVEM.W Reg to Mem,A6  SHOULD PASS
-    ;MOVE.W #$4C8E,CUR_OP_CODE                   ;MOVEM.W Mem to Reg,A6  SHOULD PASS
-    ;MOVE.W #$43CC,CUR_OP_CODE                   ;LEA A1,A6              SHOULD PASS
-    ;MOVE.W #%0100000110000101,CUR_OP_CODE       ;CHK                    SHOULD FAIL
-    ;MOVE.W #$4E75,CUR_OP_CODE                   ;RTS                    SHOULD PASS
-    ;MOVE.W #$4E71,CUR_OP_CODE                   ;NOP                    SHOULD FAIL
-    ;MOVE.W #$4415,CUR_OP_CODE                   ;NEG.B D5               SHOULD PASS
-    ;MOVE.W #$4485,CUR_OP_CODE                   ;NEG.L D5               SHOULD PASS
-   
-    *****GROUP 5 TESTS**** SUPPORTED: SUBQ
-    ;MOVE.W #%0101110010000101,CUR_OP_CODE        ;ADDQ                  SHOULD FAIL
-    ;MOVE.W #%0101110110000101,CUR_OP_CODE        ;SUBQ                  SHOULD PASS
-    ;MOVE.W #%0101101011000101,CUR_OP_CODE        ;Scc (SPL)             SHOULD FAIL
-    ;MOVE.W #%0101101011001101,CUR_OP_CODE        ;DBcc (DCPL)          SHOULD FAIL
-       
-    *****GROUP 6 TESTS********* SUPPORTED: BCS,BGE,BLT,BVC               ;Check if Branch size here should be printed
-    ; DISPLACEMENT, $00 is 16 bits, $FF is 32 bits
-    ; DISPLACEMENT = Last 8 bits
-    ;MOVE.W #%0110000001010101,CUR_OP_CODE   ;BRA                        SHOULD PASS
-    ;MOVE.W #%0110000110101010,CUR_OP_CODE   ;BSR                        SHOULD FAIL
-    ;MOVE.W #%0110010100000001,CUR_OP_CODE   ;BCS                        SHOULD PASS
-    ;MOVE.W #%0110110001010100,CUR_OP_CODE   ;BGE                        SHOULD PASS
-    ;MOVE.W #%0110110110101010,CUR_OP_CODE   ;BLT                        SHOULD PASS
-    ;MOVE.W #%0110100001010100,CUR_OP_CODE   ;BVC                        SHOULD PASS
-    
-    *****GROUP 7 TESTS********** NONE SUPPORTED
-    ;MOVE.W #%0111101011110000,CUR_OP_CODE   ;MOVEQ                      SHOULD FAIL
-    
-    *****GROUP 8 TESTS********** SUPPORTED: DIVS, OR
-    ;MOVE.W #%1000101011000101,CUR_OP_CODE    ;DIVU                      SHOULD FAIL
-    ;MOVE.W #%1000101111000110,CUR_OP_CODE    ;DIVS                      SHOULD PASS
-    ;MOVE.W #%1000101100001111,CUR_OP_CODE    ;SBCD                      SHOULD FAIL
-    ;MOVE.W #%1000110101000101,CUR_OP_CODE    ;OR                        SHOULD PASS
-            
-    *****GROUP 9 TESTS********** SUPPORTED: SUB
-    ;MOVE.W #%1001101100000101,CUR_OP_CODE    ;SUB                       SHOULD PASS
-    ;MOVE.W #%1001000110001101,CUR_OP_CODE    ;SUBX                      SHOULD FAIL
-    ;MOVE.W #%1001101011001101,CUR_OP_CODE    ;SUBA                      SHOULD FAIL
-    
-    *****GROUP A TESTS********** NONE SUPPORTED
-    ;MOVE.W #%1010110101010011,CUR_OP_CODE    ;INVALID_OP                SHOULD FAIL
-    
-    *****GROUP B TESTS********** SUPPORTED: EOR, CMP
-    ;MOVE.W #%1011101101000110,CUR_OP_CODE    ;EOR                       SHOULD PASS
-    ;MOVE.W #%1011110101001101,CUR_OP_CODE    ;CMPM                      SHOULD FAIL
-    ;MOVE.W #%1011010001000101,CUR_OP_CODE    ;CMP                       SHOULD PASS
-    *MOVE.W #%1011110011000101,CUR_OP_CODE    ;CMPA                      SHOULD FAIL
-    
-    *****GROUP C TESTS********** SUPPORTED: MULS
-    ;MOVE.W #%1100101011000110,CUR_OP_CODE    ;MULU                      SHOULD FAIL
-    ;MOVE.W #%1100101111000101,CUR_OP_CODE    ;MULS                      SHOULD PASS
-    ;MOVE.W #%1100101100000101,CUR_OP_CODE    ;ABCD                      SHOULD FAIL
-    ;MOVE.W #%1100101110001110,CUR_OP_CODE    ;EXG                       SHOULD FAIL
-    ;MOVE.W #%1100101001000101,CUR_OP_CODE    ;AND                       SHOULD FAIL   
-     
-    *****GROUP D TESTS********** SUPPORTED: ADD, ADDA
-    ;MOVE.W #%1101101101000101,CUR_OP_CODE    ;ADDX                      SHOULD FAIL
-    ;MOVE.W #%1101101011001101,CUR_OP_CODE    ;ADDA                      SHOULD FAIL
-    ;MOVE.W #%1101101001001101,CUR_OP_CODE    ;ADD                       SHOULD PASS
-    
-    *****GROUP E TESTS********** SUPPORTED: LSX, ASX, ROX
-    ;MOVE.W #%1110000011000101,CUR_OP_CODE    ;ASR NO_ROT                SHOULD PASS
-    ;MOVE.W #%1110000111000101,CUR_OP_CODE    ;ASL NO_ROT                SHOULD PASS
-    ;MOVE.W #%1110001011000101,CUR_OP_CODE    ;LSR NO_ROT                SHOULD PASS
-    ;MOVE.W #%1110001111000101,CUR_OP_CODE    ;LSL NO_ROT                SHOULD PASS
-    ;MOVE.W #%1110010011000101,CUR_OP_CODE    ;ROXR NO_ROT               SHOULD FAIL
-    ;MOVE.W #%1110010111000101,CUR_OP_CODE    ;ROXL NO_ROT               SHOULD FAIL
-    ;MOVE.W #%1110011011000101,CUR_OP_CODE    ;ROR NO_ROT                SHOULD PASS
-    ;MOVE.W #%1110011111000101,CUR_OP_CODE    ;ROL NO_ROT                SHOULD PASS    
-    
-    ;MOVE.W #%1110000001000101,CUR_OP_CODE    ;ASR                       SHOULD PASS
-    ;MOVE.W #%1110000101000101,CUR_OP_CODE    ;ASL                       SHOULD PASS
-    ;MOVE.W #%1110001001001101,CUR_OP_CODE    ;LSR                       SHOULD PASS
-    ;MOVE.W #%1110001101001101,CUR_OP_CODE    ;LSL                       SHOULD PASS
-    ;MOVE.W #%1110010001010101,CUR_OP_CODE    ;ROXR                      SHOULD FAIL
-    ;MOVE.W #%1110010101010101,CUR_OP_CODE    ;ROXL                      SHOULD FAIL
-    ;MOVE.W #%1110011001011101,CUR_OP_CODE    ;ROR                       SHOULD PASS
-    ;MOVE.W #%1110011101011101,CUR_OP_CODE    ;ROL                       SHOULD PASS    
-        
-    *****GROUP F TESTS********** NONE SUPPORTED
-    ;MOVE.W #%1111010110101011,CUR_OP_CODE    ;INVALID_OP                SHOULD FAIL
-    
-    
 ************************************************************************************
 * PRINTING BUFFER FUNCTION HAS BEEN FINISHED
 * STATUS: 
 * IDENTIFICATION FOR ALL OP CODES: 		DONE
 * VALIDATION TESTING FOR ALL OP CODES: 	DONE
 * PRINTING ALL OP CODES TO BUFFER: 		DONE
-* PRINTING SIZE BITS OF ALL OP CODES: 	NOT DONE
+* PRINTING SIZE BITS OF ALL OP CODES:   DONE
 *-----------------------------------------------------------
 *First Nibble Values (15-12)
 *Value                  Operations
@@ -475,19 +298,6 @@ FIND_1_BIT_SIZE_8:         ;Move the 1 bit size field relevant register
     RTS                         ;Return to stack
 **********************************************************************************
 
-
-
-* FIND_3_BIT_REG_TO_EA
-**********************************************************************************
-* Description: OP codes with a dynamic 3 bit register in bits 11-9 will be parsed
-* and have those 3 bits isolated and moved to the appropriate registers.
-*
-* Registers used: A6,D0,D1,D5
-*
-* Precondition: OP code has been identified with a dynamic 3 bit register in bits
-* 11-9.
-*
-* Postcondition: 3 bit dynamic register has been isolated and stored into D4.
 **********************************************************************************
 FIND_3_BIT_REG_TO_EA:       ;Move the 3 bit dynamic register bits to proper register
    ; MOVEM.L  D0-D5/A6,-(SP) ;Save all changed registers
@@ -526,15 +336,7 @@ MOVE_AND_MOVEA_PARSE_EA:       ;Move the 3 bit dynamic register bits to proper r
     LSL.W   D1,D0            ;Shift D0 left 13 bits to reposition current 3 bits
     LSR.W   D1,D0            ;Shift D0 right 13 bits to reposition current 3 bits
     MOVE.W  D0,D4            ;Move the 'lower' 3 bits into D7
-    **************MOVING SOURCE*********** TO BE DONE LATER
-    ; MOVE.W #%0011 011 001 001 101,(A6)              ;MOVEA.W A5,A3
-    ; MOVE.W #%0010 011 001 001 101,D0                ;MOVEA.L A5,A3
-     ;Expected values:
-    ;D7, DST REG:   011
-    ;D6, DST MODE:  001
-    ;D5, SRC MODE:  001
-    ;D4, SRC REG:   101
-    ;00011001
+****MOVING_SOURCE***********
     MOVE.W CUR_OP_CODE,D0     ;Move current OP code into D0     
     MOVE.W  #4,D1             ;Prepare 4 bit shift to D1
     LSL.W   D1,D0             ;Truncate to find bits 11-6
@@ -552,22 +354,6 @@ MOVE_AND_MOVEA_PARSE_EA:       ;Move the 3 bit dynamic register bits to proper r
    ; MOVEM.L (SP)+,D0-D7/A6   ;Restore registers
     RTS                     ;Return to stack
 **********************************************************************************
-
-*FIND_TRAILING_BITS_TO_EA
-**********************************************************************************
-FIND_TRAILING_BITS_TO_EA:       ;Move the 3 bit dynamic register bits to proper register
-   ; MOVEM.L  D0-D5/A6,-(SP) ;Save all changed registers
-    MOVE.W   CUR_OP_CODE,D0        ;Move current OP code into D0
-    MOVE.W   #7,D1          ;Prepare 4 bit shift to D1
-    LSL.W    D1,D0          ;Truncate to find the 2 size bits
-    LSR.W    D1,D0          ;Reposition the bits
-    MOVE.W   #6,D1          ;Prepare 9 bit shift to D1
-    LSR.W    D1,D0          ;Truncate to shift 3 bits to a byte
-    MOVE.W   D0,(A3)          ;Move 3 register bits into D4
-   ; MOVEM.L (SP)+,D0-D5/A6  ;Restore registers
-    RTS                    ;Return to stack
-**********************************************************************************
-
 *PARSE_EA_CONSTANT_BITS
 **********************************************************************************
 * Definition: Uses CUR_OP_CODE to shift the proper bits into the global constants
@@ -784,8 +570,8 @@ BIT_CHECK_MOVEP:								;This is a special case check for MOVEP
     LSR.W   #3,D0               	;Shift out 3 bits right, D0 contains bits 5-3
     CMP.W   #$1,D0              	;Compare bits to D0
     BEQ     CHECK_OP_MOVEP      	;If bits are $1 then it's addressing, goto MOVEP
-    BNE     GROUP0_INVALID      	;If not then it's DYNAMIC_BSET which is invalid                                                    
-    
+    BNE     GROUP0_INVALID      	;If not then it's DYNAMIC_BSET which is invalid
+	
 CHECK_OP_MOVEP:
     MOVE.W CUR_OP_CODE,D0       	;Move current instruction set into D0
     ANDI.W #$F138,D0            	;Mask relevant bits to D0
@@ -2166,6 +1952,7 @@ _AddStrToBuffer_End
     RTS                  
     END START                                   ; THIS SHOULD BE REMOVED FOR FULL INTEGRATION
    
+
 
 *~Font name~Courier New~
 *~Font size~10~
