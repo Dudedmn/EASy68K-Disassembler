@@ -53,10 +53,10 @@ IS_VALID        DS.B    1 * EA-bit validity flag
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 * EXECUTION **************************************
 START: * TEST FOR MOVE.L
-    MOVE.W  #$60FF, CUR_OP_CODE
+    MOVE.W  #$6000, CUR_OP_CODE
     MOVE.B  #%0110, MNEMONIC
-    MOVE.B  #%000, FIRST_3
-    MOVE.B  #%000, SECOND_3
+    MOVE.B  #%110, FIRST_3
+    MOVE.B  #%100, SECOND_3
     MOVE.B  #%000, THIRD_3
     MOVE.B  #%000, FOURTH_3
     
@@ -121,11 +121,11 @@ CHECK_1XXX:
     BEQ     LOAD_1000
     CMPI.B  #$9, MNEMONIC
     BEQ     LOAD_1001
-    CMPI.B  #$11, MNEMONIC
+    CMPI.B  #$B, MNEMONIC
     BEQ     LOAD_1011
-    CMPI.B  #$12, MNEMONIC
+    CMPI.B  #$C, MNEMONIC
     BEQ     LOAD_1100
-    CMPI.B  #$13, MNEMONIC
+    CMPI.B  #$D, MNEMONIC
     BEQ     LOAD_1101
     
     RTS
@@ -184,7 +184,28 @@ MYBE_BRA    CMPI.B  #%100, SECOND_3
             BLT     BRA
             BGE     NOT_BRA
             
-BRA         MOVE.W  A5, D5 * D5 has $1002 (Starting + MNEMONICS)
+NOT_BRA     MOVE.B  FIRST_3, D5
+            ASL.B   #1, D5
+            MOVE.B  SECOND_3, D6
+            ASR.B   #2, D6
+            ADD.B   D6, D5
+            
+            CMPI.B  #%0101, D5
+            BEQ     BRA * CS
+            CMPI.B  #%1000, D5
+            BEQ     BRA * VC
+            CMPI.B  #%1100, D5
+            BEQ     BRA * GE
+            CMPI.B  #%1101, D5
+            BEQ     BRA * LT
+            
+            JMP     INVALID
+            
+            
+BRA         CLR.L   D5
+            CLR.L   D6
+
+            MOVE.W  A5, D5 * D5 has $1002 (Starting + MNEMONICS)
             MOVE.W  CUR_OP_CODE, D6
             ANDI.W  #$00FF, D6 * D6 now has $E
             CMPI.B  #$00, D6
@@ -256,10 +277,6 @@ BRA_WRD_BK2 JSR     LOAD_NEW_LINE
 
 ***111111111BRA_WORD111111111***
 ***^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^***
-
-
-
-NOT_BRA     JMP     INVALID
 
 
 * <EA>
@@ -826,9 +843,6 @@ LOAD_GE_111:
             CMP.W   TRAILING_SIZE, D5
             BLT     INVALID
 
-            MOVE.W  (A5)+, D4
-            CLR.L   D4
-            
             CMPI.W  #$1, TRAILING_SIZE
             BEQ     CHUMP_BYTE
             CMPI.W  #$2, TRAILING_SIZE
@@ -1280,13 +1294,6 @@ INVALID:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
     END    START
-
-
-
-
-
-
-
 
 *~Font name~Courier New~
 *~Font size~10~
