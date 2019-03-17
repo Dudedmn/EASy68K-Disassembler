@@ -607,7 +607,7 @@ MAIN_CONSOLE
 CR                  EQU $0D
 LF                  EQU $0A
 NEWLINE             DC.W CR,LF,0  
-outFilename         DC.B 'Output.txt',0
+outFilename         DC.B 'DisassemblerOutput.txt',0
 byteRead            DS.B 1
 ascii_val           DC.B $31,$41,$30,$30,$31,$41,$30,$30 * Test value $1A001A00
 
@@ -625,11 +625,12 @@ invalid_address_message DC.W 'Invalid Hex Address' ,CR,LF,0
 
 
     INCLUDE "OP_Code_Routines.x68"
-    INCLUDE "EA_ver2.x68"
+    INCLUDE "EA_Integrated.x68"
     INCLUDE "Test.x68"
     
     
    END    START        ; last line of source
+
 
 
 

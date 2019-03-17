@@ -1869,7 +1869,7 @@ P_OP_OR         DC.B    '   OR',0
 P_OP_SUB        DC.B    '   SUB',0
 P_OP_EOR        DC.B    '   EOR',0
 P_OP_CMP        DC.B    '   CMP',0
-P_OP_MULS       DC.B    '   MULS.W',0
+P_OP_MULS       DC.B    '   MULS.W ',0
 P_OP_ADDA       DC.B    '   ADDA',0
 P_OP_ADD        DC.B    '   ADD',0
 P_OP_LSR        DC.B    '   LSR',0
@@ -1880,6 +1880,7 @@ P_OP_ROR        DC.B    '   ROR',0
 P_OP_ROL        DC.B    '   ROL',0
 ***************** END OF DATA CONSTANT PRINTS ***********************************
  
+
 
 
 

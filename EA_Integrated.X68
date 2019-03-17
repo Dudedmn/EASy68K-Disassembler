@@ -1,4 +1,3 @@
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 * MESSAGE VARIABLES ******************************
 
@@ -16,41 +15,49 @@ MINUS_SIGN      DC.B    $2D
 
 COMMA           DC.B    $2C
 SPACE           DC.B    $20
-
-CR              EQU     $0D              ; ASCII code for carriage return
-LF              EQU     $0A              ; ASCII code for line feed
-
 **************************************************
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-* GLOBAL BUFFER **********************************
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;  
+* Essential VARIABLE. KEEP THIS
 TRAILING_SIZE   DS.W    1 * Size of any immediate or
                           * address values. Immediate or address
                           * value of a BYTE is still processed as
                           * WORD because the trailing bytes
                           * are represented as a word regardless.
                           * $1 = BYTE, $2 = WORD, $4 = LONG
-;START_ADDRESS   EQU     $4000 * Used to parse through the entire instruction
-;END_ADDRESS     EQU     $5000
 **************************************************
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
  
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;  
+* TESTING PORTION. ERASE THIS ********************
+
 * EXECUTION **************************************
 main_EA:
     JSR PARSE_EA_CONSTANT_BITS    
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+* RULES BEFORE EXECUTION
+*
+* G_BUFFER should be loaded in A4
+*
+* READING FROM START_ADDRESS should be loaded in A5
+*
+* ALL variables should have the same name with daniel's
+*
+* CUR_OP_CODE, MNEMONIC, FIRST_3, etc should have values already.
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;      
+* ESSENTIAL EXECUTION PORTION. DO NOT ERASE ******
+
     JSR     CHECK_XXXX
 EXT                        * Main EXT alias to finish routine
     JMP check_print 
 **************************************************
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 * CHECK_MNEMONIC FUNCTIONS ***************
-
 * <EA>
 **********************************************************************************
 * Description: Checks the mnemonic starting from XXXX
@@ -184,12 +191,11 @@ MYBE_ASd_1  CMPI.B  #%000, FIRST_3
             JMP     INVALID
 
 ASd_1       CMPI.B  #%111, THIRD_3
-            BNE     INVALID
-            
+            BNE     MOVEON  
             CMPI.B  #%100, FOURTH_3
             BEQ     INVALID
-            
-            MOVEA.W #ASd_1_BACK, A3
+
+MOVEON      MOVEA.W #ASd_1_BACK, A3           
             CMPI.B  #%000, FOURTH_3
             BEQ     SIZE_W
             CMPI.B  #%001, FOURTH_3
@@ -237,7 +243,7 @@ LOAD_FIRST3 MOVE.B  FIRST_3, D4
 
 ASd_2_IMD_B JSR     LOAD_COMMA_SPACE
 
-            MOVE.B  THIRD_3, D3
+            MOVE.B  #%000, D3
             MOVE.B  FOURTH_3, D2
             
             JSR     LOAD_EA
@@ -392,7 +398,7 @@ BRA_WRD_BK2 JSR     LOAD_NEW_LINE
 **********************************************************************************
 * Description: Once the mnemonic is 1001, it is either ADD or ADDA.
 *
-* Registers used: If ADDA, D3 for SRC/DST mod, D2 for SRC/DST reg, A3 to get back from the subbranch.
+* Registers used: If ADDA, D3 for SRC/DST mod, D2 for SRC/DST reg, A3 to get back from the subbranch, D1 for size calculation.
 *                 If ADD, basically recycling the algorithm for DIVS/OR
 *
 * Precondition: FIRST_3, SECOND_3, THIRD_3, FOURTH_3
@@ -408,9 +414,13 @@ LOAD_1101:
             JMP     LOAD_1000
             
 ADDA        MOVEA.W #ADDA_BACK, A3
-            CMPI.B  #%000, FOURTH_3
+            CLR.L   D1
+            MOVE.B  SECOND_3, D1
+            ANDI.B  #%100, D1
+            
+            CMPI.B  #%000, D1
             BEQ     SIZE_W
-            CMPI.B  #%001, FOURTH_3
+            CMPI.B  #%100, D1
             BEQ     SIZE_L
             
 ADDA_BACK   MOVE.B  THIRD_3, D3
@@ -493,10 +503,16 @@ LOAD_1000:
             BLT     DIR_0 * direction bit 0
             BGE     DIR_1 * direction bit 1
             
-DIR_0       MOVEA.W #OR_BACK, A3
-            CMPI.B  #%000, FOURTH_3
+DIR_0       CLR.L   D1
+            MOVE.B  SECOND_3, D1
+            ANDI.B  #%011, D1
+    
+            MOVEA.W #OR_BACK, A3
+            CMPI.B  #%00, D1
+            BEQ     SIZE_B
+            CMPI.B  #%01, D1
             BEQ     SIZE_W
-            CMPI.B  #%001, FOURTH_3
+            CMPI.B  #%10, D1
             BEQ     SIZE_L
             
 OR_BACK     MOVE.B  THIRD_3, D3
@@ -518,10 +534,16 @@ DIR_1       MOVE.B  #%000, D3
             JSR     LOAD_EA
             JSR     LOAD_COMMA_SPACE
             
+            CLR.L   D1
+            MOVE.B  SECOND_3, D1
+            ANDI.B  #%011, D1
+    
             MOVEA.W #OR_BACK2, A3
-            CMPI.B  #%000, FOURTH_3
+            CMPI.B  #%00, D1
+            BEQ     SIZE_B
+            CMPI.B  #%01, D1
             BEQ     SIZE_W
-            CMPI.B  #%001, FOURTH_3
+            CMPI.B  #%10, D1
             BEQ     SIZE_L
             
 OR_BACK2    MOVE.B  THIRD_3, D3
@@ -533,21 +555,23 @@ OR_BACK2    MOVE.B  THIRD_3, D3
 ***^^^^^^^^^^^^^^^^^^^***
             
 ***vvvvvvvvvvvvvvvvvvv***
-DIVS        MOVE.B  #%000, D3
-            MOVE.B  FIRST_3, D2
-
-            JSR     LOAD_EA
-            JSR     LOAD_COMMA_SPACE
-            
-            MOVEA.W #DIVS_BACK, A3
+DIVS        MOVEA.W #DIVS_BACK, A3
             CMPI.B  #%000, FOURTH_3
             BEQ     SIZE_W
             CMPI.B  #%001, FOURTH_3
-            BEQ     SIZE_L
+            BEQ     INVALID
+            CMPI.B  #%100, FOURTH_3
+            BEQ     SIZE_W
             
 DIVS_BACK   MOVE.B  THIRD_3, D3
             MOVE.B  FOURTH_3, D2
-            
+
+            JSR     LOAD_EA
+            JSR     LOAD_COMMA_SPACE
+
+            MOVE.B  #%000, D3
+            MOVE.B  FIRST_3, D2
+
             JSR     LOAD_EA
             JSR     LOAD_NEW_LINE
             RTS
@@ -637,6 +661,8 @@ MYBE_RTS2   CMPI.B  #%110, THIRD_3
             BNE     NOT_RTS
 MYBE_RTS3   CMPI.B  #%101, FOURTH_3
             BEQ     RTS
+            CMPI.B  #%001, FOURTH_3 
+            BEQ     RTS * It's actually NOP but it's the same shit in EA perspective
             
 NOT_RTS     CMPI.B  #%111, FIRST_3
             BEQ     MYBE_JSR
@@ -705,6 +731,8 @@ LEA:
             BEQ     SIZE_W
             CMPI.B  #%001, FOURTH_3
             BEQ     SIZE_L
+            CMPI.B  #%100, FOURTH_3
+            BEQ     INVALID 
             
 LEA_BACK    MOVE.B  THIRD_3, D3
             MOVE.B  FOURTH_3, D2
@@ -778,6 +806,8 @@ BACK        MOVE.B  #%111, D3
             BEQ     SIZE_W
             CMPI.B  #%001, FOURTH_3
             BEQ     SIZE_L
+            CMPI.B  #%100, FOURTH_3 
+            BEQ     INVALID 
 
 BACK2       MOVE.B  THIRD_3, D3
             MOVE.B  FOURTH_3, D2
@@ -811,6 +841,8 @@ BACK4       JSR     LOAD_COMMA_SPACE
             BEQ     SIZE_W
             CMPI.B  #%001, FOURTH_3
             BEQ     SIZE_L
+            CMPI.B  #%100, FOURTH_3 
+            BEQ     INVALID 
 
 BACK3       MOVE.B  THIRD_3, D3
             MOVE.B  FOURTH_3, D2
@@ -833,6 +865,8 @@ DYNMC_BCLR  MOVE.B  #%000, D3
             BEQ     SIZE_W
             CMPI.B  #%001, FOURTH_3
             BEQ     SIZE_L
+            CMPI.B  #%100, FOURTH_3 
+            BEQ     INVALID 
             
 BACK5       MOVE.B  THIRD_3, D3
             MOVE.B  FOURTH_3, D2
@@ -1005,7 +1039,7 @@ SIZE_L  MOVE.W  #$4, TRAILING_SIZE
 
 * <EA>
 **********************************************************************************
-* Description: Loads ASCII for e.g. D3 in EA_BUFFER
+* Description: Loads ASCII for e.g. D3 in G_BUFFER
 *
 * Registers used: D0 for actually loading
 *
@@ -1023,7 +1057,7 @@ LOAD_DATA_REGISTER:
 
 * <EA>
 **********************************************************************************
-* Description: Loads ASCII for e.g. A3 in EA_BUFFER
+* Description: Loads ASCII for e.g. A3 in G_BUFFER
 *
 * Registers used: D0 for actually loading
 *
@@ -1041,7 +1075,7 @@ LOAD_ADDR_REGISTER:
 
 * <EA>
 **********************************************************************************
-* Description: Loads ASCII for e.g. (A3) in EA_BUFFER
+* Description: Loads ASCII for e.g. (A3) in G_BUFFER
 *
 * Registers used: X
 *
@@ -1057,7 +1091,7 @@ LOAD_ADDRESS:
 
 * <EA>
 **********************************************************************************
-* Description: Loads ASCII for e.g. (A3)+ in EA_BUFFER
+* Description: Loads ASCII for e.g. (A3)+ in G_BUFFER
 *
 * Registers used: X
 *
@@ -1072,7 +1106,7 @@ LOAD_ADDRESS_W_POST_INC:
 
 * <EA>
 **********************************************************************************
-* Description: Loads ASCII for e.g. -(A3) in EA_BUFFER
+* Description: Loads ASCII for e.g. -(A3) in G_BUFFER
 *
 * Registers used: X
 *
@@ -1087,7 +1121,7 @@ LOAD_ADDRESS_W_PRE_DEC:
 
 * <EA>
 **********************************************************************************
-* Description: Loads ASCII for e.g. $1234 in EA_BUFFER
+* Description: Loads ASCII for e.g. $1234 in G_BUFFER
 *
 * Registers used: D0 for actually loading
 *
@@ -1105,7 +1139,7 @@ LOAD_ABS_SHORT:
 
 * <EA>
 **********************************************************************************
-* Description: Loads ASCII for e.g. $12345678 in EA_BUFFER
+* Description: Loads ASCII for e.g. $12345678 in G_BUFFER
 *
 * Registers used: D0 for actually loading
 *
@@ -1123,7 +1157,7 @@ LOAD_ABS_LONG:
 
 * <EA>
 **********************************************************************************
-* Description: Loads ASCII for e.g. #$1234 in EA_BUFFER
+* Description: Loads ASCII for e.g. #$1234 in G_BUFFER
 *
 * Registers used: X
 *
@@ -1143,7 +1177,7 @@ LOAD_IMMDTE:
 
 * <EA>
 **********************************************************************************
-* Description: Shifts the hex to the left and loads from the left-most hex to EA_BUFFER in ASCII
+* Description: Shifts the hex to the left and loads from the left-most hex to G_BUFFER in ASCII
 *
 * Registers used: D5 for the loop counter, D1 for loop assist
 *
@@ -1178,13 +1212,7 @@ ROTATE  ROL.L   #$04, D1
 *
 * Postcondition: X
 **********************************************************************************
-LOAD_NEW_LINE:
-    ;CLR.L   D0
-
-    ;MOVE.B  CR, D0
-    ;JSR     LOAD_THIS_SHIT
-    ;MOVE.B  LF, D0
-    ;JSR     LOAD_THIS_SHIT
+LOAD_NEW_LINE:          ;Depreciated method due to IO
     RTS
 
 * <EA>
@@ -1350,7 +1378,7 @@ LOAD_MINUS_SIGN:
 * LOAD_THIS FUNCTIONS (LOWEST LEVEL) *************
 * <EA>
 **********************************************************************************
-* Description: Loads the hex value from D0 to EA_BUFFER in ASCII
+* Description: Loads the hex value from D0 to G_BUFFER in ASCII
 *
 * Registers used: X
 *
@@ -1365,7 +1393,7 @@ LOAD_THIS_SHIT:
 * <EA>
 **********************************************************************************
 * Description: Adds $30 to a number in D0 to make it a hex. If the number is greater
-*              than 9 (A~F), then adds $37. Then moves the hex value from D0 to EA_BUFFER in ASCII
+*              than 9 (A~F), then adds $37. Then moves the hex value from D0 to G_BUFFER in ASCII
 *
 * Registers used: X
 *
@@ -1399,7 +1427,7 @@ END MOVE.B  D0, (A4)+
 **********************************************************************************
 INVALID:
             MOVE.B  #%0, IS_VALID
-            JMP     check_print
+            JMP     EXT
 **************************************************
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
