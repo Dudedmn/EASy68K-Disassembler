@@ -1,6 +1,7 @@
 # EASy68K-Disassembler
 EASy68K-Disassembler made for CSS 422
-
+This disassembles or reverse compiles a given set of code. So we take input commands as a test file (say MOVEA.W A5,A6) and disassemble it to machine code then print it out.
+# Team REEEE
 ## Members
 + Daniel Yan
 + Fahad Alshehri
@@ -23,28 +24,32 @@ EASy68K-Disassembler made for CSS 422
 # Week 4
 
 ALL
-- [ ] Flowcharting structuring
-- [ ] Things to avoid for Disassembler Project
-- [ ] Pass whole Disassembler as a test case
+- [ ] Flowcharting structuring, WIP
+- [X] Things to avoid for Disassembler Project
+- [ ] Pass whole Disassembler as a test case, WIP
 
 IO
 - [ ] Documentation for Disassembler
-- [ ] Passing instruction to OP
-- [ ] Printing overall instruction
-- [ ] Test demo program for all supported commands
-- [ ] Validation testing for I/O
-- [ ] Adhere to commenting format
+- [x] Passing instruction to OP
+- [x] Printing overall instruction
+- [ ] Test demo program for all supported commands (has most but not all)
+- [X] Validation testing for I/O
+- [X] Adhere to commenting format
+- [ ] Flowchart for major routines
 
 OP Code
 - [X] Finish identification for all OP codes (supported and unsupported)
 - [X] Load messages into buffer successfully
-- [ ] Finish up comments for all lines and methods, WIP up to $4
+- [ ] Finish up comments for all lines and methods, WIP up to $E
 - [X] Validation testing for ALL OP codes
+- [X] Finished current integration tests
+- [X] Flowchart for major routines
 
 EA
 - [x] Finish Trailing Bits
-- [ ] Use OP code parsings successfully
+- [X] Use OP code parsings successfully
 - [x] Adhere to commenting format
+- [ ] Flowchart for major routines
 
 Commenting Format
 ```
@@ -68,8 +73,6 @@ CUR_OP_CODE - refers to current 16 bit instruction set
 OP_SIZE - refers to current size of the CUR_OP_CODE (used for immediates as well)
 G_BUFFER - good buffer to print to
 B_BUFFER - bad buffer to print to
-OP_BUFFER - Specific buffer for OP code
-EA_BUFFER - Specific buffer for EA code
 IS_VALID - Flag set to determine if it's a valid code. 0 is invalid, 1 is valid code.
 
 FOR EA:
@@ -87,9 +90,9 @@ A4: G_BUFFER
 Display Tasks
 ```
 All loads are done to G_BUFFER
-<ADDRESS> <OPERAND> <EA> $<HEX VALUE>
+<ADDRESS> <OPERAND> <EA> 
 Example:
-1000 MOVEA.W A5,A1 $3CBC
+1000 MOVEA.W A5,A1
 Load Order
 <ADDRESS> - OP person
 <OPERAND> - OP person
