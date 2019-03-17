@@ -32,10 +32,11 @@ IO
 - [ ] Documentation for Disassembler
 - [x] Passing instruction to OP
 - [x] Printing overall instruction
-- [ ] Test demo program for all supported commands (has most but not all)
+- [X] Test demo program for all supported commands
 - [X] Validation testing for I/O
 - [X] Adhere to commenting format
-- [ ] Flowchart for major routines
+- [X] Flowchart for major routines
+- [ ] Ported all Gdoc documentation to Word
 
 OP Code
 - [X] Finish identification for all OP codes (supported and unsupported)
@@ -44,12 +45,14 @@ OP Code
 - [X] Validation testing for ALL OP codes
 - [X] Finished current integration tests
 - [X] Flowchart for major routines
+- [X] Finished documentation for role
 
 EA
 - [x] Finish Trailing Bits
 - [X] Use OP code parsings successfully
 - [x] Adhere to commenting format
-- [ ] Flowchart for major routines
+- [X] Flowchart for major routines
+- [ ] Finished MOVEM
 
 Commenting Format
 ```
