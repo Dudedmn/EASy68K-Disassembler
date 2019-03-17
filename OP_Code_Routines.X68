@@ -176,44 +176,16 @@ GROUP_F:                ;$F| Display: DATA, $WXYZ (Unsupported)
 
 OP_JSR_DONE:
          MOVEM.L (SP)+,D0-D1       ;Recover register D0
+         JSR    check_NOP
+check_NOP                           ;THIS IS A TEMPORARY ROUTINE MADE FOR NOP until EA UPDATES NOP validity
+         CMP.W #$4E71,CUR_OP_CODE
+         BEQ    check_print
+         BNE    normal_CHECK
+normal_CHECK         
          CMP.B #1,IS_VALID
-         BEQ    main_EA
+         BEQ    main_EA             ;This runs EA's routines after OP code portion is finished
          BNE    check_print
-         ;JMP EA_ROUTINE        ;This runs EA's routines after OP code portion is finished
-**********************************************************************************
-
-********** EA Parsing ************************************************************
-
-* MOVE_LAST_6_BITS_TO_EA
-**********************************************************************************
-* Description: For OP codes with the last 6 bits specified as EA Mode and EA Reg,
-* the last 6 bits will be parsed and moved into the appropriate registers.
-*
-* Registers used: A6,D0,D1,D6,D7 
-
-* Precondition: OP code has been identified with only the last 6 bits for EA,
-* current instruction set is stored into A6.
-
-* Postcondition: Last 6 bits of instruction bit has been isolated and stored. Bits
-* for EA Mode have been stored in D7, Bits for EA Reg been stored in D6.
-**********************************************************************************
-MOVE_LAST_6_BITS_TO_EA:      ;Move last 6 bits from EA field to relevant registers
-   ; MOVEM.L D0-D7/A6, -(SP) ;Save all changed registers
-    MOVE.W CUR_OP_CODE,D0    ;Move current OP code into D0
-    MOVE.W  #10,D1           ;Prepare 10 bit shift to D1
-    LSL.W   D1,D0            ;Truncate to find the last 6 bits
-    LSR.W   D1,D0            ;Shift back to get the proper 6 bits
-    MOVE.W  D0,D7            ;Move last 6 bits into D7
-    MOVE.W  #3,D1            ;Prepare 3 bit shift into D1
-    LSR.W   D1,D7            ;Shift 3 bits off D7 to obtain EA Mode
-    MOVE.W  D7,D6            ;Move the 'upper' 3 bits into D6
-    MOVE.W  #13,D1           ;Prepare 13 bit shift into D1
-    LSL.W   D1,D0            ;Shift D0 left 13 bits to reposition current 3 bits
-    LSR.W   D1,D0            ;Shift D0 right 13 bits to reposition current 3 bits
-    MOVE.W  D0,D7            ;Move the 'lower' 3 bits into D7
-   ; MOVEM.L (SP)+,D0-D7/A6  ;Restore registers
-    RTS                      ;Return to stack
-    
+**********************************************************************************    
 * FIND_2_BIT_SIZE_7_TO_6
 **********************************************************************************
 * Description: For OP codes with 2 bit size fields, the 2 relevant bits (7-6) will 
@@ -289,20 +261,6 @@ FIND_1_BIT_SIZE_8:         ;Move the 1 bit size field relevant register
     RTS                         ;Return to stack
 **********************************************************************************
 
-**********************************************************************************
-FIND_3_BIT_REG_TO_EA:       ;Move the 3 bit dynamic register bits to proper register
-   ; MOVEM.L  D0-D5/A6,-(SP) ;Save all changed registers
-    MOVE.W   CUR_OP_CODE,D0        ;Move current OP code into D0
-    MOVE.W   #4,D1          ;Prepare 4 bit shift to D1
-    LSL.W    D1,D0          ;Truncate to find the 2 size bits
-    LSR.W    D1,D0          ;Reposition the bits
-    MOVE.W   #9,D1          ;Prepare 9 bit shift to D1
-    LSR.W    D1,D0          ;Truncate to shift 3 bits to a byte
-    MOVE.W   D0,D5          ;Move 3 register bits into D4
-   ; MOVEM.L (SP)+,D0-D5/A6  ;Restore registers
-    RTS                     ;Return to stack
-**********************************************************************************
-
 * MOVE_AND_MOVEA_PARSE_EA
 **********************************************************************************
 * Description: Special parsing for the SRC and DST Mode/Reg for MOVE/MOVE
@@ -345,6 +303,7 @@ MOVE_AND_MOVEA_PARSE_EA:       ;Move the 3 bit dynamic register bits to proper r
    ; MOVEM.L (SP)+,D0-D7/A6   ;Restore registers
     RTS                     ;Return to stack
 **********************************************************************************
+********** EA Parsing ************************************************************
 *PARSE_EA_CONSTANT_BITS
 **********************************************************************************
 * Definition: Uses CUR_OP_CODE to shift the proper bits into the global constants
@@ -746,14 +705,8 @@ CHECK_OP_RESET:
     MOVE.W CUR_OP_CODE,D0    		;Move current instruction set into D0
     CMP.W  #$4E70,D0	     		;Compare the appropriate bits
     BEQ    GROUP4_INVALID	 		;INVALID OP code found
-    BNE    CHECK_OP_NOP      		;Check next OP code
-    
-CHECK_OP_NOP:
-    MOVE.W CUR_OP_CODE,D0   		;Move current instruction set into D0
-    CMP.W  #$4E71,D0	     		;Compare the appropriate bits
-    BEQ    GROUP4_INVALID 	 		;INVALID OP code found
-    BNE    CHECK_OP_ILLEGAL  		;Check next OP code
-    
+    BNE    CHECK_OP_ILLEGAL         ;Check next OP code
+        
 CHECK_OP_ILLEGAL:
     MOVE.W CUR_OP_CODE,D0    		;Move current instruction set into D0
     CMP.W  #$4AFC,D0	     		;Compare the appropriate bits
@@ -914,9 +867,16 @@ CHECK_OP_CHK:
     ANDI.W  #$F1C0,D0				;Mask relevant bits to D0
     CMP.W   #$4180,D0				;Compare the appropriate masked bits
     BEQ     INVALID_OP				;INVALID OP code
-    BNE     CHECK_OP_RTS			;Check next OP code
+    BNE     CHECK_OP_NOP			;Check next OP code
 
 *Supported OP codes to check
+CHECK_OP_NOP:                       ;While this code is not in the supported docs, Nash covered it in class and expects it to be implemented
+    MOVE.W CUR_OP_CODE,D0   		;Move current instruction set into D0
+    CMP.W  #$4E71,D0	     		;Compare the appropriate bits
+    BNE    CHECK_OP_RTS       		;Check next OP code
+    JSR    PRINT_OP_NOP             ;Print out OP code
+    BRA    GROUP4_SUCCESS           ;Finish routine
+    
 CHECK_OP_RTS:
     MOVE.W CUR_OP_CODE,D0		    ;Move current instruction set into D0
     CMP.W  #$4E75,D0				;Mask exact bits for RTS	
@@ -1036,8 +996,65 @@ CHECK_OP_BSR:
     ANDI.W  #$FF00,D0			;Mask appropriate bits
     CMP.W   #$6100,D0			;Compare masked bits
     BEQ     GROUP6_INVALID		;INVALID OP code found
-    BNE     CHECK_OP_BRA		;Check next OP code
+    BNE     CHECK_OP_BGT		;Check next OP code
     
+CHECK_OP_BGT:
+    MOVE.W CUR_OP_CODE,D0   	;Move current instruction set into D0
+    ANDI.W #$FF00,D0			;Mask appropriate bits
+    CMP.W  #$6E00,D0 			;Compare masked bits
+    BEQ    GROUP6_INVALID       ;INVALID OP code found
+    BNE    CHECK_OP_BCC         ;Check next OP code
+
+CHECK_OP_BCC:
+    MOVE.W CUR_OP_CODE,D0   	;Move current instruction set into D0
+    ANDI.W #$FF00,D0			;Mask appropriate bits
+    CMP.W  #$6400,D0 			;Compare masked bits
+    BEQ    GROUP6_INVALID       ;INVALID OP code found
+    BNE    CHECK_OP_BEQ         ;Check next OP code 
+
+CHECK_OP_BEQ:
+    MOVE.W CUR_OP_CODE,D0   	;Move current instruction set into D0
+    ANDI.W #$FF00,D0			;Mask appropriate bits
+    CMP.W  #$6700,D0 			;Compare masked bits
+    BEQ    GROUP6_INVALID       ;INVALID OP code found
+    BNE    CHECK_OP_BHI         ;Check next OP code
+
+CHECK_OP_BHI:
+    MOVE.W CUR_OP_CODE,D0   	;Move current instruction set into D0
+    ANDI.W #$FF00,D0			;Mask appropriate bits
+    CMP.W  #$6200,D0 			;Compare masked bits
+    BEQ    GROUP6_INVALID       ;INVALID OP code found
+    BNE    CHECK_OP_BLS         ;Check next OP code
+
+CHECK_OP_BLS:
+    MOVE.W CUR_OP_CODE,D0   	;Move current instruction set into D0
+    ANDI.W #$FF00,D0			;Mask appropriate bits
+    CMP.W  #$6300,D0 			;Compare masked bits
+    BEQ    GROUP6_INVALID       ;INVALID OP code found
+    BNE    CHECK_OP_BMI         ;Check next OP code
+
+CHECK_OP_BMI:
+    MOVE.W CUR_OP_CODE,D0   	;Move current instruction set into D0
+    ANDI.W #$FF00,D0			;Mask appropriate bits
+    CMP.W  #$6B00,D0 			;Compare masked bits
+    BEQ    GROUP6_INVALID       ;INVALID OP code found
+    BNE    CHECK_OP_BNE         ;Check next OP code
+
+CHECK_OP_BNE:
+    MOVE.W CUR_OP_CODE,D0   	;Move current instruction set into D0
+    ANDI.W #$FF00,D0			;Mask appropriate bits
+    CMP.W  #$6600,D0 			;Compare masked bits
+    BEQ    GROUP6_INVALID       ;INVALID OP code found
+    BNE    CHECK_OP_BPL         ;Check next OP code    
+
+CHECK_OP_BPL:
+    MOVE.W CUR_OP_CODE,D0   	;Move current instruction set into D0
+    ANDI.W #$FF00,D0			;Mask appropriate bits
+    CMP.W  #$6A00,D0 			;Compare masked bits
+    BEQ    GROUP6_INVALID       ;INVALID OP code found
+    BNE    CHECK_OP_BRA         ;Check next OP code 
+
+
 *Supported OP codes
 CHECK_OP_BRA:
     MOVE.W  CUR_OP_CODE,D0  	;Move current instruction set into D0       
@@ -1158,6 +1175,12 @@ GROUP8_SUCCESS:
 C_GROUP_9:
     MOVEM.L D0-D1,-(SP)     			;Save the registers
 *Unsupported OP codes
+CHECK_SIZE_BIT_FOR_SUB:
+    JSR     FIND_2_BIT_SIZE_7_TO_6      ;Find the size bits in 7-6
+    CMP.B   #%11,OP_SIZE                ;If the bits are %11, it has to be SUBA
+    BEQ     CHECK_OP_SUBA               ;If the bits equal it must be SUBA
+    BNE     CHECK_OP_SUBX               ;If the bits are not equal it could be SUBX
+    
 CHECK_OP_SUBA:             				;Check SUBA first as it has static bits
     MOVE.W  CUR_OP_CODE,D0    			;Move current instruction set into D0
     ANDI.W  #$F0C0,D0					;Mask appropriate bits
@@ -1177,8 +1200,8 @@ BIT_CHECK_SUBX:
     LSL.W   D1,D0               		;Shift left 7 bits truncate 15-9 bits
     LSR.W   D1,D0               		;Reposition D0
     LSR.W   #4,D0               		;Truncate 4 right most bits to
-    ANDI.W  #$FF18,D0           		;Compare remaining static bits
-    CMP.W   #$0018,D0           		;If equal to this value it's SUBX
+    ANDI.W  #$FF13,D0           		;Compare remaining static bits
+    CMP.W   #$0010,D0           		;If equal to this value it's SUBX
     BEQ     GROUP9_INVALID      		;INVALID OP code found
     BNE     CHECK_OP_SUB        		;Not can only be SUB here
     
@@ -1278,24 +1301,18 @@ CHECK_OP_ABCD:
     BNE     CHECK_OP_EXG
  
 CHECK_OP_EXG:
-    MOVE.W  CUR_OP_CODE,D0    ;Move current instruction set into D0
-    ANDI.W  #$F130,D0
-    CMP.W   #$C100,D0
-    BEQ     BIT_CHECK_EXG
-    BNE     CHECK_OP_AND
+    BRA     BIT_CHECK_EXG       ;Always do bit check here
                         
 BIT_CHECK_EXG:                 ;Checks the OP mode bits 7-6 which cannot be 11 for EXG
     MOVE.W  CUR_OP_CODE,D0
-    MOVE.W  #8,D1
+    MOVE.W  #7,D1
     LSL.W   D1,D0
     LSR.W   D1,D0
-    LSR.W   #6,D0
-    ANDI.W  #$FFF3,D0
-    CMP.W   #$0003,D0          ;This bit then equals MULS
-    BEQ     CHECK_OP_MULS
-    CMP.W   #$0000,D0          ;Second comparison to check if OP mode bit is valid
-    BEQ     CHECK_OP_AND       ;If it's 0 it could be OP_AND
-    BNE     GROUPC_INVALID         ;Otherwise it's EXG (01,10 op bits)
+    LSR.W   #4,D0
+    ANDI.W  #$FF83,D0
+    CMP.W   #$0010,D0          ;Bit mask static EXG bits
+    BEQ     GROUPC_INVALID     ;If this equals, then OP must be EXG
+    BNE     CHECK_OP_MULS      ;Otherwise it's MULS
 *Supported OP code
 CHECK_OP_MULS:
     MOVE.W CUR_OP_CODE,D0    ;Move current instruction set into D0
@@ -1327,31 +1344,37 @@ GROUPC_SUCCESS:
 ********************************************************************************
 C_GROUP_D:
     MOVEM.L D0,-(SP)        		;Save registers to stack
-*Unsupported OP code
+*Unsupported OP codes
+BIT_SIZE_CHECK
+    MOVE    CUR_OP_CODE,D0          ;Move current instruction set into D0
+    JSR     FIND_2_BIT_SIZE_7_TO_6  ;Specific size bit checking to see if it's 11
+    CMP.B   #%11,OP_SIZE            ;If it's %11 it cannot be ADDX and is either ADDA or ADD
+    BEQ     CHECK_OP_ADDA           ;If it's equal check ADDA
+    BNE     CHECK_OP_ADDX           ;If it's not equal check ADDX
+    
 CHECK_OP_ADDX:
-    MOVE CUR_OP_CODE,D0    			;Move current instruction set into D0
+    MOVE    CUR_OP_CODE,D0
     ANDI.W #$F130,D0				;Mask appropriate bits
     CMP.W  #$D100,D0				;Compare masked bits
     BEQ    GROUPD_INVALID			;INVALID OP code found
-    BNE    CHECK_OP_ADDA			;Check next OP code
+    BNE    CHECK_OP_ADD 			;Check next OP code
+    
+*Supported OP codes
+CHECK_OP_ADD:
+    JSR PRINT_OP_ADD        		;Only remaining OP in $D is ADD at this point
+    BRA GROUPD_SUCCESS              ;Finish routine
 
-*Supported OP code
 CHECK_OP_ADDA:
-    MOVE CUR_OP_CODE,D0    			;Move current instruction set into D0
+    MOVE    CUR_OP_CODE,D0    		;Move current instruction set into D0
     ANDI.W #$F0C0,D0				;Mask applicable bits
     CMP.W  #$D0C0,D0				;Compare masked bits
     BNE    CHECK_OP_ADD				;Check next OP code
     JSR    FIND_1_BIT_SIZE_8		;Size bit to print
     JSR    PRINT_OP_ADDA			;Print out OP code
     BRA    GROUPD_SUCCESS			;Finish routine
-*Unsupported OP code
-CHECK_OP_ADD:
-    JSR FIND_2_BIT_SIZE_7_TO_6
-    JSR PRINT_OP_ADD        		;Only remaining OP in $D is ADD
-    BRA GROUPD_SUCCESS
     
 GROUPD_INVALID:
-    JSR INVALID_OP
+    JSR INVALID_OP                  ;INVALID OP code found
 GROUPD_SUCCESS:
     MOVEM.L (SP)+,D0        		;Restore registers from stack
     RTS                     		;Return to stack
@@ -1611,12 +1634,14 @@ PRINT_OP_MOVE_W:
 PRINT_OP_JSR:
     MOVE.L #P_OP_JSR, Arg_AddStrToBuffer_String
     JSR PRINT_TO_BUFFER
-    JSR PRINT_OP_SIZE
     RTS
 PRINT_OP_RTS:
     MOVE.L #P_OP_RTS, Arg_AddStrToBuffer_String
     JSR PRINT_TO_BUFFER
-    JSR PRINT_OP_SIZE
+    RTS
+PRINT_OP_NOP:
+    MOVE.L #P_OP_NOP, Arg_AddStrToBuffer_String
+    JSR PRINT_TO_BUFFER
     RTS
 PRINT_OP_LEA:
     MOVE.L #P_OP_LEA, Arg_AddStrToBuffer_String
@@ -1855,6 +1880,7 @@ P_OP_ROR        DC.B    '   ROR',0
 P_OP_ROL        DC.B    '   ROL',0
 ***************** END OF DATA CONSTANT PRINTS ***********************************
  
+
 
 
 
