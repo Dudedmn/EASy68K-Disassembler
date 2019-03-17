@@ -24,12 +24,12 @@ This disassembles or reverse compiles a given set of code. So we take input comm
 # Week 4
 
 ALL
-- [ ] Flowcharting structuring, WIP
+- [X ] Flowcharting structuring, WIP
 - [X] Things to avoid for Disassembler Project
-- [ ] Pass whole Disassembler as a test case, WIP
+- [X] Pass whole Disassembler as a test case, WIP
 
 IO
-- [ ] Documentation for Disassembler
+- [X ] Documentation for Disassembler
 - [x] Passing instruction to OP
 - [x] Printing overall instruction
 - [X] Test demo program for all supported commands
@@ -41,7 +41,7 @@ IO
 OP Code
 - [X] Finish identification for all OP codes (supported and unsupported)
 - [X] Load messages into buffer successfully
-- [ ] Finish up comments for all lines and methods, WIP up to $E
+- [X ] Finish up comments for all lines and methods, WIP up to $E
 - [X] Validation testing for ALL OP codes
 - [X] Finished current integration tests
 - [X] Flowchart for major routines
