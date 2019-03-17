@@ -906,7 +906,7 @@ CHECK_OP_UNLK:
     ANDI.W #$FFF8,D0				;Mask relevant bits to D0
     CMP.W  #$4E58,D0				;Compare the appropriate masked bits
     BEQ    GROUP4_INVALID			;INVALID OP code
-    BNE    CHECK_OP_MOVE			;Check next OP
+    BNE    CHECK_OP_MOVE_USP        ;Check next OP
     
 CHECK_OP_MOVE_USP:
     MOVE.W CUR_OP_CODE,D0    		;Move current instruction set into D0
@@ -1836,7 +1836,7 @@ PRINT_OP_SIZE:                     ;Prints current OP code byte size if applicab
 * Formatting is as follows: P_OP_<OPCODE>, where P = Print, OP = Operation,
 * <OPCODE> is any valid operand
 
-P_INVALID_OP    DC.B    'DATA   ',0
+P_INVALID_OP    DC.B    '   DATA   $',0
 OP_FOUND        DC.B    'Found OP',0 ; this should be taken out later
 P_SIZE_B        DC.B    '.B ',0
 P_SIZE_W        DC.B    '.W ',0
@@ -1951,6 +1951,7 @@ _AddStrToBuffer_End
     RTS                  
     END START                                   ; THIS SHOULD BE REMOVED FOR FULL INTEGRATION
    
+
 
 
 
