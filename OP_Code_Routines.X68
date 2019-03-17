@@ -1,28 +1,17 @@
 *-----------------------------------------------------------
 * Title      : OP Code routines for Disassembler
 * Written by : Daniel Yan
-* Date       : 2/28/2019, Updated 3/12/2019
+* Date       : 2/28/2019, Updated 3/16/2019
 
 * Description: Disassembler routines to identify any valid
 * OP code dependent on current supported list.
 *------------------------------------------------------------
-     ORG $1000              ;Start at address $1000
-CUR_OP_CODE     DS.W    1   ;Used to determine the current 4 hex OP code
 OP_SIZE         DS.B    1   ;This constant refers to the size of the current OP code 
-G_BUFFER        DS.B    80  ;Used to print out the needed letters to the buffer
 MNEMONIC        DS.B    1   ;Constant for EA, first 4 bits (15-12) of a 4 hex OP code
 FIRST_3         DS.B    1   ;Constant for EA, 3 bits (11-9) of a 4 hex OP code
 SECOND_3        DS.B    1   ;Constant for EA, 3 bits (8-6) of a 4 hex OP code
 THIRD_3         DS.B    1   ;Constant for EA, 3 bits (5-3) of a 4 hex OP code
 FOURTH_3        DS.B    1   ;Constant for EA, 3 bits (2-0) of a 4 hex OP code
-B_BUFFER        DS.B    81  ;Bad buffer used to load bad data
-IS_VALID        DS.B    1   ;Global-bit validity flag
-                            ;$0 = invalid, $1 = valid
-
-START:
-    
-    LEA G_BUFFER,A4         ;Load G_BUFFER into A4, put a pointer to it as A4
-    MOVE.B #0, (A4)         ;Move 0 to indicate where to put the loaded buffer word
 
 ************************************************************************************
 * PRINTING BUFFER FUNCTION HAS BEEN FINISHED
@@ -187,7 +176,9 @@ GROUP_F:                ;$F| Display: DATA, $WXYZ (Unsupported)
 
 OP_JSR_DONE:
          MOVEM.L (SP)+,D0-D1       ;Recover register D0
-         SIMHALT
+         CMP.B #1,IS_VALID
+         BEQ    main_EA
+         BNE    check_print
          ;JMP EA_ROUTINE        ;This runs EA's routines after OP code portion is finished
 **********************************************************************************
 
@@ -618,7 +609,6 @@ CHECK_OP_DYNAMIC_BCLR:
 
 GROUP0_INVALID:                     ;Checks have been finished, invalid OP code has been found
     JSR INVALID_OP                  ;INVALID OP code found
-    
 GROUP0_SUCCESS:                     ;Checks have been finished,a valid OP code has been found
     MOVEM.L (SP)+,D0-D1             ;Restore registers
     RTS                             ;Return to stack
@@ -641,7 +631,6 @@ CHECK_OP_MOVE_B:
     
 GROUP1_INVALID:
     JSR INVALID_OP                  ;Invalid OP code found
-    
 GROUP1_SUCCESS:
     MOVEM.L (SP)+,D0-D1             ;Restore register
     RTS                             ;Return to stack
@@ -684,7 +673,6 @@ CHECK_OP_MOVE_L:
     
 GROUP2_INVALID:    
     JSR INVALID_OP                  ;Invalid OP code found
-    
 GROUP2_SUCCESS:
     MOVEM.L (SP)+,D0-D2             ;Restore register
     RTS                             ;Return to stack
@@ -727,7 +715,6 @@ CHECK_OP_MOVE_W:
     
 GROUP3_INVALID:
     JSR INVALID_OP				   ;INVALID OP code found
-
 GROUP3_SUCCESS:
     MOVEM.L (SP)+,D0-D2 		   ;Restore registers from stack
     RTS							   ;Return to stack
@@ -906,7 +893,7 @@ CHECK_OP_UNLK:
     ANDI.W #$FFF8,D0				;Mask relevant bits to D0
     CMP.W  #$4E58,D0				;Compare the appropriate masked bits
     BEQ    GROUP4_INVALID			;INVALID OP code
-    BNE    CHECK_OP_MOVE			;Check next OP
+    BNE    CHECK_OP_MOVE_USP	    ;Check next OP
     
 CHECK_OP_MOVE_USP:
     MOVE.W CUR_OP_CODE,D0    		;Move current instruction set into D0
@@ -972,7 +959,7 @@ CHECK_OP_MOVEM:
     
 GROUP4_INVALID:
     JSR INVALID_OP					;INVALID op code has been found, set IS_VALID to 0
-
+    JMP GROUP4_SUCCESS 
 GROUP4_SUCCESS:
     MOVEM.L (SP)+,D0 				;Restore saved registers
     RTS								;Return to stack
@@ -1020,7 +1007,6 @@ CHECK_OP_SUBQ
     
 GROUP5_INVALID: 
     JSR INVALID_OP          		;INVALID OP has been found, set IS_VALID to 0
-
 GROUP5_SUCCESS:
     MOVEM.L (SP)+,D0        		;Restore registers from stack
     RTS                     		;Return to stack
@@ -1097,7 +1083,6 @@ CHECK_OP_BVC:
     
 GROUP6_INVALID:
     JSR    INVALID_OP    		;INVALID OP code found, set IS_VALID to 0
-        
 GROUP6_SUCCESS:
     MOVEM.L (SP)+,D0			;Restore registers from stack
     RTS							;Return from stack
@@ -1119,7 +1104,6 @@ CHECK_OP_MOVEQ
     
 GROUP7_INVALID:
     JSR INVALID_OP				;INVALID OP code found, set IS_VALID to 0
-    
 GROUP7_SUCCESS:    
     MOVEM.L (SP)+,D0			;Restore registers from stack
     RTS							;Return from stack
@@ -1152,16 +1136,15 @@ CHECK_OP_DIVS:
     MOVE.W  CUR_OP_CODE,D0   			;Move current instruction set into D0
     ANDI.W  #$F1C0,D0					;Mask appropriate bits
     CMP.W   #$81C0,D0					;Compare masked bits
-    BEQ     PRINT_OP_DIVS				;INVALID OP code found
     BNE     CHECK_OP_OR					;Check next OP code
-    
+    JSR     PRINT_OP_DIVS				;OP Code found
+    BRA     GROUP8_SUCCESS
 CHECK_OP_OR:              				;At this point only remaining $8 code is OR
     JSR     FIND_2_BIT_SIZE_7_TO_6		;Finding size bit to print out
     JSR     PRINT_OP_OR					;Print out OR
     BRA     GROUP8_SUCCESS				;Finish routine
 GROUP8_INVALID:
-     JSR    INVALID_OP					;INVALID OP code found, set IS_VALID to 0
-     
+     JSR     INVALID_OP					;INVALID OP code found, set IS_VALID to 0
 GROUP8_SUCCESS:
      MOVEM.L (SP)+,D0					;Restore register from stack
      RTS								;Return to stack
@@ -1179,15 +1162,14 @@ CHECK_OP_SUBA:             				;Check SUBA first as it has static bits
     MOVE.W  CUR_OP_CODE,D0    			;Move current instruction set into D0
     ANDI.W  #$F0C0,D0					;Mask appropriate bits
     CMP.W   #$90C0,D0					;Compare masked bits
-    BEQ     INVALID_OP					;INVALID OP has been found
+    BEQ     GROUP9_INVALID			    ;INVALID OP has been found
     BNE     CHECK_OP_SUBX				;Check next OP
 
 CHECK_OP_SUBX:
     MOVE.W  CUR_OP_CODE,D0    			;Move current instruction set into D0
     ANDI.W  #$F130,D0					;Mask appropriate bits
     CMP.W   #$9100,D0					;Compare masked bits
-    BEQ     BIT_CHECK_SUBX				;Checking if this code is SUBX through bit shifts
-    BNE     GROUP9_INVALID      		;Cannot be a valid OP code here
+    BRA     BIT_CHECK_SUBX				;Checking if this code is SUBX through bit shifts
     
 BIT_CHECK_SUBX:    
     MOVE.W  CUR_OP_CODE,D0      		;Move current instruction set into D0
@@ -1207,9 +1189,8 @@ CHECK_OP_SUB:                   		;At this point only remaining $9 is SUB
     BRA     GROUP9_SUCCESS				;Finish routine
     
 GROUP9_INVALID:
-    BRA     INVALID_OP					;INVALID OP code found, set IS_VALID to 0
-    
-GROUP9_SUCCESS:
+     JSR     INVALID_OP					;INVALID OP code found, set IS_VALID to 0
+GROUP9_SUCCESS: 
     MOVEM.L (SP)+,D0-D1         		;Restore registers
     RTS                         		;Return to stack
 
@@ -1267,7 +1248,6 @@ CHECK_OP_CMP:
     
 GROUPB_INVALID:
     JSR     INVALID_OP           		;INVALID OP has been found, set IS_VALID to 0
- 
 GROUPB_SUCCESS:
     MOVEM.L (SP)+,D0         			;Restore registers from stack
     RTS                      			;Return to stack
@@ -1321,19 +1301,18 @@ CHECK_OP_MULS:
     MOVE.W CUR_OP_CODE,D0    ;Move current instruction set into D0
     ANDI.W #$F1C0,D0
     CMP.W  #$C1C0,D0
-    BEQ    PRINT_OP_MULS
     BNE    CHECK_OP_AND          ; OP_AND is completely dynamic outside of first nibble
-
+    JSR    PRINT_OP_MULS
+    BRA    GROUPC_SUCCESS
 *Odd completely dynamic unsupported OP code    
 CHECK_OP_AND:                 ;This would be the only possible OP code left after CHECK_OP_MULS
     MOVE.W  CUR_OP_CODE,D0    ;Move current instruction set into D0
     ANDI.W  #$F000,D0
     CMP.W   #$C000,D0
     BEQ     GROUPC_INVALID
-    
+    BRA    GROUPC_INVALID    
 GROUPC_INVALID:
     JSR     INVALID_OP
-    
 GROUPC_SUCCESS:
     MOVEM.L (SP)+,D0-D1
     RTS
@@ -1373,7 +1352,6 @@ CHECK_OP_ADD:
     
 GROUPD_INVALID:
     JSR INVALID_OP
-    
 GROUPD_SUCCESS:
     MOVEM.L (SP)+,D0        		;Restore registers from stack
     RTS                     		;Return to stack
@@ -1534,7 +1512,6 @@ CHECK_OP_ASL:
 
 GROUPE_INVALID:
     JSR     INVALID_OP
-    
 GROUPE_SUCCESS:
     MOVEM.L (SP)+,D0
     RTS
@@ -1554,9 +1531,7 @@ C_GROUP_F:
 * For unsupported OP codes, display DATA $WXYZ   
 * THIS WILL NEED TO BE CHANGED TO DISPLAY: 1000 DATA $WXYZ IN THE FUTURE
 ********************************************************************************
-INVALID_OP:  ; Prints DATA for invalid op, THIS SHOULD BE SETTING THE IS_VALID BIT TO 0
-    MOVE.L #P_INVALID_OP, Arg_AddStrToBuffer_String
-    JSR PRINT_TO_BUFFER
+INVALID_OP:  ; ONLY SETS IS_VALID TO 0
     MOVE.B #0,IS_VALID
     RTS
 
@@ -1607,7 +1582,6 @@ PRINT_OP_DYNAMIC_BCLR:
 PRINT_OP_MOVEB:
     MOVE.L #P_OP_MOVEB, Arg_AddStrToBuffer_String
     JSR PRINT_TO_BUFFER
-    JSR PRINT_OP_SIZE
     RTS
 ******************************* END OF GROUP 1 ********************************
     
@@ -1615,12 +1589,10 @@ PRINT_OP_MOVEB:
 PRINT_OP_MOVEA_L:
     MOVE.L #P_OP_MOVEA_L, Arg_AddStrToBuffer_String
     JSR PRINT_TO_BUFFER
-    JSR PRINT_OP_SIZE
     RTS
 PRINT_OP_MOVE_L:
     MOVE.L #P_OP_MOVE_L, Arg_AddStrToBuffer_String
     JSR PRINT_TO_BUFFER
-    JSR PRINT_OP_SIZE
     RTS
 ******************************* END OF GROUP 2 ********************************
     
@@ -1632,7 +1604,6 @@ PRINT_OP_MOVEA_W:
 PRINT_OP_MOVE_W:
     MOVE.L #P_OP_MOVE_W, Arg_AddStrToBuffer_String
     JSR PRINT_TO_BUFFER
-    JSR PRINT_OP_SIZE
     RTS
 ******************************* END OF GROUP 3 ********************************
 
@@ -1760,7 +1731,7 @@ PRINT_OP_ADD:
 PRINT_OP_ADDA:
     MOVE.L #P_OP_ADDA, Arg_AddStrToBuffer_String
     JSR PRINT_TO_BUFFER
-    JSR PRINT_OP_SIZE
+    JSR PRINT_OP_SIZE_ADDA
     RTS
 
 ******************************* END OF GROUP D ********************************
@@ -1826,6 +1797,12 @@ PRINT_OP_SIZE:                     ;Prints current OP code byte size if applicab
     CMP.B  #%10,OP_SIZE         ;Check for long size
     BEQ    PRINT_SIZE_LONG      ;Print .L to buffer
     RTS
+    
+PRINT_OP_SIZE_ADDA:                  ;Special  print for ADDA
+    CMP.B #%0,OP_SIZE
+    BEQ    PRINT_SIZE_WORD
+    BNE    PRINT_SIZE_LONG
+    
 ******************* END OF SIZE PRINTS ****************************************
 
 ******************* END OF PRINTING ROUTINES **********************************
@@ -1836,121 +1813,55 @@ PRINT_OP_SIZE:                     ;Prints current OP code byte size if applicab
 * Formatting is as follows: P_OP_<OPCODE>, where P = Print, OP = Operation,
 * <OPCODE> is any valid operand
 
-P_INVALID_OP    DC.B    'DATA   ',0
+P_INVALID_OP    DC.B    '   DATA   $',0
 OP_FOUND        DC.B    'Found OP',0 ; this should be taken out later
 P_SIZE_B        DC.B    '.B ',0
 P_SIZE_W        DC.B    '.W ',0
 P_SIZE_L        DC.B    '.L ',0
-P_OP_ORI        DC.B    'ORI',0
-P_OP_CMPI       DC.B    'CMPI',0
-P_OP_BCLR     	DC.B    'BCLR',0
-P_OP_MOVEB      DC.B    'MOVE.B ',0
-P_OP_MOVEA_L    DC.B    'MOVEA.L    ',0 
-P_OP_MOVE_L     DC.B    'MOVE.L ',0
-P_OP_MOVEA_W    DC.B    'MOVEA.W    ',0
-P_OP_MOVE_W     DC.B    'MOVE.W ',0
-P_OP_MOVEM_W    DC.B    'MOVEM.W    ',0
-P_OP_MOVEM_L    DC.B    'MOVEM.L    ',0
-P_OP_LEA        DC.B    'LEA',0
-P_OP_JSR        DC.B    'JSR',0
-P_OP_NOP        DC.B    'NOP',0
-P_OP_RTS        DC.B    'RTS',0
-P_OP_NEG        DC.B    'NEG',0
-P_OP_SUBQ       DC.B    'SUBQ',0
-P_OP_BRA        DC.B    'BRA',0
-P_OP_BCS        DC.B    'BCS',0
-P_OP_BGE        DC.B    'BGE',0
-P_OP_BLT        DC.B    'BLT',0
-P_OP_BVC        DC.B    'BVC',0
-P_OP_DIVS       DC.B    'DIVS.W ',0
-P_OP_OR         DC.B    'OR',0
-P_OP_SUB        DC.B    'SUB',0
-P_OP_EOR        DC.B    'EOR',0
-P_OP_CMP        DC.B    'CMP',0
-P_OP_MULS       DC.B    'MULS.W ',0
-P_OP_ADDA       DC.B    'ADDA',0
-P_OP_ADD        DC.B    'ADD',0
-P_OP_LSR        DC.B    'LSR',0
-P_OP_LSL        DC.B    'LSL',0
-P_OP_ASR        DC.B    'ASR',0
-P_OP_ASL        DC.B    'ASL',0
-P_OP_ROR        DC.B    'ROR',0
-P_OP_ROL        DC.B    'ROL',0
+P_OP_ORI        DC.B    '   ORI',0
+P_OP_CMPI       DC.B    '   CMPI',0
+P_OP_BCLR     	DC.B    '   BCLR',0
+P_OP_MOVEB      DC.B    '   MOVE.B ',0
+P_OP_MOVEA_L    DC.B    '   MOVEA.L ',0 
+P_OP_MOVE_L     DC.B    '   MOVE.L ',0
+P_OP_MOVEA_W    DC.B    '   MOVEA.W ',0
+P_OP_MOVE_W     DC.B    '   MOVE.W ',0
+P_OP_MOVEM_W    DC.B    '   MOVEM.W ',0
+P_OP_MOVEM_L    DC.B    '   MOVEM.L ',0
+P_OP_LEA        DC.B    '   LEA',0
+P_OP_JSR        DC.B    '   JSR',0
+P_OP_NOP        DC.B    '   NOP',0
+P_OP_RTS        DC.B    '   RTS',0
+P_OP_NEG        DC.B    '   NEG',0
+P_OP_SUBQ       DC.B    '   SUBQ',0
+P_OP_BRA        DC.B    '   BRA',0
+P_OP_BCS        DC.B    '   BCS',0
+P_OP_BGE        DC.B    '   BGE',0
+P_OP_BLT        DC.B    '   BLT',0
+P_OP_BVC        DC.B    '   BVC',0
+P_OP_DIVS       DC.B    '   DIVS.W ',0
+P_OP_OR         DC.B    '   OR',0
+P_OP_SUB        DC.B    '   SUB',0
+P_OP_EOR        DC.B    '   EOR',0
+P_OP_CMP        DC.B    '   CMP',0
+P_OP_MULS       DC.B    '   MULS.W',0
+P_OP_ADDA       DC.B    '   ADDA',0
+P_OP_ADD        DC.B    '   ADD',0
+P_OP_LSR        DC.B    '   LSR',0
+P_OP_LSL        DC.B    '   LSL',0
+P_OP_ASR        DC.B    '   ASR',0
+P_OP_ASL        DC.B    '   ASL',0
+P_OP_ROR        DC.B    '   ROR',0
+P_OP_ROL        DC.B    '   ROL',0
 ***************** END OF DATA CONSTANT PRINTS ***********************************
  
 
-**
-* AddStrToBuffer
-**
-* Adds the given NULL-terminated string to the specified buffer.
-*
-* Default buffer length is 80 characters, but can be modified in the argument
-* variables.
-*
-* If the buffer length is exceeded, either due to lack of a NULL character or
-* an incorrectly specified length, 1 is returned. Otherwise, 0 is returned to
-* indicate success.
-*
-**
-* @param Arg_AddStrToBuffer_String              Pointer to string
-* @param Arg_AddStrToBuffer_Buffer              Pointer to buffer
-* @param Arg_AddStrToBuffer_BufferLength        Length of buffer (default 80 chars)
-* @return Ret_AddStrToBuffer_Success            0 if successful, 1 otherwise.
-* @branch _AddStrToBuffer_FindBufferNullLoop    Loop to find NULL in buffer
-* @branch _AddStrToBuffer_AddLoop               Loop to add string to buffer
-* @branch _AddStrToBuffer_Success               Branch when string successfully added
-* @branch _AddStrToBuffer_StringLengthExceeded  Branch when length exceeded (either string or buffer)
-* @branch _AddStrToBuffer_End                   End of subroutine
-**
-Arg_AddStrToBuffer_String           DS.L    1
-Arg_AddStrToBuffer_Buffer           DS.L    1
-Arg_AddStrToBuffer_BufferLength     DC.L    80
-Ret_AddStrToBuffer_Success          DS.B    1
 
-AddStrToBuffer:                     DS.W    0
-    MOVEM.L     D0-D1/A0-A1, -(SP)                  * Backup registers to stack
 
-    MOVE.L      Arg_AddStrToBuffer_String, A0       * Load string pointer
-    MOVE.L      Arg_AddStrToBuffer_Buffer, A1       * Load buffer pointer
-    MOVE.L      Arg_AddStrToBuffer_BufferLength, D0 * Load buffer length
-    CLR.W       Ret_AddStrToBuffer_Success          * Clear success bit
-    CLR.L       D1                                  * Clear loop counter
 
-_AddStrToBuffer_BufferLoop
-    CMPI.B      #0, (A1)                            * If buffer char is NULL
-    BEQ         _AddStrToBuffer_AddLoop             * Start adding string to bufer
-    
-    CMP.L       D0, D1                              * If counter >= max length
-    BGE         _AddStrToBuffer_LengthExceeded      * Error, return
-    
-    ADDQ.L      #1, A1                              * Go to next character
-    ADDQ.B      #1, D1                              * Increment counter
-    BRA         _AddStrToBuffer_BufferLoop          * Loop back
-    
-_AddStrToBuffer_AddLoop
-    CMPI.B      #0, (A0)                            * If string char is NULL
-    BEQ         _AddStrToBuffer_Success             * String successfully added
-    
-    CMP.B       D0, D1                              * If counter >= max length
-    BGE         _AddStrToBuffer_LengthExceeded      * Error, return
-    
-    MOVE.B      (A0)+, (A1)+                        * Move string char to buffer char
-    ADDQ.L      #1, A4
-    ADDQ.B      #1, D1                              * Increment counter
-    BRA         _AddStrToBuffer_AddLoop             * Loop back
 
-_AddStrToBuffer_Success
-    MOVE.B      #0, (A1)                            * Add NULL to end of string
-    BRA         _AddStrToBuffer_End                 * Finish subroutine
 
-_AddStrToBuffer_LengthExceeded
-    MOVE.W      #1, Ret_AddStrToBuffer_Success      * Invalidate success bit
 
-_AddStrToBuffer_End
-    MOVEM.L     (SP)+, D0-D1/A0-A1                  * Restore registers from stack
-    RTS                  
-    END START                                   ; THIS SHOULD BE REMOVED FOR FULL INTEGRATION
-   
 
 
 

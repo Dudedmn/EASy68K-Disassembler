@@ -1,4 +1,4 @@
-    ORG    $1000
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 * MESSAGE VARIABLES ******************************
 
@@ -17,15 +17,13 @@ MINUS_SIGN      DC.B    $2D
 COMMA           DC.B    $2C
 SPACE           DC.B    $20
 
-CR              DC.B    $D
-LF              DC.B    $A
+
 **************************************************
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 * GLOBAL BUFFER **********************************
-MNEMONIC        DS.B    1 * First four BITS of any instruction
  
 TRAILING_SIZE   DS.W    1 * Size of any immediate or
                           * address values. Immediate or address
@@ -34,41 +32,23 @@ TRAILING_SIZE   DS.W    1 * Size of any immediate or
                           * are represented as a word regardless.
                           * $1 = BYTE, $2 = WORD, $4 = LONG
 
-FIRST_3         DS.B    1 * First, second, third, and fourth bundles of three bits each
-SECOND_3        DS.B    1
-THIRD_3         DS.B    1
-FOURTH_3        DS.B    1
 
-CUR_OP_CODE     DS.W    1 * Used for Daniel's code
 
 START_ADDRESS   EQU     $4000 * Used to parse through the entire instruction
 END_ADDRESS     EQU     $5000
 
 EA_BUFFER       DS.B    80 * Used to load ASCII-converted EA ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-IS_VALID        DS.B    1 * EA-bit validity flag
-                          * $0 = invalid, $1 = valid
+
 **************************************************
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
  
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 * EXECUTION **************************************
-START: * TEST FOR MOVE.L
-    MOVE.W  #$6000, CUR_OP_CODE
-    MOVE.B  #%0110, MNEMONIC
-    MOVE.B  #%110, FIRST_3
-    MOVE.B  #%100, SECOND_3
-    MOVE.B  #%000, THIRD_3
-    MOVE.B  #%000, FOURTH_3
-    
-    MOVE.W  #START_ADDRESS, D0
-    ADDI.B  #2, D0
-    MOVEA.L D0, A5
-    *MOVEA.L #START_ADDRESS, A5
-    
-    LEA     EA_BUFFER, A4
+mainEA
 
-    JSR     CHECK_XXXX
-EXT SIMHALT * This EXT alias is critical for NOT loading error
+    JMP     CHECK_XXXX
+EXT 
+    JMP print_instruction * This EXT alias is critical for NOT loading error
 **************************************************
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -121,11 +101,11 @@ CHECK_1XXX:
     BEQ     LOAD_1000
     CMPI.B  #$9, MNEMONIC
     BEQ     LOAD_1001
-    CMPI.B  #$B, MNEMONIC
+    CMPI.B  #$11, MNEMONIC
     BEQ     LOAD_1011
-    CMPI.B  #$C, MNEMONIC
+    CMPI.B  #$12, MNEMONIC
     BEQ     LOAD_1100
-    CMPI.B  #$D, MNEMONIC
+    CMPI.B  #$13, MNEMONIC
     BEQ     LOAD_1101
     
     RTS
@@ -184,75 +164,64 @@ MYBE_BRA    CMPI.B  #%100, SECOND_3
             BLT     BRA
             BGE     NOT_BRA
             
-NOT_BRA     MOVE.B  FIRST_3, D5
-            ASL.B   #1, D5
-            MOVE.B  SECOND_3, D6
-            ASR.B   #2, D6
-            ADD.B   D6, D5
-            
-            CMPI.B  #%0101, D5
-            BEQ     BRA * CS
-            CMPI.B  #%1000, D5
-            BEQ     BRA * VC
-            CMPI.B  #%1100, D5
-            BEQ     BRA * GE
-            CMPI.B  #%1101, D5
-            BEQ     BRA * LT
-            
-            JMP     INVALID
-            
-            
-BRA         CLR.L   D5
-            CLR.L   D6
-
-            MOVE.W  A5, D5 * D5 has $1002 (Starting + MNEMONICS)
-            MOVE.W  CUR_OP_CODE, D6
-            ANDI.W  #$00FF, D6 * D6 now has $E
+BRA         MOVE.W  CUR_OP_CODE, D6
+            ANDI.W  #$0011, D6 * D6 now has $E
             CMPI.B  #$00, D6
             BEQ     BRA_WORD * word. there is 4 hex trailing bits (word)
-
             CMPI.B  #$FF, D6
-            BEQ     BRA_BYTE
-            CMPI.B  #$FE, D6
-            BEQ     BRA_BYTE
-
-            JMP     INVALID
+            BEQ     * long. there is 8 hex trailing bits (word)
+            JMP     BRA_BYTE
             
 ***vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv***
 ***111111111BRA_BYTE111111111***
-BRA_BYTE    CMPI.B  #$FE, D6
-            BEQ     DOWN_ZERO
-            CMPI.B  #$FF, D6
-            BEQ     DOWN_ONE
-            
-            JMP     INVALID
-            
-DOWN_ZERO   SUBI.B  #$2, D5 * D5 has $1000 (Starting)
-            JMP     BRA_BYTE2
-            
-DOWN_ONE    SUBI.B  #$1, D5 * D5 has $1001 (Starting + 1)
-            JMP     BRA_BYTE2
-            
-BRA_BYTE2   MOVE.W  #BRA_BYTE3, A2
+BRA_BYTE    CMPI.W  #$7F, D6
+            BLE     POS_BYTE
+            BGT     NEG_BYTE
+
+***vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv***
+***222222222BRA_BYTE_POSITIVE222222222***
+POS_BYTE    MOVE.W  #BRA_BYTE_BK, A2
+            MOVE.W  A5, D5 * D5 has $1002
+            ADD.W   D6, D5
+            MOVE.W  D5, D4 * D4 now has $1010
+            JMP     LOAD_ABS_SHORT
+BRA_BYTE_BK JSR     LOAD_NEW_LINE
+            RTS
+***222222222BRA_BYTE_POSITIVE222222222***
+***^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^***
+
+
+***vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv***
+***222222222BRA_BYTE_NEGATIVE222222222***
+NEG_BYTE    MOVE.W  #BRA_BYT_BK2, A2
+            NEG     D6 * D6 now has twos-comp'ed $E
+            SUB.W   D6, D5 * D5 now has $1002 - 2cmp'ed $E    *<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
             MOVE.W  D5, D4
             JMP     LOAD_ABS_SHORT
-BRA_BYTE3   JSR     LOAD_NEW_LINE
+BRA_BYT_BK2 JSR     LOAD_NEW_LINE
             RTS
+            
+***222222222BRA_BYTE_NEGATIVE222222222***
+***^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^***
+
 ***111111111BRA_BYTE111111111***
 ***^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^***
 
 ***vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv***
 ***111111111BRA_WORD111111111***
-BRA_WORD    MOVE.W  (A5)+, D4 * D4 now has $000E
+BRA_WORD    MOVE.W  A5, D5 * D5 now has $1002
+            MOVE.W  (A5)+, D4 * D4 now has $000E
+            CMPI.W  #$7FFF, D4
+            BLE     POS_WORD
+            BGT     NEG_WORD
 
-            CMPI.L  #$8000, D4
-            BGE     NEG_WORD
-            BLT     POS_WORD
-            
+
+
 ***vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv***
 ***222222222BRA_WORD_POSITIVE222222222***
 POS_WORD    MOVE.W  #BRA_WORD_BK, A2
-            ADD.W   D5, D4 * D4 now has $100E
+            ADD.W   D5, D4 * D4 now has $1010
+
             JMP     LOAD_ABS_SHORT
 BRA_WORD_BK JSR     LOAD_NEW_LINE
             RTS
@@ -262,16 +231,13 @@ BRA_WORD_BK JSR     LOAD_NEW_LINE
 ***vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv***
 ***222222222BRA_WORD_NEGATIVE222222222***
 NEG_WORD    MOVE.W  #BRA_WRD_BK2, A2
-            NEG     D4
-            
-            CMP.L   D5, D4 * $4002 vs DISPLACEMENT
-            BGT     INVALID
-            
-            SUB.W   D4, D5 * D5 now has $1000 - 2cmp'ed $000E
+            NEG     D4 * D4 now has twos-comp'ed $000E
+            SUB.W   D4, D5 * D5 now has $1002 - 2cmp'ed $000E
             MOVE.W  D5, D4
             JMP     LOAD_ABS_SHORT
 BRA_WRD_BK2 JSR     LOAD_NEW_LINE
             RTS
+
 ***222222222BRA_WORD_NEGATIVE222222222***
 ***^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^***
 
@@ -279,6 +245,45 @@ BRA_WRD_BK2 JSR     LOAD_NEW_LINE
 ***^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^***
 
 
+            
+***vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv***
+***111111111BRA_LONG111111111***
+BRA_LONG    MOVE.W  A5, D5 * D5 now has $1002
+            MOVE.L  (A5)+, D4 * D4 now has $000E000E
+            CMPI.L  #$7FFFFFFF, D4
+            BLE     POS_LONG
+            BGT     NEG_LONG
+
+
+
+***vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv***
+***222222222BRA_LONG_POSITIVE222222222***
+POS_LONG    MOVE.W  #BRA_LONG_BK, A2
+            ADD.L   D5, D4 * D4 now has $1002+ 000E000E
+
+            JMP     LOAD_ABS_LONG
+BRA_LONG_BK JSR     LOAD_NEW_LINE
+            RTS
+***222222222BRA_LONG_POSITIVE222222222***
+***^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^***
+
+***vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv***
+***222222222BRA_LONG_NEGATIVE222222222***
+NEG_LONG    MOVE.W  #BRA_LNG_BK2, A2
+            NEG     D4 * D4 now has twos-comp'ed $000E000E
+            SUB.L   D4, D5 * D5 now has $1002 - 2cmp'ed $000E000E
+            MOVE.L  D5, D4
+            JMP     LOAD_ABS_LONG
+BRA_LNG_BK2 JSR     LOAD_NEW_LINE
+            RTS
+***222222222BRA_LONG_NEGATIVE222222222***
+***^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^***
+
+***111111111BRA_LONG111111111***
+***^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^***
+
+            
+NOT_BRA     JMP     INVALID
 * <EA>
 **********************************************************************************
 * Description: Once the mnemonic is 1001, it is either ADD or ADDA.
@@ -843,6 +848,9 @@ LOAD_GE_111:
             CMP.W   TRAILING_SIZE, D5
             BLT     INVALID
 
+            MOVE.W  (A5)+, D4
+            CLR.L   D4
+            
             CMPI.W  #$1, TRAILING_SIZE
             BEQ     CHUMP_BYTE
             CMPI.W  #$2, TRAILING_SIZE
@@ -1289,11 +1297,21 @@ END MOVE.B  D0, (A4)+
 **********************************************************************************
 INVALID:
             MOVE.B  #%0, IS_VALID
-            JMP     EXT
+            JMP     mainloop
 **************************************************
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-    END    START
+
+
+
+
+
+
+
+
+
+
+
 
 *~Font name~Courier New~
 *~Font size~10~

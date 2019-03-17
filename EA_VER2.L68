@@ -1,0 +1,1706 @@
+00000000 Starting Address
+Assembler used: EASy68K Editor/Assembler v5.16.01
+Created On: 3/16/2019 3:30:04 PM
+
+00000000                             1  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+00000000                             2  * MESSAGE VARIABLES ******************************
+00000000                             3  
+00000000                             4  * ASCII values for respective characters
+00000000                             5  
+00000000= 41                         6  ADDRESS         DC.B    $41
+00000001= 44                         7  DATA            DC.B    $44
+00000002                             8  
+00000002= 28                         9  PTHSIS_OPEN     DC.B    $28
+00000003= 29                        10  PTHSIS_CLSD     DC.B    $29
+00000004= 24                        11  HEX_SIGN        DC.B    $24
+00000005= 23                        12  IMMDTE_VALU     DC.B    $23
+00000006= 2B                        13  PLUS_SIGN       DC.B    $2B
+00000007= 2D                        14  MINUS_SIGN      DC.B    $2D
+00000008                            15  
+00000008= 2C                        16  COMMA           DC.B    $2C
+00000009= 20                        17  SPACE           DC.B    $20
+0000000A                            18  **************************************************
+0000000A                            19  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0000000A                            20  
+0000000A                            21  
+0000000A                            22  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0000000A                            23  * GLOBAL BUFFER **********************************
+0000000A                            24  TRAILING_SIZE   DS.W    1 * Size of any immediate or
+0000000C                            25                            * address values. Immediate or address
+0000000C                            26                            * value of a BYTE is still processed as
+0000000C                            27                            * WORD because the trailing bytes
+0000000C                            28                            * are represented as a word regardless.
+0000000C                            29                            * $1 = BYTE, $2 = WORD, $4 = LONG
+0000000C                            30  
+0000000C                            31  
+Line 32 ERROR: Undefined symbol
+0000000C                            32  START_ADDRESS   EQU     (A5) * Used to parse through the entire instruction
+Line 33 ERROR: Undefined symbol
+0000000C                            33  END_ADDRESS     EQU     (A6)
+0000000C                            34  
+0000000C                            35  **************************************************
+0000000C                            36  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0000000C                            37   
+0000000C                            38  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0000000C                            39  * EXECUTION **************************************
+0000000C                            40  main_EA
+Line 41 ERROR: Undefined symbol
+0000000C  4EB9 004DBD16             41      JSR     PARSE_EA_CONSTANT_BITS
+Line 42 ERROR: Undefined symbol
+00000012  33D5 005455B8             42      MOVE.W  (A5),START_ADDRESS
+Line 43 ERROR: Undefined symbol
+00000018  33D6 005455B8             43      MOVE.W  (A6),END_ADDRESS
+Line 44 ERROR: Undefined symbol
+0000001E  303C BD16                 44      MOVE.W  #START_ADDRESS,D0
+00000022  5400                      45      ADDI.B  #2, D0
+00000024  2A40                      46      MOVEA.L D0, A5
+00000026                            47      *MOVEA.L #START_ADDRESS, A5
+00000026                            48      
+00000026  4EB9 00000032             49      JSR     CHECK_XXXX
+0000002C                            50  EXT                     * This EXT alias is critical for NOT loading error
+Line 51 ERROR: Undefined symbol
+0000002C  4EF9 004DBD16             51      JMP     check_print 
+00000032                            52  **************************************************
+00000032                            53  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+00000032                            54  
+00000032                            55  
+00000032                            56  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+00000032                            57  * CHECK_MNEMONIC FUNCTIONS ***************
+00000032                            58  
+00000032                            59  * <EA>
+00000032                            60  **********************************************************************************
+00000032                            61  * Description: Checks the mnemonic starting from XXXX
+00000032                            62  *
+00000032                            63  * Registers used: X
+00000032                            64  *
+00000032                            65  * Precondition: X
+00000032                            66  *
+00000032                            67  * Postcondition: X
+00000032                            68  **********************************************************************************
+00000032                            69  CHECK_XXXX:
+Line 70 ERROR: Undefined symbol
+00000032  0C39 0008 005455B8        70      CMPI.B  #$8, MNEMONIC
+0000003A  6D00 0008                 71      BLT     CHECK_0XXX
+0000003E  4EF9 00000056             72      JMP     CHECK_1XXX
+00000044                            73  
+00000044                            74  * <EA>
+00000044                            75  **********************************************************************************
+00000044                            76  * Description: Checks the mnemonic starting from 0XXX
+00000044                            77  *
+00000044                            78  * Registers used: X
+00000044                            79  *
+00000044                            80  * Precondition: X
+00000044                            81  *
+00000044                            82  * Postcondition: X
+00000044                            83  **********************************************************************************
+00000044                            84  CHECK_0XXX:
+Line 85 ERROR: Undefined symbol
+00000044  0C39 0004 005455B8        85      CMPI.B  #$4, MNEMONIC
+0000004C  6D00 0058                 86      BLT     CHECK_00XX
+00000050  4EF9 000000B6             87      JMP     CHECK_01XX
+00000056                            88  
+00000056                            89  * <EA>
+00000056                            90  **********************************************************************************
+00000056                            91  * Description: Checks the mnemonic starting from 1XXX
+00000056                            92  *
+00000056                            93  * Registers used: X
+00000056                            94  *
+00000056                            95  * Precondition: X
+00000056                            96  *
+00000056                            97  * Postcondition: X
+00000056                            98  **********************************************************************************
+00000056                            99  CHECK_1XXX:
+Line 100 ERROR: Undefined symbol
+00000056  0C39 0008 005455B8       100      CMPI.B  #$8, MNEMONIC
+0000005E  6700 0350                101      BEQ     LOAD_1000
+Line 102 ERROR: Undefined symbol
+00000062  0C39 0009 005455B8       102      CMPI.B  #$9, MNEMONIC
+0000006A  6700 033E                103      BEQ     LOAD_1001
+Line 104 ERROR: Undefined symbol
+0000006E  0C39 000B 005455B8       104      CMPI.B  #$B, MNEMONIC
+00000076  6700 032C                105      BEQ     LOAD_1011
+Line 106 ERROR: Undefined symbol
+0000007A  0C39 000C 005455B8       106      CMPI.B  #$C, MNEMONIC
+00000082  6700 031A                107      BEQ     LOAD_1100
+Line 108 ERROR: Undefined symbol
+00000086  0C39 000D 005455B8       108      CMPI.B  #$D, MNEMONIC
+0000008E  6700 02A4                109      BEQ     LOAD_1101
+Line 110 ERROR: Undefined symbol
+00000092  0C39 000E 005455B8       110      CMPI.B  #$E, MNEMONIC
+0000009A  6700 0040                111      BEQ     LOAD_1110
+0000009E                           112      
+0000009E  4EF9 00000B2E            113      JMP     INVALID
+000000A4                           114      
+000000A4  4E75                     115      RTS
+000000A6                           116  
+000000A6                           117  * <EA>
+000000A6                           118  **********************************************************************************
+000000A6                           119  * Description: Checks the mnemonic starting from 00XX
+000000A6                           120  *
+000000A6                           121  * Registers used: X
+000000A6                           122  *
+000000A6                           123  * Precondition: X
+000000A6                           124  *
+000000A6                           125  * Postcondition: X
+000000A6                           126  **********************************************************************************
+000000A6                           127  CHECK_00XX:
+Line 128 ERROR: Undefined symbol
+000000A6  0C39 0001 005455B8       128      CMPI.B  #$1, MNEMONIC
+000000AE  6D00 0642                129      BLT     LOAD_0000
+000000B2  6C00 07D6                130      BGE     LOAD_00XX
+000000B6                           131  
+000000B6                           132  * <EA>
+000000B6                           133  **********************************************************************************
+000000B6                           134  * Description: Checks the mnemonic starting from 01XX
+000000B6                           135  *
+000000B6                           136  * Registers used: X
+000000B6                           137  *
+000000B6                           138  * Precondition: X
+000000B6                           139  *
+000000B6                           140  * Postcondition: X
+000000B6                           141  **********************************************************************************
+000000B6                           142  CHECK_01XX:
+Line 143 ERROR: Undefined symbol
+000000B6  0C39 0004 005455B8       143      CMPI.B  #%0100, MNEMONIC
+000000BE  6700 04A4                144      BEQ     LOAD_0100
+Line 145 ERROR: Undefined symbol
+000000C2  0C39 0005 005455B8       145      CMPI.B  #%0101, MNEMONIC
+000000CA  6700 03FA                146      BEQ     LOAD_0101
+Line 147 ERROR: Undefined symbol
+000000CE  0C39 0006 005455B8       147      CMPI.B  #%0110, MNEMONIC
+000000D6  6700 0148                148      BEQ     LOAD_0110
+000000DA  4E75                     149      RTS
+000000DC                           150  
+000000DC                           151  **************************************************
+000000DC                           152  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+000000DC                           153  
+000000DC                           154  
+000000DC                           155  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+000000DC                           156  * LOAD_THIS FUNCTIONS (HIGHEST LEVEL) ************
+000000DC                           157  
+000000DC                           158  * <EA>
+000000DC                           159  **********************************************************************************
+000000DC                           160  * Description: Once the mnemonic is 1110, it is either ASd, LSd, or ROd.
+000000DC                           161  *
+000000DC                           162  * Registers used: Whether if it is ASd, LSd, or ROd, they all share the same
+000000DC                           163  *                 EA algorithm. D5 for calculation, A2 and A3 for returning from subbranches.
+000000DC                           164  *
+000000DC                           165  * Precondition: FIRST_3, SECOND_3, THIRD_3, FOURTH_3
+000000DC                           166  *
+000000DC                           167  * Postcondition: X
+000000DC                           168  **********************************************************************************
+000000DC                           169  LOAD_1110:
+000000DC  247C 00000000            170              MOVEA.L #0, A2
+000000E2  267C 00000000            171              MOVEA.L #0, A3
+000000E8  4285                     172              CLR.L   D5
+000000EA                           173      
+Line 174 ERROR: Undefined symbol
+000000EA  1A39 004DBD16            174              MOVE.B  SECOND_3, D5
+000000F0  0205 0003                175              ANDI.B  #%011, D5
+000000F4                           176      
+000000F4  0C05 0003                177              CMPI.B  #%11, D5
+000000F8  6700 0006                178              BEQ     MYBE_ASd_1
+000000FC  6600 007A                179              BNE     MYBE_ASd_2
+00000100                           180  
+00000100                           181  ***vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv***
+00000100                           182  ***111111111 ASd <ea> 111111111***
+Line 183 ERROR: Undefined symbol
+00000100  0C39 0000 005455B8       183  MYBE_ASd_1  CMPI.B  #%000, FIRST_3
+00000108  6700 0020                184              BEQ     ASd_1
+Line 185 ERROR: Undefined symbol
+0000010C  0C39 0001 005455B8       185              CMPI.B  #%001, FIRST_3
+00000114  6700 0014                186              BEQ     ASd_1 * LSd
+Line 187 ERROR: Undefined symbol
+00000118  0C39 0003 005455B8       187              CMPI.B  #%011, FIRST_3
+00000120  6700 0008                188              BEQ     ASd_1 * ROd
+00000124  4EF9 00000B2E            189              JMP     INVALID
+0000012A                           190  
+Line 191 ERROR: Undefined symbol
+0000012A  0C39 0007 005455B8       191  ASd_1       CMPI.B  #%111, THIRD_3
+00000132  6600 09FA                192              BNE     INVALID
+00000136                           193              
+Line 194 ERROR: Undefined symbol
+00000136  0C39 0004 005455B8       194              CMPI.B  #%100, FOURTH_3
+0000013E  6700 09EE                195              BEQ     INVALID
+00000142                           196              
+00000142  367C 015E                197              MOVEA.W #ASd_1_BACK, A3
+Line 198 ERROR: Undefined symbol
+00000146  0C39 0000 005455B8       198              CMPI.B  #%000, FOURTH_3
+0000014E  6700 085C                199              BEQ     SIZE_W
+Line 200 ERROR: Undefined symbol
+00000152  0C39 0001 005455B8       200              CMPI.B  #%001, FOURTH_3
+0000015A  6700 0858                201              BEQ     SIZE_L
+0000015E                           202  
+Line 203 ERROR: Undefined symbol
+0000015E  1639 004DBD16            203  ASd_1_BACK  MOVE.B  THIRD_3, D3
+Line 204 ERROR: Undefined symbol
+00000164  1439 004DBD16            204              MOVE.B  FOURTH_3, D2
+0000016A                           205              
+0000016A  4EB9 000008FE            206              JSR     LOAD_EA
+00000170  4EB9 00000A62            207              JSR     LOAD_NEW_LINE
+00000176  4E75                     208              RTS
+00000178                           209  ***111111111 ASd <ea> 111111111***
+00000178                           210  ***^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^***
+00000178                           211  
+00000178                           212  ***vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv***
+00000178                           213  ***111111111 ASd X, Y 11111111***
+00000178  4285                     214  MYBE_ASd_2  CLR.L   D5
+0000017A                           215  
+Line 216 ERROR: Undefined symbol
+0000017A  1A39 004DBD16            216              MOVE.B  THIRD_3, D5
+00000180  0205 0003                217              ANDI.B  #%011, D5
+00000184  0C05 0002                218              CMPI.B  #%10, D5
+00000188  6600 0006                219              BNE     ASd_2 * or LSd or ROd
+0000018C  6700 09A0                220              BEQ     INVALID
+00000190                           221              
+00000190  4285                     222  ASd_2       CLR.L   D5
+00000192                           223  
+Line 224 ERROR: Undefined symbol
+00000192  1A39 004DBD16            224              MOVE.B  THIRD_3, D5
+00000198  0205 0004                225              ANDI.B  #%100, D5
+0000019C  0C05 0004                226              CMPI.B  #%100, D5
+000001A0  6700 0050                227              BEQ     ASd_2_REG
+000001A4  6600 0002                228              BNE     ASd_2_IMD
+000001A8                           229              
+000001A8                           230  ***vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv***
+000001A8                           231  ***222222222 ASd #<data>, Dy 222222222***
+000001A8  347C 01D2                232  ASd_2_IMD   MOVEA.W #ASd_2_IMD_B, A2
+Line 233 ERROR: Undefined symbol
+000001AC  0C39 0000 005455B8       233              CMPI.B  #%000, FIRST_3
+000001B4  6700 0006                234              BEQ     LOAD_8
+000001B8  6600 000C                235              BNE     LOAD_FIRST3
+000001BC                           236              
+000001BC  183C 0008                237  LOAD_8      MOVE.B  #8, D4
+000001C0  4EF9 00000A2E            238              JMP     LOAD_IMMDTE
+000001C6                           239  
+Line 240 ERROR: Undefined symbol
+000001C6  1839 004DBD16            240  LOAD_FIRST3 MOVE.B  FIRST_3, D4
+000001CC  4EF9 00000A2E            241              JMP     LOAD_IMMDTE
+000001D2                           242  
+000001D2  4EB9 00000A7E            243  ASd_2_IMD_B JSR     LOAD_COMMA_SPACE
+000001D8                           244  
+Line 245 ERROR: Undefined symbol
+000001D8  1639 004DBD16            245              MOVE.B  THIRD_3, D3
+Line 246 ERROR: Undefined symbol
+000001DE  1439 004DBD16            246              MOVE.B  FOURTH_3, D2
+000001E4                           247              
+000001E4  4EB9 000008FE            248              JSR     LOAD_EA
+000001EA  4EB9 00000A62            249              JSR     LOAD_NEW_LINE
+000001F0  4E75                     250              RTS
+000001F2                           251  ***222222222 ASd #<data>, Dy 222222222***
+000001F2                           252  ***^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^***
+000001F2                           253  
+000001F2                           254  ***vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv***
+000001F2                           255  ***222222222 ASd Dx, Dy 222222222***
+000001F2  163C 0000                256  ASd_2_REG   MOVE.B  #%000, D3
+Line 257 ERROR: Undefined symbol
+000001F6  1439 004DBD16            257              MOVE.B  FIRST_3, D2
+000001FC                           258              
+000001FC  4EB9 000008FE            259              JSR     LOAD_EA
+00000202  4EB9 00000A7E            260              JSR     LOAD_COMMA_SPACE
+00000208                           261              
+00000208  163C 0000                262              MOVE.B  #%000, D3
+Line 263 ERROR: Undefined symbol
+0000020C  1439 004DBD16            263              MOVE.B  FOURTH_3, D2
+00000212                           264              
+00000212  4EB9 000008FE            265              JSR     LOAD_EA
+00000218  4EB9 00000A62            266              JSR     LOAD_NEW_LINE
+0000021E  4E75                     267              RTS
+00000220                           268  ***222222222 ASd Dx, Dy 222222222***
+00000220                           269  ***^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^***
+00000220                           270  
+00000220                           271  ***111111111 ASd X, Y 111111111***
+00000220                           272  ***^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^***
+00000220                           273  
+00000220                           274  
+00000220                           275  * <EA>
+00000220                           276  **********************************************************************************
+00000220                           277  * Description: Once the mnemonic is 0110, it is either BRA or Bcc.
+00000220                           278  *
+00000220                           279  * Registers used: Whether if it is BRA or Bcc, in terms of EA, both instructions
+00000220                           280  *                 share the same EA algorithm. D4 for the displacement, D5 for calculation,
+00000220                           281  *                 D6 for checking the current opcode, A2 and A3 for returning from subbranches.
+00000220                           282  *
+00000220                           283  * Precondition: FIRST_3, SECOND_3, THIRD_3, FOURTH_3
+00000220                           284  *
+00000220                           285  * Postcondition: X
+00000220                           286  **********************************************************************************
+00000220                           287  LOAD_0110:
+00000220  247C 00000000            288              MOVEA.L #0, A2
+00000226  267C 00000000            289              MOVEA.L #0, A3
+0000022C  4285                     290              CLR.L   D5
+0000022E  4286                     291              CLR.L   D6
+00000230  4284                     292              CLR.L   D4
+00000232                           293  
+Line 294 ERROR: Undefined symbol
+00000232  0C39 0000 005455B8       294              CMPI.B  #%000, FIRST_3
+0000023A  6700 0006                295              BEQ     MYBE_BRA
+0000023E  6600 0012                296              BNE     NOT_BRA
+Line 297 ERROR: Undefined symbol
+00000242  0C39 0004 005455B8       297  MYBE_BRA    CMPI.B  #%100, SECOND_3
+0000024A  6D00 003E                298              BLT     BRA
+0000024E  6C00 0002                299              BGE     NOT_BRA
+00000252                           300              
+Line 301 ERROR: Undefined symbol
+00000252  1A39 004DBD16            301  NOT_BRA     MOVE.B  FIRST_3, D5
+00000258  E305                     302              ASL.B   #1, D5
+Line 303 ERROR: Undefined symbol
+0000025A  1C39 004DBD16            303              MOVE.B  SECOND_3, D6
+00000260  E406                     304              ASR.B   #2, D6
+00000262  DA06                     305              ADD.B   D6, D5
+00000264                           306              
+00000264  0C05 0005                307              CMPI.B  #%0101, D5
+00000268  6700 0020                308              BEQ     BRA * CS
+0000026C  0C05 0008                309              CMPI.B  #%1000, D5
+00000270  6700 0018                310              BEQ     BRA * VC
+00000274  0C05 000C                311              CMPI.B  #%1100, D5
+00000278  6700 0010                312              BEQ     BRA * GE
+0000027C  0C05 000D                313              CMPI.B  #%1101, D5
+00000280  6700 0008                314              BEQ     BRA * LT
+00000284                           315              
+00000284  4EF9 00000B2E            316              JMP     INVALID
+0000028A                           317              
+0000028A                           318              
+0000028A  4285                     319  BRA         CLR.L   D5
+0000028C  4286                     320              CLR.L   D6
+0000028E                           321  
+0000028E  3A0D                     322              MOVE.W  A5, D5 * D5 has $1002 (Starting + MNEMONICS)
+Line 323 ERROR: Undefined symbol
+00000290  3C39 004DBD16            323              MOVE.W  CUR_OP_CODE, D6
+00000296  0246 00FF                324              ANDI.W  #$00FF, D6 * D6 now has $E
+0000029A  0C06 0000                325              CMPI.B  #$00, D6
+0000029E  6700 0052                326              BEQ     BRA_WORD * word. there is 4 hex trailing bits (word)
+000002A2                           327  
+000002A2  0C06 00FF                328              CMPI.B  #$FF, D6
+000002A6  6700 0010                329              BEQ     BRA_BYTE
+000002AA  0C06 00FE                330              CMPI.B  #$FE, D6
+000002AE  6700 0008                331              BEQ     BRA_BYTE
+000002B2                           332  
+000002B2  4EF9 00000B2E            333              JMP     INVALID
+000002B8                           334              
+000002B8                           335  ***vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv***
+000002B8                           336  ***111111111 BRA_BYTE 111111111***
+000002B8  0C06 00FE                337  BRA_BYTE    CMPI.B  #$FE, D6
+000002BC  6700 0010                338              BEQ     DOWN_ZERO
+000002C0  0C06 00FF                339              CMPI.B  #$FF, D6
+000002C4  6700 0010                340              BEQ     DOWN_ONE
+000002C8                           341              
+000002C8  4EF9 00000B2E            342              JMP     INVALID
+000002CE                           343              
+000002CE  5505                     344  DOWN_ZERO   SUBI.B  #$2, D5 * D5 has $1000 (Starting)
+000002D0  4EF9 000002DE            345              JMP     BRA_BYTE2
+000002D6                           346              
+000002D6  5305                     347  DOWN_ONE    SUBI.B  #$1, D5 * D5 has $1001 (Starting + 1)
+000002D8  4EF9 000002DE            348              JMP     BRA_BYTE2
+000002DE                           349              
+000002DE  347C 02EA                350  BRA_BYTE2   MOVE.W  #BRA_BYTE3, A2
+000002E2  3805                     351              MOVE.W  D5, D4
+000002E4  4EF9 00000A0A            352              JMP     LOAD_ABS_SHORT
+000002EA  4EB9 00000A62            353  BRA_BYTE3   JSR     LOAD_NEW_LINE
+000002F0  4E75                     354              RTS
+000002F2                           355  ***111111111 BRA_BYTE 111111111***
+000002F2                           356  ***^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^***
+000002F2                           357  
+000002F2                           358  ***vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv***
+000002F2                           359  ***111111111 BRA_WORD 111111111***
+000002F2  381D                     360  BRA_WORD    MOVE.W  (A5)+, D4 * D4 now has $000E
+000002F4                           361  
+000002F4  0C84 00008000            362              CMPI.L  #$8000, D4
+000002FA  6C00 001A                363              BGE     NEG_WORD
+000002FE  6D00 0002                364              BLT     POS_WORD
+00000302                           365              
+00000302                           366  ***vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv***
+00000302                           367  ***222222222 BRA_WORD_POSITIVE 222222222***
+00000302  347C 030E                368  POS_WORD    MOVE.W  #BRA_WORD_BK, A2
+00000306  D845                     369              ADD.W   D5, D4 * D4 now has $100E
+00000308  4EF9 00000A0A            370              JMP     LOAD_ABS_SHORT
+0000030E  4EB9 00000A62            371  BRA_WORD_BK JSR     LOAD_NEW_LINE
+00000314  4E75                     372              RTS
+00000316                           373  ***222222222 BRA_WORD_POSITIVE 222222222***
+00000316                           374  ***^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^***
+00000316                           375  
+00000316                           376  ***vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv***
+00000316                           377  ***222222222 BRA_WORD_NEGATIVE 222222222***
+00000316  347C 032C                378  NEG_WORD    MOVE.W  #BRA_WRD_BK2, A2
+0000031A  4444                     379              NEG     D4
+0000031C                           380              
+0000031C  B885                     381              CMP.L   D5, D4 * $4002 vs DISPLACEMENT
+0000031E  6E00 080E                382              BGT     INVALID
+00000322                           383              
+00000322  9A44                     384              SUB.W   D4, D5 * D5 now has $1000 - 2cmp'ed $000E
+00000324  3805                     385              MOVE.W  D5, D4
+00000326  4EF9 00000A0A            386              JMP     LOAD_ABS_SHORT
+0000032C  4EB9 00000A62            387  BRA_WRD_BK2 JSR     LOAD_NEW_LINE
+00000332  4E75                     388              RTS
+00000334                           389  ***222222222 BRA_WORD_NEGATIVE 222222222***
+00000334                           390  ***^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^***
+00000334                           391  
+00000334                           392  ***111111111 BRA_WORD 111111111***
+00000334                           393  ***^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^***
+00000334                           394  
+00000334                           395  
+00000334                           396  * <EA>
+00000334                           397  **********************************************************************************
+00000334                           398  * Description: Once the mnemonic is 1001, it is either ADD or ADDA.
+00000334                           399  *
+00000334                           400  * Registers used: If ADDA, D3 for SRC/DST mod, D2 for SRC/DST reg, A3 to get back from the subbranch.
+00000334                           401  *                 If ADD, basically recycling the algorithm for DIVS/OR
+00000334                           402  *
+00000334                           403  * Precondition: FIRST_3, SECOND_3, THIRD_3, FOURTH_3
+00000334                           404  *
+00000334                           405  * Postcondition: X
+00000334                           406  **********************************************************************************
+00000334                           407  LOAD_1101:
+Line 408 ERROR: Undefined symbol
+00000334  0C39 0003 005455B8       408              CMPI.B  #%011, SECOND_3
+0000033C  6700 0014                409              BEQ     ADDA
+Line 410 ERROR: Undefined symbol
+00000340  0C39 0007 005455B8       410              CMPI.B  #%111, SECOND_3
+00000348  6700 0008                411              BEQ     ADDA
+0000034C                           412              
+0000034C  4EF9 000003B0            413              JMP     LOAD_1000
+00000352                           414              
+00000352  367C 036E                415  ADDA        MOVEA.W #ADDA_BACK, A3
+Line 416 ERROR: Undefined symbol
+00000356  0C39 0000 005455B8       416              CMPI.B  #%000, FOURTH_3
+0000035E  6700 064C                417              BEQ     SIZE_W
+Line 418 ERROR: Undefined symbol
+00000362  0C39 0001 005455B8       418              CMPI.B  #%001, FOURTH_3
+0000036A  6700 0648                419              BEQ     SIZE_L
+0000036E                           420              
+Line 421 ERROR: Undefined symbol
+0000036E  1639 004DBD16            421  ADDA_BACK   MOVE.B  THIRD_3, D3
+Line 422 ERROR: Undefined symbol
+00000374  1439 004DBD16            422              MOVE.B  FOURTH_3, D2
+0000037A                           423  
+0000037A  4EB9 000008FE            424              JSR     LOAD_EA
+00000380  4EB9 00000A7E            425              JSR     LOAD_COMMA_SPACE
+00000386                           426              
+00000386  163C 0001                427              MOVE.B  #%001, D3
+Line 428 ERROR: Undefined symbol
+0000038A  1439 004DBD16            428              MOVE.B  FIRST_3, D2
+00000390                           429              
+00000390  4EB9 000008FE            430              JSR     LOAD_EA
+00000396  4EB9 00000A62            431              JSR     LOAD_NEW_LINE
+0000039C  4E75                     432              RTS
+0000039E                           433  
+0000039E                           434  * <EA>
+0000039E                           435  **********************************************************************************
+0000039E                           436  * Description: Once the mnemonic is 1001, it is MULS.
+0000039E                           437  *
+0000039E                           438  * Registers used: X. Basically recycling the algorithm for DIVS/OR
+0000039E                           439  *
+0000039E                           440  * Precondition: X
+0000039E                           441  *
+0000039E                           442  * Postcondition: X
+0000039E                           443  **********************************************************************************
+0000039E                           444  LOAD_1100:
+0000039E  4EF9 000003B0            445      JMP     LOAD_1000
+000003A4                           446      
+000003A4                           447  * <EA>
+000003A4                           448  **********************************************************************************
+000003A4                           449  * Description: Once the mnemonic is 1001, it is either EOR or CMP.
+000003A4                           450  *
+000003A4                           451  * Registers used: X. Basically recycling the algorithm for DIVS/OR
+000003A4                           452  *
+000003A4                           453  * Precondition: X
+000003A4                           454  *
+000003A4                           455  * Postcondition: X
+000003A4                           456  **********************************************************************************
+000003A4                           457  LOAD_1011:
+000003A4  4EF9 000003B0            458      JMP     LOAD_1000
+000003AA                           459  
+000003AA                           460  
+000003AA                           461  * <EA>
+000003AA                           462  **********************************************************************************
+000003AA                           463  * Description: Once the mnemonic is 1001, it is SUB.
+000003AA                           464  *
+000003AA                           465  * Registers used: X. Basically recycling the algorithm for DIVS/OR
+000003AA                           466  *
+000003AA                           467  * Precondition: X
+000003AA                           468  *
+000003AA                           469  * Postcondition: X
+000003AA                           470  **********************************************************************************
+000003AA                           471  LOAD_1001:
+000003AA  4EF9 000003B0            472      JMP     LOAD_1000
+000003B0                           473  
+000003B0                           474  
+000003B0                           475  * <EA>
+000003B0                           476  **********************************************************************************
+000003B0                           477  * Description: Once the mnemonic is 1000, it is either DIVS or OR.
+000003B0                           478  *
+000003B0                           479  * Registers used: D3 for SRC/DST mod, D2 for SRC/DST reg, A3 to get back from the subbranch.
+000003B0                           480  *
+000003B0                           481  * Precondition: FIRST_3, SECOND_3, THIRD_3, FOURTH_3
+000003B0                           482  *
+000003B0                           483  * Postcondition: X
+000003B0                           484  **********************************************************************************
+000003B0                           485  LOAD_1000:
+000003B0  4283                     486              CLR.L   D3
+000003B2  4282                     487              CLR.L   D2
+000003B4  267C 00000000            488              MOVEA.L #0, A3
+000003BA                           489              
+Line 490 ERROR: Undefined symbol
+000003BA  0C39 0007 005455B8       490              CMPI.B  #%111, SECOND_3
+000003C2  6700 00B6                491              BEQ     DIVS
+000003C6                           492              
+Line 493 ERROR: Undefined symbol
+000003C6  0C39 0003 005455B8       493              CMPI.B  #%011, SECOND_3
+000003CE  6700 075E                494              BEQ     INVALID
+000003D2                           495              
+000003D2                           496  ***vvvvvvvvvvvvvvvvvvv***
+Line 497 ERROR: Undefined symbol
+000003D2  0C39 0004 005455B8       497              CMPI.B  #%100, SECOND_3
+000003DA  6D00 0006                498              BLT     DIR_0 * direction bit 0
+000003DE  6C00 004E                499              BGE     DIR_1 * direction bit 1
+000003E2                           500              
+000003E2  367C 03FE                501  DIR_0       MOVEA.W #OR_BACK, A3
+Line 502 ERROR: Undefined symbol
+000003E6  0C39 0000 005455B8       502              CMPI.B  #%000, FOURTH_3
+000003EE  6700 05BC                503              BEQ     SIZE_W
+Line 504 ERROR: Undefined symbol
+000003F2  0C39 0001 005455B8       504              CMPI.B  #%001, FOURTH_3
+000003FA  6700 05B8                505              BEQ     SIZE_L
+000003FE                           506              
+Line 507 ERROR: Undefined symbol
+000003FE  1639 004DBD16            507  OR_BACK     MOVE.B  THIRD_3, D3
+Line 508 ERROR: Undefined symbol
+00000404  1439 004DBD16            508              MOVE.B  FOURTH_3, D2
+0000040A                           509  
+0000040A  4EB9 000008FE            510              JSR     LOAD_EA
+00000410  4EB9 00000A7E            511              JSR     LOAD_COMMA_SPACE
+00000416                           512              
+00000416  163C 0000                513              MOVE.B  #%000, D3
+Line 514 ERROR: Undefined symbol
+0000041A  1439 004DBD16            514              MOVE.B  FIRST_3, D2
+00000420                           515              
+00000420  4EB9 000008FE            516              JSR     LOAD_EA
+00000426  4EB9 00000A62            517              JSR     LOAD_NEW_LINE
+0000042C  4E75                     518              RTS
+0000042E                           519              
+0000042E  163C 0000                520  DIR_1       MOVE.B  #%000, D3
+Line 521 ERROR: Undefined symbol
+00000432  1439 004DBD16            521              MOVE.B  FIRST_3, D2
+00000438                           522              
+00000438  4EB9 000008FE            523              JSR     LOAD_EA
+0000043E  4EB9 00000A7E            524              JSR     LOAD_COMMA_SPACE
+00000444                           525              
+00000444  367C 0460                526              MOVEA.W #OR_BACK2, A3
+Line 527 ERROR: Undefined symbol
+00000448  0C39 0000 005455B8       527              CMPI.B  #%000, FOURTH_3
+00000450  6700 055A                528              BEQ     SIZE_W
+Line 529 ERROR: Undefined symbol
+00000454  0C39 0001 005455B8       529              CMPI.B  #%001, FOURTH_3
+0000045C  6700 0556                530              BEQ     SIZE_L
+00000460                           531              
+Line 532 ERROR: Undefined symbol
+00000460  1639 004DBD16            532  OR_BACK2    MOVE.B  THIRD_3, D3
+Line 533 ERROR: Undefined symbol
+00000466  1439 004DBD16            533              MOVE.B  FOURTH_3, D2
+0000046C                           534  
+0000046C  4EB9 000008FE            535              JSR     LOAD_EA
+00000472  4EB9 00000A62            536              JSR     LOAD_NEW_LINE
+00000478  4E75                     537              RTS    
+0000047A                           538  ***^^^^^^^^^^^^^^^^^^^***
+0000047A                           539              
+0000047A                           540  ***vvvvvvvvvvvvvvvvvvv***
+0000047A  163C 0000                541  DIVS        MOVE.B  #%000, D3
+Line 542 ERROR: Undefined symbol
+0000047E  1439 004DBD16            542              MOVE.B  FIRST_3, D2
+00000484                           543  
+00000484  4EB9 000008FE            544              JSR     LOAD_EA
+0000048A  4EB9 00000A7E            545              JSR     LOAD_COMMA_SPACE
+00000490                           546              
+00000490  367C 04AC                547              MOVEA.W #DIVS_BACK, A3
+Line 548 ERROR: Undefined symbol
+00000494  0C39 0000 005455B8       548              CMPI.B  #%000, FOURTH_3
+0000049C  6700 050E                549              BEQ     SIZE_W
+Line 550 ERROR: Undefined symbol
+000004A0  0C39 0001 005455B8       550              CMPI.B  #%001, FOURTH_3
+000004A8  6700 050A                551              BEQ     SIZE_L
+000004AC                           552              
+Line 553 ERROR: Undefined symbol
+000004AC  1639 004DBD16            553  DIVS_BACK   MOVE.B  THIRD_3, D3
+Line 554 ERROR: Undefined symbol
+000004B2  1439 004DBD16            554              MOVE.B  FOURTH_3, D2
+000004B8                           555              
+000004B8  4EB9 000008FE            556              JSR     LOAD_EA
+000004BE  4EB9 00000A62            557              JSR     LOAD_NEW_LINE
+000004C4  4E75                     558              RTS
+000004C6                           559  ***^^^^^^^^^^^^^^^^^^^***
+000004C6                           560  
+000004C6                           561  
+000004C6                           562  * <EA>
+000004C6                           563  **********************************************************************************
+000004C6                           564  * Description: Once the mnemonic is 0101, it is SUBQ
+000004C6                           565  *
+000004C6                           566  * Registers used: D4 to load the data within the EA bits, and A2 to come back
+000004C6                           567  *
+000004C6                           568  * Precondition: FIRST_3, SECOND_3, THIRD_3, FOURTH_3
+000004C6                           569  *
+000004C6                           570  * Postcondition: X
+000004C6                           571  **********************************************************************************
+000004C6                           572  LOAD_0101:
+000004C6  4283                     573              CLR.L   D3
+000004C8  4282                     574              CLR.L   D2
+000004CA  267C 00000000            575              MOVEA.L #0, A3
+000004D0                           576  
+Line 577 ERROR: Undefined symbol
+000004D0  0C39 0007 005455B8       577              CMPI.B  #%111, FIRST_3
+000004D8  6F00 0008                578              BLE     MYBE_SUBQ1
+000004DC  4EF9 00000B2E            579              JMP     INVALID
+000004E2                           580              
+Line 581 ERROR: Undefined symbol
+000004E2  0C39 0003 005455B8       581  MYBE_SUBQ1  CMPI.B  #%011, SECOND_3
+000004EA  6E00 0008                582              BGT     MYBE_SUBQ2
+000004EE  4EF9 00000B2E            583              JMP     INVALID
+000004F4                           584  
+Line 585 ERROR: Undefined symbol
+000004F4  0C39 0007 005455B8       585  MYBE_SUBQ2  CMPI.B  #%111, SECOND_3
+000004FC  6D00 0008                586              BLT     SUBQ
+00000500  4EF9 00000B2E            587              JMP     INVALID
+00000506                           588  
+Line 589 ERROR: Undefined symbol
+00000506  5239 005455B8            589  SUBQ        ADDI.B  #%1, FIRST_3
+Line 590 ERROR: Undefined symbol
+0000050C  1839 004DBD16            590              MOVE.B  FIRST_3, D4
+00000512                           591              
+00000512  347C 051C                592              MOVEA.W #SUBQ_SAVED, A2
+00000516  4EF9 00000A2E            593              JMP     LOAD_IMMDTE
+0000051C                           594              
+0000051C  4EB9 00000A7E            595  SUBQ_SAVED  JSR     LOAD_COMMA_SPACE
+00000522                           596  
+00000522  367C 054A                597              MOVEA.W #SUBQ_BACK, A3
+Line 598 ERROR: Undefined symbol
+00000526  0C39 0004 005455B8       598              CMPI.B  #%100, SECOND_3
+0000052E  6700 0474                599              BEQ     SIZE_B
+Line 600 ERROR: Undefined symbol
+00000532  0C39 0005 005455B8       600              CMPI.B  #%101, SECOND_3
+0000053A  6700 0470                601              BEQ     SIZE_W
+Line 602 ERROR: Undefined symbol
+0000053E  0C39 0006 005455B8       602              CMPI.B  #%110, SECOND_3
+00000546  6700 046C                603              BEQ     SIZE_L
+0000054A                           604              
+Line 605 ERROR: Undefined symbol
+0000054A  1639 004DBD16            605  SUBQ_BACK   MOVE.B  THIRD_3, D3
+Line 606 ERROR: Undefined symbol
+00000550  1439 004DBD16            606              MOVE.B  FOURTH_3, D2
+00000556                           607  
+00000556  4EB9 000008FE            608              JSR     LOAD_EA
+0000055C  4EB9 00000A62            609              JSR     LOAD_NEW_LINE
+00000562  4E75                     610              RTS
+00000564                           611  
+00000564                           612  * <EA>
+00000564                           613  **********************************************************************************
+00000564                           614  * Description: Once the mnemonic is 0100, it is either NEG, RTS, JSR, MOVEM, or LEA.
+00000564                           615  *
+00000564                           616  * Registers used: D3 for SRC/DST mod, D2 for SRC/DST reg, A3 to get back from the subbranch,
+00000564                           617  *                 D5, D4 for BCLR, D6 for recognizing MOVEM
+00000564                           618  *
+00000564                           619  * Precondition: FIRST_3, SECOND_3, THIRD_3, FOURTH_3
+00000564                           620  *
+00000564                           621  * Postcondition: X
+00000564                           622  **********************************************************************************
+00000564                           623  LOAD_0100:
+00000564  4283                     624              CLR.L   D3
+00000566  4282                     625              CLR.L   D2
+00000568  267C 00000000            626              MOVEA.L #0, A3
+0000056E                           627  
+Line 628 ERROR: Undefined symbol
+0000056E  0C39 0002 005455B8       628              CMPI.B  #%010, FIRST_3
+00000576  6700 0006                629              BEQ     MYBE_NEG
+0000057A  6600 000E                630              BNE     NOT_NEG
+Line 631 ERROR: Undefined symbol
+0000057E  0C39 0003 005455B8       631  MYBE_NEG    CMPI.B  #%011, SECOND_3
+00000586  6D00 0096                632              BLT     NEG
+0000058A                           633  
+Line 634 ERROR: Undefined symbol
+0000058A  0C39 0007 005455B8       634  NOT_NEG     CMPI.B  #%111, FIRST_3
+00000592  6700 0006                635              BEQ     MYBE_RTS1
+00000596  6600 002E                636              BNE     NOT_RTS
+Line 637 ERROR: Undefined symbol
+0000059A  0C39 0001 005455B8       637  MYBE_RTS1   CMPI.B  #%001, SECOND_3
+000005A2  6700 0006                638              BEQ     MYBE_RTS2
+000005A6  6600 001E                639              BNE     NOT_RTS
+Line 640 ERROR: Undefined symbol
+000005AA  0C39 0006 005455B8       640  MYBE_RTS2   CMPI.B  #%110, THIRD_3
+000005B2  6700 0006                641              BEQ     MYBE_RTS3
+000005B6  6600 000E                642              BNE     NOT_RTS
+Line 643 ERROR: Undefined symbol
+000005BA  0C39 0005 005455B8       643  MYBE_RTS3   CMPI.B  #%101, FOURTH_3
+000005C2  6700 009C                644              BEQ     RTS
+000005C6                           645              
+Line 646 ERROR: Undefined symbol
+000005C6  0C39 0007 005455B8       646  NOT_RTS     CMPI.B  #%111, FIRST_3
+000005CE  6700 0006                647              BEQ     MYBE_JSR
+000005D2  6600 000E                648              BNE     NOT_JSR
+Line 649 ERROR: Undefined symbol
+000005D6  0C39 0002 005455B8       649  MYBE_JSR    CMPI.B  #%010, SECOND_3
+000005DE  6700 0088                650              BEQ     JSR
+000005E2                           651  
+000005E2  4286                     652  NOT_JSR     CLR.L   D6
+Line 653 ERROR: Undefined symbol
+000005E4  1C39 004DBD16            653              MOVE.B  FIRST_3, D6
+000005EA  0206 0005                654              ANDI.B  #%101, D6 * Making %1X0 -> %100
+000005EE  0C06 0004                655              CMPI.B  #%100, D6
+000005F2  6700 0006                656              BEQ     MYBE_MOVEM
+000005F6  6600 0014                657              BNE     NOT_MOVEM
+000005FA                           658              
+Line 659 ERROR: Undefined symbol
+000005FA  1C39 004DBD16            659  MYBE_MOVEM  MOVE.B  SECOND_3, D6
+00000600  0206 0006                660              ANDI.B  #%110, D6
+00000604  0C06 0002                661              CMPI.B  #%010, D6
+00000608  6700 0094                662              BEQ     MOVEM
+0000060C                           663              
+Line 664 ERROR: Undefined symbol
+0000060C  0C39 0007 005455B8       664  NOT_MOVEM   CMPI.B  #%111, SECOND_3
+00000614  6700 0090                665              BEQ     LEA
+00000618                           666              
+00000618  4EF9 00000B2E            667              JMP     INVALID
+0000061E                           668  
+0000061E                           669  NEG:
+0000061E  367C 0646                670              MOVEA.W #NEG_BACK, A3
+Line 671 ERROR: Undefined symbol
+00000622  0C39 0000 005455B8       671              CMPI.B  #%000, SECOND_3
+0000062A  6700 0378                672              BEQ     SIZE_B
+Line 673 ERROR: Undefined symbol
+0000062E  0C39 0001 005455B8       673              CMPI.B  #%001, SECOND_3
+00000636  6700 0374                674              BEQ     SIZE_W
+Line 675 ERROR: Undefined symbol
+0000063A  0C39 0002 005455B8       675              CMPI.B  #%010, SECOND_3
+00000642  6700 0370                676              BEQ     SIZE_L
+00000646                           677              
+Line 678 ERROR: Undefined symbol
+00000646  1639 004DBD16            678  NEG_BACK    MOVE.B  THIRD_3, D3
+Line 679 ERROR: Undefined symbol
+0000064C  1439 004DBD16            679              MOVE.B  FOURTH_3, D2
+00000652                           680  
+00000652  4EB9 000008FE            681              JSR     LOAD_EA
+00000658  4EB9 00000A62            682              JSR     LOAD_NEW_LINE
+0000065E  4E75                     683              RTS
+00000660                           684              
+00000660                           685  RTS:
+00000660  4EB9 00000A62            686              JSR     LOAD_NEW_LINE
+00000666  4E75                     687              RTS
+00000668                           688  
+00000668                           689  JSR:
+00000668  367C 0684                690              MOVEA.W #JSR_BACK, A3
+Line 691 ERROR: Undefined symbol
+0000066C  0C39 0000 005455B8       691              CMPI.B  #%000, FOURTH_3
+00000674  6700 0336                692              BEQ     SIZE_W
+Line 693 ERROR: Undefined symbol
+00000678  0C39 0001 005455B8       693              CMPI.B  #%001, FOURTH_3
+00000680  6700 0332                694              BEQ     SIZE_L
+00000684                           695              
+Line 696 ERROR: Undefined symbol
+00000684  1639 004DBD16            696  JSR_BACK    MOVE.B  THIRD_3, D3
+Line 697 ERROR: Undefined symbol
+0000068A  1439 004DBD16            697              MOVE.B  FOURTH_3, D2
+00000690                           698              
+00000690  4EB9 000008FE            699              JSR     LOAD_EA
+00000696  4EB9 00000A62            700              JSR     LOAD_NEW_LINE
+0000069C  4E75                     701              RTS
+0000069E                           702  
+0000069E                           703  MOVEM:
+0000069E  4EB9 00000A62            704              JSR     LOAD_NEW_LINE
+000006A4  4E75                     705              RTS
+000006A6                           706      
+000006A6                           707  LEA:
+000006A6  367C 06C2                708              MOVEA.W #LEA_BACK, A3
+Line 709 ERROR: Undefined symbol
+000006AA  0C39 0000 005455B8       709              CMPI.B  #%000, FOURTH_3
+000006B2  6700 02F8                710              BEQ     SIZE_W
+Line 711 ERROR: Undefined symbol
+000006B6  0C39 0001 005455B8       711              CMPI.B  #%001, FOURTH_3
+000006BE  6700 02F4                712              BEQ     SIZE_L
+000006C2                           713              
+Line 714 ERROR: Undefined symbol
+000006C2  1639 004DBD16            714  LEA_BACK    MOVE.B  THIRD_3, D3
+Line 715 ERROR: Undefined symbol
+000006C8  1439 004DBD16            715              MOVE.B  FOURTH_3, D2
+000006CE                           716              
+000006CE  4EB9 000008FE            717              JSR     LOAD_EA
+000006D4  4EB9 00000A7E            718              JSR     LOAD_COMMA_SPACE
+000006DA                           719              
+000006DA  163C 0001                720              MOVE.B  #%001, D3
+Line 721 ERROR: Undefined symbol
+000006DE  1439 004DBD16            721              MOVE.B  FIRST_3, D2
+000006E4                           722              
+000006E4  4EB9 000008FE            723              JSR     LOAD_EA
+000006EA  4EB9 00000A62            724              JSR     LOAD_NEW_LINE
+000006F0  4E75                     725              RTS
+000006F2                           726  
+000006F2                           727  * <EA>
+000006F2                           728  **********************************************************************************
+000006F2                           729  * Description: Once the mnemonic is 0000, it is either BCLR, CMPI, ORI, or Dynamic BCLR.
+000006F2                           730  *
+000006F2                           731  * Registers used: D3 for SRC/DST mod, D2 for SRC/DST reg, A3 to get back from the subbranch,
+000006F2                           732  *                 D5, D4 for BCLR
+000006F2                           733  *
+000006F2                           734  * Precondition: FIRST_3, SECOND_3, THIRD_3, FOURTH_3
+000006F2                           735  *
+000006F2                           736  * Postcondition: X
+000006F2                           737  **********************************************************************************
+000006F2                           738  LOAD_0000:
+000006F2  4283                     739              CLR.L   D3
+000006F4  4282                     740              CLR.L   D2
+000006F6  267C 00000000            741              MOVEA.L #0, A3
+000006FC                           742  
+Line 743 ERROR: Undefined symbol
+000006FC  0C39 0000 005455B8       743              CMPI.B  #%000, FIRST_3
+00000704  6700 0006                744              BEQ     MYBE_ORI
+00000708  6600 000E                745              BNE     NOT_ORI
+Line 746 ERROR: Undefined symbol
+0000070C  0C39 0003 005455B8       746  MYBE_ORI    CMPI.B  #%011, SECOND_3
+00000714  6D00 004C                747              BLT     ORI_CMPI            
+00000718                           748  
+Line 749 ERROR: Undefined symbol
+00000718  0C39 0006 005455B8       749  NOT_ORI     CMPI.B  #%110, FIRST_3
+00000720  6700 0006                750              BEQ     MYBE_CMPI
+00000724  6600 000E                751              BNE     NOT_CMPI
+Line 752 ERROR: Undefined symbol
+00000728  0C39 0003 005455B8       752  MYBE_CMPI   CMPI.B  #%011, SECOND_3
+00000730  6D00 0030                753              BLT     ORI_CMPI
+00000734                           754              
+Line 755 ERROR: Undefined symbol
+00000734  0C39 0004 005455B8       755  NOT_CMPI    CMPI.B  #%100, FIRST_3
+0000073C  6700 0006                756              BEQ     MYBE_BCLR
+00000740  6600 000E                757              BNE     NOT_BCLR
+Line 758 ERROR: Undefined symbol
+00000744  0C39 0002 005455B8       758  MYBE_BCLR   CMPI.B  #%010, SECOND_3
+0000074C  6700 0086                759              BEQ     BCLR
+00000750                           760  
+Line 761 ERROR: Undefined symbol
+00000750  0C39 0006 005455B8       761  NOT_BCLR    CMPI.B  #%110, SECOND_3
+00000758  6700 00E4                762              BEQ     DYNMC_BCLR
+0000075C                           763              
+0000075C  4EF9 00000B2E            764              JMP     INVALID
+00000762                           765              
+00000762                           766  ***vvvvvvvvvvvvvvvvvvv***
+00000762  367C 078A                767  ORI_CMPI    MOVEA.W #BACK, A3
+Line 768 ERROR: Undefined symbol
+00000766  0C39 0000 005455B8       768              CMPI.B  #%000, SECOND_3
+0000076E  6700 0234                769              BEQ     SIZE_B
+Line 770 ERROR: Undefined symbol
+00000772  0C39 0001 005455B8       770              CMPI.B  #%001, SECOND_3
+0000077A  6700 0230                771              BEQ     SIZE_W
+Line 772 ERROR: Undefined symbol
+0000077E  0C39 0002 005455B8       772              CMPI.B  #%010, SECOND_3
+00000786  6700 022C                773              BEQ     SIZE_L
+0000078A                           774  
+0000078A  163C 0007                775  BACK        MOVE.B  #%111, D3
+0000078E  143C 0004                776              MOVE.B  #%100, D2
+00000792                           777              
+00000792  4EB9 000008FE            778              JSR     LOAD_EA
+00000798  4EB9 00000A7E            779              JSR     LOAD_COMMA_SPACE
+0000079E                           780              
+0000079E  367C 07BA                781              MOVEA.W #BACK2, A3   
+Line 782 ERROR: Undefined symbol
+000007A2  0C39 0000 005455B8       782              CMPI.B  #%000, FOURTH_3
+000007AA  6700 0200                783              BEQ     SIZE_W
+Line 784 ERROR: Undefined symbol
+000007AE  0C39 0001 005455B8       784              CMPI.B  #%001, FOURTH_3
+000007B6  6700 01FC                785              BEQ     SIZE_L
+000007BA                           786  
+Line 787 ERROR: Undefined symbol
+000007BA  1639 004DBD16            787  BACK2       MOVE.B  THIRD_3, D3
+Line 788 ERROR: Undefined symbol
+000007C0  1439 004DBD16            788              MOVE.B  FOURTH_3, D2
+000007C6                           789          
+000007C6  4EB9 000008FE            790              JSR     LOAD_EA
+000007CC  4EB9 00000A62            791              JSR     LOAD_NEW_LINE
+000007D2  4E75                     792              RTS
+000007D4                           793  ***^^^^^^^^^^^^^^^^^^^***
+000007D4                           794  
+000007D4                           795  ***vvvvvvvvvvvvvvvvvvv***
+000007D4  4285                     796  BCLR        CLR.L   D5
+000007D6  4284                     797              CLR.L   D4
+000007D8  247C 00000000            798              MOVEA.L #0, A2
+000007DE                           799  
+Line 800 ERROR: Undefined symbol
+000007DE  3A3C BD16                800              MOVE.W  #END_ADDRESS, D5
+000007E2  9A4D                     801              SUB.W   A5, D5
+000007E4  0C45 0002                802              CMPI.W  #$2, D5
+000007E8  6D00 0344                803              BLT     INVALID
+000007EC                           804  
+000007EC  381D                     805              MOVE.W  (A5)+, D4
+000007EE  4284                     806              CLR.L   D4
+000007F0  381D                     807              MOVE.W  (A5)+, D4
+000007F2  0244 00FF                808              ANDI.W  #$00FF, D4
+000007F6  247C 00000802            809              MOVEA.L #BACK4, A2
+000007FC  4EF9 00000A2E            810              JMP     LOAD_IMMDTE
+00000802                           811              
+00000802  4EB9 00000A7E            812  BACK4       JSR     LOAD_COMMA_SPACE
+00000808                           813              
+00000808  367C 0824                814              MOVEA.W #BACK3, A3
+Line 815 ERROR: Undefined symbol
+0000080C  0C39 0000 005455B8       815              CMPI.B  #%000, FOURTH_3
+00000814  6700 0196                816              BEQ     SIZE_W
+Line 817 ERROR: Undefined symbol
+00000818  0C39 0001 005455B8       817              CMPI.B  #%001, FOURTH_3
+00000820  6700 0192                818              BEQ     SIZE_L
+00000824                           819  
+Line 820 ERROR: Undefined symbol
+00000824  1639 004DBD16            820  BACK3       MOVE.B  THIRD_3, D3
+Line 821 ERROR: Undefined symbol
+0000082A  1439 004DBD16            821              MOVE.B  FOURTH_3, D2
+00000830                           822  
+00000830  4EB9 000008FE            823              JSR     LOAD_EA
+00000836  4EB9 00000A62            824              JSR     LOAD_NEW_LINE
+0000083C                           825  
+0000083C  4E75                     826              RTS
+0000083E                           827  ***^^^^^^^^^^^^^^^^^^^***
+0000083E                           828  
+0000083E                           829  ***vvvvvvvvvvvvvvvvvvv***
+0000083E  163C 0000                830  DYNMC_BCLR  MOVE.B  #%000, D3
+Line 831 ERROR: Undefined symbol
+00000842  1439 004DBD16            831              MOVE.B  FIRST_3, D2
+00000848                           832              
+00000848  4EB9 000008FE            833              JSR     LOAD_EA
+0000084E  4EB9 00000A7E            834              JSR     LOAD_COMMA_SPACE
+00000854                           835  
+00000854  367C 0870                836              MOVEA.W #BACK5, A3
+Line 837 ERROR: Undefined symbol
+00000858  0C39 0000 005455B8       837              CMPI.B  #%000, FOURTH_3
+00000860  6700 014A                838              BEQ     SIZE_W
+Line 839 ERROR: Undefined symbol
+00000864  0C39 0001 005455B8       839              CMPI.B  #%001, FOURTH_3
+0000086C  6700 0146                840              BEQ     SIZE_L
+00000870                           841              
+Line 842 ERROR: Undefined symbol
+00000870  1639 004DBD16            842  BACK5       MOVE.B  THIRD_3, D3
+Line 843 ERROR: Undefined symbol
+00000876  1439 004DBD16            843              MOVE.B  FOURTH_3, D2
+0000087C                           844              
+0000087C  4EB9 000008FE            845              JSR     LOAD_EA
+00000882  4EB9 00000A62            846              JSR     LOAD_NEW_LINE
+00000888                           847              
+00000888  4E75                     848              RTS
+0000088A                           849  ***^^^^^^^^^^^^^^^^^^^***
+0000088A                           850  
+0000088A                           851  * <EA>
+0000088A                           852  **********************************************************************************
+0000088A                           853  * Description: Once the mnemonic is 00XX, it is either MOVE or MOVEA. Checks the 3-bit bundles and
+0000088A                           854  *              the size of immediate/address values if necessary.
+0000088A                           855  *
+0000088A                           856  * Registers used: D3 for SRC/DST mod, D2 for SRC/DST reg, A3 to get back from the subbranch
+0000088A                           857  *
+0000088A                           858  * Precondition: FIRST_3, SECOND_3, THIRD_3, FOURTH_3
+0000088A                           859  *
+0000088A                           860  * Postcondition: X
+0000088A                           861  **********************************************************************************
+0000088A                           862  LOAD_00XX:
+0000088A  4283                     863          CLR.L   D3
+0000088C  4282                     864          CLR.L   D2
+0000088E  267C 00000000            865          MOVEA.L #0, A3
+00000894                           866          
+00000894  367C 08B0                867          MOVEA.W #GOO, A3
+Line 868 ERROR: Undefined symbol
+00000898  0C39 0003 005455B8       868          CMPI.B  #%0011, MNEMONIC
+000008A0  6700 010A                869          BEQ     SIZE_W
+Line 870 ERROR: Undefined symbol
+000008A4  0C39 0002 005455B8       870          CMPI.B  #%0010, MNEMONIC
+000008AC  6700 0106                871          BEQ     SIZE_L
+000008B0                           872  
+Line 873 ERROR: Undefined symbol
+000008B0  1639 004DBD16            873  GOO     MOVE.B  THIRD_3, D3
+Line 874 ERROR: Undefined symbol
+000008B6  1439 004DBD16            874          MOVE.B  FOURTH_3, D2
+000008BC                           875      
+000008BC  4EB9 000008FE            876          JSR     LOAD_EA
+000008C2  4EB9 00000A7E            877          JSR     LOAD_COMMA_SPACE
+000008C8                           878      
+000008C8  367C 08E4                879          MOVEA.W #GOO2, A3
+Line 880 ERROR: Undefined symbol
+000008CC  0C39 0000 005455B8       880          CMPI.B  #%000, FIRST_3
+000008D4  6700 00D6                881          BEQ     SIZE_W
+Line 882 ERROR: Undefined symbol
+000008D8  0C39 0001 005455B8       882          CMPI.B  #%001, FIRST_3
+000008E0  6700 00D2                883          BEQ     SIZE_L
+000008E4                           884      
+Line 885 ERROR: Undefined symbol
+000008E4  1639 004DBD16            885  GOO2    MOVE.B  SECOND_3, D3
+Line 886 ERROR: Undefined symbol
+000008EA  1439 004DBD16            886          MOVE.B  FIRST_3, D2
+000008F0                           887              
+000008F0  4EB9 000008FE            888          JSR     LOAD_EA
+000008F6  4EB9 00000A62            889          JSR     LOAD_NEW_LINE
+000008FC                           890      
+000008FC  4E75                     891          RTS
+000008FE                           892  **************************************************
+000008FE                           893  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+000008FE                           894  
+000008FE                           895  
+000008FE                           896  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+000008FE                           897  * LOAD_THIS FUNCTIONS (HIGH LEVEL) ***************
+000008FE                           898  
+000008FE                           899  * <EA>
+000008FE                           900  **********************************************************************************
+000008FE                           901  * Description: Checks the SRC/DST mod
+000008FE                           902  *
+000008FE                           903  * Registers used: A2 for branching back from subbranches
+000008FE                           904  *
+000008FE                           905  * Precondition: D3 for SRC/DST mod
+000008FE                           906  *
+000008FE                           907  * Postcondition: X
+000008FE                           908  **********************************************************************************
+000008FE                           909  LOAD_EA:
+000008FE  347C 090E                910          MOVEA.W #SAVED, A2 * remember to come back!
+00000902                           911  
+00000902  0C43 0007                912          CMPI    #%111, D3
+00000906  6D00 0008                913          BLT     LOAD_LT_111
+0000090A  6C00 0032                914          BGE     LOAD_GE_111
+0000090E                           915      
+0000090E  4E75                     916  SAVED   RTS
+00000910                           917  
+00000910                           918  * <EA>
+00000910                           919  **********************************************************************************
+00000910                           920  * Description: Checks the SRC/DST mod where it is not immediate/address value
+00000910                           921  *
+00000910                           922  * Registers used: X
+00000910                           923  *
+00000910                           924  * Precondition: D3 for SRC/DST mod
+00000910                           925  *
+00000910                           926  * Postcondition: X
+00000910                           927  **********************************************************************************
+00000910                           928  LOAD_LT_111:
+00000910  0C43 0000                929      CMPI    #%000, D3 * e.g. D3
+00000914  6700 00A6                930      BEQ     LOAD_DATA_REGISTER
+00000918  0C43 0001                931      CMPI    #%001, D3 * e.g. A3
+0000091C  6700 00B0                932      BEQ     LOAD_ADDR_REGISTER
+00000920  0C43 0002                933      CMPI    #%010, D3 * e.g. (A3)
+00000924  6700 00BA                934      BEQ     LOAD_ADDRESS
+00000928  0C43 0003                935      CMPI    #%011, D3 * e.g. (A3)+
+0000092C  6700 00C4                936      BEQ     LOAD_ADDRESS_W_POST_INC
+00000930  0C43 0004                937      CMPI    #%100, D3 * e.g. -(A3)
+00000934  6700 00C8                938      BEQ     LOAD_ADDRESS_W_PRE_DEC
+00000938                           939      
+00000938  4EF9 00000B2E            940      JMP     INVALID
+0000093E                           941      
+0000093E                           942  * <EA>
+0000093E                           943  **********************************************************************************
+0000093E                           944  * Description: Checks the SRC/DST mod where it is immediate/address value
+0000093E                           945  *
+0000093E                           946  * Registers used: D5 for SUB.W, D4 for immediate/address value extraction
+0000093E                           947  *
+0000093E                           948  * Precondition: A5 for START_ADDRESS iteration, TRAILING_SIZE for size of the immediate/address value
+0000093E                           949  *
+0000093E                           950  * Postcondition: IS_INVALID flag set if EA bit not valid
+0000093E                           951  **********************************************************************************
+0000093E                           952  LOAD_GE_111:
+0000093E  4285                     953              CLR.L   D5
+00000940  4284                     954              CLR.L   D4
+00000942                           955  
+Line 956 ERROR: Undefined symbol
+00000942  3A3C BD16                956              MOVE.W  #END_ADDRESS, D5
+00000946  9A4D                     957              SUB.W   A5, D5
+00000948  BA78 000A                958              CMP.W   TRAILING_SIZE, D5
+0000094C  6D00 01E0                959              BLT     INVALID
+00000950                           960  
+00000950  0C78 0001 000A           961              CMPI.W  #$1, TRAILING_SIZE
+00000956  6700 0016                962              BEQ     CHUMP_BYTE
+0000095A  0C78 0002 000A           963              CMPI.W  #$2, TRAILING_SIZE
+00000960  6700 0014                964              BEQ     CHUMP_WORD
+00000964  0C78 0004 000A           965              CMPI.W  #$4, TRAILING_SIZE
+0000096A  6700 0012                966              BEQ     CHUMP_LONG
+0000096E                           967  
+0000096E  381D                     968  CHUMP_BYTE  MOVE.W  (A5)+, D4 * Minimum 4 hex (e.g. MOVE.B #1, $2 = XXXX 0001 0002)
+00000970  4EF9 00000986            969              JMP     GO
+00000976                           970  
+00000976  381D                     971  CHUMP_WORD  MOVE.W  (A5)+, D4
+00000978  4EF9 00000986            972              JMP     GO
+0000097E                           973              
+0000097E  281D                     974  CHUMP_LONG  MOVE.L  (A5)+, D4
+00000980  4EF9 00000986            975              JMP     GO
+00000986                           976  
+00000986  0C42 0000                977  GO          CMPI    #%000, D2
+0000098A  6700 007E                978              BEQ     LOAD_ABS_SHORT
+0000098E  0C42 0001                979              CMPI    #%001, D2
+00000992  6700 0088                980              BEQ     LOAD_ABS_LONG
+00000996  0C42 0004                981              CMPI    #%100, D2
+0000099A  6700 0092                982              BEQ     LOAD_IMMDTE
+0000099E                           983      
+0000099E  4EF9 00000B2E            984              JMP     INVALID
+000009A4                           985  * <EA>
+000009A4                           986  **********************************************************************************
+000009A4                           987  * Description: Puts in the proper value in TRAILING_SIZE based on the immediate/address value size
+000009A4                           988  *
+000009A4                           989  * Registers used: X
+000009A4                           990  *
+000009A4                           991  * Precondition: X
+000009A4                           992  *
+000009A4                           993  * Postcondition: Set up TRAILING_SIZE
+000009A4                           994  **********************************************************************************
+000009A4                           995  TRAILING_HELPER:            
+000009A4  31FC 0002 000A           996  SIZE_B  MOVE.W  #$2, TRAILING_SIZE
+000009AA  4ED3                     997          JMP     (A3)
+000009AC                           998  
+000009AC  31FC 0002 000A           999  SIZE_W  MOVE.W  #$2, TRAILING_SIZE
+000009B2  4ED3                    1000          JMP     (A3)
+000009B4                          1001          
+000009B4  31FC 0004 000A          1002  SIZE_L  MOVE.W  #$4, TRAILING_SIZE
+000009BA  4ED3                    1003          JMP     (A3)
+000009BC                          1004  **************************************************
+000009BC                          1005  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+000009BC                          1006  
+000009BC                          1007  
+000009BC                          1008  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+000009BC                          1009  * LOAD_THIS FUNCTIONS (INTERMEDIATE LEVEL) *******
+000009BC                          1010  
+000009BC                          1011  * <EA>
+000009BC                          1012  **********************************************************************************
+000009BC                          1013  * Description: Loads ASCII for e.g. D3 in EA_BUFFER
+000009BC                          1014  *
+000009BC                          1015  * Registers used: D0 for actually loading
+000009BC                          1016  *
+000009BC                          1017  * Precondition: D2 for SRC/DST reg
+000009BC                          1018  *
+000009BC                          1019  * Postcondition: X
+000009BC                          1020  **********************************************************************************
+000009BC                          1021  LOAD_DATA_REGISTER:
+000009BC  4280                    1022      CLR.L   D0
+000009BE                          1023      
+000009BE  4EB9 00000A96           1024      JSR     LOAD_D
+000009C4  1002                    1025      MOVE.B  D2, D0
+000009C6  4EB9 00000B0A           1026      JSR     LOAD_NUM
+000009CC  4ED2                    1027      JMP     (A2)
+000009CE                          1028  
+000009CE                          1029  * <EA>
+000009CE                          1030  **********************************************************************************
+000009CE                          1031  * Description: Loads ASCII for e.g. A3 in EA_BUFFER
+000009CE                          1032  *
+000009CE                          1033  * Registers used: D0 for actually loading
+000009CE                          1034  *
+000009CE                          1035  * Precondition: D2 for SRC/DST reg
+000009CE                          1036  *
+000009CE                          1037  * Postcondition: X
+000009CE                          1038  **********************************************************************************
+000009CE                          1039  LOAD_ADDR_REGISTER:
+000009CE  4280                    1040      CLR.L   D0
+000009D0                          1041  
+000009D0  4EB9 00000AA4           1042      JSR     LOAD_A
+000009D6  1002                    1043      MOVE.B  D2, D0
+000009D8  4EB9 00000B0A           1044      JSR     LOAD_NUM
+000009DE  4ED2                    1045      JMP     (A2)
+000009E0                          1046  
+000009E0                          1047  * <EA>
+000009E0                          1048  **********************************************************************************
+000009E0                          1049  * Description: Loads ASCII for e.g. (A3) in EA_BUFFER
+000009E0                          1050  *
+000009E0                          1051  * Registers used: X
+000009E0                          1052  *
+000009E0                          1053  * Precondition: X
+000009E0                          1054  *
+000009E0                          1055  * Postcondition: X
+000009E0                          1056  **********************************************************************************
+000009E0                          1057  LOAD_ADDRESS:
+000009E0  4EB9 00000AB2           1058      JSR     LOAD_PTHSIS_OPEN
+000009E6  4EB8 09CE               1059      JSR     LOAD_ADDR_REGISTER
+000009EA  4EB9 00000AC0           1060      JSR     LOAD_PTHSIS_CLSD
+000009F0  4ED2                    1061      JMP     (A2)
+000009F2                          1062  
+000009F2                          1063  * <EA>
+000009F2                          1064  **********************************************************************************
+000009F2                          1065  * Description: Loads ASCII for e.g. (A3)+ in EA_BUFFER
+000009F2                          1066  *
+000009F2                          1067  * Registers used: X
+000009F2                          1068  *
+000009F2                          1069  * Precondition: X
+000009F2                          1070  *
+000009F2                          1071  * Postcondition: X
+000009F2                          1072  **********************************************************************************
+000009F2                          1073  LOAD_ADDRESS_W_POST_INC:
+000009F2  4EB8 09E0               1074      JSR     LOAD_ADDRESS
+000009F6  4EB9 00000AEA           1075      JSR     LOAD_PLUS_SIGN
+000009FC  4ED2                    1076      JMP     (A2)
+000009FE                          1077  
+000009FE                          1078  * <EA>
+000009FE                          1079  **********************************************************************************
+000009FE                          1080  * Description: Loads ASCII for e.g. -(A3) in EA_BUFFER
+000009FE                          1081  *
+000009FE                          1082  * Registers used: X
+000009FE                          1083  *
+000009FE                          1084  * Precondition: X
+000009FE                          1085  *
+000009FE                          1086  * Postcondition: X
+000009FE                          1087  **********************************************************************************
+000009FE                          1088  LOAD_ADDRESS_W_PRE_DEC:
+000009FE  4EB9 00000AF8           1089      JSR     LOAD_MINUS_SIGN
+00000A04  4EB8 09E0               1090      JSR     LOAD_ADDRESS
+00000A08  4ED2                    1091      JMP     (A2)
+00000A0A                          1092  
+00000A0A                          1093  * <EA>
+00000A0A                          1094  **********************************************************************************
+00000A0A                          1095  * Description: Loads ASCII for e.g. $1234 in EA_BUFFER
+00000A0A                          1096  *
+00000A0A                          1097  * Registers used: D0 for actually loading
+00000A0A                          1098  *
+00000A0A                          1099  * Precondition: D4 for immediate/address value  
+00000A0A                          1100  *
+00000A0A                          1101  * Postcondition: X
+00000A0A                          1102  **********************************************************************************
+00000A0A                          1103  LOAD_ABS_SHORT:
+00000A0A  4280                    1104      CLR.L   D0
+00000A0C                          1105  
+00000A0C  4EB9 00000ACE           1106      JSR     LOAD_HEX_SIGN
+00000A12  3004                    1107      MOVE.W  D4, D0
+00000A14  4EB9 00000A38           1108      JSR     LOAD_BYTES
+00000A1A  4ED2                    1109      JMP     (A2)
+00000A1C                          1110  
+00000A1C                          1111  * <EA>
+00000A1C                          1112  **********************************************************************************
+00000A1C                          1113  * Description: Loads ASCII for e.g. $12345678 in EA_BUFFER
+00000A1C                          1114  *
+00000A1C                          1115  * Registers used: D0 for actually loading
+00000A1C                          1116  *
+00000A1C                          1117  * Precondition: D4 for immediate/address value  
+00000A1C                          1118  *
+00000A1C                          1119  * Postcondition: X
+00000A1C                          1120  **********************************************************************************
+00000A1C                          1121  LOAD_ABS_LONG:
+00000A1C  4280                    1122      CLR.L   D0
+00000A1E                          1123  
+00000A1E  4EB9 00000ACE           1124      JSR     LOAD_HEX_SIGN
+00000A24  2004                    1125      MOVE.L  D4, D0
+00000A26  4EB9 00000A38           1126      JSR     LOAD_BYTES
+00000A2C  4ED2                    1127      JMP     (A2)
+00000A2E                          1128  
+00000A2E                          1129  * <EA>
+00000A2E                          1130  **********************************************************************************
+00000A2E                          1131  * Description: Loads ASCII for e.g. #$1234 in EA_BUFFER
+00000A2E                          1132  *
+00000A2E                          1133  * Registers used: X
+00000A2E                          1134  *
+00000A2E                          1135  * Precondition: X 
+00000A2E                          1136  *
+00000A2E                          1137  * Postcondition: X
+00000A2E                          1138  **********************************************************************************
+00000A2E                          1139  LOAD_IMMDTE:
+00000A2E  4EB9 00000ADC           1140      JSR     LOAD_IMMDTE_VALU
+00000A34  4EF8 0A1C               1141      JMP     LOAD_ABS_LONG
+00000A38                          1142  
+00000A38                          1143  **************************************************
+00000A38                          1144  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+00000A38                          1145  
+00000A38                          1146  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+00000A38                          1147  * LOAD_THIS FUNCTIONS (LOW LEVEL) ****************
+00000A38                          1148  
+00000A38                          1149  * <EA>
+00000A38                          1150  **********************************************************************************
+00000A38                          1151  * Description: Shifts the hex to the left and loads from the left-most hex to EA_BUFFER in ASCII
+00000A38                          1152  *
+00000A38                          1153  * Registers used: D5 for the loop counter, D1 for loop assist
+00000A38                          1154  *
+00000A38                          1155  * Precondition: D0 for the immediate/address value  
+00000A38                          1156  *
+00000A38                          1157  * Postcondition: X
+00000A38                          1158  **********************************************************************************
+00000A38                          1159  LOAD_BYTES:
+00000A38  4285                    1160          CLR.L   D5
+00000A3A  4281                    1161          CLR.L   D1
+00000A3C                          1162  
+00000A3C  2200                    1163          MOVE.L  D0, D1
+00000A3E  1A3C 0008               1164          MOVE.B  #8, D5
+00000A42  0C45 0000               1165  LOOP    CMPI    #0, D5
+00000A46  6E00 0004               1166          BGT     ROTATE
+00000A4A  4E75                    1167          RTS
+00000A4C                          1168      
+00000A4C  E999                    1169  ROTATE  ROL.L   #$04, D1
+00000A4E  1001                    1170          MOVE.B  D1, D0
+00000A50  0280 0000000F           1171          ANDI.L  #$0000000F, D0
+00000A56  4EB9 00000B0A           1172          JSR     LOAD_NUM
+00000A5C  5345                    1173          SUBI    #1, D5
+00000A5E  4EF8 0A42               1174          JMP     LOOP        
+00000A62                          1175  
+00000A62                          1176  * <EA>
+00000A62                          1177  **********************************************************************************
+00000A62                          1178  * Description: Loads ASCII for CR, LF 
+00000A62                          1179  *
+00000A62                          1180  * Registers used: D0 for actually loading
+00000A62                          1181  *
+00000A62                          1182  * Precondition: CR, LF 
+00000A62                          1183  *
+00000A62                          1184  * Postcondition: X
+00000A62                          1185  **********************************************************************************
+00000A62                          1186  LOAD_NEW_LINE:
+00000A62  4280                    1187      CLR.L   D0
+00000A64                          1188  
+Line 1189 ERROR: Undefined symbol
+00000A64  1039 004DBD16           1189      MOVE.B  CR, D0
+00000A6A  4EB9 00000B06           1190      JSR     LOAD_THIS_SHIT
+Line 1191 ERROR: Undefined symbol
+00000A70  1039 004DBD16           1191      MOVE.B  LF, D0
+00000A76  4EB9 00000B06           1192      JSR     LOAD_THIS_SHIT
+00000A7C  4E75                    1193      RTS
+00000A7E                          1194  
+00000A7E                          1195  * <EA>
+00000A7E                          1196  **********************************************************************************
+00000A7E                          1197  * Description: Loads ASCII for ', ' 
+00000A7E                          1198  *
+00000A7E                          1199  * Registers used: D0 for actually loading
+00000A7E                          1200  *
+00000A7E                          1201  * Precondition: COMMA, SPACE
+00000A7E                          1202  *
+00000A7E                          1203  * Postcondition: X
+00000A7E                          1204  **********************************************************************************
+00000A7E                          1205  LOAD_COMMA_SPACE:
+00000A7E  4280                    1206      CLR.L   D0
+00000A80                          1207  
+00000A80  1038 0008               1208      MOVE.B  COMMA, D0
+00000A84  4EB9 00000B06           1209      JSR     LOAD_THIS_SHIT
+00000A8A  1038 0009               1210      MOVE.B  SPACE, D0
+00000A8E  4EB9 00000B06           1211      JSR     LOAD_THIS_SHIT
+00000A94                          1212      
+00000A94  4E75                    1213      RTS
+00000A96                          1214  
+00000A96                          1215  * <EA>
+00000A96                          1216  **********************************************************************************
+00000A96                          1217  * Description: Loads ASCII for D 
+00000A96                          1218  *
+00000A96                          1219  * Registers used: D0 for actually loading
+00000A96                          1220  *
+00000A96                          1221  * Precondition: DATA
+00000A96                          1222  *
+00000A96                          1223  * Postcondition: X
+00000A96                          1224  **********************************************************************************
+00000A96                          1225  LOAD_D:
+00000A96  4280                    1226      CLR.L   D0
+00000A98                          1227  
+00000A98  1038 0001               1228      MOVE.B  DATA, D0
+00000A9C  4EB9 00000B06           1229      JSR     LOAD_THIS_SHIT
+00000AA2  4E75                    1230      RTS
+00000AA4                          1231  
+00000AA4                          1232  * <EA>
+00000AA4                          1233  **********************************************************************************
+00000AA4                          1234  * Description: Loads ASCII for A
+00000AA4                          1235  *
+00000AA4                          1236  * Registers used: D0 for actually loading
+00000AA4                          1237  *
+00000AA4                          1238  * Precondition: ADDRESS
+00000AA4                          1239  *
+00000AA4                          1240  * Postcondition: X
+00000AA4                          1241  **********************************************************************************
+00000AA4                          1242  LOAD_A:
+00000AA4  4280                    1243      CLR.L   D0
+00000AA6                          1244  
+00000AA6  1038 0000               1245      MOVE.B  ADDRESS, D0
+00000AAA  4EB9 00000B06           1246      JSR     LOAD_THIS_SHIT
+00000AB0  4E75                    1247      RTS
+00000AB2                          1248  
+00000AB2                          1249  * <EA>
+00000AB2                          1250  **********************************************************************************
+00000AB2                          1251  * Description: Loads ASCII for (
+00000AB2                          1252  *
+00000AB2                          1253  * Registers used: D0 for actually loading
+00000AB2                          1254  *
+00000AB2                          1255  * Precondition: PTHSIS_OPEN
+00000AB2                          1256  *
+00000AB2                          1257  * Postcondition: X
+00000AB2                          1258  **********************************************************************************
+00000AB2                          1259  LOAD_PTHSIS_OPEN:
+00000AB2  4280                    1260      CLR.L   D0
+00000AB4                          1261  
+00000AB4  1038 0002               1262      MOVE.B  PTHSIS_OPEN, D0
+00000AB8  4EB9 00000B06           1263      JSR     LOAD_THIS_SHIT
+00000ABE  4E75                    1264      RTS
+00000AC0                          1265  
+00000AC0                          1266  * <EA>
+00000AC0                          1267  **********************************************************************************
+00000AC0                          1268  * Description: Loads ASCII for )
+00000AC0                          1269  *
+00000AC0                          1270  * Registers used: D0 for actually loading
+00000AC0                          1271  *
+00000AC0                          1272  * Precondition: PTHSIS_CLSD
+00000AC0                          1273  *
+00000AC0                          1274  * Postcondition: X
+00000AC0                          1275  **********************************************************************************
+00000AC0                          1276  LOAD_PTHSIS_CLSD:
+00000AC0  4280                    1277      CLR.L   D0
+00000AC2                          1278  
+00000AC2  1038 0003               1279      MOVE.B  PTHSIS_CLSD, D0
+00000AC6  4EB9 00000B06           1280      JSR     LOAD_THIS_SHIT
+00000ACC  4E75                    1281      RTS
+00000ACE                          1282  
+00000ACE                          1283  * <EA>
+00000ACE                          1284  **********************************************************************************
+00000ACE                          1285  * Description: Loads ASCII for $
+00000ACE                          1286  *
+00000ACE                          1287  * Registers used: D0 for actually loading
+00000ACE                          1288  *
+00000ACE                          1289  * Precondition: HEX_SIGN
+00000ACE                          1290  *
+00000ACE                          1291  * Postcondition: X
+00000ACE                          1292  **********************************************************************************
+00000ACE                          1293  LOAD_HEX_SIGN:
+00000ACE  4280                    1294      CLR.L   D0
+00000AD0                          1295  
+00000AD0  1038 0004               1296      MOVE.B  HEX_SIGN, D0
+00000AD4  4EB9 00000B06           1297      JSR     LOAD_THIS_SHIT
+00000ADA  4E75                    1298      RTS
+00000ADC                          1299  
+00000ADC                          1300  * <EA>
+00000ADC                          1301  **********************************************************************************
+00000ADC                          1302  * Description: Loads ASCII for #
+00000ADC                          1303  *
+00000ADC                          1304  * Registers used: D0 for actually loading
+00000ADC                          1305  *
+00000ADC                          1306  * Precondition: IMMDTE_VALU
+00000ADC                          1307  *
+00000ADC                          1308  * Postcondition: X
+00000ADC                          1309  **********************************************************************************
+00000ADC                          1310  LOAD_IMMDTE_VALU:
+00000ADC  4280                    1311      CLR.L   D0
+00000ADE                          1312  
+00000ADE  1038 0005               1313      MOVE.B  IMMDTE_VALU, D0
+00000AE2  4EB9 00000B06           1314      JSR     LOAD_THIS_SHIT
+00000AE8  4E75                    1315      RTS
+00000AEA                          1316  
+00000AEA                          1317  * <EA>
+00000AEA                          1318  **********************************************************************************
+00000AEA                          1319  * Description: Loads ASCII for +
+00000AEA                          1320  *
+00000AEA                          1321  * Registers used: D0 for actually loading
+00000AEA                          1322  *
+00000AEA                          1323  * Precondition: PLUS_SIGN
+00000AEA                          1324  *
+00000AEA                          1325  * Postcondition: X
+00000AEA                          1326  **********************************************************************************
+00000AEA                          1327  LOAD_PLUS_SIGN:
+00000AEA  4280                    1328      CLR.L   D0
+00000AEC                          1329  
+00000AEC  1038 0006               1330      MOVE.B  PLUS_SIGN, D0
+00000AF0  4EB9 00000B06           1331      JSR     LOAD_THIS_SHIT
+00000AF6  4E75                    1332      RTS
+00000AF8                          1333  
+00000AF8                          1334  * <EA>
+00000AF8                          1335  **********************************************************************************
+00000AF8                          1336  * Description: Loads ASCII for -
+00000AF8                          1337  *
+00000AF8                          1338  * Registers used: D0 for actually loading
+00000AF8                          1339  *
+00000AF8                          1340  * Precondition: MINUS_SIGN
+00000AF8                          1341  *
+00000AF8                          1342  * Postcondition: X
+00000AF8                          1343  **********************************************************************************
+00000AF8                          1344  LOAD_MINUS_SIGN:
+00000AF8  4280                    1345      CLR.L   D0
+00000AFA                          1346  
+00000AFA  1038 0007               1347      MOVE.B  MINUS_SIGN, D0
+00000AFE  4EB9 00000B06           1348      JSR     LOAD_THIS_SHIT
+00000B04  4E75                    1349      RTS
+00000B06                          1350  **************************************************
+00000B06                          1351  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+00000B06                          1352  
+00000B06                          1353  
+00000B06                          1354  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+00000B06                          1355  * LOAD_THIS FUNCTIONS (LOWEST LEVEL) *************
+00000B06                          1356  * <EA>
+00000B06                          1357  **********************************************************************************
+00000B06                          1358  * Description: Loads the hex value from D0 to EA_BUFFER in ASCII
+00000B06                          1359  *
+00000B06                          1360  * Registers used: X
+00000B06                          1361  *
+00000B06                          1362  * Precondition: X
+00000B06                          1363  *
+00000B06                          1364  * Postcondition: X
+00000B06                          1365  **********************************************************************************
+00000B06                          1366  LOAD_THIS_SHIT:
+00000B06  18C0                    1367      MOVE.B  D0, (A4)+
+00000B08  4E75                    1368      RTS
+00000B0A                          1369  
+00000B0A                          1370  * <EA>
+00000B0A                          1371  **********************************************************************************
+00000B0A                          1372  * Description: Adds $30 to a number in D0 to make it a hex. If the number is greater
+00000B0A                          1373  *              than 9 (A~F), then adds $37. Then moves the hex value from D0 to EA_BUFFER in ASCII
+00000B0A                          1374  *
+00000B0A                          1375  * Registers used: X
+00000B0A                          1376  *
+00000B0A                          1377  * Precondition: X
+00000B0A                          1378  *
+00000B0A                          1379  * Postcondition: X
+00000B0A                          1380  **********************************************************************************
+00000B0A                          1381  LOAD_NUM:
+00000B0A  0C00 0009               1382      CMPI.B  #$9, D0
+00000B0E  6E00 0006               1383      BGT     GT
+00000B12  6F00 000C               1384      BLE     LE
+00000B16                          1385      
+00000B16  0600 0037               1386  GT  ADDI.B  #$37, D0 * A~F
+00000B1A  4EF9 00000B2A           1387      JMP     END
+00000B20  0600 0030               1388  LE  ADDI.B  #$30, D0 * 0~9
+00000B24  4EF9 00000B2A           1389      JMP     END
+00000B2A                          1390  
+00000B2A  18C0                    1391  END MOVE.B  D0, (A4)+
+00000B2C  4E75                    1392      RTS
+00000B2E                          1393  
+00000B2E                          1394  * <EA>
+00000B2E                          1395  **********************************************************************************
+00000B2E                          1396  * Description: Execution goes here if even one of the EA bit is invalid. Flags the invalid-bit and
+00000B2E                          1397  *              entirely exits the EA process.
+00000B2E                          1398  *
+00000B2E                          1399  * Registers used: X
+00000B2E                          1400  *
+00000B2E                          1401  * Precondition: X
+00000B2E                          1402  *
+00000B2E                          1403  * Postcondition: X
+00000B2E                          1404  **********************************************************************************
+00000B2E                          1405  INVALID:
+Line 1406 ERROR: Undefined symbol
+00000B2E  13FC 0000 005455B8      1406              MOVE.B  #%0, IS_VALID
+00000B36  4EF8 002C               1407              JMP     EXT
+00000B3A                          1408  **************************************************
+00000B3A                          1409  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+00000B3A                          1410  
+00000B3A                          1411  
+00000B3A                          1412  
+00000B3A                          1413  
+00000B3A                          1414  
+00000B3A                          1415  
+00000B3A                          1416  
+00000B3A                          1417  
+Line 1418 WARNING: END directive missing, starting address not set
+
+138 errors detected
+1 warning generated
+
+
+SYMBOL TABLE INFORMATION
+Symbol-name         Value
+-------------------------
+ADDA                352
+ADDA_BACK           36E
+ADDRESS             0
+ASD_1               12A
+ASD_1_BACK          15E
+ASD_2               190
+ASD_2_IMD           1A8
+ASD_2_IMD_B         1D2
+ASD_2_REG           1F2
+BACK                78A
+BACK2               7BA
+BACK3               824
+BACK4               802
+BACK5               870
+BCLR                7D4
+BRA                 28A
+BRA_BYTE            2B8
+BRA_BYTE2           2DE
+BRA_BYTE3           2EA
+BRA_WORD            2F2
+BRA_WORD_BK         30E
+BRA_WRD_BK2         32C
+CHECK_00XX          A6
+CHECK_01XX          B6
+CHECK_0XXX          44
+CHECK_1XXX          56
+CHECK_XXXX          32
+CHUMP_BYTE          96E
+CHUMP_LONG          97E
+CHUMP_WORD          976
+COMMA               8
+DATA                1
+DIR_0               3E2
+DIR_1               42E
+DIVS                47A
+DIVS_BACK           4AC
+DOWN_ONE            2D6
+DOWN_ZERO           2CE
+DYNMC_BCLR          83E
+END                 B2A
+EXT                 2C
+GO                  986
+GOO                 8B0
+GOO2                8E4
+GT                  B16
+HEX_SIGN            4
+IMMDTE_VALU         5
+INVALID             B2E
+JSR                 668
+JSR_BACK            684
+LE                  B20
+LEA                 6A6
+LEA_BACK            6C2
+LOAD_0000           6F2
+LOAD_00XX           88A
+LOAD_0100           564
+LOAD_0101           4C6
+LOAD_0110           220
+LOAD_1000           3B0
+LOAD_1001           3AA
+LOAD_1011           3A4
+LOAD_1100           39E
+LOAD_1101           334
+LOAD_1110           DC
+LOAD_8              1BC
+LOAD_A              AA4
+LOAD_ABS_LONG       A1C
+LOAD_ABS_SHORT      A0A
+LOAD_ADDRESS        9E0
+LOAD_ADDRESS_W_POST_INC  9F2
+LOAD_ADDRESS_W_PRE_DEC  9FE
+LOAD_ADDR_REGISTER  9CE
+LOAD_BYTES          A38
+LOAD_COMMA_SPACE    A7E
+LOAD_D              A96
+LOAD_DATA_REGISTER  9BC
+LOAD_EA             8FE
+LOAD_FIRST3         1C6
+LOAD_GE_111         93E
+LOAD_HEX_SIGN       ACE
+LOAD_IMMDTE         A2E
+LOAD_IMMDTE_VALU    ADC
+LOAD_LT_111         910
+LOAD_MINUS_SIGN     AF8
+LOAD_NEW_LINE       A62
+LOAD_NUM            B0A
+LOAD_PLUS_SIGN      AEA
+LOAD_PTHSIS_CLSD    AC0
+LOAD_PTHSIS_OPEN    AB2
+LOAD_THIS_SHIT      B06
+LOOP                A42
+MAIN_EA             C
+MINUS_SIGN          7
+MOVEM               69E
+MYBE_ASD_1          100
+MYBE_ASD_2          178
+MYBE_BCLR           744
+MYBE_BRA            242
+MYBE_CMPI           728
+MYBE_JSR            5D6
+MYBE_MOVEM          5FA
+MYBE_NEG            57E
+MYBE_ORI            70C
+MYBE_RTS1           59A
+MYBE_RTS2           5AA
+MYBE_RTS3           5BA
+MYBE_SUBQ1          4E2
+MYBE_SUBQ2          4F4
+NEG                 61E
+NEG_BACK            646
+NEG_WORD            316
+NOT_BCLR            750
+NOT_BRA             252
+NOT_CMPI            734
+NOT_JSR             5E2
+NOT_MOVEM           60C
+NOT_NEG             58A
+NOT_ORI             718
+NOT_RTS             5C6
+ORI_CMPI            762
+OR_BACK             3FE
+OR_BACK2            460
+PLUS_SIGN           6
+POS_WORD            302
+PTHSIS_CLSD         3
+PTHSIS_OPEN         2
+ROTATE              A4C
+RTS                 660
+SAVED               90E
+SIZE_B              9A4
+SIZE_L              9B4
+SIZE_W              9AC
+SPACE               9
+SUBQ                506
+SUBQ_BACK           54A
+SUBQ_SAVED          51C
+TRAILING_HELPER     9A4
+TRAILING_SIZE       A

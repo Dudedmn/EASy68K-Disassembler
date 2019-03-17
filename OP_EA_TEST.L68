@@ -1,6 +1,6 @@
 000010B6 Starting Address
 Assembler used: EASy68K Editor/Assembler v5.16.01
-Created On: 3/15/2019 7:09:34 PM
+Created On: 3/13/2019 10:39:28 PM
 
 00000000                             1  *-----------------------------------------------------------
 00000000                             2  * Title      : OP Code routines for Disassembler
@@ -245,7 +245,7 @@ Created On: 3/15/2019 7:09:34 PM
 000010C4                           241  * STATUS: 
 000010C4                           242  * IDENTIFICATION FOR ALL OP CODES:      DONE
 000010C4                           243  * VALIDATION TESTING FOR ALL OP CODES:  DONE
-000010C4                           244  * PRINTING ALL OP CODES TO BUFFER:      DONE
+000010C4                           244  * PRINTING ALL OP CODES TO BUFFER:      NOT DONE
 000010C4                           245  * PRINTING SIZE BITS OF ALL OP CODES:   NOT DONE
 000010C4                           246  *-----------------------------------------------------------
 000010C4                           247  *First Nibble Values (15-12)
@@ -405,7 +405,7 @@ Created On: 3/15/2019 7:09:34 PM
 000011F8                           401  
 000011F8                           402  OP_JSR_DONE:
 000011F8  4CDF 0003                403           MOVEM.L (SP)+,D0-D1       ;Recover register D0
-000011FC  4EF9 0000209C            404           JMP EA_ROUTINE
+000011FC  4EF9 0000209C            404           JMP DENNY_EA_SHIT
 00001202                           405  **********************************************************************************
 00001202                           406  
 00001202                           407  ********** EA Parsing ************************************************************
@@ -2084,7 +2084,7 @@ Created On: 3/15/2019 7:09:34 PM
 0000209A  4E75                    2080      RTS                  
 0000209C                          2081     
 0000209C                          2082     
-0000209C                          2083  ;EA_ROUTINE:
+0000209C                          2083  ;DENNY_EA_SHIT:
 0000209C                          2084  
 0000209C                          2085  ;    MOVEA.L #0, A5
 0000209C                          2086   ;   MOVEA.L #START_ADDRESS, A5
@@ -2104,1141 +2104,1130 @@ Created On: 3/15/2019 7:09:34 PM
 0000209C                          2100      ;MOVE.B  #%111, THIRD_3
 0000209C                          2101      ;MOVE.B  #%000, FOURTH_3
 0000209C                          2102      ;MOVEA.L #START_ADDRESS, A5
-0000209C                          2103  
-0000209C                          2104      ;CHECK IF IS_VALID = 0
-0000209C                          2105      ;IF SO SKIP TO RUN_FAHAD_CODE
-0000209C                          2106  
-0000209C                          2107  EA_ROUTINE:
-0000209C                          2108  
-0000209C  2A7C 00000000           2109      MOVEA.L #0, A5
-000020A2  2A7C 00004000           2110      MOVEA.L #START_ADDRESS, A5
-000020A8  4EB8 12AC               2111      JSR     PARSE_EA_CONSTANT_BITS
-000020AC  4EB9 000020BC           2112      JSR     CHECK_XXXX              ;When it returns here, Denny's routines have finished
-000020B2                          2113      ;CHECK IF IS_VALID = 0
-000020B2                          2114  
-000020B2  4EF9 000020B8           2115  EXT JMP RUN_FAHAD_CODE
-000020B8                          2116  
-000020B8  FFFF FFFF               2117  RUN_FAHAD_CODE SIMHALT * This EXT alias is critical for NOT loading error
-000020BC                          2118  
-000020BC                          2119  ;RUN_FAHAD_CODE here would do something like
-000020BC                          2120  ;
-000020BC                          2121  **************************************************
-000020BC                          2122  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-000020BC                          2123  
-000020BC                          2124  
-000020BC                          2125  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-000020BC                          2126  * CHECK_MNEMONIC FUNCTIONS ***************
-000020BC                          2127  
-000020BC                          2128  * <EA>
-000020BC                          2129  **********************************************************************************
-000020BC                          2130  * Description: Checks the mnemonic starting from XXXX
-000020BC                          2131  *
-000020BC                          2132  * Registers used: X
-000020BC                          2133  *
-000020BC                          2134  * Precondition: X
-000020BC                          2135  *
-000020BC                          2136  * Postcondition: X
-000020BC                          2137  **********************************************************************************
-000020BC                          2138  CHECK_XXXX:
-000020BC  0C38 0008 1000          2139      CMPI.B  #$8, MNEMONIC
-000020C2  6D00 0008               2140      BLT     CHECK_0XXX
-000020C6  4EF9 000020DC           2141      JMP     CHECK_1XXX
-000020CC                          2142  
-000020CC                          2143  * <EA>
-000020CC                          2144  **********************************************************************************
-000020CC                          2145  * Description: Checks the mnemonic starting from 0XXX
-000020CC                          2146  *
-000020CC                          2147  * Registers used: X
-000020CC                          2148  *
-000020CC                          2149  * Precondition: X
-000020CC                          2150  *
-000020CC                          2151  * Postcondition: X
-000020CC                          2152  **********************************************************************************
-000020CC                          2153  CHECK_0XXX:
-000020CC  0C38 0004 1000          2154      CMPI.B  #$4, MNEMONIC
-000020D2  6D00 003C               2155      BLT     CHECK_00XX
-000020D6  4EF9 0000211E           2156      JMP     CHECK_01XX
-000020DC                          2157  
-000020DC                          2158  * <EA>
-000020DC                          2159  **********************************************************************************
-000020DC                          2160  * Description: Checks the mnemonic starting from 1XXX
-000020DC                          2161  *
-000020DC                          2162  * Registers used: X
-000020DC                          2163  *
-000020DC                          2164  * Precondition: X
-000020DC                          2165  *
-000020DC                          2166  * Postcondition: X
-000020DC                          2167  **********************************************************************************
-000020DC                          2168  CHECK_1XXX:
-000020DC  0C38 0008 1000          2169      CMPI.B  #$8, MNEMONIC
-000020E2  6700 00BE               2170      BEQ     LOAD_1000
-000020E6  0C38 0009 1000          2171      CMPI.B  #$9, MNEMONIC
-000020EC  6700 00AE               2172      BEQ     LOAD_1001
-000020F0  0C38 0011 1000          2173      CMPI.B  #$11, MNEMONIC
-000020F6  6700 009E               2174      BEQ     LOAD_1011
-000020FA  0C38 0012 1000          2175      CMPI.B  #$12, MNEMONIC
-00002100  6700 008E               2176      BEQ     LOAD_1100
-00002104  0C38 0013 1000          2177      CMPI.B  #$13, MNEMONIC
-0000210A  6700 0028               2178      BEQ     LOAD_1101
-0000210E                          2179      
-0000210E  4E75                    2180      RTS
-00002110                          2181  
-00002110                          2182  * <EA>
-00002110                          2183  **********************************************************************************
-00002110                          2184  * Description: Checks the mnemonic starting from 00XX
-00002110                          2185  *
-00002110                          2186  * Registers used: X
-00002110                          2187  *
-00002110                          2188  * Precondition: X
-00002110                          2189  *
-00002110                          2190  * Postcondition: X
-00002110                          2191  **********************************************************************************
-00002110                          2192  CHECK_00XX:
-00002110  0C38 0001 1000          2193      CMPI.B  #$1, MNEMONIC
-00002116  6D00 035E               2194      BLT     LOAD_0000
-0000211A  6C00 04C4               2195      BGE     LOAD_00XX
-0000211E                          2196  
-0000211E                          2197  * <EA>
-0000211E                          2198  **********************************************************************************
-0000211E                          2199  * Description: Checks the mnemonic starting from 01XX
-0000211E                          2200  *
-0000211E                          2201  * Registers used: X
-0000211E                          2202  *
-0000211E                          2203  * Precondition: X
-0000211E                          2204  *
-0000211E                          2205  * Postcondition: X
-0000211E                          2206  **********************************************************************************
-0000211E                          2207  CHECK_01XX:
-0000211E  0C38 0004 1000          2208      CMPI.B  #%0100, MNEMONIC
-00002124  6700 01F8               2209      BEQ     LOAD_0100
-00002128  0C38 0005 1000          2210      CMPI.B  #%0101, MNEMONIC
-0000212E  6700 0164               2211      BEQ     LOAD_0101
-00002132  4E75                    2212      RTS
-00002134                          2213  
-00002134                          2214  **************************************************
-00002134                          2215  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-00002134                          2216  
-00002134                          2217  
-00002134                          2218  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-00002134                          2219  * LOAD_THIS FUNCTIONS (HIGHEST LEVEL) ************
-00002134                          2220  * <EA>
-00002134                          2221  **********************************************************************************
-00002134                          2222  * Description: Once the mnemonic is 1001, it is either ADD or ADDA.
-00002134                          2223  *
-00002134                          2224  * Registers used: If ADDA, D3 for SRC/DST mod, D2 for SRC/DST reg, A3 to get back from the subbranch.
-00002134                          2225  *                 If ADD, basically recycling the algorithm for DIVS/OR
-00002134                          2226  *
-00002134                          2227  * Precondition: FIRST_3, SECOND_3, THIRD_3, FOURTH_3
-00002134                          2228  *
-00002134                          2229  * Postcondition: X
-00002134                          2230  **********************************************************************************
-00002134                          2231  LOAD_1101:
-00002134  0C38 0003 1005          2232              CMPI.B  #%011, SECOND_3
-0000213A  6700 0012               2233              BEQ     ADDA
-0000213E  0C38 0007 1005          2234              CMPI.B  #%111, SECOND_3
-00002144  6700 0008               2235              BEQ     ADDA
-00002148                          2236              
-00002148  4EF9 000021A2           2237              JMP     LOAD_1000
-0000214E                          2238              
-0000214E  367C 2166               2239  ADDA        MOVEA.W #ADDA_BACK, A3
-00002152  0C38 0000 1007          2240              CMPI.B  #%000, FOURTH_3
-00002158  6700 059C               2241              BEQ     SIZE_W
-0000215C  0C38 0001 1007          2242              CMPI.B  #%001, FOURTH_3
-00002162  6700 059A               2243              BEQ     SIZE_L
-00002166                          2244              
-00002166  1638 1006               2245  ADDA_BACK   MOVE.B  THIRD_3, D3
-0000216A  1438 1007               2246              MOVE.B  FOURTH_3, D2
-0000216E                          2247  
-0000216E  4EB9 00002644           2248              JSR     LOAD_EA
-00002174  4EB9 000027C4           2249              JSR     LOAD_COMMA_SPACE
-0000217A                          2250              
-0000217A  163C 0001               2251              MOVE.B  #%001, D3
-0000217E  1438 1004               2252              MOVE.B  FIRST_3, D2
-00002182                          2253              
-00002182  4EB9 00002644           2254              JSR     LOAD_EA
-00002188  4EB9 000027AC           2255              JSR     LOAD_NEW_LINE
-0000218E  4E75                    2256              RTS
-00002190                          2257  
-00002190                          2258  * <EA>
-00002190                          2259  **********************************************************************************
-00002190                          2260  * Description: Once the mnemonic is 1001, it is MULS.
-00002190                          2261  *
-00002190                          2262  * Registers used: X. Basically recycling the algorithm for DIVS/OR
+0000209C                          2103  DENNY_EA_SHIT:
+0000209C                          2104  
+0000209C  2A7C 00000000           2105      MOVEA.L #0, A5
+000020A2  2A7C 00004000           2106      MOVEA.L #START_ADDRESS, A5
+000020A8  4EB8 12AC               2107      JSR     PARSE_EA_CONSTANT_BITS
+000020AC  4EB9 000020B6           2108      JSR     CHECK_XXXX
+000020B2  FFFF FFFF               2109  EXT SIMHALT * This EXT alias is critical for NOT loading error
+000020B6                          2110  **************************************************
+000020B6                          2111  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+000020B6                          2112  
+000020B6                          2113  
+000020B6                          2114  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+000020B6                          2115  * CHECK_MNEMONIC FUNCTIONS ***************
+000020B6                          2116  
+000020B6                          2117  * <EA>
+000020B6                          2118  **********************************************************************************
+000020B6                          2119  * Description: Checks the mnemonic starting from XXXX
+000020B6                          2120  *
+000020B6                          2121  * Registers used: X
+000020B6                          2122  *
+000020B6                          2123  * Precondition: X
+000020B6                          2124  *
+000020B6                          2125  * Postcondition: X
+000020B6                          2126  **********************************************************************************
+000020B6                          2127  CHECK_XXXX:
+000020B6  0C38 0008 1000          2128      CMPI.B  #$8, MNEMONIC
+000020BC  6D00 0008               2129      BLT     CHECK_0XXX
+000020C0  4EF9 000020D6           2130      JMP     CHECK_1XXX
+000020C6                          2131  
+000020C6                          2132  * <EA>
+000020C6                          2133  **********************************************************************************
+000020C6                          2134  * Description: Checks the mnemonic starting from 0XXX
+000020C6                          2135  *
+000020C6                          2136  * Registers used: X
+000020C6                          2137  *
+000020C6                          2138  * Precondition: X
+000020C6                          2139  *
+000020C6                          2140  * Postcondition: X
+000020C6                          2141  **********************************************************************************
+000020C6                          2142  CHECK_0XXX:
+000020C6  0C38 0004 1000          2143      CMPI.B  #$4, MNEMONIC
+000020CC  6D00 003C               2144      BLT     CHECK_00XX
+000020D0  4EF9 00002118           2145      JMP     CHECK_01XX
+000020D6                          2146  
+000020D6                          2147  * <EA>
+000020D6                          2148  **********************************************************************************
+000020D6                          2149  * Description: Checks the mnemonic starting from 1XXX
+000020D6                          2150  *
+000020D6                          2151  * Registers used: X
+000020D6                          2152  *
+000020D6                          2153  * Precondition: X
+000020D6                          2154  *
+000020D6                          2155  * Postcondition: X
+000020D6                          2156  **********************************************************************************
+000020D6                          2157  CHECK_1XXX:
+000020D6  0C38 0008 1000          2158      CMPI.B  #$8, MNEMONIC
+000020DC  6700 00BE               2159      BEQ     LOAD_1000
+000020E0  0C38 0009 1000          2160      CMPI.B  #$9, MNEMONIC
+000020E6  6700 00AE               2161      BEQ     LOAD_1001
+000020EA  0C38 0011 1000          2162      CMPI.B  #$11, MNEMONIC
+000020F0  6700 009E               2163      BEQ     LOAD_1011
+000020F4  0C38 0012 1000          2164      CMPI.B  #$12, MNEMONIC
+000020FA  6700 008E               2165      BEQ     LOAD_1100
+000020FE  0C38 0013 1000          2166      CMPI.B  #$13, MNEMONIC
+00002104  6700 0028               2167      BEQ     LOAD_1101
+00002108                          2168      
+00002108  4E75                    2169      RTS
+0000210A                          2170  
+0000210A                          2171  * <EA>
+0000210A                          2172  **********************************************************************************
+0000210A                          2173  * Description: Checks the mnemonic starting from 00XX
+0000210A                          2174  *
+0000210A                          2175  * Registers used: X
+0000210A                          2176  *
+0000210A                          2177  * Precondition: X
+0000210A                          2178  *
+0000210A                          2179  * Postcondition: X
+0000210A                          2180  **********************************************************************************
+0000210A                          2181  CHECK_00XX:
+0000210A  0C38 0001 1000          2182      CMPI.B  #$1, MNEMONIC
+00002110  6D00 035E               2183      BLT     LOAD_0000
+00002114  6C00 04C4               2184      BGE     LOAD_00XX
+00002118                          2185  
+00002118                          2186  * <EA>
+00002118                          2187  **********************************************************************************
+00002118                          2188  * Description: Checks the mnemonic starting from 01XX
+00002118                          2189  *
+00002118                          2190  * Registers used: X
+00002118                          2191  *
+00002118                          2192  * Precondition: X
+00002118                          2193  *
+00002118                          2194  * Postcondition: X
+00002118                          2195  **********************************************************************************
+00002118                          2196  CHECK_01XX:
+00002118  0C38 0004 1000          2197      CMPI.B  #%0100, MNEMONIC
+0000211E  6700 01F8               2198      BEQ     LOAD_0100
+00002122  0C38 0005 1000          2199      CMPI.B  #%0101, MNEMONIC
+00002128  6700 0164               2200      BEQ     LOAD_0101
+0000212C  4E75                    2201      RTS
+0000212E                          2202  
+0000212E                          2203  **************************************************
+0000212E                          2204  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0000212E                          2205  
+0000212E                          2206  
+0000212E                          2207  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0000212E                          2208  * LOAD_THIS FUNCTIONS (HIGHEST LEVEL) ************
+0000212E                          2209  * <EA>
+0000212E                          2210  **********************************************************************************
+0000212E                          2211  * Description: Once the mnemonic is 1001, it is either ADD or ADDA.
+0000212E                          2212  *
+0000212E                          2213  * Registers used: If ADDA, D3 for SRC/DST mod, D2 for SRC/DST reg, A3 to get back from the subbranch.
+0000212E                          2214  *                 If ADD, basically recycling the algorithm for DIVS/OR
+0000212E                          2215  *
+0000212E                          2216  * Precondition: FIRST_3, SECOND_3, THIRD_3, FOURTH_3
+0000212E                          2217  *
+0000212E                          2218  * Postcondition: X
+0000212E                          2219  **********************************************************************************
+0000212E                          2220  LOAD_1101:
+0000212E  0C38 0003 1005          2221              CMPI.B  #%011, SECOND_3
+00002134  6700 0012               2222              BEQ     ADDA
+00002138  0C38 0007 1005          2223              CMPI.B  #%111, SECOND_3
+0000213E  6700 0008               2224              BEQ     ADDA
+00002142                          2225              
+00002142  4EF9 0000219C           2226              JMP     LOAD_1000
+00002148                          2227              
+00002148  367C 2160               2228  ADDA        MOVEA.W #ADDA_BACK, A3
+0000214C  0C38 0000 1007          2229              CMPI.B  #%000, FOURTH_3
+00002152  6700 059C               2230              BEQ     SIZE_W
+00002156  0C38 0001 1007          2231              CMPI.B  #%001, FOURTH_3
+0000215C  6700 059A               2232              BEQ     SIZE_L
+00002160                          2233              
+00002160  1638 1006               2234  ADDA_BACK   MOVE.B  THIRD_3, D3
+00002164  1438 1007               2235              MOVE.B  FOURTH_3, D2
+00002168                          2236  
+00002168  4EB9 0000263E           2237              JSR     LOAD_EA
+0000216E  4EB9 000027BE           2238              JSR     LOAD_COMMA_SPACE
+00002174                          2239              
+00002174  163C 0001               2240              MOVE.B  #%001, D3
+00002178  1438 1004               2241              MOVE.B  FIRST_3, D2
+0000217C                          2242              
+0000217C  4EB9 0000263E           2243              JSR     LOAD_EA
+00002182  4EB9 000027A6           2244              JSR     LOAD_NEW_LINE
+00002188  4E75                    2245              RTS
+0000218A                          2246  
+0000218A                          2247  * <EA>
+0000218A                          2248  **********************************************************************************
+0000218A                          2249  * Description: Once the mnemonic is 1001, it is MULS.
+0000218A                          2250  *
+0000218A                          2251  * Registers used: X. Basically recycling the algorithm for DIVS/OR
+0000218A                          2252  *
+0000218A                          2253  * Precondition: X
+0000218A                          2254  *
+0000218A                          2255  * Postcondition: X
+0000218A                          2256  **********************************************************************************
+0000218A                          2257  LOAD_1100:
+0000218A  4EF9 0000219C           2258      JMP     LOAD_1000
+00002190                          2259      
+00002190                          2260  * <EA>
+00002190                          2261  **********************************************************************************
+00002190                          2262  * Description: Once the mnemonic is 1001, it is either EOR or CMP.
 00002190                          2263  *
-00002190                          2264  * Precondition: X
+00002190                          2264  * Registers used: X. Basically recycling the algorithm for DIVS/OR
 00002190                          2265  *
-00002190                          2266  * Postcondition: X
-00002190                          2267  **********************************************************************************
-00002190                          2268  LOAD_1100:
-00002190  4EF9 000021A2           2269      JMP     LOAD_1000
-00002196                          2270      
-00002196                          2271  * <EA>
-00002196                          2272  **********************************************************************************
-00002196                          2273  * Description: Once the mnemonic is 1001, it is either EOR or CMP.
-00002196                          2274  *
-00002196                          2275  * Registers used: X. Basically recycling the algorithm for DIVS/OR
-00002196                          2276  *
-00002196                          2277  * Precondition: X
-00002196                          2278  *
-00002196                          2279  * Postcondition: X
-00002196                          2280  **********************************************************************************
-00002196                          2281  LOAD_1011:
-00002196  4EF9 000021A2           2282      JMP     LOAD_1000
-0000219C                          2283  
-0000219C                          2284  
-0000219C                          2285  * <EA>
-0000219C                          2286  **********************************************************************************
-0000219C                          2287  * Description: Once the mnemonic is 1001, it is SUB.
-0000219C                          2288  *
-0000219C                          2289  * Registers used: X. Basically recycling the algorithm for DIVS/OR
-0000219C                          2290  *
-0000219C                          2291  * Precondition: X
-0000219C                          2292  *
-0000219C                          2293  * Postcondition: X
-0000219C                          2294  **********************************************************************************
-0000219C                          2295  LOAD_1001:
-0000219C  4EF9 000021A2           2296      JMP     LOAD_1000
-000021A2                          2297  
-000021A2                          2298  
-000021A2                          2299  * <EA>
-000021A2                          2300  **********************************************************************************
-000021A2                          2301  * Description: Once the mnemonic is 1000, it is either DIVS or OR.
-000021A2                          2302  *
-000021A2                          2303  * Registers used: D3 for SRC/DST mod, D2 for SRC/DST reg, A3 to get back from the subbranch.
-000021A2                          2304  *
-000021A2                          2305  * Precondition: FIRST_3, SECOND_3, THIRD_3, FOURTH_3
-000021A2                          2306  *
-000021A2                          2307  * Postcondition: X
-000021A2                          2308  **********************************************************************************
-000021A2                          2309  LOAD_1000:
-000021A2  4283                    2310              CLR.L   D3
-000021A4  4282                    2311              CLR.L   D2
-000021A6  267C 00000000           2312              MOVEA.L #0, A3
-000021AC                          2313              
-000021AC  0C38 0007 1005          2314              CMPI.B  #%111, SECOND_3
-000021B2  6700 009E               2315              BEQ     DIVS
-000021B6                          2316              
-000021B6  0C38 0003 1005          2317              CMPI.B  #%011, SECOND_3
-000021BC  6700 06B6               2318              BEQ     INVALID
-000021C0                          2319              
-000021C0                          2320  ***vvvvvvvvvvvvvvvvvvv***
-000021C0  0C38 0004 1005          2321              CMPI.B  #%100, SECOND_3
-000021C6  6D00 0006               2322              BLT     DIR_0 * direction bit 0
-000021CA  6C00 0044               2323              BGE     DIR_1 * direction bit 1
-000021CE                          2324              
-000021CE  367C 21E6               2325  DIR_0       MOVEA.W #OR_BACK, A3
-000021D2  0C38 0000 1007          2326              CMPI.B  #%000, FOURTH_3
-000021D8  6700 051C               2327              BEQ     SIZE_W
-000021DC  0C38 0001 1007          2328              CMPI.B  #%001, FOURTH_3
-000021E2  6700 051A               2329              BEQ     SIZE_L
-000021E6                          2330              
-000021E6  1638 1006               2331  OR_BACK     MOVE.B  THIRD_3, D3
-000021EA  1438 1007               2332              MOVE.B  FOURTH_3, D2
-000021EE                          2333  
-000021EE  4EB9 00002644           2334              JSR     LOAD_EA
-000021F4  4EB9 000027C4           2335              JSR     LOAD_COMMA_SPACE
-000021FA                          2336              
-000021FA  163C 0000               2337              MOVE.B  #%000, D3
-000021FE  1438 1004               2338              MOVE.B  FIRST_3, D2
-00002202                          2339              
-00002202  4EB9 00002644           2340              JSR     LOAD_EA
-00002208  4EB9 000027AC           2341              JSR     LOAD_NEW_LINE
-0000220E  4E75                    2342              RTS
-00002210                          2343              
-00002210  163C 0000               2344  DIR_1       MOVE.B  #%000, D3
-00002214  1438 1004               2345              MOVE.B  FIRST_3, D2
-00002218                          2346              
-00002218  4EB9 00002644           2347              JSR     LOAD_EA
-0000221E  4EB9 000027C4           2348              JSR     LOAD_COMMA_SPACE
-00002224                          2349              
-00002224  367C 223C               2350              MOVEA.W #OR_BACK2, A3
-00002228  0C38 0000 1007          2351              CMPI.B  #%000, FOURTH_3
-0000222E  6700 04C6               2352              BEQ     SIZE_W
-00002232  0C38 0001 1007          2353              CMPI.B  #%001, FOURTH_3
-00002238  6700 04C4               2354              BEQ     SIZE_L
-0000223C                          2355              
-0000223C  1638 1006               2356  OR_BACK2    MOVE.B  THIRD_3, D3
-00002240  1438 1007               2357              MOVE.B  FOURTH_3, D2
-00002244                          2358  
-00002244  4EB9 00002644           2359              JSR     LOAD_EA
-0000224A  4EB9 000027AC           2360              JSR     LOAD_NEW_LINE
-00002250  4E75                    2361              RTS    
-00002252                          2362  ***^^^^^^^^^^^^^^^^^^^***
-00002252                          2363              
-00002252                          2364  ***vvvvvvvvvvvvvvvvvvv***
-00002252  163C 0000               2365  DIVS        MOVE.B  #%000, D3
-00002256  1438 1004               2366              MOVE.B  FIRST_3, D2
-0000225A                          2367  
-0000225A  4EB9 00002644           2368              JSR     LOAD_EA
-00002260  4EB9 000027C4           2369              JSR     LOAD_COMMA_SPACE
-00002266                          2370              
-00002266  367C 227E               2371              MOVEA.W #DIVS_BACK, A3
-0000226A  0C38 0000 1007          2372              CMPI.B  #%000, FOURTH_3
-00002270  6700 0484               2373              BEQ     SIZE_W
-00002274  0C38 0001 1007          2374              CMPI.B  #%001, FOURTH_3
-0000227A  6700 0482               2375              BEQ     SIZE_L
-0000227E                          2376              
-0000227E  1638 1006               2377  DIVS_BACK   MOVE.B  THIRD_3, D3
-00002282  1438 1007               2378              MOVE.B  FOURTH_3, D2
-00002286                          2379              
-00002286  4EB9 00002644           2380              JSR     LOAD_EA
-0000228C  4EB9 000027AC           2381              JSR     LOAD_NEW_LINE
-00002292  4E75                    2382              RTS
-00002294                          2383  ***^^^^^^^^^^^^^^^^^^^***
-00002294                          2384  
-00002294                          2385  
-00002294                          2386  * <EA>
-00002294                          2387  **********************************************************************************
-00002294                          2388  * Description: Once the mnemonic is 0101, it is SUBQ
-00002294                          2389  *
-00002294                          2390  * Registers used: D4 to load the data within the EA bits, and A2 to come back
-00002294                          2391  *
-00002294                          2392  * Precondition: FIRST_3, SECOND_3, THIRD_3, FOURTH_3
-00002294                          2393  *
-00002294                          2394  * Postcondition: X
-00002294                          2395  **********************************************************************************
-00002294                          2396  LOAD_0101:
-00002294  4283                    2397              CLR.L   D3
-00002296  4282                    2398              CLR.L   D2
-00002298  267C 00000000           2399              MOVEA.L #0, A3
-0000229E                          2400  
-0000229E  0C38 0007 1004          2401              CMPI.B  #%111, FIRST_3
-000022A4  6F00 0008               2402              BLE     MYBE_SUBQ1
-000022A8  4EF9 00002874           2403              JMP     INVALID
-000022AE                          2404              
-000022AE  0C38 0003 1005          2405  MYBE_SUBQ1  CMPI.B  #%011, SECOND_3
-000022B4  6E00 0008               2406              BGT     MYBE_SUBQ2
-000022B8  4EF9 00002874           2407              JMP     INVALID
-000022BE                          2408  
-000022BE  0C38 0007 1005          2409  MYBE_SUBQ2  CMPI.B  #%111, SECOND_3
-000022C4  6D00 0008               2410              BLT     SUBQ
-000022C8  4EF9 00002874           2411              JMP     INVALID
-000022CE                          2412  
-000022CE  5238 1004               2413  SUBQ        ADDI.B  #%1, FIRST_3
-000022D2  1838 1004               2414              MOVE.B  FIRST_3, D4
-000022D6                          2415              
-000022D6  347C 22E0               2416              MOVEA.W #SUBQ_SAVED, A2
-000022DA  4EF9 00002778           2417              JMP     LOAD_IMMDTE
-000022E0                          2418              
-000022E0  4EB9 000027C4           2419  SUBQ_SAVED  JSR     LOAD_COMMA_SPACE
-000022E6                          2420  
-000022E6  367C 2308               2421              MOVEA.W #SUBQ_BACK, A3
-000022EA  0C38 0004 1005          2422              CMPI.B  #%100, SECOND_3
-000022F0  6700 03FC               2423              BEQ     SIZE_B
-000022F4  0C38 0005 1005          2424              CMPI.B  #%101, SECOND_3
-000022FA  6700 03FA               2425              BEQ     SIZE_W
-000022FE  0C38 0006 1005          2426              CMPI.B  #%110, SECOND_3
-00002304  6700 03F8               2427              BEQ     SIZE_L
-00002308                          2428              
-00002308  1638 1006               2429  SUBQ_BACK   MOVE.B  THIRD_3, D3
-0000230C  1438 1007               2430              MOVE.B  FOURTH_3, D2
-00002310                          2431  
-00002310  4EB9 00002644           2432              JSR     LOAD_EA
-00002316  4EB9 000027AC           2433              JSR     LOAD_NEW_LINE
-0000231C  4E75                    2434              RTS
-0000231E                          2435  
-0000231E                          2436  * <EA>
-0000231E                          2437  **********************************************************************************
-0000231E                          2438  * Description: Once the mnemonic is 0100, it is either NEG, RTS, JSR, MOVEM, or LEA.
-0000231E                          2439  *
-0000231E                          2440  * Registers used: D3 for SRC/DST mod, D2 for SRC/DST reg, A3 to get back from the subbranch,
-0000231E                          2441  *                 D5, D4 for BCLR, D6 for recognizing MOVEM
-0000231E                          2442  *
-0000231E                          2443  * Precondition: FIRST_3, SECOND_3, THIRD_3, FOURTH_3
-0000231E                          2444  *
-0000231E                          2445  * Postcondition: X
-0000231E                          2446  **********************************************************************************
-0000231E                          2447  LOAD_0100:
-0000231E  4283                    2448              CLR.L   D3
-00002320  4282                    2449              CLR.L   D2
-00002322  267C 00000000           2450              MOVEA.L #0, A3
-00002328                          2451  
-00002328  0C38 0002 1004          2452              CMPI.B  #%010, FIRST_3
-0000232E  6700 0006               2453              BEQ     MYBE_NEG
-00002332  6600 000C               2454              BNE     NOT_NEG
-00002336  0C38 0003 1005          2455  MYBE_NEG    CMPI.B  #%011, SECOND_3
-0000233C  6D00 0084               2456              BLT     NEG
-00002340                          2457  
-00002340  0C38 0007 1004          2458  NOT_NEG     CMPI.B  #%111, FIRST_3
-00002346  6700 0006               2459              BEQ     MYBE_RTS1
-0000234A  6600 0028               2460              BNE     NOT_RTS
-0000234E  0C38 0001 1005          2461  MYBE_RTS1   CMPI.B  #%001, SECOND_3
-00002354  6700 0006               2462              BEQ     MYBE_RTS2
-00002358  6600 001A               2463              BNE     NOT_RTS
-0000235C  0C38 0006 1006          2464  MYBE_RTS2   CMPI.B  #%110, THIRD_3
-00002362  6700 0006               2465              BEQ     MYBE_RTS3
-00002366  6600 000C               2466              BNE     NOT_RTS
-0000236A  0C38 0005 1007          2467  MYBE_RTS3   CMPI.B  #%101, FOURTH_3
-00002370  6700 0088               2468              BEQ     RTS
-00002374                          2469              
-00002374  0C38 0007 1004          2470  NOT_RTS     CMPI.B  #%111, FIRST_3
-0000237A  6700 0006               2471              BEQ     MYBE_JSR
-0000237E  6600 000C               2472              BNE     NOT_JSR
-00002382  0C38 0002 1005          2473  MYBE_JSR    CMPI.B  #%010, SECOND_3
-00002388  6700 0078               2474              BEQ     JSR
-0000238C                          2475  
-0000238C  4286                    2476  NOT_JSR     CLR.L   D6
-0000238E  1C38 1004               2477              MOVE.B  FIRST_3, D6
-00002392  0206 0005               2478              ANDI.B  #%101, D6 * Making %1X0 -> %100
-00002396  0C06 0004               2479              CMPI.B  #%100, D6
-0000239A  6700 0006               2480              BEQ     MYBE_MOVEM
-0000239E  6600 0012               2481              BNE     NOT_MOVEM
-000023A2                          2482              
-000023A2  1C38 1005               2483  MYBE_MOVEM  MOVE.B  SECOND_3, D6
-000023A6  0206 0006               2484              ANDI.B  #%110, D6
-000023AA  0C06 0002               2485              CMPI.B  #%010, D6
-000023AE  6700 0080               2486              BEQ     MOVEM
-000023B2                          2487              
-000023B2  0C38 0007 1005          2488  NOT_MOVEM   CMPI.B  #%111, SECOND_3
-000023B8  6700 007A               2489              BEQ     LEA
-000023BC                          2490              
-000023BC  4EF9 00002874           2491              JMP     INVALID
-000023C2                          2492  
-000023C2                          2493  NEG:
-000023C2  367C 23E4               2494              MOVEA.W #NEG_BACK, A3
-000023C6  0C38 0000 1005          2495              CMPI.B  #%000, SECOND_3
-000023CC  6700 0320               2496              BEQ     SIZE_B
-000023D0  0C38 0001 1005          2497              CMPI.B  #%001, SECOND_3
-000023D6  6700 031E               2498              BEQ     SIZE_W
-000023DA  0C38 0002 1005          2499              CMPI.B  #%010, SECOND_3
-000023E0  6700 031C               2500              BEQ     SIZE_L
-000023E4                          2501              
-000023E4  1638 1006               2502  NEG_BACK    MOVE.B  THIRD_3, D3
-000023E8  1438 1007               2503              MOVE.B  FOURTH_3, D2
-000023EC                          2504  
-000023EC  4EB9 00002644           2505              JSR     LOAD_EA
-000023F2  4EB9 000027AC           2506              JSR     LOAD_NEW_LINE
-000023F8  4E75                    2507              RTS
-000023FA                          2508              
-000023FA                          2509  RTS:
-000023FA  4EB9 000027AC           2510              JSR     LOAD_NEW_LINE
-00002400  4E75                    2511              RTS
-00002402                          2512  
-00002402                          2513  JSR:
-00002402  367C 241A               2514              MOVEA.W #JSR_BACK, A3
-00002406  0C38 0000 1007          2515              CMPI.B  #%000, FOURTH_3
-0000240C  6700 02E8               2516              BEQ     SIZE_W
-00002410  0C38 0001 1007          2517              CMPI.B  #%001, FOURTH_3
-00002416  6700 02E6               2518              BEQ     SIZE_L
-0000241A                          2519              
-0000241A  1638 1006               2520  JSR_BACK    MOVE.B  THIRD_3, D3
-0000241E  1438 1007               2521              MOVE.B  FOURTH_3, D2
-00002422                          2522              
-00002422  4EB9 00002644           2523              JSR     LOAD_EA
-00002428  4EB9 000027AC           2524              JSR     LOAD_NEW_LINE
-0000242E  4E75                    2525              RTS
-00002430                          2526  
-00002430                          2527  MOVEM:
-00002430  FFFF FFFF               2528      SIMHALT
-00002434                          2529      
-00002434                          2530  LEA:
-00002434  367C 244C               2531              MOVEA.W #LEA_BACK, A3
-00002438  0C38 0000 1007          2532              CMPI.B  #%000, FOURTH_3
-0000243E  6700 02B6               2533              BEQ     SIZE_W
-00002442  0C38 0001 1007          2534              CMPI.B  #%001, FOURTH_3
-00002448  6700 02B4               2535              BEQ     SIZE_L
-0000244C                          2536              
-0000244C  1638 1006               2537  LEA_BACK    MOVE.B  THIRD_3, D3
-00002450  1438 1007               2538              MOVE.B  FOURTH_3, D2
-00002454                          2539              
-00002454  4EB9 00002644           2540              JSR     LOAD_EA
-0000245A  4EB9 000027C4           2541              JSR     LOAD_COMMA_SPACE
-00002460                          2542              
-00002460  163C 0001               2543              MOVE.B  #%001, D3
-00002464  1438 1004               2544              MOVE.B  FIRST_3, D2
-00002468                          2545              
-00002468  4EB9 00002644           2546              JSR     LOAD_EA
-0000246E  4EB9 000027AC           2547              JSR     LOAD_NEW_LINE
-00002474  4E75                    2548              RTS
-00002476                          2549  
-00002476                          2550  * <EA>
-00002476                          2551  **********************************************************************************
-00002476                          2552  * Description: Once the mnemonic is 0000, it is either BCLR, CMPI, ORI, or Dynamic BCLR.
-00002476                          2553  *
-00002476                          2554  * Registers used: D3 for SRC/DST mod, D2 for SRC/DST reg, A3 to get back from the subbranch,
-00002476                          2555  *                 D5, D4 for BCLR
-00002476                          2556  *
-00002476                          2557  * Precondition: FIRST_3, SECOND_3, THIRD_3, FOURTH_3
-00002476                          2558  *
-00002476                          2559  * Postcondition: X
-00002476                          2560  **********************************************************************************
-00002476                          2561  LOAD_0000:
-00002476  4283                    2562              CLR.L   D3
-00002478  4282                    2563              CLR.L   D2
-0000247A  267C 00000000           2564              MOVEA.L #0, A3
-00002480                          2565  
-00002480  0C38 0000 1004          2566              CMPI.B  #%000, FIRST_3
-00002486  6700 0006               2567              BEQ     MYBE_ORI
-0000248A  6600 000C               2568              BNE     NOT_ORI
-0000248E  0C38 0003 1005          2569  MYBE_ORI    CMPI.B  #%011, SECOND_3
-00002494  6D00 0042               2570              BLT     ORI_CMPI            
-00002498                          2571  
-00002498  0C38 0006 1004          2572  NOT_ORI     CMPI.B  #%110, FIRST_3
-0000249E  6700 0006               2573              BEQ     MYBE_CMPI
-000024A2  6600 000C               2574              BNE     NOT_CMPI
-000024A6  0C38 0003 1005          2575  MYBE_CMPI   CMPI.B  #%011, SECOND_3
-000024AC  6D00 002A               2576              BLT     ORI_CMPI
-000024B0                          2577              
-000024B0  0C38 0004 1004          2578  NOT_CMPI    CMPI.B  #%100, FIRST_3
-000024B6  6700 0006               2579              BEQ     MYBE_BCLR
-000024BA  6600 000C               2580              BNE     NOT_BCLR
-000024BE  0C38 0002 1005          2581  MYBE_BCLR   CMPI.B  #%010, SECOND_3
-000024C4  6700 0076               2582              BEQ     BCLR
-000024C8                          2583  
-000024C8  0C38 0006 1005          2584  NOT_BCLR    CMPI.B  #%110, SECOND_3
-000024CE  6700 00CE               2585              BEQ     DYNMC_BCLR
-000024D2                          2586              
-000024D2  4EF9 00002874           2587              JMP     INVALID
-000024D8                          2588              
-000024D8                          2589  ***vvvvvvvvvvvvvvvvvvv***
-000024D8  367C 24FA               2590  ORI_CMPI    MOVEA.W #BACK, A3
-000024DC  0C38 0000 1005          2591              CMPI.B  #%000, SECOND_3
-000024E2  6700 020A               2592              BEQ     SIZE_B
-000024E6  0C38 0001 1005          2593              CMPI.B  #%001, SECOND_3
-000024EC  6700 0208               2594              BEQ     SIZE_W
-000024F0  0C38 0002 1005          2595              CMPI.B  #%010, SECOND_3
-000024F6  6700 0206               2596              BEQ     SIZE_L
-000024FA                          2597  
-000024FA  163C 0007               2598  BACK        MOVE.B  #%111, D3
-000024FE  143C 0004               2599              MOVE.B  #%100, D2
-00002502                          2600              
-00002502  4EB9 00002644           2601              JSR     LOAD_EA
-00002508  4EB9 000027C4           2602              JSR     LOAD_COMMA_SPACE
-0000250E                          2603              
-0000250E  367C 2526               2604              MOVEA.W #BACK2, A3   
-00002512  0C38 0000 1007          2605              CMPI.B  #%000, FOURTH_3
-00002518  6700 01DC               2606              BEQ     SIZE_W
-0000251C  0C38 0001 1007          2607              CMPI.B  #%001, FOURTH_3
-00002522  6700 01DA               2608              BEQ     SIZE_L
-00002526                          2609  
-00002526  1638 1006               2610  BACK2       MOVE.B  THIRD_3, D3
-0000252A  1438 1007               2611              MOVE.B  FOURTH_3, D2
-0000252E                          2612          
-0000252E  4EB9 00002644           2613              JSR     LOAD_EA
-00002534  4EB9 000027AC           2614              JSR     LOAD_NEW_LINE
-0000253A  4E75                    2615              RTS
-0000253C                          2616  ***^^^^^^^^^^^^^^^^^^^***
-0000253C                          2617  
-0000253C                          2618  ***vvvvvvvvvvvvvvvvvvv***
-0000253C  4285                    2619  BCLR        CLR.L   D5
-0000253E  4284                    2620              CLR.L   D4
-00002540  247C 00000000           2621              MOVEA.L #0, A2
-00002546                          2622  
-00002546  3A3C 5000               2623              MOVE.W  #END_ADDRESS, D5
-0000254A  9A4D                    2624              SUB.W   A5, D5
-0000254C  0C45 0002               2625              CMPI.W  #$2, D5
-00002550  6D00 0322               2626              BLT     INVALID
-00002554                          2627  
-00002554  381D                    2628              MOVE.W  (A5)+, D4
-00002556  4284                    2629              CLR.L   D4
-00002558  381D                    2630              MOVE.W  (A5)+, D4
-0000255A  0244 00FF               2631              ANDI.W  #$00FF, D4
-0000255E  247C 0000256A           2632              MOVEA.L #BACK4, A2
-00002564  4EF9 00002778           2633              JMP     LOAD_IMMDTE
-0000256A                          2634              
-0000256A  4EB9 000027C4           2635  BACK4       JSR     LOAD_COMMA_SPACE
-00002570                          2636              
-00002570  367C 2588               2637              MOVEA.W #BACK3, A3
-00002574  0C38 0000 1007          2638              CMPI.B  #%000, FOURTH_3
-0000257A  6700 017A               2639              BEQ     SIZE_W
-0000257E  0C38 0001 1007          2640              CMPI.B  #%001, FOURTH_3
-00002584  6700 0178               2641              BEQ     SIZE_L
-00002588                          2642  
-00002588  1638 1006               2643  BACK3       MOVE.B  THIRD_3, D3
-0000258C  1438 1007               2644              MOVE.B  FOURTH_3, D2
-00002590                          2645  
-00002590  4EB9 00002644           2646              JSR     LOAD_EA
-00002596  4EB9 000027AC           2647              JSR     LOAD_NEW_LINE
-0000259C                          2648  
-0000259C  4E75                    2649              RTS
-0000259E                          2650  ***^^^^^^^^^^^^^^^^^^^***
-0000259E                          2651  
-0000259E                          2652  ***vvvvvvvvvvvvvvvvvvv***
-0000259E  163C 0000               2653  DYNMC_BCLR  MOVE.B  #%000, D3
-000025A2  1438 1004               2654              MOVE.B  FIRST_3, D2
-000025A6                          2655              
-000025A6  4EB9 00002644           2656              JSR     LOAD_EA
-000025AC  4EB9 000027C4           2657              JSR     LOAD_COMMA_SPACE
-000025B2                          2658  
-000025B2  367C 25CA               2659              MOVEA.W #BACK5, A3
-000025B6  0C38 0000 1007          2660              CMPI.B  #%000, FOURTH_3
-000025BC  6700 0138               2661              BEQ     SIZE_W
-000025C0  0C38 0001 1007          2662              CMPI.B  #%001, FOURTH_3
-000025C6  6700 0136               2663              BEQ     SIZE_L
-000025CA                          2664              
-000025CA  1638 1006               2665  BACK5       MOVE.B  THIRD_3, D3
-000025CE  1438 1007               2666              MOVE.B  FOURTH_3, D2
-000025D2                          2667              
-000025D2  4EB9 00002644           2668              JSR     LOAD_EA
-000025D8  4EB9 000027AC           2669              JSR     LOAD_NEW_LINE
-000025DE                          2670              
-000025DE  4E75                    2671              RTS
-000025E0                          2672  ***^^^^^^^^^^^^^^^^^^^***
-000025E0                          2673  
-000025E0                          2674  * <EA>
-000025E0                          2675  **********************************************************************************
-000025E0                          2676  * Description: Once the mnemonic is 00XX, it is either MOVE or MOVEA. Checks the 3-bit bundles and
-000025E0                          2677  *              the size of immediate/address values if necessary.
-000025E0                          2678  *
-000025E0                          2679  * Registers used: D3 for SRC/DST mod, D2 for SRC/DST reg, A3 to get back from the subbranch
-000025E0                          2680  *
-000025E0                          2681  * Precondition: FIRST_3, SECOND_3, THIRD_3, FOURTH_3
-000025E0                          2682  *
-000025E0                          2683  * Postcondition: X
-000025E0                          2684  **********************************************************************************
-000025E0                          2685  LOAD_00XX:
-000025E0  4283                    2686          CLR.L   D3
-000025E2  4282                    2687          CLR.L   D2
-000025E4  267C 00000000           2688          MOVEA.L #0, A3
-000025EA                          2689          
-000025EA  367C 2602               2690          MOVEA.W #GOO, A3
-000025EE  0C38 0003 1000          2691          CMPI.B  #%0011, MNEMONIC
-000025F4  6700 0100               2692          BEQ     SIZE_W
-000025F8  0C38 0002 1000          2693          CMPI.B  #%0010, MNEMONIC
-000025FE  6700 00FE               2694          BEQ     SIZE_L
-00002602                          2695  
-00002602  1638 1006               2696  GOO     MOVE.B  THIRD_3, D3
-00002606  1438 1007               2697          MOVE.B  FOURTH_3, D2
-0000260A                          2698      
-0000260A  4EB9 00002644           2699          JSR     LOAD_EA
-00002610  4EB9 000027C4           2700          JSR     LOAD_COMMA_SPACE
-00002616                          2701      
-00002616  367C 262E               2702          MOVEA.W #GOO2, A3
-0000261A  0C38 0000 1004          2703          CMPI.B  #%000, FIRST_3
-00002620  6700 00D4               2704          BEQ     SIZE_W
-00002624  0C38 0001 1004          2705          CMPI.B  #%001, FIRST_3
-0000262A  6700 00D2               2706          BEQ     SIZE_L
-0000262E                          2707      
-0000262E  1638 1005               2708  GOO2    MOVE.B  SECOND_3, D3
-00002632  1438 1004               2709          MOVE.B  FIRST_3, D2
-00002636                          2710              
-00002636  4EB9 00002644           2711          JSR     LOAD_EA
-0000263C  4EB9 000027AC           2712          JSR     LOAD_NEW_LINE
-00002642                          2713      
-00002642  4E75                    2714          RTS
-00002644                          2715  **************************************************
-00002644                          2716  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-00002644                          2717  
-00002644                          2718  
-00002644                          2719  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-00002644                          2720  * LOAD_THIS FUNCTIONS (HIGH LEVEL) ***************
-00002644                          2721  
-00002644                          2722  * <EA>
-00002644                          2723  **********************************************************************************
-00002644                          2724  * Description: Checks the SRC/DST mod
-00002644                          2725  *
-00002644                          2726  * Registers used: A2 for branching back from subbranches
-00002644                          2727  *
-00002644                          2728  * Precondition: D3 for SRC/DST mod
-00002644                          2729  *
-00002644                          2730  * Postcondition: X
-00002644                          2731  **********************************************************************************
-00002644                          2732  LOAD_EA:
-00002644  347C 2654               2733          MOVEA.W #SAVED, A2 * remember to come back!
-00002648                          2734  
-00002648  0C43 0007               2735          CMPI    #%111, D3
-0000264C  6D00 0008               2736          BLT     LOAD_LT_111
-00002650  6C00 0032               2737          BGE     LOAD_GE_111
-00002654                          2738      
-00002654  4E75                    2739  SAVED   RTS
-00002656                          2740  
-00002656                          2741  * <EA>
-00002656                          2742  **********************************************************************************
-00002656                          2743  * Description: Checks the SRC/DST mod where it is not immediate/address value
-00002656                          2744  *
-00002656                          2745  * Registers used: X
-00002656                          2746  *
-00002656                          2747  * Precondition: D3 for SRC/DST mod
-00002656                          2748  *
-00002656                          2749  * Postcondition: X
-00002656                          2750  **********************************************************************************
-00002656                          2751  LOAD_LT_111:
-00002656  0C43 0000               2752      CMPI    #%000, D3 * e.g. D3
-0000265A  6700 00AA               2753      BEQ     LOAD_DATA_REGISTER
-0000265E  0C43 0001               2754      CMPI    #%001, D3 * e.g. A3
-00002662  6700 00B4               2755      BEQ     LOAD_ADDR_REGISTER
-00002666  0C43 0002               2756      CMPI    #%010, D3 * e.g. (A3)
-0000266A  6700 00BE               2757      BEQ     LOAD_ADDRESS
-0000266E  0C43 0003               2758      CMPI    #%011, D3 * e.g. (A3)+
-00002672  6700 00C8               2759      BEQ     LOAD_ADDRESS_W_POST_INC
-00002676  0C43 0004               2760      CMPI    #%100, D3 * e.g. -(A3)
-0000267A  6700 00CC               2761      BEQ     LOAD_ADDRESS_W_PRE_DEC
-0000267E                          2762      
-0000267E  4EF9 00002874           2763      JMP     INVALID
-00002684                          2764      
-00002684                          2765  * <EA>
-00002684                          2766  **********************************************************************************
-00002684                          2767  * Description: Checks the SRC/DST mod where it is immediate/address value
-00002684                          2768  *
-00002684                          2769  * Registers used: D5 for SUB.W, D4 for immediate/address value extraction
-00002684                          2770  *
-00002684                          2771  * Precondition: A5 for START_ADDRESS iteration, TRAILING_SIZE for size of the immediate/address value
-00002684                          2772  *
-00002684                          2773  * Postcondition: IS_INVALID flag set if EA bit not valid
-00002684                          2774  **********************************************************************************
-00002684                          2775  LOAD_GE_111:
-00002684  4285                    2776              CLR.L   D5
-00002686  4284                    2777              CLR.L   D4
-00002688                          2778  
-00002688  3A3C 5000               2779              MOVE.W  #END_ADDRESS, D5
-0000268C  9A4D                    2780              SUB.W   A5, D5
-0000268E  BA78 1002               2781              CMP.W   TRAILING_SIZE, D5
-00002692  6D00 01E0               2782              BLT     INVALID
-00002696                          2783  
-00002696  381D                    2784              MOVE.W  (A5)+, D4
-00002698  4284                    2785              CLR.L   D4
-0000269A                          2786              
-0000269A  0C78 0001 1002          2787              CMPI.W  #$1, TRAILING_SIZE
-000026A0  6700 0016               2788              BEQ     CHUMP_BYTE
-000026A4  0C78 0002 1002          2789              CMPI.W  #$2, TRAILING_SIZE
-000026AA  6700 0014               2790              BEQ     CHUMP_WORD
-000026AE  0C78 0004 1002          2791              CMPI.W  #$4, TRAILING_SIZE
-000026B4  6700 0012               2792              BEQ     CHUMP_LONG
-000026B8                          2793  
-000026B8  381D                    2794  CHUMP_BYTE  MOVE.W  (A5)+, D4 * Minimum 4 hex (e.g. MOVE.B #1, $2 = XXXX 0001 0002)
-000026BA  4EF9 000026D0           2795              JMP     GO
-000026C0                          2796  
-000026C0  381D                    2797  CHUMP_WORD  MOVE.W  (A5)+, D4
-000026C2  4EF9 000026D0           2798              JMP     GO
-000026C8                          2799              
-000026C8  281D                    2800  CHUMP_LONG  MOVE.L  (A5)+, D4
-000026CA  4EF9 000026D0           2801              JMP     GO
-000026D0                          2802  
-000026D0  0C42 0000               2803  GO          CMPI    #%000, D2
-000026D4  6700 007E               2804              BEQ     LOAD_ABS_SHORT
-000026D8  0C42 0001               2805              CMPI    #%001, D2
-000026DC  6700 0088               2806              BEQ     LOAD_ABS_LONG
-000026E0  0C42 0004               2807              CMPI    #%100, D2
-000026E4  6700 0092               2808              BEQ     LOAD_IMMDTE
-000026E8                          2809      
-000026E8  4EF9 00002874           2810              JMP     INVALID
-000026EE                          2811  * <EA>
-000026EE                          2812  **********************************************************************************
-000026EE                          2813  * Description: Puts in the proper value in TRAILING_SIZE based on the immediate/address value size
-000026EE                          2814  *
-000026EE                          2815  * Registers used: X
-000026EE                          2816  *
-000026EE                          2817  * Precondition: X
-000026EE                          2818  *
-000026EE                          2819  * Postcondition: Set up TRAILING_SIZE
-000026EE                          2820  **********************************************************************************
-000026EE                          2821  TRAILING_HELPER:            
-000026EE  31FC 0002 1002          2822  SIZE_B  MOVE.W  #$2, TRAILING_SIZE
-000026F4  4ED3                    2823          JMP     (A3)
-000026F6                          2824  
-000026F6  31FC 0002 1002          2825  SIZE_W  MOVE.W  #$2, TRAILING_SIZE
-000026FC  4ED3                    2826          JMP     (A3)
-000026FE                          2827          
-000026FE  31FC 0004 1002          2828  SIZE_L  MOVE.W  #$4, TRAILING_SIZE
-00002704  4ED3                    2829          JMP     (A3)
-00002706                          2830  **************************************************
-00002706                          2831  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-00002706                          2832  
-00002706                          2833  
-00002706                          2834  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-00002706                          2835  * LOAD_THIS FUNCTIONS (INTERMEDIATE LEVEL) *******
-00002706                          2836  
-00002706                          2837  * <EA>
-00002706                          2838  **********************************************************************************
-00002706                          2839  * Description: Loads ASCII for e.g. D3 in EA_BUFFER
-00002706                          2840  *
-00002706                          2841  * Registers used: D0 for actually loading
-00002706                          2842  *
-00002706                          2843  * Precondition: D2 for SRC/DST reg
-00002706                          2844  *
-00002706                          2845  * Postcondition: X
-00002706                          2846  **********************************************************************************
-00002706                          2847  LOAD_DATA_REGISTER:
-00002706  4280                    2848      CLR.L   D0
-00002708                          2849      
-00002708  4EB9 000027DC           2850      JSR     LOAD_D
-0000270E  1002                    2851      MOVE.B  D2, D0
-00002710  4EB9 00002850           2852      JSR     LOAD_NUM
-00002716  4ED2                    2853      JMP     (A2)
-00002718                          2854  
-00002718                          2855  * <EA>
-00002718                          2856  **********************************************************************************
-00002718                          2857  * Description: Loads ASCII for e.g. A3 in EA_BUFFER
-00002718                          2858  *
-00002718                          2859  * Registers used: D0 for actually loading
-00002718                          2860  *
-00002718                          2861  * Precondition: D2 for SRC/DST reg
-00002718                          2862  *
-00002718                          2863  * Postcondition: X
-00002718                          2864  **********************************************************************************
-00002718                          2865  LOAD_ADDR_REGISTER:
-00002718  4280                    2866      CLR.L   D0
-0000271A                          2867  
-0000271A  4EB9 000027EA           2868      JSR     LOAD_A
-00002720  1002                    2869      MOVE.B  D2, D0
-00002722  4EB9 00002850           2870      JSR     LOAD_NUM
-00002728  4ED2                    2871      JMP     (A2)
-0000272A                          2872  
-0000272A                          2873  * <EA>
-0000272A                          2874  **********************************************************************************
-0000272A                          2875  * Description: Loads ASCII for e.g. (A3) in EA_BUFFER
-0000272A                          2876  *
-0000272A                          2877  * Registers used: X
-0000272A                          2878  *
-0000272A                          2879  * Precondition: X
-0000272A                          2880  *
-0000272A                          2881  * Postcondition: X
-0000272A                          2882  **********************************************************************************
-0000272A                          2883  LOAD_ADDRESS:
-0000272A  4EB9 000027F8           2884      JSR     LOAD_PTHSIS_OPEN
-00002730  4EB8 2718               2885      JSR     LOAD_ADDR_REGISTER
-00002734  4EB9 00002806           2886      JSR     LOAD_PTHSIS_CLSD
-0000273A  4ED2                    2887      JMP     (A2)
-0000273C                          2888  
-0000273C                          2889  * <EA>
-0000273C                          2890  **********************************************************************************
-0000273C                          2891  * Description: Loads ASCII for e.g. (A3)+ in EA_BUFFER
-0000273C                          2892  *
-0000273C                          2893  * Registers used: X
-0000273C                          2894  *
-0000273C                          2895  * Precondition: X
-0000273C                          2896  *
-0000273C                          2897  * Postcondition: X
-0000273C                          2898  **********************************************************************************
-0000273C                          2899  LOAD_ADDRESS_W_POST_INC:
-0000273C  4EB8 272A               2900      JSR     LOAD_ADDRESS
-00002740  4EB9 00002830           2901      JSR     LOAD_PLUS_SIGN
-00002746  4ED2                    2902      JMP     (A2)
-00002748                          2903  
-00002748                          2904  * <EA>
-00002748                          2905  **********************************************************************************
-00002748                          2906  * Description: Loads ASCII for e.g. -(A3) in EA_BUFFER
-00002748                          2907  *
-00002748                          2908  * Registers used: X
-00002748                          2909  *
-00002748                          2910  * Precondition: X
-00002748                          2911  *
-00002748                          2912  * Postcondition: X
-00002748                          2913  **********************************************************************************
-00002748                          2914  LOAD_ADDRESS_W_PRE_DEC:
-00002748  4EB9 0000283E           2915      JSR     LOAD_MINUS_SIGN
-0000274E  4EB8 272A               2916      JSR     LOAD_ADDRESS
-00002752  4ED2                    2917      JMP     (A2)
-00002754                          2918  
-00002754                          2919  * <EA>
-00002754                          2920  **********************************************************************************
-00002754                          2921  * Description: Loads ASCII for e.g. $1234 in EA_BUFFER
-00002754                          2922  *
-00002754                          2923  * Registers used: D0 for actually loading
-00002754                          2924  *
-00002754                          2925  * Precondition: D4 for immediate/address value  
-00002754                          2926  *
-00002754                          2927  * Postcondition: X
-00002754                          2928  **********************************************************************************
-00002754                          2929  LOAD_ABS_SHORT:
-00002754  4280                    2930      CLR.L   D0
-00002756                          2931  
-00002756  4EB9 00002814           2932      JSR     LOAD_HEX_SIGN
-0000275C  3004                    2933      MOVE.W  D4, D0
-0000275E  4EB9 00002782           2934      JSR     LOAD_BYTES
-00002764  4ED2                    2935      JMP     (A2)
-00002766                          2936  
-00002766                          2937  * <EA>
-00002766                          2938  **********************************************************************************
-00002766                          2939  * Description: Loads ASCII for e.g. $12345678 in EA_BUFFER
-00002766                          2940  *
-00002766                          2941  * Registers used: D0 for actually loading
-00002766                          2942  *
-00002766                          2943  * Precondition: D4 for immediate/address value  
-00002766                          2944  *
-00002766                          2945  * Postcondition: X
-00002766                          2946  **********************************************************************************
-00002766                          2947  LOAD_ABS_LONG:
-00002766  4280                    2948      CLR.L   D0
-00002768                          2949  
-00002768  4EB9 00002814           2950      JSR     LOAD_HEX_SIGN
-0000276E  2004                    2951      MOVE.L  D4, D0
-00002770  4EB9 00002782           2952      JSR     LOAD_BYTES
-00002776  4ED2                    2953      JMP     (A2)
-00002778                          2954  
-00002778                          2955  * <EA>
-00002778                          2956  **********************************************************************************
-00002778                          2957  * Description: Loads ASCII for e.g. #$1234 in EA_BUFFER
-00002778                          2958  *
-00002778                          2959  * Registers used: X
-00002778                          2960  *
-00002778                          2961  * Precondition: X 
-00002778                          2962  *
-00002778                          2963  * Postcondition: X
-00002778                          2964  **********************************************************************************
-00002778                          2965  LOAD_IMMDTE:
-00002778  4EB9 00002822           2966      JSR     LOAD_IMMDTE_VALU
-0000277E  4EF8 2766               2967      JMP     LOAD_ABS_LONG
-00002782                          2968  
-00002782                          2969  **************************************************
-00002782                          2970  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-00002782                          2971  
-00002782                          2972  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-00002782                          2973  * LOAD_THIS FUNCTIONS (LOW LEVEL) ****************
-00002782                          2974  
-00002782                          2975  * <EA>
-00002782                          2976  **********************************************************************************
-00002782                          2977  * Description: Shifts the hex to the left and loads from the left-most hex to EA_BUFFER in ASCII
-00002782                          2978  *
-00002782                          2979  * Registers used: D5 for the loop counter, D1 for loop assist
-00002782                          2980  *
-00002782                          2981  * Precondition: D0 for the immediate/address value  
-00002782                          2982  *
-00002782                          2983  * Postcondition: X
-00002782                          2984  **********************************************************************************
-00002782                          2985  LOAD_BYTES:
-00002782  4285                    2986          CLR.L   D5
-00002784  4281                    2987          CLR.L   D1
-00002786                          2988  
-00002786  2200                    2989          MOVE.L  D0, D1
-00002788  1A3C 0008               2990          MOVE.B  #8, D5
-0000278C  0C45 0000               2991  LOOP    CMPI    #0, D5
-00002790  6E00 0004               2992          BGT     ROTATE
-00002794  4E75                    2993          RTS
-00002796                          2994      
-00002796  E999                    2995  ROTATE  ROL.L   #$04, D1
-00002798  1001                    2996          MOVE.B  D1, D0
-0000279A  0280 0000000F           2997          ANDI.L  #$0000000F, D0
-000027A0  4EB9 00002850           2998          JSR     LOAD_NUM
-000027A6  5345                    2999          SUBI    #1, D5
-000027A8  4EF8 278C               3000          JMP     LOOP        
-000027AC                          3001  
-000027AC                          3002  * <EA>
-000027AC                          3003  **********************************************************************************
-000027AC                          3004  * Description: Loads ASCII for CR, LF 
-000027AC                          3005  *
-000027AC                          3006  * Registers used: D0 for actually loading
-000027AC                          3007  *
-000027AC                          3008  * Precondition: CR, LF 
-000027AC                          3009  *
-000027AC                          3010  * Postcondition: X
-000027AC                          3011  **********************************************************************************
-000027AC                          3012  LOAD_NEW_LINE:
-000027AC  4280                    3013      CLR.L   D0
-000027AE                          3014  
-000027AE  1038 1063               3015      MOVE.B  CR, D0
-000027B2  4EB9 0000284C           3016      JSR     LOAD_THIS_SHIT
-000027B8  1038 1064               3017      MOVE.B  LF, D0
-000027BC  4EB9 0000284C           3018      JSR     LOAD_THIS_SHIT
-000027C2  4E75                    3019      RTS
-000027C4                          3020  
-000027C4                          3021  * <EA>
-000027C4                          3022  **********************************************************************************
-000027C4                          3023  * Description: Loads ASCII for ', ' 
-000027C4                          3024  *
-000027C4                          3025  * Registers used: D0 for actually loading
-000027C4                          3026  *
-000027C4                          3027  * Precondition: COMMA, SPACE
-000027C4                          3028  *
-000027C4                          3029  * Postcondition: X
-000027C4                          3030  **********************************************************************************
-000027C4                          3031  LOAD_COMMA_SPACE:
-000027C4  4280                    3032      CLR.L   D0
-000027C6                          3033  
-000027C6  1038 1061               3034      MOVE.B  COMMA, D0
-000027CA  4EB9 0000284C           3035      JSR     LOAD_THIS_SHIT
-000027D0  1038 1062               3036      MOVE.B  SPACE, D0
-000027D4  4EB9 0000284C           3037      JSR     LOAD_THIS_SHIT
-000027DA                          3038      
-000027DA  4E75                    3039      RTS
-000027DC                          3040  
-000027DC                          3041  * <EA>
-000027DC                          3042  **********************************************************************************
-000027DC                          3043  * Description: Loads ASCII for D 
-000027DC                          3044  *
-000027DC                          3045  * Registers used: D0 for actually loading
-000027DC                          3046  *
-000027DC                          3047  * Precondition: DATA
-000027DC                          3048  *
-000027DC                          3049  * Postcondition: X
-000027DC                          3050  **********************************************************************************
-000027DC                          3051  LOAD_D:
-000027DC  4280                    3052      CLR.L   D0
-000027DE                          3053  
-000027DE  1038 105A               3054      MOVE.B  DATA, D0
-000027E2  4EB9 0000284C           3055      JSR     LOAD_THIS_SHIT
-000027E8  4E75                    3056      RTS
-000027EA                          3057  
-000027EA                          3058  * <EA>
-000027EA                          3059  **********************************************************************************
-000027EA                          3060  * Description: Loads ASCII for A
-000027EA                          3061  *
-000027EA                          3062  * Registers used: D0 for actually loading
-000027EA                          3063  *
-000027EA                          3064  * Precondition: ADDRESS
-000027EA                          3065  *
-000027EA                          3066  * Postcondition: X
-000027EA                          3067  **********************************************************************************
-000027EA                          3068  LOAD_A:
-000027EA  4280                    3069      CLR.L   D0
-000027EC                          3070  
-000027EC  1038 1059               3071      MOVE.B  ADDRESS, D0
-000027F0  4EB9 0000284C           3072      JSR     LOAD_THIS_SHIT
-000027F6  4E75                    3073      RTS
-000027F8                          3074  
-000027F8                          3075  * <EA>
-000027F8                          3076  **********************************************************************************
-000027F8                          3077  * Description: Loads ASCII for (
-000027F8                          3078  *
-000027F8                          3079  * Registers used: D0 for actually loading
-000027F8                          3080  *
-000027F8                          3081  * Precondition: PTHSIS_OPEN
-000027F8                          3082  *
-000027F8                          3083  * Postcondition: X
-000027F8                          3084  **********************************************************************************
-000027F8                          3085  LOAD_PTHSIS_OPEN:
-000027F8  4280                    3086      CLR.L   D0
-000027FA                          3087  
-000027FA  1038 105B               3088      MOVE.B  PTHSIS_OPEN, D0
-000027FE  4EB9 0000284C           3089      JSR     LOAD_THIS_SHIT
-00002804  4E75                    3090      RTS
-00002806                          3091  
-00002806                          3092  * <EA>
-00002806                          3093  **********************************************************************************
-00002806                          3094  * Description: Loads ASCII for )
-00002806                          3095  *
-00002806                          3096  * Registers used: D0 for actually loading
-00002806                          3097  *
-00002806                          3098  * Precondition: PTHSIS_CLSD
-00002806                          3099  *
-00002806                          3100  * Postcondition: X
-00002806                          3101  **********************************************************************************
-00002806                          3102  LOAD_PTHSIS_CLSD:
-00002806  4280                    3103      CLR.L   D0
-00002808                          3104  
-00002808  1038 105C               3105      MOVE.B  PTHSIS_CLSD, D0
-0000280C  4EB9 0000284C           3106      JSR     LOAD_THIS_SHIT
-00002812  4E75                    3107      RTS
-00002814                          3108  
-00002814                          3109  * <EA>
-00002814                          3110  **********************************************************************************
-00002814                          3111  * Description: Loads ASCII for $
-00002814                          3112  *
-00002814                          3113  * Registers used: D0 for actually loading
-00002814                          3114  *
-00002814                          3115  * Precondition: HEX_SIGN
-00002814                          3116  *
-00002814                          3117  * Postcondition: X
-00002814                          3118  **********************************************************************************
-00002814                          3119  LOAD_HEX_SIGN:
-00002814  4280                    3120      CLR.L   D0
-00002816                          3121  
-00002816  1038 105D               3122      MOVE.B  HEX_SIGN, D0
-0000281A  4EB9 0000284C           3123      JSR     LOAD_THIS_SHIT
-00002820  4E75                    3124      RTS
-00002822                          3125  
-00002822                          3126  * <EA>
-00002822                          3127  **********************************************************************************
-00002822                          3128  * Description: Loads ASCII for #
-00002822                          3129  *
-00002822                          3130  * Registers used: D0 for actually loading
-00002822                          3131  *
-00002822                          3132  * Precondition: IMMDTE_VALU
-00002822                          3133  *
-00002822                          3134  * Postcondition: X
-00002822                          3135  **********************************************************************************
-00002822                          3136  LOAD_IMMDTE_VALU:
-00002822  4280                    3137      CLR.L   D0
-00002824                          3138  
-00002824  1038 105E               3139      MOVE.B  IMMDTE_VALU, D0
-00002828  4EB9 0000284C           3140      JSR     LOAD_THIS_SHIT
-0000282E  4E75                    3141      RTS
-00002830                          3142  
-00002830                          3143  * <EA>
-00002830                          3144  **********************************************************************************
-00002830                          3145  * Description: Loads ASCII for +
-00002830                          3146  *
-00002830                          3147  * Registers used: D0 for actually loading
-00002830                          3148  *
-00002830                          3149  * Precondition: PLUS_SIGN
-00002830                          3150  *
-00002830                          3151  * Postcondition: X
-00002830                          3152  **********************************************************************************
-00002830                          3153  LOAD_PLUS_SIGN:
-00002830  4280                    3154      CLR.L   D0
-00002832                          3155  
-00002832  1038 105F               3156      MOVE.B  PLUS_SIGN, D0
-00002836  4EB9 0000284C           3157      JSR     LOAD_THIS_SHIT
-0000283C  4E75                    3158      RTS
-0000283E                          3159  
-0000283E                          3160  * <EA>
-0000283E                          3161  **********************************************************************************
-0000283E                          3162  * Description: Loads ASCII for -
-0000283E                          3163  *
-0000283E                          3164  * Registers used: D0 for actually loading
-0000283E                          3165  *
-0000283E                          3166  * Precondition: MINUS_SIGN
-0000283E                          3167  *
-0000283E                          3168  * Postcondition: X
-0000283E                          3169  **********************************************************************************
-0000283E                          3170  LOAD_MINUS_SIGN:
-0000283E  4280                    3171      CLR.L   D0
-00002840                          3172  
-00002840  1038 1060               3173      MOVE.B  MINUS_SIGN, D0
-00002844  4EB9 0000284C           3174      JSR     LOAD_THIS_SHIT
-0000284A  4E75                    3175      RTS
-0000284C                          3176  **************************************************
-0000284C                          3177  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-0000284C                          3178  
-0000284C                          3179  
-0000284C                          3180  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-0000284C                          3181  * LOAD_THIS FUNCTIONS (LOWEST LEVEL) *************
-0000284C                          3182  * <EA>
-0000284C                          3183  **********************************************************************************
-0000284C                          3184  * Description: Loads the hex value from D0 to EA_BUFFER in ASCII
-0000284C                          3185  *
-0000284C                          3186  * Registers used: X
-0000284C                          3187  *
-0000284C                          3188  * Precondition: X
-0000284C                          3189  *
-0000284C                          3190  * Postcondition: X
-0000284C                          3191  **********************************************************************************
-0000284C                          3192  LOAD_THIS_SHIT:
-0000284C  18C0                    3193      MOVE.B  D0, (A4)+
-0000284E  4E75                    3194      RTS
-00002850                          3195  
-00002850                          3196  * <EA>
-00002850                          3197  **********************************************************************************
-00002850                          3198  * Description: Adds $30 to a number in D0 to make it a hex. If the number is greater
-00002850                          3199  *              than 9 (A~F), then adds $37. Then moves the hex value from D0 to EA_BUFFER in ASCII
-00002850                          3200  *
-00002850                          3201  * Registers used: X
-00002850                          3202  *
-00002850                          3203  * Precondition: X
-00002850                          3204  *
-00002850                          3205  * Postcondition: X
-00002850                          3206  **********************************************************************************
-00002850                          3207  LOAD_NUM:
-00002850  0C00 0009               3208      CMPI.B  #$9, D0
-00002854  6E00 0006               3209      BGT     GT
-00002858  6F00 000C               3210      BLE     LE
-0000285C                          3211      
-0000285C  0600 0037               3212  GT  ADDI.B  #$37, D0 * A~F
-00002860  4EF9 00002870           3213      JMP     END
-00002866  0600 0030               3214  LE  ADDI.B  #$30, D0 * 0~9
-0000286A  4EF9 00002870           3215      JMP     END
-00002870                          3216  
-00002870  18C0                    3217  END MOVE.B  D0, (A4)+
-00002872  4E75                    3218      RTS
-00002874                          3219  
-00002874                          3220  * <EA>
-00002874                          3221  **********************************************************************************
-00002874                          3222  * Description: Execution goes here if even one of the EA bit is invalid. Flags the invalid-bit and
-00002874                          3223  *              entirely exits the EA process.
-00002874                          3224  *
-00002874                          3225  * Registers used: X
-00002874                          3226  *
-00002874                          3227  * Precondition: X
-00002874                          3228  *
-00002874                          3229  * Postcondition: X
-00002874                          3230  **********************************************************************************
-00002874                          3231  INVALID:
-00002874  11FC 0000 10B5          3232              MOVE.B  #%0, IS_VALID
-0000287A  4EF8 20B2               3233              JMP     EXT
-0000287E                          3234  **************************************************
-0000287E                          3235  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-0000287E                          3236  
-0000287E                          3237      END    START
+00002190                          2266  * Precondition: X
+00002190                          2267  *
+00002190                          2268  * Postcondition: X
+00002190                          2269  **********************************************************************************
+00002190                          2270  LOAD_1011:
+00002190  4EF9 0000219C           2271      JMP     LOAD_1000
+00002196                          2272  
+00002196                          2273  
+00002196                          2274  * <EA>
+00002196                          2275  **********************************************************************************
+00002196                          2276  * Description: Once the mnemonic is 1001, it is SUB.
+00002196                          2277  *
+00002196                          2278  * Registers used: X. Basically recycling the algorithm for DIVS/OR
+00002196                          2279  *
+00002196                          2280  * Precondition: X
+00002196                          2281  *
+00002196                          2282  * Postcondition: X
+00002196                          2283  **********************************************************************************
+00002196                          2284  LOAD_1001:
+00002196  4EF9 0000219C           2285      JMP     LOAD_1000
+0000219C                          2286  
+0000219C                          2287  
+0000219C                          2288  * <EA>
+0000219C                          2289  **********************************************************************************
+0000219C                          2290  * Description: Once the mnemonic is 1000, it is either DIVS or OR.
+0000219C                          2291  *
+0000219C                          2292  * Registers used: D3 for SRC/DST mod, D2 for SRC/DST reg, A3 to get back from the subbranch.
+0000219C                          2293  *
+0000219C                          2294  * Precondition: FIRST_3, SECOND_3, THIRD_3, FOURTH_3
+0000219C                          2295  *
+0000219C                          2296  * Postcondition: X
+0000219C                          2297  **********************************************************************************
+0000219C                          2298  LOAD_1000:
+0000219C  4283                    2299              CLR.L   D3
+0000219E  4282                    2300              CLR.L   D2
+000021A0  267C 00000000           2301              MOVEA.L #0, A3
+000021A6                          2302              
+000021A6  0C38 0007 1005          2303              CMPI.B  #%111, SECOND_3
+000021AC  6700 009E               2304              BEQ     DIVS
+000021B0                          2305              
+000021B0  0C38 0003 1005          2306              CMPI.B  #%011, SECOND_3
+000021B6  6700 06B6               2307              BEQ     INVALID
+000021BA                          2308              
+000021BA                          2309  ***vvvvvvvvvvvvvvvvvvv***
+000021BA  0C38 0004 1005          2310              CMPI.B  #%100, SECOND_3
+000021C0  6D00 0006               2311              BLT     DIR_0 * direction bit 0
+000021C4  6C00 0044               2312              BGE     DIR_1 * direction bit 1
+000021C8                          2313              
+000021C8  367C 21E0               2314  DIR_0       MOVEA.W #OR_BACK, A3
+000021CC  0C38 0000 1007          2315              CMPI.B  #%000, FOURTH_3
+000021D2  6700 051C               2316              BEQ     SIZE_W
+000021D6  0C38 0001 1007          2317              CMPI.B  #%001, FOURTH_3
+000021DC  6700 051A               2318              BEQ     SIZE_L
+000021E0                          2319              
+000021E0  1638 1006               2320  OR_BACK     MOVE.B  THIRD_3, D3
+000021E4  1438 1007               2321              MOVE.B  FOURTH_3, D2
+000021E8                          2322  
+000021E8  4EB9 0000263E           2323              JSR     LOAD_EA
+000021EE  4EB9 000027BE           2324              JSR     LOAD_COMMA_SPACE
+000021F4                          2325              
+000021F4  163C 0000               2326              MOVE.B  #%000, D3
+000021F8  1438 1004               2327              MOVE.B  FIRST_3, D2
+000021FC                          2328              
+000021FC  4EB9 0000263E           2329              JSR     LOAD_EA
+00002202  4EB9 000027A6           2330              JSR     LOAD_NEW_LINE
+00002208  4E75                    2331              RTS
+0000220A                          2332              
+0000220A  163C 0000               2333  DIR_1       MOVE.B  #%000, D3
+0000220E  1438 1004               2334              MOVE.B  FIRST_3, D2
+00002212                          2335              
+00002212  4EB9 0000263E           2336              JSR     LOAD_EA
+00002218  4EB9 000027BE           2337              JSR     LOAD_COMMA_SPACE
+0000221E                          2338              
+0000221E  367C 2236               2339              MOVEA.W #OR_BACK2, A3
+00002222  0C38 0000 1007          2340              CMPI.B  #%000, FOURTH_3
+00002228  6700 04C6               2341              BEQ     SIZE_W
+0000222C  0C38 0001 1007          2342              CMPI.B  #%001, FOURTH_3
+00002232  6700 04C4               2343              BEQ     SIZE_L
+00002236                          2344              
+00002236  1638 1006               2345  OR_BACK2    MOVE.B  THIRD_3, D3
+0000223A  1438 1007               2346              MOVE.B  FOURTH_3, D2
+0000223E                          2347  
+0000223E  4EB9 0000263E           2348              JSR     LOAD_EA
+00002244  4EB9 000027A6           2349              JSR     LOAD_NEW_LINE
+0000224A  4E75                    2350              RTS    
+0000224C                          2351  ***^^^^^^^^^^^^^^^^^^^***
+0000224C                          2352              
+0000224C                          2353  ***vvvvvvvvvvvvvvvvvvv***
+0000224C  163C 0000               2354  DIVS        MOVE.B  #%000, D3
+00002250  1438 1004               2355              MOVE.B  FIRST_3, D2
+00002254                          2356  
+00002254  4EB9 0000263E           2357              JSR     LOAD_EA
+0000225A  4EB9 000027BE           2358              JSR     LOAD_COMMA_SPACE
+00002260                          2359              
+00002260  367C 2278               2360              MOVEA.W #DIVS_BACK, A3
+00002264  0C38 0000 1007          2361              CMPI.B  #%000, FOURTH_3
+0000226A  6700 0484               2362              BEQ     SIZE_W
+0000226E  0C38 0001 1007          2363              CMPI.B  #%001, FOURTH_3
+00002274  6700 0482               2364              BEQ     SIZE_L
+00002278                          2365              
+00002278  1638 1006               2366  DIVS_BACK   MOVE.B  THIRD_3, D3
+0000227C  1438 1007               2367              MOVE.B  FOURTH_3, D2
+00002280                          2368              
+00002280  4EB9 0000263E           2369              JSR     LOAD_EA
+00002286  4EB9 000027A6           2370              JSR     LOAD_NEW_LINE
+0000228C  4E75                    2371              RTS
+0000228E                          2372  ***^^^^^^^^^^^^^^^^^^^***
+0000228E                          2373  
+0000228E                          2374  
+0000228E                          2375  * <EA>
+0000228E                          2376  **********************************************************************************
+0000228E                          2377  * Description: Once the mnemonic is 0101, it is SUBQ
+0000228E                          2378  *
+0000228E                          2379  * Registers used: D4 to load the data within the EA bits, and A2 to come back
+0000228E                          2380  *
+0000228E                          2381  * Precondition: FIRST_3, SECOND_3, THIRD_3, FOURTH_3
+0000228E                          2382  *
+0000228E                          2383  * Postcondition: X
+0000228E                          2384  **********************************************************************************
+0000228E                          2385  LOAD_0101:
+0000228E  4283                    2386              CLR.L   D3
+00002290  4282                    2387              CLR.L   D2
+00002292  267C 00000000           2388              MOVEA.L #0, A3
+00002298                          2389  
+00002298  0C38 0007 1004          2390              CMPI.B  #%111, FIRST_3
+0000229E  6F00 0008               2391              BLE     MYBE_SUBQ1
+000022A2  4EF9 0000286E           2392              JMP     INVALID
+000022A8                          2393              
+000022A8  0C38 0003 1005          2394  MYBE_SUBQ1  CMPI.B  #%011, SECOND_3
+000022AE  6E00 0008               2395              BGT     MYBE_SUBQ2
+000022B2  4EF9 0000286E           2396              JMP     INVALID
+000022B8                          2397  
+000022B8  0C38 0007 1005          2398  MYBE_SUBQ2  CMPI.B  #%111, SECOND_3
+000022BE  6D00 0008               2399              BLT     SUBQ
+000022C2  4EF9 0000286E           2400              JMP     INVALID
+000022C8                          2401  
+000022C8  5238 1004               2402  SUBQ        ADDI.B  #%1, FIRST_3
+000022CC  1838 1004               2403              MOVE.B  FIRST_3, D4
+000022D0                          2404              
+000022D0  347C 22DA               2405              MOVEA.W #SUBQ_SAVED, A2
+000022D4  4EF9 00002772           2406              JMP     LOAD_IMMDTE
+000022DA                          2407              
+000022DA  4EB9 000027BE           2408  SUBQ_SAVED  JSR     LOAD_COMMA_SPACE
+000022E0                          2409  
+000022E0  367C 2302               2410              MOVEA.W #SUBQ_BACK, A3
+000022E4  0C38 0004 1005          2411              CMPI.B  #%100, SECOND_3
+000022EA  6700 03FC               2412              BEQ     SIZE_B
+000022EE  0C38 0005 1005          2413              CMPI.B  #%101, SECOND_3
+000022F4  6700 03FA               2414              BEQ     SIZE_W
+000022F8  0C38 0006 1005          2415              CMPI.B  #%110, SECOND_3
+000022FE  6700 03F8               2416              BEQ     SIZE_L
+00002302                          2417              
+00002302  1638 1006               2418  SUBQ_BACK   MOVE.B  THIRD_3, D3
+00002306  1438 1007               2419              MOVE.B  FOURTH_3, D2
+0000230A                          2420  
+0000230A  4EB9 0000263E           2421              JSR     LOAD_EA
+00002310  4EB9 000027A6           2422              JSR     LOAD_NEW_LINE
+00002316  4E75                    2423              RTS
+00002318                          2424  
+00002318                          2425  * <EA>
+00002318                          2426  **********************************************************************************
+00002318                          2427  * Description: Once the mnemonic is 0100, it is either NEG, RTS, JSR, MOVEM, or LEA.
+00002318                          2428  *
+00002318                          2429  * Registers used: D3 for SRC/DST mod, D2 for SRC/DST reg, A3 to get back from the subbranch,
+00002318                          2430  *                 D5, D4 for BCLR, D6 for recognizing MOVEM
+00002318                          2431  *
+00002318                          2432  * Precondition: FIRST_3, SECOND_3, THIRD_3, FOURTH_3
+00002318                          2433  *
+00002318                          2434  * Postcondition: X
+00002318                          2435  **********************************************************************************
+00002318                          2436  LOAD_0100:
+00002318  4283                    2437              CLR.L   D3
+0000231A  4282                    2438              CLR.L   D2
+0000231C  267C 00000000           2439              MOVEA.L #0, A3
+00002322                          2440  
+00002322  0C38 0002 1004          2441              CMPI.B  #%010, FIRST_3
+00002328  6700 0006               2442              BEQ     MYBE_NEG
+0000232C  6600 000C               2443              BNE     NOT_NEG
+00002330  0C38 0003 1005          2444  MYBE_NEG    CMPI.B  #%011, SECOND_3
+00002336  6D00 0084               2445              BLT     NEG
+0000233A                          2446  
+0000233A  0C38 0007 1004          2447  NOT_NEG     CMPI.B  #%111, FIRST_3
+00002340  6700 0006               2448              BEQ     MYBE_RTS1
+00002344  6600 0028               2449              BNE     NOT_RTS
+00002348  0C38 0001 1005          2450  MYBE_RTS1   CMPI.B  #%001, SECOND_3
+0000234E  6700 0006               2451              BEQ     MYBE_RTS2
+00002352  6600 001A               2452              BNE     NOT_RTS
+00002356  0C38 0006 1006          2453  MYBE_RTS2   CMPI.B  #%110, THIRD_3
+0000235C  6700 0006               2454              BEQ     MYBE_RTS3
+00002360  6600 000C               2455              BNE     NOT_RTS
+00002364  0C38 0005 1007          2456  MYBE_RTS3   CMPI.B  #%101, FOURTH_3
+0000236A  6700 0088               2457              BEQ     RTS
+0000236E                          2458              
+0000236E  0C38 0007 1004          2459  NOT_RTS     CMPI.B  #%111, FIRST_3
+00002374  6700 0006               2460              BEQ     MYBE_JSR
+00002378  6600 000C               2461              BNE     NOT_JSR
+0000237C  0C38 0002 1005          2462  MYBE_JSR    CMPI.B  #%010, SECOND_3
+00002382  6700 0078               2463              BEQ     JSR
+00002386                          2464  
+00002386  4286                    2465  NOT_JSR     CLR.L   D6
+00002388  1C38 1004               2466              MOVE.B  FIRST_3, D6
+0000238C  0206 0005               2467              ANDI.B  #%101, D6 * Making %1X0 -> %100
+00002390  0C06 0004               2468              CMPI.B  #%100, D6
+00002394  6700 0006               2469              BEQ     MYBE_MOVEM
+00002398  6600 0012               2470              BNE     NOT_MOVEM
+0000239C                          2471              
+0000239C  1C38 1005               2472  MYBE_MOVEM  MOVE.B  SECOND_3, D6
+000023A0  0206 0006               2473              ANDI.B  #%110, D6
+000023A4  0C06 0002               2474              CMPI.B  #%010, D6
+000023A8  6700 0080               2475              BEQ     MOVEM
+000023AC                          2476              
+000023AC  0C38 0007 1005          2477  NOT_MOVEM   CMPI.B  #%111, SECOND_3
+000023B2  6700 007A               2478              BEQ     LEA
+000023B6                          2479              
+000023B6  4EF9 0000286E           2480              JMP     INVALID
+000023BC                          2481  
+000023BC                          2482  NEG:
+000023BC  367C 23DE               2483              MOVEA.W #NEG_BACK, A3
+000023C0  0C38 0000 1005          2484              CMPI.B  #%000, SECOND_3
+000023C6  6700 0320               2485              BEQ     SIZE_B
+000023CA  0C38 0001 1005          2486              CMPI.B  #%001, SECOND_3
+000023D0  6700 031E               2487              BEQ     SIZE_W
+000023D4  0C38 0002 1005          2488              CMPI.B  #%010, SECOND_3
+000023DA  6700 031C               2489              BEQ     SIZE_L
+000023DE                          2490              
+000023DE  1638 1006               2491  NEG_BACK    MOVE.B  THIRD_3, D3
+000023E2  1438 1007               2492              MOVE.B  FOURTH_3, D2
+000023E6                          2493  
+000023E6  4EB9 0000263E           2494              JSR     LOAD_EA
+000023EC  4EB9 000027A6           2495              JSR     LOAD_NEW_LINE
+000023F2  4E75                    2496              RTS
+000023F4                          2497              
+000023F4                          2498  RTS:
+000023F4  4EB9 000027A6           2499              JSR     LOAD_NEW_LINE
+000023FA  4E75                    2500              RTS
+000023FC                          2501  
+000023FC                          2502  JSR:
+000023FC  367C 2414               2503              MOVEA.W #JSR_BACK, A3
+00002400  0C38 0000 1007          2504              CMPI.B  #%000, FOURTH_3
+00002406  6700 02E8               2505              BEQ     SIZE_W
+0000240A  0C38 0001 1007          2506              CMPI.B  #%001, FOURTH_3
+00002410  6700 02E6               2507              BEQ     SIZE_L
+00002414                          2508              
+00002414  1638 1006               2509  JSR_BACK    MOVE.B  THIRD_3, D3
+00002418  1438 1007               2510              MOVE.B  FOURTH_3, D2
+0000241C                          2511              
+0000241C  4EB9 0000263E           2512              JSR     LOAD_EA
+00002422  4EB9 000027A6           2513              JSR     LOAD_NEW_LINE
+00002428  4E75                    2514              RTS
+0000242A                          2515  
+0000242A                          2516  MOVEM:
+0000242A  FFFF FFFF               2517      SIMHALT
+0000242E                          2518      
+0000242E                          2519  LEA:
+0000242E  367C 2446               2520              MOVEA.W #LEA_BACK, A3
+00002432  0C38 0000 1007          2521              CMPI.B  #%000, FOURTH_3
+00002438  6700 02B6               2522              BEQ     SIZE_W
+0000243C  0C38 0001 1007          2523              CMPI.B  #%001, FOURTH_3
+00002442  6700 02B4               2524              BEQ     SIZE_L
+00002446                          2525              
+00002446  1638 1006               2526  LEA_BACK    MOVE.B  THIRD_3, D3
+0000244A  1438 1007               2527              MOVE.B  FOURTH_3, D2
+0000244E                          2528              
+0000244E  4EB9 0000263E           2529              JSR     LOAD_EA
+00002454  4EB9 000027BE           2530              JSR     LOAD_COMMA_SPACE
+0000245A                          2531              
+0000245A  163C 0001               2532              MOVE.B  #%001, D3
+0000245E  1438 1004               2533              MOVE.B  FIRST_3, D2
+00002462                          2534              
+00002462  4EB9 0000263E           2535              JSR     LOAD_EA
+00002468  4EB9 000027A6           2536              JSR     LOAD_NEW_LINE
+0000246E  4E75                    2537              RTS
+00002470                          2538  
+00002470                          2539  * <EA>
+00002470                          2540  **********************************************************************************
+00002470                          2541  * Description: Once the mnemonic is 0000, it is either BCLR, CMPI, ORI, or Dynamic BCLR.
+00002470                          2542  *
+00002470                          2543  * Registers used: D3 for SRC/DST mod, D2 for SRC/DST reg, A3 to get back from the subbranch,
+00002470                          2544  *                 D5, D4 for BCLR
+00002470                          2545  *
+00002470                          2546  * Precondition: FIRST_3, SECOND_3, THIRD_3, FOURTH_3
+00002470                          2547  *
+00002470                          2548  * Postcondition: X
+00002470                          2549  **********************************************************************************
+00002470                          2550  LOAD_0000:
+00002470  4283                    2551              CLR.L   D3
+00002472  4282                    2552              CLR.L   D2
+00002474  267C 00000000           2553              MOVEA.L #0, A3
+0000247A                          2554  
+0000247A  0C38 0000 1004          2555              CMPI.B  #%000, FIRST_3
+00002480  6700 0006               2556              BEQ     MYBE_ORI
+00002484  6600 000C               2557              BNE     NOT_ORI
+00002488  0C38 0003 1005          2558  MYBE_ORI    CMPI.B  #%011, SECOND_3
+0000248E  6D00 0042               2559              BLT     ORI_CMPI            
+00002492                          2560  
+00002492  0C38 0006 1004          2561  NOT_ORI     CMPI.B  #%110, FIRST_3
+00002498  6700 0006               2562              BEQ     MYBE_CMPI
+0000249C  6600 000C               2563              BNE     NOT_CMPI
+000024A0  0C38 0003 1005          2564  MYBE_CMPI   CMPI.B  #%011, SECOND_3
+000024A6  6D00 002A               2565              BLT     ORI_CMPI
+000024AA                          2566              
+000024AA  0C38 0004 1004          2567  NOT_CMPI    CMPI.B  #%100, FIRST_3
+000024B0  6700 0006               2568              BEQ     MYBE_BCLR
+000024B4  6600 000C               2569              BNE     NOT_BCLR
+000024B8  0C38 0002 1005          2570  MYBE_BCLR   CMPI.B  #%010, SECOND_3
+000024BE  6700 0076               2571              BEQ     BCLR
+000024C2                          2572  
+000024C2  0C38 0006 1005          2573  NOT_BCLR    CMPI.B  #%110, SECOND_3
+000024C8  6700 00CE               2574              BEQ     DYNMC_BCLR
+000024CC                          2575              
+000024CC  4EF9 0000286E           2576              JMP     INVALID
+000024D2                          2577              
+000024D2                          2578  ***vvvvvvvvvvvvvvvvvvv***
+000024D2  367C 24F4               2579  ORI_CMPI    MOVEA.W #BACK, A3
+000024D6  0C38 0000 1005          2580              CMPI.B  #%000, SECOND_3
+000024DC  6700 020A               2581              BEQ     SIZE_B
+000024E0  0C38 0001 1005          2582              CMPI.B  #%001, SECOND_3
+000024E6  6700 0208               2583              BEQ     SIZE_W
+000024EA  0C38 0002 1005          2584              CMPI.B  #%010, SECOND_3
+000024F0  6700 0206               2585              BEQ     SIZE_L
+000024F4                          2586  
+000024F4  163C 0007               2587  BACK        MOVE.B  #%111, D3
+000024F8  143C 0004               2588              MOVE.B  #%100, D2
+000024FC                          2589              
+000024FC  4EB9 0000263E           2590              JSR     LOAD_EA
+00002502  4EB9 000027BE           2591              JSR     LOAD_COMMA_SPACE
+00002508                          2592              
+00002508  367C 2520               2593              MOVEA.W #BACK2, A3   
+0000250C  0C38 0000 1007          2594              CMPI.B  #%000, FOURTH_3
+00002512  6700 01DC               2595              BEQ     SIZE_W
+00002516  0C38 0001 1007          2596              CMPI.B  #%001, FOURTH_3
+0000251C  6700 01DA               2597              BEQ     SIZE_L
+00002520                          2598  
+00002520  1638 1006               2599  BACK2       MOVE.B  THIRD_3, D3
+00002524  1438 1007               2600              MOVE.B  FOURTH_3, D2
+00002528                          2601          
+00002528  4EB9 0000263E           2602              JSR     LOAD_EA
+0000252E  4EB9 000027A6           2603              JSR     LOAD_NEW_LINE
+00002534  4E75                    2604              RTS
+00002536                          2605  ***^^^^^^^^^^^^^^^^^^^***
+00002536                          2606  
+00002536                          2607  ***vvvvvvvvvvvvvvvvvvv***
+00002536  4285                    2608  BCLR        CLR.L   D5
+00002538  4284                    2609              CLR.L   D4
+0000253A  247C 00000000           2610              MOVEA.L #0, A2
+00002540                          2611  
+00002540  3A3C 5000               2612              MOVE.W  #END_ADDRESS, D5
+00002544  9A4D                    2613              SUB.W   A5, D5
+00002546  0C45 0002               2614              CMPI.W  #$2, D5
+0000254A  6D00 0322               2615              BLT     INVALID
+0000254E                          2616  
+0000254E  381D                    2617              MOVE.W  (A5)+, D4
+00002550  4284                    2618              CLR.L   D4
+00002552  381D                    2619              MOVE.W  (A5)+, D4
+00002554  0244 00FF               2620              ANDI.W  #$00FF, D4
+00002558  247C 00002564           2621              MOVEA.L #BACK4, A2
+0000255E  4EF9 00002772           2622              JMP     LOAD_IMMDTE
+00002564                          2623              
+00002564  4EB9 000027BE           2624  BACK4       JSR     LOAD_COMMA_SPACE
+0000256A                          2625              
+0000256A  367C 2582               2626              MOVEA.W #BACK3, A3
+0000256E  0C38 0000 1007          2627              CMPI.B  #%000, FOURTH_3
+00002574  6700 017A               2628              BEQ     SIZE_W
+00002578  0C38 0001 1007          2629              CMPI.B  #%001, FOURTH_3
+0000257E  6700 0178               2630              BEQ     SIZE_L
+00002582                          2631  
+00002582  1638 1006               2632  BACK3       MOVE.B  THIRD_3, D3
+00002586  1438 1007               2633              MOVE.B  FOURTH_3, D2
+0000258A                          2634  
+0000258A  4EB9 0000263E           2635              JSR     LOAD_EA
+00002590  4EB9 000027A6           2636              JSR     LOAD_NEW_LINE
+00002596                          2637  
+00002596  4E75                    2638              RTS
+00002598                          2639  ***^^^^^^^^^^^^^^^^^^^***
+00002598                          2640  
+00002598                          2641  ***vvvvvvvvvvvvvvvvvvv***
+00002598  163C 0000               2642  DYNMC_BCLR  MOVE.B  #%000, D3
+0000259C  1438 1004               2643              MOVE.B  FIRST_3, D2
+000025A0                          2644              
+000025A0  4EB9 0000263E           2645              JSR     LOAD_EA
+000025A6  4EB9 000027BE           2646              JSR     LOAD_COMMA_SPACE
+000025AC                          2647  
+000025AC  367C 25C4               2648              MOVEA.W #BACK5, A3
+000025B0  0C38 0000 1007          2649              CMPI.B  #%000, FOURTH_3
+000025B6  6700 0138               2650              BEQ     SIZE_W
+000025BA  0C38 0001 1007          2651              CMPI.B  #%001, FOURTH_3
+000025C0  6700 0136               2652              BEQ     SIZE_L
+000025C4                          2653              
+000025C4  1638 1006               2654  BACK5       MOVE.B  THIRD_3, D3
+000025C8  1438 1007               2655              MOVE.B  FOURTH_3, D2
+000025CC                          2656              
+000025CC  4EB9 0000263E           2657              JSR     LOAD_EA
+000025D2  4EB9 000027A6           2658              JSR     LOAD_NEW_LINE
+000025D8                          2659              
+000025D8  4E75                    2660              RTS
+000025DA                          2661  ***^^^^^^^^^^^^^^^^^^^***
+000025DA                          2662  
+000025DA                          2663  * <EA>
+000025DA                          2664  **********************************************************************************
+000025DA                          2665  * Description: Once the mnemonic is 00XX, it is either MOVE or MOVEA. Checks the 3-bit bundles and
+000025DA                          2666  *              the size of immediate/address values if necessary.
+000025DA                          2667  *
+000025DA                          2668  * Registers used: D3 for SRC/DST mod, D2 for SRC/DST reg, A3 to get back from the subbranch
+000025DA                          2669  *
+000025DA                          2670  * Precondition: FIRST_3, SECOND_3, THIRD_3, FOURTH_3
+000025DA                          2671  *
+000025DA                          2672  * Postcondition: X
+000025DA                          2673  **********************************************************************************
+000025DA                          2674  LOAD_00XX:
+000025DA  4283                    2675          CLR.L   D3
+000025DC  4282                    2676          CLR.L   D2
+000025DE  267C 00000000           2677          MOVEA.L #0, A3
+000025E4                          2678          
+000025E4  367C 25FC               2679          MOVEA.W #GOO, A3
+000025E8  0C38 0003 1000          2680          CMPI.B  #%0011, MNEMONIC
+000025EE  6700 0100               2681          BEQ     SIZE_W
+000025F2  0C38 0002 1000          2682          CMPI.B  #%0010, MNEMONIC
+000025F8  6700 00FE               2683          BEQ     SIZE_L
+000025FC                          2684  
+000025FC  1638 1006               2685  GOO     MOVE.B  THIRD_3, D3
+00002600  1438 1007               2686          MOVE.B  FOURTH_3, D2
+00002604                          2687      
+00002604  4EB9 0000263E           2688          JSR     LOAD_EA
+0000260A  4EB9 000027BE           2689          JSR     LOAD_COMMA_SPACE
+00002610                          2690      
+00002610  367C 2628               2691          MOVEA.W #GOO2, A3
+00002614  0C38 0000 1004          2692          CMPI.B  #%000, FIRST_3
+0000261A  6700 00D4               2693          BEQ     SIZE_W
+0000261E  0C38 0001 1004          2694          CMPI.B  #%001, FIRST_3
+00002624  6700 00D2               2695          BEQ     SIZE_L
+00002628                          2696      
+00002628  1638 1005               2697  GOO2    MOVE.B  SECOND_3, D3
+0000262C  1438 1004               2698          MOVE.B  FIRST_3, D2
+00002630                          2699              
+00002630  4EB9 0000263E           2700          JSR     LOAD_EA
+00002636  4EB9 000027A6           2701          JSR     LOAD_NEW_LINE
+0000263C                          2702      
+0000263C  4E75                    2703          RTS
+0000263E                          2704  **************************************************
+0000263E                          2705  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0000263E                          2706  
+0000263E                          2707  
+0000263E                          2708  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0000263E                          2709  * LOAD_THIS FUNCTIONS (HIGH LEVEL) ***************
+0000263E                          2710  
+0000263E                          2711  * <EA>
+0000263E                          2712  **********************************************************************************
+0000263E                          2713  * Description: Checks the SRC/DST mod
+0000263E                          2714  *
+0000263E                          2715  * Registers used: A2 for branching back from subbranches
+0000263E                          2716  *
+0000263E                          2717  * Precondition: D3 for SRC/DST mod
+0000263E                          2718  *
+0000263E                          2719  * Postcondition: X
+0000263E                          2720  **********************************************************************************
+0000263E                          2721  LOAD_EA:
+0000263E  347C 264E               2722          MOVEA.W #SAVED, A2 * remember to come back!
+00002642                          2723  
+00002642  0C43 0007               2724          CMPI    #%111, D3
+00002646  6D00 0008               2725          BLT     LOAD_LT_111
+0000264A  6C00 0032               2726          BGE     LOAD_GE_111
+0000264E                          2727      
+0000264E  4E75                    2728  SAVED   RTS
+00002650                          2729  
+00002650                          2730  * <EA>
+00002650                          2731  **********************************************************************************
+00002650                          2732  * Description: Checks the SRC/DST mod where it is not immediate/address value
+00002650                          2733  *
+00002650                          2734  * Registers used: X
+00002650                          2735  *
+00002650                          2736  * Precondition: D3 for SRC/DST mod
+00002650                          2737  *
+00002650                          2738  * Postcondition: X
+00002650                          2739  **********************************************************************************
+00002650                          2740  LOAD_LT_111:
+00002650  0C43 0000               2741      CMPI    #%000, D3 * e.g. D3
+00002654  6700 00AA               2742      BEQ     LOAD_DATA_REGISTER
+00002658  0C43 0001               2743      CMPI    #%001, D3 * e.g. A3
+0000265C  6700 00B4               2744      BEQ     LOAD_ADDR_REGISTER
+00002660  0C43 0002               2745      CMPI    #%010, D3 * e.g. (A3)
+00002664  6700 00BE               2746      BEQ     LOAD_ADDRESS
+00002668  0C43 0003               2747      CMPI    #%011, D3 * e.g. (A3)+
+0000266C  6700 00C8               2748      BEQ     LOAD_ADDRESS_W_POST_INC
+00002670  0C43 0004               2749      CMPI    #%100, D3 * e.g. -(A3)
+00002674  6700 00CC               2750      BEQ     LOAD_ADDRESS_W_PRE_DEC
+00002678                          2751      
+00002678  4EF9 0000286E           2752      JMP     INVALID
+0000267E                          2753      
+0000267E                          2754  * <EA>
+0000267E                          2755  **********************************************************************************
+0000267E                          2756  * Description: Checks the SRC/DST mod where it is immediate/address value
+0000267E                          2757  *
+0000267E                          2758  * Registers used: D5 for SUB.W, D4 for immediate/address value extraction
+0000267E                          2759  *
+0000267E                          2760  * Precondition: A5 for START_ADDRESS iteration, TRAILING_SIZE for size of the immediate/address value
+0000267E                          2761  *
+0000267E                          2762  * Postcondition: IS_INVALID flag set if EA bit not valid
+0000267E                          2763  **********************************************************************************
+0000267E                          2764  LOAD_GE_111:
+0000267E  4285                    2765              CLR.L   D5
+00002680  4284                    2766              CLR.L   D4
+00002682                          2767  
+00002682  3A3C 5000               2768              MOVE.W  #END_ADDRESS, D5
+00002686  9A4D                    2769              SUB.W   A5, D5
+00002688  BA78 1002               2770              CMP.W   TRAILING_SIZE, D5
+0000268C  6D00 01E0               2771              BLT     INVALID
+00002690                          2772  
+00002690  381D                    2773              MOVE.W  (A5)+, D4
+00002692  4284                    2774              CLR.L   D4
+00002694                          2775              
+00002694  0C78 0001 1002          2776              CMPI.W  #$1, TRAILING_SIZE
+0000269A  6700 0016               2777              BEQ     CHUMP_BYTE
+0000269E  0C78 0002 1002          2778              CMPI.W  #$2, TRAILING_SIZE
+000026A4  6700 0014               2779              BEQ     CHUMP_WORD
+000026A8  0C78 0004 1002          2780              CMPI.W  #$4, TRAILING_SIZE
+000026AE  6700 0012               2781              BEQ     CHUMP_LONG
+000026B2                          2782  
+000026B2  381D                    2783  CHUMP_BYTE  MOVE.W  (A5)+, D4 * Minimum 4 hex (e.g. MOVE.B #1, $2 = XXXX 0001 0002)
+000026B4  4EF9 000026CA           2784              JMP     GO
+000026BA                          2785  
+000026BA  381D                    2786  CHUMP_WORD  MOVE.W  (A5)+, D4
+000026BC  4EF9 000026CA           2787              JMP     GO
+000026C2                          2788              
+000026C2  281D                    2789  CHUMP_LONG  MOVE.L  (A5)+, D4
+000026C4  4EF9 000026CA           2790              JMP     GO
+000026CA                          2791  
+000026CA  0C42 0000               2792  GO          CMPI    #%000, D2
+000026CE  6700 007E               2793              BEQ     LOAD_ABS_SHORT
+000026D2  0C42 0001               2794              CMPI    #%001, D2
+000026D6  6700 0088               2795              BEQ     LOAD_ABS_LONG
+000026DA  0C42 0004               2796              CMPI    #%100, D2
+000026DE  6700 0092               2797              BEQ     LOAD_IMMDTE
+000026E2                          2798      
+000026E2  4EF9 0000286E           2799              JMP     INVALID
+000026E8                          2800  * <EA>
+000026E8                          2801  **********************************************************************************
+000026E8                          2802  * Description: Puts in the proper value in TRAILING_SIZE based on the immediate/address value size
+000026E8                          2803  *
+000026E8                          2804  * Registers used: X
+000026E8                          2805  *
+000026E8                          2806  * Precondition: X
+000026E8                          2807  *
+000026E8                          2808  * Postcondition: Set up TRAILING_SIZE
+000026E8                          2809  **********************************************************************************
+000026E8                          2810  TRAILING_HELPER:            
+000026E8  31FC 0002 1002          2811  SIZE_B  MOVE.W  #$2, TRAILING_SIZE
+000026EE  4ED3                    2812          JMP     (A3)
+000026F0                          2813  
+000026F0  31FC 0002 1002          2814  SIZE_W  MOVE.W  #$2, TRAILING_SIZE
+000026F6  4ED3                    2815          JMP     (A3)
+000026F8                          2816          
+000026F8  31FC 0004 1002          2817  SIZE_L  MOVE.W  #$4, TRAILING_SIZE
+000026FE  4ED3                    2818          JMP     (A3)
+00002700                          2819  **************************************************
+00002700                          2820  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+00002700                          2821  
+00002700                          2822  
+00002700                          2823  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+00002700                          2824  * LOAD_THIS FUNCTIONS (INTERMEDIATE LEVEL) *******
+00002700                          2825  
+00002700                          2826  * <EA>
+00002700                          2827  **********************************************************************************
+00002700                          2828  * Description: Loads ASCII for e.g. D3 in EA_BUFFER
+00002700                          2829  *
+00002700                          2830  * Registers used: D0 for actually loading
+00002700                          2831  *
+00002700                          2832  * Precondition: D2 for SRC/DST reg
+00002700                          2833  *
+00002700                          2834  * Postcondition: X
+00002700                          2835  **********************************************************************************
+00002700                          2836  LOAD_DATA_REGISTER:
+00002700  4280                    2837      CLR.L   D0
+00002702                          2838      
+00002702  4EB9 000027D6           2839      JSR     LOAD_D
+00002708  1002                    2840      MOVE.B  D2, D0
+0000270A  4EB9 0000284A           2841      JSR     LOAD_NUM
+00002710  4ED2                    2842      JMP     (A2)
+00002712                          2843  
+00002712                          2844  * <EA>
+00002712                          2845  **********************************************************************************
+00002712                          2846  * Description: Loads ASCII for e.g. A3 in EA_BUFFER
+00002712                          2847  *
+00002712                          2848  * Registers used: D0 for actually loading
+00002712                          2849  *
+00002712                          2850  * Precondition: D2 for SRC/DST reg
+00002712                          2851  *
+00002712                          2852  * Postcondition: X
+00002712                          2853  **********************************************************************************
+00002712                          2854  LOAD_ADDR_REGISTER:
+00002712  4280                    2855      CLR.L   D0
+00002714                          2856  
+00002714  4EB9 000027E4           2857      JSR     LOAD_A
+0000271A  1002                    2858      MOVE.B  D2, D0
+0000271C  4EB9 0000284A           2859      JSR     LOAD_NUM
+00002722  4ED2                    2860      JMP     (A2)
+00002724                          2861  
+00002724                          2862  * <EA>
+00002724                          2863  **********************************************************************************
+00002724                          2864  * Description: Loads ASCII for e.g. (A3) in EA_BUFFER
+00002724                          2865  *
+00002724                          2866  * Registers used: X
+00002724                          2867  *
+00002724                          2868  * Precondition: X
+00002724                          2869  *
+00002724                          2870  * Postcondition: X
+00002724                          2871  **********************************************************************************
+00002724                          2872  LOAD_ADDRESS:
+00002724  4EB9 000027F2           2873      JSR     LOAD_PTHSIS_OPEN
+0000272A  4EB8 2712               2874      JSR     LOAD_ADDR_REGISTER
+0000272E  4EB9 00002800           2875      JSR     LOAD_PTHSIS_CLSD
+00002734  4ED2                    2876      JMP     (A2)
+00002736                          2877  
+00002736                          2878  * <EA>
+00002736                          2879  **********************************************************************************
+00002736                          2880  * Description: Loads ASCII for e.g. (A3)+ in EA_BUFFER
+00002736                          2881  *
+00002736                          2882  * Registers used: X
+00002736                          2883  *
+00002736                          2884  * Precondition: X
+00002736                          2885  *
+00002736                          2886  * Postcondition: X
+00002736                          2887  **********************************************************************************
+00002736                          2888  LOAD_ADDRESS_W_POST_INC:
+00002736  4EB8 2724               2889      JSR     LOAD_ADDRESS
+0000273A  4EB9 0000282A           2890      JSR     LOAD_PLUS_SIGN
+00002740  4ED2                    2891      JMP     (A2)
+00002742                          2892  
+00002742                          2893  * <EA>
+00002742                          2894  **********************************************************************************
+00002742                          2895  * Description: Loads ASCII for e.g. -(A3) in EA_BUFFER
+00002742                          2896  *
+00002742                          2897  * Registers used: X
+00002742                          2898  *
+00002742                          2899  * Precondition: X
+00002742                          2900  *
+00002742                          2901  * Postcondition: X
+00002742                          2902  **********************************************************************************
+00002742                          2903  LOAD_ADDRESS_W_PRE_DEC:
+00002742  4EB9 00002838           2904      JSR     LOAD_MINUS_SIGN
+00002748  4EB8 2724               2905      JSR     LOAD_ADDRESS
+0000274C  4ED2                    2906      JMP     (A2)
+0000274E                          2907  
+0000274E                          2908  * <EA>
+0000274E                          2909  **********************************************************************************
+0000274E                          2910  * Description: Loads ASCII for e.g. $1234 in EA_BUFFER
+0000274E                          2911  *
+0000274E                          2912  * Registers used: D0 for actually loading
+0000274E                          2913  *
+0000274E                          2914  * Precondition: D4 for immediate/address value  
+0000274E                          2915  *
+0000274E                          2916  * Postcondition: X
+0000274E                          2917  **********************************************************************************
+0000274E                          2918  LOAD_ABS_SHORT:
+0000274E  4280                    2919      CLR.L   D0
+00002750                          2920  
+00002750  4EB9 0000280E           2921      JSR     LOAD_HEX_SIGN
+00002756  3004                    2922      MOVE.W  D4, D0
+00002758  4EB9 0000277C           2923      JSR     LOAD_BYTES
+0000275E  4ED2                    2924      JMP     (A2)
+00002760                          2925  
+00002760                          2926  * <EA>
+00002760                          2927  **********************************************************************************
+00002760                          2928  * Description: Loads ASCII for e.g. $12345678 in EA_BUFFER
+00002760                          2929  *
+00002760                          2930  * Registers used: D0 for actually loading
+00002760                          2931  *
+00002760                          2932  * Precondition: D4 for immediate/address value  
+00002760                          2933  *
+00002760                          2934  * Postcondition: X
+00002760                          2935  **********************************************************************************
+00002760                          2936  LOAD_ABS_LONG:
+00002760  4280                    2937      CLR.L   D0
+00002762                          2938  
+00002762  4EB9 0000280E           2939      JSR     LOAD_HEX_SIGN
+00002768  2004                    2940      MOVE.L  D4, D0
+0000276A  4EB9 0000277C           2941      JSR     LOAD_BYTES
+00002770  4ED2                    2942      JMP     (A2)
+00002772                          2943  
+00002772                          2944  * <EA>
+00002772                          2945  **********************************************************************************
+00002772                          2946  * Description: Loads ASCII for e.g. #$1234 in EA_BUFFER
+00002772                          2947  *
+00002772                          2948  * Registers used: X
+00002772                          2949  *
+00002772                          2950  * Precondition: X 
+00002772                          2951  *
+00002772                          2952  * Postcondition: X
+00002772                          2953  **********************************************************************************
+00002772                          2954  LOAD_IMMDTE:
+00002772  4EB9 0000281C           2955      JSR     LOAD_IMMDTE_VALU
+00002778  4EF8 2760               2956      JMP     LOAD_ABS_LONG
+0000277C                          2957  
+0000277C                          2958  **************************************************
+0000277C                          2959  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0000277C                          2960  
+0000277C                          2961  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0000277C                          2962  * LOAD_THIS FUNCTIONS (LOW LEVEL) ****************
+0000277C                          2963  
+0000277C                          2964  * <EA>
+0000277C                          2965  **********************************************************************************
+0000277C                          2966  * Description: Shifts the hex to the left and loads from the left-most hex to EA_BUFFER in ASCII
+0000277C                          2967  *
+0000277C                          2968  * Registers used: D5 for the loop counter, D1 for loop assist
+0000277C                          2969  *
+0000277C                          2970  * Precondition: D0 for the immediate/address value  
+0000277C                          2971  *
+0000277C                          2972  * Postcondition: X
+0000277C                          2973  **********************************************************************************
+0000277C                          2974  LOAD_BYTES:
+0000277C  4285                    2975          CLR.L   D5
+0000277E  4281                    2976          CLR.L   D1
+00002780                          2977  
+00002780  2200                    2978          MOVE.L  D0, D1
+00002782  1A3C 0008               2979          MOVE.B  #8, D5
+00002786  0C45 0000               2980  LOOP    CMPI    #0, D5
+0000278A  6E00 0004               2981          BGT     ROTATE
+0000278E  4E75                    2982          RTS
+00002790                          2983      
+00002790  E999                    2984  ROTATE  ROL.L   #$04, D1
+00002792  1001                    2985          MOVE.B  D1, D0
+00002794  0280 0000000F           2986          ANDI.L  #$0000000F, D0
+0000279A  4EB9 0000284A           2987          JSR     LOAD_NUM
+000027A0  5345                    2988          SUBI    #1, D5
+000027A2  4EF8 2786               2989          JMP     LOOP        
+000027A6                          2990  
+000027A6                          2991  * <EA>
+000027A6                          2992  **********************************************************************************
+000027A6                          2993  * Description: Loads ASCII for CR, LF 
+000027A6                          2994  *
+000027A6                          2995  * Registers used: D0 for actually loading
+000027A6                          2996  *
+000027A6                          2997  * Precondition: CR, LF 
+000027A6                          2998  *
+000027A6                          2999  * Postcondition: X
+000027A6                          3000  **********************************************************************************
+000027A6                          3001  LOAD_NEW_LINE:
+000027A6  4280                    3002      CLR.L   D0
+000027A8                          3003  
+000027A8  1038 1063               3004      MOVE.B  CR, D0
+000027AC  4EB9 00002846           3005      JSR     LOAD_THIS_SHIT
+000027B2  1038 1064               3006      MOVE.B  LF, D0
+000027B6  4EB9 00002846           3007      JSR     LOAD_THIS_SHIT
+000027BC  4E75                    3008      RTS
+000027BE                          3009  
+000027BE                          3010  * <EA>
+000027BE                          3011  **********************************************************************************
+000027BE                          3012  * Description: Loads ASCII for ', ' 
+000027BE                          3013  *
+000027BE                          3014  * Registers used: D0 for actually loading
+000027BE                          3015  *
+000027BE                          3016  * Precondition: COMMA, SPACE
+000027BE                          3017  *
+000027BE                          3018  * Postcondition: X
+000027BE                          3019  **********************************************************************************
+000027BE                          3020  LOAD_COMMA_SPACE:
+000027BE  4280                    3021      CLR.L   D0
+000027C0                          3022  
+000027C0  1038 1061               3023      MOVE.B  COMMA, D0
+000027C4  4EB9 00002846           3024      JSR     LOAD_THIS_SHIT
+000027CA  1038 1062               3025      MOVE.B  SPACE, D0
+000027CE  4EB9 00002846           3026      JSR     LOAD_THIS_SHIT
+000027D4                          3027      
+000027D4  4E75                    3028      RTS
+000027D6                          3029  
+000027D6                          3030  * <EA>
+000027D6                          3031  **********************************************************************************
+000027D6                          3032  * Description: Loads ASCII for D 
+000027D6                          3033  *
+000027D6                          3034  * Registers used: D0 for actually loading
+000027D6                          3035  *
+000027D6                          3036  * Precondition: DATA
+000027D6                          3037  *
+000027D6                          3038  * Postcondition: X
+000027D6                          3039  **********************************************************************************
+000027D6                          3040  LOAD_D:
+000027D6  4280                    3041      CLR.L   D0
+000027D8                          3042  
+000027D8  1038 105A               3043      MOVE.B  DATA, D0
+000027DC  4EB9 00002846           3044      JSR     LOAD_THIS_SHIT
+000027E2  4E75                    3045      RTS
+000027E4                          3046  
+000027E4                          3047  * <EA>
+000027E4                          3048  **********************************************************************************
+000027E4                          3049  * Description: Loads ASCII for A
+000027E4                          3050  *
+000027E4                          3051  * Registers used: D0 for actually loading
+000027E4                          3052  *
+000027E4                          3053  * Precondition: ADDRESS
+000027E4                          3054  *
+000027E4                          3055  * Postcondition: X
+000027E4                          3056  **********************************************************************************
+000027E4                          3057  LOAD_A:
+000027E4  4280                    3058      CLR.L   D0
+000027E6                          3059  
+000027E6  1038 1059               3060      MOVE.B  ADDRESS, D0
+000027EA  4EB9 00002846           3061      JSR     LOAD_THIS_SHIT
+000027F0  4E75                    3062      RTS
+000027F2                          3063  
+000027F2                          3064  * <EA>
+000027F2                          3065  **********************************************************************************
+000027F2                          3066  * Description: Loads ASCII for (
+000027F2                          3067  *
+000027F2                          3068  * Registers used: D0 for actually loading
+000027F2                          3069  *
+000027F2                          3070  * Precondition: PTHSIS_OPEN
+000027F2                          3071  *
+000027F2                          3072  * Postcondition: X
+000027F2                          3073  **********************************************************************************
+000027F2                          3074  LOAD_PTHSIS_OPEN:
+000027F2  4280                    3075      CLR.L   D0
+000027F4                          3076  
+000027F4  1038 105B               3077      MOVE.B  PTHSIS_OPEN, D0
+000027F8  4EB9 00002846           3078      JSR     LOAD_THIS_SHIT
+000027FE  4E75                    3079      RTS
+00002800                          3080  
+00002800                          3081  * <EA>
+00002800                          3082  **********************************************************************************
+00002800                          3083  * Description: Loads ASCII for )
+00002800                          3084  *
+00002800                          3085  * Registers used: D0 for actually loading
+00002800                          3086  *
+00002800                          3087  * Precondition: PTHSIS_CLSD
+00002800                          3088  *
+00002800                          3089  * Postcondition: X
+00002800                          3090  **********************************************************************************
+00002800                          3091  LOAD_PTHSIS_CLSD:
+00002800  4280                    3092      CLR.L   D0
+00002802                          3093  
+00002802  1038 105C               3094      MOVE.B  PTHSIS_CLSD, D0
+00002806  4EB9 00002846           3095      JSR     LOAD_THIS_SHIT
+0000280C  4E75                    3096      RTS
+0000280E                          3097  
+0000280E                          3098  * <EA>
+0000280E                          3099  **********************************************************************************
+0000280E                          3100  * Description: Loads ASCII for $
+0000280E                          3101  *
+0000280E                          3102  * Registers used: D0 for actually loading
+0000280E                          3103  *
+0000280E                          3104  * Precondition: HEX_SIGN
+0000280E                          3105  *
+0000280E                          3106  * Postcondition: X
+0000280E                          3107  **********************************************************************************
+0000280E                          3108  LOAD_HEX_SIGN:
+0000280E  4280                    3109      CLR.L   D0
+00002810                          3110  
+00002810  1038 105D               3111      MOVE.B  HEX_SIGN, D0
+00002814  4EB9 00002846           3112      JSR     LOAD_THIS_SHIT
+0000281A  4E75                    3113      RTS
+0000281C                          3114  
+0000281C                          3115  * <EA>
+0000281C                          3116  **********************************************************************************
+0000281C                          3117  * Description: Loads ASCII for #
+0000281C                          3118  *
+0000281C                          3119  * Registers used: D0 for actually loading
+0000281C                          3120  *
+0000281C                          3121  * Precondition: IMMDTE_VALU
+0000281C                          3122  *
+0000281C                          3123  * Postcondition: X
+0000281C                          3124  **********************************************************************************
+0000281C                          3125  LOAD_IMMDTE_VALU:
+0000281C  4280                    3126      CLR.L   D0
+0000281E                          3127  
+0000281E  1038 105E               3128      MOVE.B  IMMDTE_VALU, D0
+00002822  4EB9 00002846           3129      JSR     LOAD_THIS_SHIT
+00002828  4E75                    3130      RTS
+0000282A                          3131  
+0000282A                          3132  * <EA>
+0000282A                          3133  **********************************************************************************
+0000282A                          3134  * Description: Loads ASCII for +
+0000282A                          3135  *
+0000282A                          3136  * Registers used: D0 for actually loading
+0000282A                          3137  *
+0000282A                          3138  * Precondition: PLUS_SIGN
+0000282A                          3139  *
+0000282A                          3140  * Postcondition: X
+0000282A                          3141  **********************************************************************************
+0000282A                          3142  LOAD_PLUS_SIGN:
+0000282A  4280                    3143      CLR.L   D0
+0000282C                          3144  
+0000282C  1038 105F               3145      MOVE.B  PLUS_SIGN, D0
+00002830  4EB9 00002846           3146      JSR     LOAD_THIS_SHIT
+00002836  4E75                    3147      RTS
+00002838                          3148  
+00002838                          3149  * <EA>
+00002838                          3150  **********************************************************************************
+00002838                          3151  * Description: Loads ASCII for -
+00002838                          3152  *
+00002838                          3153  * Registers used: D0 for actually loading
+00002838                          3154  *
+00002838                          3155  * Precondition: MINUS_SIGN
+00002838                          3156  *
+00002838                          3157  * Postcondition: X
+00002838                          3158  **********************************************************************************
+00002838                          3159  LOAD_MINUS_SIGN:
+00002838  4280                    3160      CLR.L   D0
+0000283A                          3161  
+0000283A  1038 1060               3162      MOVE.B  MINUS_SIGN, D0
+0000283E  4EB9 00002846           3163      JSR     LOAD_THIS_SHIT
+00002844  4E75                    3164      RTS
+00002846                          3165  **************************************************
+00002846                          3166  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+00002846                          3167  
+00002846                          3168  
+00002846                          3169  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+00002846                          3170  * LOAD_THIS FUNCTIONS (LOWEST LEVEL) *************
+00002846                          3171  * <EA>
+00002846                          3172  **********************************************************************************
+00002846                          3173  * Description: Loads the hex value from D0 to EA_BUFFER in ASCII
+00002846                          3174  *
+00002846                          3175  * Registers used: X
+00002846                          3176  *
+00002846                          3177  * Precondition: X
+00002846                          3178  *
+00002846                          3179  * Postcondition: X
+00002846                          3180  **********************************************************************************
+00002846                          3181  LOAD_THIS_SHIT:
+00002846  18C0                    3182      MOVE.B  D0, (A4)+
+00002848  4E75                    3183      RTS
+0000284A                          3184  
+0000284A                          3185  * <EA>
+0000284A                          3186  **********************************************************************************
+0000284A                          3187  * Description: Adds $30 to a number in D0 to make it a hex. If the number is greater
+0000284A                          3188  *              than 9 (A~F), then adds $37. Then moves the hex value from D0 to EA_BUFFER in ASCII
+0000284A                          3189  *
+0000284A                          3190  * Registers used: X
+0000284A                          3191  *
+0000284A                          3192  * Precondition: X
+0000284A                          3193  *
+0000284A                          3194  * Postcondition: X
+0000284A                          3195  **********************************************************************************
+0000284A                          3196  LOAD_NUM:
+0000284A  0C00 0009               3197      CMPI.B  #$9, D0
+0000284E  6E00 0006               3198      BGT     GT
+00002852  6F00 000C               3199      BLE     LE
+00002856                          3200      
+00002856  0600 0037               3201  GT  ADDI.B  #$37, D0 * A~F
+0000285A  4EF9 0000286A           3202      JMP     END
+00002860  0600 0030               3203  LE  ADDI.B  #$30, D0 * 0~9
+00002864  4EF9 0000286A           3204      JMP     END
+0000286A                          3205  
+0000286A  18C0                    3206  END MOVE.B  D0, (A4)+
+0000286C  4E75                    3207      RTS
+0000286E                          3208  
+0000286E                          3209  * <EA>
+0000286E                          3210  **********************************************************************************
+0000286E                          3211  * Description: Execution goes here if even one of the EA bit is invalid. Flags the invalid-bit and
+0000286E                          3212  *              entirely exits the EA process.
+0000286E                          3213  *
+0000286E                          3214  * Registers used: X
+0000286E                          3215  *
+0000286E                          3216  * Precondition: X
+0000286E                          3217  *
+0000286E                          3218  * Postcondition: X
+0000286E                          3219  **********************************************************************************
+0000286E                          3220  INVALID:
+0000286E  11FC 0000 10B5          3221              MOVE.B  #%0, IS_VALID
+00002874  4EF8 20B2               3222              JMP     EXT
+00002878                          3223  **************************************************
+00002878                          3224  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+00002878                          3225  
+00002878                          3226      END    START
 
 No errors detected
 No warnings generated
@@ -3247,28 +3236,28 @@ No warnings generated
 SYMBOL TABLE INFORMATION
 Symbol-name         Value
 -------------------------
-ADDA                214E
-ADDA_BACK           2166
+ADDA                2148
+ADDA_BACK           2160
 ADDRESS             1059
 ADDSTRTOBUFFER      2048
 ARG_ADDSTRTOBUFFER_BUFFER  203E
 ARG_ADDSTRTOBUFFER_BUFFERLENGTH  2042
 ARG_ADDSTRTOBUFFER_STRING  203A
-BACK                24FA
-BACK2               2526
-BACK3               2588
-BACK4               256A
-BACK5               25CA
-BCLR                253C
+BACK                24F4
+BACK2               2520
+BACK3               2582
+BACK4               2564
+BACK5               25C4
+BCLR                2536
 BIT_CHECK_EXG       1ABC
 BIT_CHECK_EXT       16B4
 BIT_CHECK_MOVEP     1426
 BIT_CHECK_SUBX      19E6
 B_BUFFER            1009
-CHECK_00XX          2110
-CHECK_01XX          211E
-CHECK_0XXX          20CC
-CHECK_1XXX          20DC
+CHECK_00XX          210A
+CHECK_01XX          2118
+CHECK_0XXX          20C6
+CHECK_1XXX          20D6
 CHECK_OP_ABCD       1A94
 CHECK_OP_ADD        1B3E
 CHECK_OP_ADDA       1B2A
@@ -3371,10 +3360,10 @@ CHECK_OP_TRAP       1732
 CHECK_OP_TRAPV      1608
 CHECK_OP_TST        171E
 CHECK_OP_UNLK       175A
-CHECK_XXXX          20BC
-CHUMP_BYTE          26B8
-CHUMP_LONG          26C8
-CHUMP_WORD          26C0
+CHECK_XXXX          20B6
+CHUMP_BYTE          26B2
+CHUMP_LONG          26C2
+CHUMP_WORD          26BA
 COMMA               1061
 CR                  1063
 CUR_OP_CODE         4000
@@ -3395,15 +3384,15 @@ C_GROUP_D           1B12
 C_GROUP_E           1B54
 C_GROUP_F           1CEC
 DATA                105A
-DIR_0               21CE
-DIR_1               2210
-DIVS                2252
-DIVS_BACK           227E
-DYNMC_BCLR          259E
+DENNY_EA_SHIT       209C
+DIR_0               21C8
+DIR_1               220A
+DIVS                224C
+DIVS_BACK           2278
+DYNMC_BCLR          2598
 EA_BUFFER           1065
-EA_ROUTINE          209C
 EA_SIZE             1008
-END                 2870
+END                 286A
 END_ADDRESS         5000
 EXT                 20B2
 FIND_2_BIT_SIZE_TO_EA  1224
@@ -3413,9 +3402,9 @@ FIND_MOVEA_W_DIFF   156A
 FIND_TRAILING_BITS_TO_EA  1296
 FIRST_3             1004
 FOURTH_3            1007
-GO                  26D0
-GOO                 2602
-GOO2                262E
+GO                  26CA
+GOO                 25FC
+GOO2                2628
 GROUP0_INVALID      14BC
 GROUP0_SUCCESS      14C2
 GROUP1_INVALID      14E6
@@ -3460,85 +3449,85 @@ GROUP_C             11B4
 GROUP_D             11C6
 GROUP_E             11D8
 GROUP_F             11EA
-GT                  285C
+GT                  2856
 G_BUFFER            4100
 HEX_SIGN            105D
 IMMDTE_VALU         105E
-INVALID             2874
+INVALID             286E
 INVALID_OP          1CF4
 IS_VALID            10B5
-JSR                 2402
-JSR_BACK            241A
-LE                  2866
-LEA                 2434
-LEA_BACK            244C
+JSR                 23FC
+JSR_BACK            2414
+LE                  2860
+LEA                 242E
+LEA_BACK            2446
 LF                  1064
-LOAD_0000           2476
-LOAD_00XX           25E0
-LOAD_0100           231E
-LOAD_0101           2294
-LOAD_1000           21A2
-LOAD_1001           219C
-LOAD_1011           2196
-LOAD_1100           2190
-LOAD_1101           2134
-LOAD_A              27EA
-LOAD_ABS_LONG       2766
-LOAD_ABS_SHORT      2754
-LOAD_ADDRESS        272A
-LOAD_ADDRESS_W_POST_INC  273C
-LOAD_ADDRESS_W_PRE_DEC  2748
-LOAD_ADDR_REGISTER  2718
-LOAD_BYTES          2782
-LOAD_COMMA_SPACE    27C4
-LOAD_D              27DC
-LOAD_DATA_REGISTER  2706
-LOAD_EA             2644
-LOAD_GE_111         2684
-LOAD_HEX_SIGN       2814
-LOAD_IMMDTE         2778
-LOAD_IMMDTE_VALU    2822
-LOAD_LT_111         2656
-LOAD_MINUS_SIGN     283E
-LOAD_NEW_LINE       27AC
-LOAD_NUM            2850
+LOAD_0000           2470
+LOAD_00XX           25DA
+LOAD_0100           2318
+LOAD_0101           228E
+LOAD_1000           219C
+LOAD_1001           2196
+LOAD_1011           2190
+LOAD_1100           218A
+LOAD_1101           212E
+LOAD_A              27E4
+LOAD_ABS_LONG       2760
+LOAD_ABS_SHORT      274E
+LOAD_ADDRESS        2724
+LOAD_ADDRESS_W_POST_INC  2736
+LOAD_ADDRESS_W_PRE_DEC  2742
+LOAD_ADDR_REGISTER  2712
+LOAD_BYTES          277C
+LOAD_COMMA_SPACE    27BE
+LOAD_D              27D6
+LOAD_DATA_REGISTER  2700
+LOAD_EA             263E
+LOAD_GE_111         267E
+LOAD_HEX_SIGN       280E
+LOAD_IMMDTE         2772
+LOAD_IMMDTE_VALU    281C
+LOAD_LT_111         2650
+LOAD_MINUS_SIGN     2838
+LOAD_NEW_LINE       27A6
+LOAD_NUM            284A
 LOAD_OP_CODE        10C4
-LOAD_PLUS_SIGN      2830
-LOAD_PTHSIS_CLSD    2806
-LOAD_PTHSIS_OPEN    27F8
-LOAD_THIS_SHIT      284C
-LOOP                278C
+LOAD_PLUS_SIGN      282A
+LOAD_PTHSIS_CLSD    2800
+LOAD_PTHSIS_OPEN    27F2
+LOAD_THIS_SHIT      2846
+LOOP                2786
 MINUS_SIGN          1060
 MNEMONIC            1000
-MOVEM               2430
+MOVEM               242A
 MOVE_AND_MOVEA_PARSE_EA  1250
 MOVE_LAST_6_BITS_TO_EA  1202
-MYBE_BCLR           24BE
-MYBE_CMPI           24A6
-MYBE_JSR            2382
-MYBE_MOVEM          23A2
-MYBE_NEG            2336
-MYBE_ORI            248E
-MYBE_RTS1           234E
-MYBE_RTS2           235C
-MYBE_RTS3           236A
-MYBE_SUBQ1          22AE
-MYBE_SUBQ2          22BE
-NEG                 23C2
-NEG_BACK            23E4
-NOT_BCLR            24C8
-NOT_CMPI            24B0
-NOT_JSR             238C
-NOT_MOVEM           23B2
-NOT_NEG             2340
-NOT_ORI             2498
-NOT_RTS             2374
+MYBE_BCLR           24B8
+MYBE_CMPI           24A0
+MYBE_JSR            237C
+MYBE_MOVEM          239C
+MYBE_NEG            2330
+MYBE_ORI            2488
+MYBE_RTS1           2348
+MYBE_RTS2           2356
+MYBE_RTS3           2364
+MYBE_SUBQ1          22A8
+MYBE_SUBQ2          22B8
+NEG                 23BC
+NEG_BACK            23DE
+NOT_BCLR            24C2
+NOT_CMPI            24AA
+NOT_JSR             2386
+NOT_MOVEM           23AC
+NOT_NEG             233A
+NOT_ORI             2492
+NOT_RTS             236E
 OP_FOUND            1F62
 OP_JSR_DONE         11F8
 OP_JSR_ROUTINE      10D4
-ORI_CMPI            24D8
-OR_BACK             21E6
-OR_BACK2            223C
+ORI_CMPI            24D2
+OR_BACK             21E0
+OR_BACK2            2236
 PARSE_EA_CONSTANT_BITS  12AC
 PLUS_SIGN           105F
 PRINT_OP            1F52
@@ -3622,22 +3611,21 @@ P_SIZE_L            1F73
 P_SIZE_W            1F6F
 READ_NEXT_INSTRUCTION  1D0C
 RET_ADDSTRTOBUFFER_SUCCESS  2046
-ROTATE              2796
-RTS                 23FA
-RUN_FAHAD_CODE      20B8
-SAVED               2654
+ROTATE              2790
+RTS                 23F4
+SAVED               264E
 SECOND_3            1005
-SIZE_B              26EE
-SIZE_L              26FE
-SIZE_W              26F6
+SIZE_B              26E8
+SIZE_L              26F8
+SIZE_W              26F0
 SPACE               1062
 START               10B6
 START_ADDRESS       4000
-SUBQ                22CE
-SUBQ_BACK           2308
-SUBQ_SAVED          22E0
+SUBQ                22C8
+SUBQ_BACK           2302
+SUBQ_SAVED          22DA
 THIRD_3             1006
-TRAILING_HELPER     26EE
+TRAILING_HELPER     26E8
 TRAILING_SIZE       1002
 _ADDSTRTOBUFFER_ADDLOOP  2072
 _ADDSTRTOBUFFER_BUFFERLOOP  205E

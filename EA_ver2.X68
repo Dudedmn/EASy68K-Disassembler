@@ -1,4 +1,4 @@
-    ORG    $1000
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 * MESSAGE VARIABLES ******************************
 
@@ -17,58 +17,39 @@ MINUS_SIGN      DC.B    $2D
 COMMA           DC.B    $2C
 SPACE           DC.B    $20
 
-CR              DC.B    $D
-LF              DC.B    $A
+CR              EQU     $0D              ; ASCII code for carriage return
+LF              EQU     $0A              ; ASCII code for line feed
+
 **************************************************
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 * GLOBAL BUFFER **********************************
-MNEMONIC        DS.B    1 * First four BITS of any instruction
- 
 TRAILING_SIZE   DS.W    1 * Size of any immediate or
                           * address values. Immediate or address
                           * value of a BYTE is still processed as
                           * WORD because the trailing bytes
                           * are represented as a word regardless.
                           * $1 = BYTE, $2 = WORD, $4 = LONG
-
-FIRST_3         DS.B    1 * First, second, third, and fourth bundles of three bits each
-SECOND_3        DS.B    1
-THIRD_3         DS.B    1
-FOURTH_3        DS.B    1
-
-CUR_OP_CODE     DS.W    1 * Used for Daniel's code
-
-START_ADDRESS   EQU     $4000 * Used to parse through the entire instruction
-END_ADDRESS     EQU     $5000
-
-EA_BUFFER       DS.B    80 * Used to load ASCII-converted EA ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-IS_VALID        DS.B    1 * EA-bit validity flag
-                          * $0 = invalid, $1 = valid
+;START_ADDRESS   EQU     $4000 * Used to parse through the entire instruction
+;END_ADDRESS     EQU     $5000
 **************************************************
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
  
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 * EXECUTION **************************************
-START:
-    MOVE.W  #$6000, CUR_OP_CODE
-    MOVE.B  #%1110, MNEMONIC
-    MOVE.B  #%000, FIRST_3
-    MOVE.B  #%110, SECOND_3
-    MOVE.B  #%100, THIRD_3
-    MOVE.B  #%001, FOURTH_3
-    
-    MOVE.W  #START_ADDRESS, D0
-    ADDI.B  #2, D0
-    MOVEA.L D0, A5
+main_EA:
+    JSR PARSE_EA_CONSTANT_BITS    
+    ;MOVE.W  A5, D0
+    ;ADDI.B  #2, D0
+    ;MOVEA.L D0, A5
     *MOVEA.L #START_ADDRESS, A5
     
-    LEA     EA_BUFFER, A4
 
     JSR     CHECK_XXXX
-EXT SIMHALT * This EXT alias is critical for NOT loading error
+EXT 
+    JMP check_print * This EXT alias is critical for NOT loading error
 **************************************************
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -817,7 +798,7 @@ BCLR        CLR.L   D5
             CLR.L   D4
             MOVEA.L #0, A2
 
-            MOVE.W  #END_ADDRESS, D5
+            MOVE.W  A6, D5
             SUB.W   A5, D5
             CMPI.W  #$2, D5
             BLT     INVALID
@@ -973,7 +954,7 @@ LOAD_GE_111:
             CLR.L   D5
             CLR.L   D4
 
-            MOVE.W  #END_ADDRESS, D5
+            MOVE.W  A6, D5
             SUB.W   A5, D5
             CMP.W   TRAILING_SIZE, D5
             BLT     INVALID
@@ -1204,12 +1185,12 @@ ROTATE  ROL.L   #$04, D1
 * Postcondition: X
 **********************************************************************************
 LOAD_NEW_LINE:
-    CLR.L   D0
+    ;CLR.L   D0
 
-    MOVE.B  CR, D0
-    JSR     LOAD_THIS_SHIT
-    MOVE.B  LF, D0
-    JSR     LOAD_THIS_SHIT
+    ;MOVE.B  CR, D0
+    ;JSR     LOAD_THIS_SHIT
+    ;MOVE.B  LF, D0
+    ;JSR     LOAD_THIS_SHIT
     RTS
 
 * <EA>
@@ -1424,11 +1405,13 @@ END MOVE.B  D0, (A4)+
 **********************************************************************************
 INVALID:
             MOVE.B  #%0, IS_VALID
-            JMP     EXT
+            JMP     check_print
 **************************************************
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-    END    START
+
+
+
 
 
 

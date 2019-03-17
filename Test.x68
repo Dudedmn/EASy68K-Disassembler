@@ -5,25 +5,55 @@
 * Description:
 *-----------------------------------------------------------
 
-    ORG $3000
+    ORG $9000
+    LSR.L #$1,D1        ; CHECK THIS Prints #$1,A1 instead of #$,D1    
+        
+    SUBQ.B #$1,D1       ; CHECK THIS Prints #$2,D1 instead of #$1,D1
+     
+    LSL.B #3,D1         ; CHECK THIS Prints #3,A1 instead of #3,D1
+    
+    SUBQ.B #$1,D1       ; CHECK THIS Prints #$2,D1 instead of #$1,D1
+
+    BCLR.L #$3,D1       ; CHECK THIS Prints #$57,D1 instead of #$3,D1
+    
+    ;LSR.W #$1,D1        ; This doesn't show up if it's placed right after BCLR    
+    ;LSL.W #$1,D1        ; This doesn't show up if it's placed right after BCLR    
+    
+    ;ASL.B  D3,D5     
+    ;ASR.W  D3,D5
+    ORI.W #$2501, D1
+     
+    ROL.L  D3,D5     
+   
+    ROR.L  D3,D5     
+    OR.L (SP),D2
+    
+    OR.W D1,(A0)+
+    
 
     NOP
-
+    
     RTS
-
+    
     NOP
-
+    
     RTS
     
     ORI.W #$2501, D1
-   
+    
     SUBQ.B  #1,D0
     
     SUBQ.W  #$2, D1
     
     SUBQ.L  #4,D2
-
+    
     LEA     (A0),A0
+    
+    LEA     (A1),A0
+    
+    LEA     $0100,A0
+    
+    LEA     $9300,A0
     
     LEA     (A5),A0
 
@@ -615,6 +645,10 @@ label3
 
     
  
+
+
+
+
 
 
 
