@@ -1,0 +1,233 @@
+*--------------------------------------------------------------------------
+* Title      : Disassembler for 422
+* Written by : Daniel, Denny, Fahad
+* Date       :
+* 
+* Description: This code contains a method for you to use
+* with your Disassembler project IO, and a short demo of 
+* how to call this method in the body of the "START" code.
+* 
+* Hints and Tips:
+*   -Follow the code commenting convention here for file & method headers
+*   -Don't rename this file name (Main.X68)
+*   -Don't reorg the start address ($1000)
+*   -Don't rename or edit the IO method I've provided you with here
+*   -Don't rename the config.cfg file or change the file format: 
+*    <Long_StartAddress>\CR\LF
+*    <Long_EndAddress>\CR\LF<EOF>
+*---------------------------------------------------------------------------
+    ORG    $1000    *Don't change this; see hints and tips above
+*---------------------------------------------------------------------------
+START:
+    ***********************************************************
+    * Code demo for printing strings to console & file is here
+    * Pay close attention to:
+    *   (1) the detailed comments, 
+    *   (2) how to build a (Callee-Saved) method
+    *   (3) how to call that method using JSR (return with RTS)
+    ***********************************************************
+    
+    ;LEA DATACHECK,A1
+    ;JSR check_DATA
+
+    **************************************************
+    *Your disassembler code goes here
+    **************************************************
+***************TEST NOP   
+    MOVE.W #%0100111001110001,D1
+    LEA NOPCHECK,A1
+    JSR check_NOP
+***************TEST RTS
+    MOVE.W #%0100111001110101,D1
+    LEA RTSCHECK,A1
+    JSR check_RTS
+    
+    
+    SIMHALT
+    ;Open config.cfg (trap subtasks 50-59) (this is an IO responsibility if 3 team members)
+    ;load start and end address as longs
+    
+    ;loop from start to end, printing out the instruction or DATA if not recognized 
+    ;   use my method below (printStringToFileAndConsole) to print out the individual instruction (or DATA)
+
+
+*********************************************************************************
+* Method Name: check_NOP
+* Description: Looks for the Binary code of NOP or 0100111001110001 or $4E71 in hex.
+* If the value is found, then print out NOP. Otherwise simply RTS.
+* Preconditions:  D1 has some sort of binary input.
+* Postconditions: 'NOP' is printed to console if NOP binary value is found.
+*********************************************************************************
+check_NOP:
+        CMPI #$4E71, D1
+        BEQ PRINT_NOP
+        RTS
+*********************************************************************************
+* Method Name: check_RTS
+* Description: Looks for the binary value of RTS $4E75 from data register D1 and
+* compares the value of RTS to D1. If it equals it prints 'RTS' otherwise it will
+* only RTS.
+* Preconditions:  Some value in D1
+* Postconditions: Prints 'RTS' in the console if found, otherwise just RTS
+*********************************************************************************
+check_RTS:
+        CMPI #$4E75, D1
+        BEQ  PRINT_RST
+        RTS
+*********************************************************************************
+* Method Name: TrapTask13
+* Description: Creates a file if none exists, and appends bytes to that file
+*   while also echoing the written bytes to the screen.  You shouldn't need to
+*   change this code.
+*
+* Calling Convention: Callee-Saved 
+*
+* Preconditions & Method Input:
+*   A1 points to the null-terminated buffer to write (newline will be added for you)
+*
+* Postconditions & Output:
+*   ALL files that were previously open will be CLOSED (FileIDs will be invalid)
+*   See 'Output.txt' in directory for the results, also piped to the console
+*
+*
+*  A2 holds a pointer to null terminated string to write (input)
+*  A3 points to the null-terminated file name
+*  D3 holds the number of bytes already in the file to write
+*
+*  D5 holds number of bytes to write
+********************************************************************************
+toSave REG D0-D5/A2-A3
+
+PRINT_NOP:
+    LEA PRINTNOP, A1        ; buffer of chars to write
+    JSR TrapTask13
+
+PRINT_RST:
+    LEA PRINTRTS, A1        ; buffer of chars to write
+    JSR TrapTask13
+    
+
+TrapTask13:
+    *******************************************************************
+    * Method initialization, regsiter spilling, parameter saving, etc.
+    *******************************************************************
+    MOVEM.L toSave, -(SP)   ;  Callee-Saved, so save and restore     
+      
+    MOVEA.L A1, A2 ; save this buffer to write
+    LEA outFilename, A3  ; save this for later, too
+      
+    move #50,d0   
+    trap #15 ; close all files, suggested to begin any IO 
+    *******************************************************************
+    * End Method Init
+    *******************************************************************
+
+    ******************************************************************************************
+    * Calculate the number of bytes to write by searching for the null in the target buffer A0
+    ******************************************************************************************
+    CLR.L D5 *D5 is now the number of bytes to write
+nullLoop:
+    MOVE.B (A1)+, D0
+    CMPI.B #0,D0  * compare to null
+    BEQ findNullLoopDone
+    ADDI.W #1, D5
+    BRA nullLoop
+    
+findNullLoopDone:
+    MOVEA.L A3, A1 * reset A1 so it points to the file to write to (to open, next)
+    
+    ;check if file exists, and open with task 51 if so, otherwise 52
+    ;(precondition here is A1 points to the null-terminated filename )
+    MOVE.B #51, D0      ;open file (task 51 is existing, 52 is new)
+    trap #15
+      
+    if.w D0 <NE> #0 then.s         ; if file error (404, not found)
+        MOVE.B #52, D0             ; open new file (52 is new)
+        trap #15
+    endi
+    
+    ********************************************************************************************************* 
+    * Seek to END of FILE by counting the number of bytes, closing, reopening, then seeking.
+    *    (first, count number of bytes already in the file to obtain seek position)
+    *********************************************************************************************************
+    Clr.L D3   ;TODO: reg save, D3 is now our count of bytes read
+    MOVE.L #1, D2 ; read one byte at a time
+    LEA byteRead, A1
+    
+countLoop:
+    MOVE.B #53, D0 ; try to read one byte (TODO: move out of loop)
+    trap #15
+    
+    CMPI.W #1,D0  ;1 == EOF
+    BEQ countDone
+    ADDI #1, D3
+    BRA countLoop
+    
+countDone:    
+    * close this file
+     move #56,d0  
+     trap #15 
+     
+     * reopen the target file
+     MOVE.L A3,A1
+     MOVE #51, D0
+     trap #15
+     
+    * seek to right position, then continue with writing
+    MOVE.L D3, D2 ; move the number of bytes found in the file to D2
+    MOVE #55, D0  ; position file task
+    trap #15
+
+    ******************************************************************************
+    * Actually write the buffer to the file, after caculating the number of bytes 
+    *  to write and after seeking to the right location in the file for append
+    ******************************************************************************
+
+    MOVE.L D5, D2 ; restore this for the actually writing the buffer 
+    ; assumes A0 hasnt changed since handed to this method      
+    MOVEA.L A2, A1 ; load the address of the buffer we want to write to disk
+    ; assumes file ID is still stored in D1.L  
+    MOVE.B #54, D0 ; subtask 54 is write to open file (append, or?), assumes D2 holds # of bytes
+    trap #15
+
+    ; add a newline to the file output
+    LEA NEWLINE, A1
+    MOVE.B #54, D0 
+    MOVE.B #2,D2  ; kills # of bytes to write from input param
+    trap #15
+    
+    ; finally, close only this file
+    MOVE.B #56, D0 ; close file task
+    trap #15
+  
+    ; report to screen
+    MOVEA.L A2, A1 ; load the address of the buffer we want to write to disk & screen
+    MOVE.B #13, D0
+    trap #15
+      
+    ; restore context
+    MOVEM.L (SP)+, toSave
+    
+    RTS
+    
+* Required variables and constants go here for your Disassembler
+CR                  EQU $0D
+LF                  EQU $0A
+NEWLINE             DC.B CR,LF,0  
+PRINTRTS            DC.B 'RTS',0
+PRINTNOP            DC.B 'NOP',0
+NOPCHECK            DC.B 'Checking input for NOP',0
+RTSCHECK            DC.B 'Checking input for RTS',0
+outFilename         DC.B 'Output.txt',0
+byteRead            DS.B 1
+
+   END    START        ; last line of source
+
+
+
+
+
+*~Font name~Courier New~
+*~Font size~15~
+*~Tab type~1~
+*~Tab size~4~
