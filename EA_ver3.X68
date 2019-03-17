@@ -233,12 +233,11 @@ MYBE_ASd_1  CMPI.B  #%000, FIRST_3
             JMP     INVALID
 
 ASd_1       CMPI.B  #%111, THIRD_3
-            BNE     INVALID
-            
+            BNE     MOVEON  
             CMPI.B  #%100, FOURTH_3
             BEQ     INVALID
-            
-            MOVEA.W #ASd_1_BACK, A3
+
+MOVEON      MOVEA.W #ASd_1_BACK, A3           
             CMPI.B  #%000, FOURTH_3
             BEQ     SIZE_W
             CMPI.B  #%001, FOURTH_3
@@ -1481,6 +1480,7 @@ INVALID:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
     END    START
+
 
 
 
