@@ -1,7 +1,7 @@
 # EASy68K-Disassembler
 EASy68K-Disassembler made for CSS 422
 This disassembles or reverse compiles a given set of code. So we take input commands as a test file (say MOVEA.W A5,A6) and disassemble it to machine code then print it out.
-
+# Team REEEE
 ## Members
 + Daniel Yan
 + Fahad Alshehri
