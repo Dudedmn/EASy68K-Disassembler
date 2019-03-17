@@ -176,12 +176,6 @@ GROUP_F:                ;$F| Display: DATA, $WXYZ (Unsupported)
 
 OP_JSR_DONE:
          MOVEM.L (SP)+,D0-D1       ;Recover register D0
-         JSR    check_NOP
-check_NOP                           ;THIS IS A TEMPORARY ROUTINE MADE FOR NOP until EA UPDATES NOP validity
-         CMP.W #$4E71,CUR_OP_CODE
-         BEQ    check_print
-         BNE    normal_CHECK
-normal_CHECK         
          CMP.B #1,IS_VALID
          BEQ    main_EA             ;This runs EA's routines after OP code portion is finished
          BNE    check_print
@@ -1111,14 +1105,13 @@ GROUP6_SUCCESS:
 ********************************************************************************
 C_GROUP_7:
     MOVEM.L D0,-(SP)        	;Save register to stack
-    
+*Unsupported OP code
 CHECK_OP_MOVEQ
     MOVE.W CUR_OP_CODE,D0		;Move current instruction set to D0
     ANDI.W #$F100,D0			;Mask appropriate bits
     CMP.W  #$7000,D0			;Compare masked bits
-    BNE    GROUP7_INVALID		;INVALID OP code found
-    BEQ    GROUP7_SUCCESS		;Finish routine
-    
+    BRA    GROUP7_INVALID		;INVALID OP code found
+
 GROUP7_INVALID:
     JSR INVALID_OP				;INVALID OP code found, set IS_VALID to 0
 GROUP7_SUCCESS:    
@@ -1326,10 +1319,11 @@ CHECK_OP_AND:                 ;This would be the only possible OP code left afte
     MOVE.W  CUR_OP_CODE,D0    ;Move current instruction set into D0
     ANDI.W  #$F000,D0
     CMP.W   #$C000,D0
-    BEQ     GROUPC_INVALID
     BRA    GROUPC_INVALID    
+    
 GROUPC_INVALID:
     JSR     INVALID_OP
+    
 GROUPC_SUCCESS:
     MOVEM.L (SP)+,D0-D1
     RTS
@@ -1880,6 +1874,7 @@ P_OP_ROR        DC.B    '   ROR',0
 P_OP_ROL        DC.B    '   ROL',0
 ***************** END OF DATA CONSTANT PRINTS ***********************************
  
+
 
 
 

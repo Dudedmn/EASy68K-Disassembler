@@ -6,13 +6,343 @@
 *-----------------------------------------------------------
 
     ORG $9000
-    LSL.W (A1)+         ; EA issue?
+    ;ADDQ.B      #8,$8000
+    ;AND.W       $00004900,D6   ;investigate
+    
+    MOVEQ.L     #122,D1    
+
+    ADD.L   D2,D1
+    
+    ADD.W   D1,$8000
+    
+    ADD.B   (A2),D1
+    
+	ADD.W   D3,(A7)
+
+    ADD.B   (A5)+,D7
+
+    ADD.L   D4,(A3)+
+
+    ADD.W   -(A1),D3  
+	
+	ADD.B   D1,-(A5)
+   
+    ADDA.L      #18,A7
+
+    ADDA.W      #199,A5
+
+    ADDA.L      D1,A2
+
+    ADDA.W      D2,A1
+
+    ADDA.W      A1,A2
+
+    ADDA.L      A1,A6
+
+    ADDA.W      (A1),A2
+
+    ADDA.L      -(A1),A6
+
+    ADDA.W      (A1)+,A2
+
+    ADDA.W      #$8000,A4
+
+    ADDA.L      #$8000,A4
+
+    ADDA.W      A1,A2
+
+    ADDA.L      A1,A6       
+
+    ADDQ.B      #1,D6
+
+    ADDQ.W      #2,D6
+
+    ADDQ.L      #4,D6    
+
+    ADDQ.W      #2,A2
+
+    ADDQ.L      #4,A5    
+
+    ADDQ.B      #1,(A3)
+
+    ADDQ.W      #2,(A3)+
+
+    ADDQ.L      #4,-(A3)
+
+    ADDQ.W      #3,$4000
+
+    AND.W       D0,D1
+
+    AND.B       D0,D1
+
+    AND.L       D7,D1
+
+    AND.L       D2,$00004000
+
+    AND.W       D3,$00014000
+
+    AND.B       D1,$00011000
+
+    AND.L       $00004000,D2
+
+    AND.B       $00004A00,D1 
+
+    AND.W       D1,(A3)
+
+    AND.B      (A7),D7
+
+    AND.W       D1,-(A3)
+
+    AND.L      -(A7),D7
+
+    AND.L      D1,(A3)+
+
+    AND.W       (A7)+,D7
+
+    DIVU         D1,D2
+
+    DIVU         $00000011,D6
+
+    DIVU         (A0),D0
+
+    DIVU         -(A0),D0   
+
+    DIVU         (A0)+,D0
+
+    DIVU         $0001000,D1
+
+    DIVU         $8000,D1
+
+    BRA     $A100
+
+    BRA     $A029
+
+    *Negative 8 bit displacement
+    BRA     $9F86
+
+    BRA     $9FF4
+
+    BRA     $A004
+
+    
+    *Positive 8 bit displacement
+    BRA     $A029
+
+    BRA     $A085
+
+    BRA     $A010
+
+    BRA     $A08F
+   
+    LSL.W     $00FF0000
+
+    LSL.W     $20(a0)
+
+    LSL.W    (a0)+
+
+    LSL.W     -(a0)
+
+    
+    LSR.W     $00080000
+
+    LSR.W     $20(a0)
+
+    LSR.W    (a0)+
+
+    LSR.W     -(a0)
+
+    ASL.W     $230000
+
+    ASL.W     $20(a0)
+
+    ASL.W    (a0)+
+
+    ASL.W     -(a0)
+	
+    ASR.W     $AA0000
+
+    ASR.W     $20(a0)
+
+    ASR.W    (a0)+
+
+    ASR.W     -(a0)
+    
+    LSL.W     $4000
+ 
+    MOVE.B      #19,(A1)
+
+    MOVE.L      #12,-(A1)
+
+    MOVE.W      #1982,(A1)+
+
+    MOVE.B      #19,D3
+
+    MOVE.L      #12,D2
+
+    MOVE.W      #1982,D1
+
+    MOVE.W      #$19AA,D1 
+        
+    MOVEA.L      #18,A7
+
+    MOVEA.W      #199,A5
+
+    MOVEA.L      D1,A2
+
+    MOVEA.W      D2,A1
+
+    MOVEA.W      A1,A2
+
+    MOVEA.L      A1,A6
+
+    MOVEA.W      (A1),A2
+
+    MOVEA.L      -(A1),A6
+
+    MOVEA.W      (A1)+,A2
+
+    MOVEA.W     #19,A3
+
+    MOVEA.L     #1944,A5
+
+    MOVEA.W      A1,A2
+
+    MOVEA.L      A1,A6
+
+    MOVEM.W   A1-A7,-(A1)
+
+    MOVEM.L   D1-D7,-(A1)
+
+    MOVEM.W   A1/D7,-(A1)
+
+    MOVEM.L   A1/D7,-(A1)
+
+    MOVEM.W   A1-A7,(A1)
+ 
+    MOVEQ.L     #122,D1
+
+    MOVEQ.L     #11,D2
+
+    MOVEQ.L     #111,D3
+
+    MOVEQ.L     #101,D7
+
+    MOVEQ.L     #12,D2
+
+    MULS         D1,D2
+
+    MULS         $00000011,D6
+
+    MULS         (A1),D0
+
+    MULS         -(A5),D2   
+
+    MULS         (A0)+,D1
+
+    MULS         $0001000,D4
+
+    MULS         $8000,D3 
+
+    NOT.B   D0
+
+    NOT.W   D1
+
+    NOT.L   D2
+
+    NOT.B   (A0)
+
+    NOT.W   -(A0)
+
+    NOT.L   (A0)+ 
+
+    NOT     $8000
+
+    NOT.W   $4000
+     
+    OR.W       D0,D1
+
+    OR.B       D0,D1
+
+    OR.L       D7,D1
+
+    OR.L       D2,$4000
+
+    OR.W       D3,$00014000
+
+    OR.B       D1,$00011000
+
+    OR.L       $5000,D2
+
+    OR.W       $6900,D6
+
+    OR.B       $4A00,D1 
+
+    OR.W       D1,(A3)
+
+    OR.B      (A7),D7
+
+    OR.W       D1,-(A3)
+
+    OR.L      -(A7),D7
+
+    OR.W       D1,(A3)+
+
+    OR.L      (A7)+,D7 
+        
+    LSL.B   #2,D3
+
+    LSL.W   #8,D2
+
+    LSL.L   #7,D1
+
+    LSR.B   D2,D3
+
+    LSR.W   D1,D2
+
+    LSR.L   D7,D1
+
+    ASL.B   #2,D3
+
+    ASL.W   #8,D2
+
+    ASL.L   #7,D1
+
+    ASR.B   D2,D3
+
+    ASR.W   D1,D2
+
+    ASL.L   D7,D1
+
+    SUB.L   D2,D1
+
+    SUB.W   D1,$8000
+
+    SUB.B   (A2),D1
+
+    SUB.W   D3,(A7)
+
+    SUB.B   (A5)+,D7
+
+    SUB.L   D4,(A3)+
+
+    SUB.W   -(A1),D3
+
+    SUB.B   D1,-(A5)
+ 
+    LSL.W (A1)+         ;finished testing
+    
     MULS.W (A0),D1      ;finished testing
+    
     SUB.L D1,(A1)+      ;finished testing
+    
     SUB.L D1,A1         ;finished testing
+    
     SUB.L D1,(A1)       ;finished testing
+    
     SUB.L D1,-(A1)      ;finished  testing
+    
     SUB.W D1,A1         ;finished  testing
+    
     ADDA.L D1,A2        ;finishtes testing
 
     LSR.L #$1,D1        ; CHECK THIS Prints #$1,A1 instead of #$,D1    
@@ -653,6 +983,7 @@ label3
 
     
  
+
 
 
 
