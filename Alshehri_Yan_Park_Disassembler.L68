@@ -1,6 +1,6 @@
 000010A4 Starting Address
 Assembler used: EASy68K Editor/Assembler v5.16.01
-Created On: 3/17/2019 9:14:04 PM
+Created On: 3/17/2019 9:38:32 PM
 
 00000000                             1  **--------------------------------------------------------------------------
 00000000                             2  * Title      : Disassembler in Motorola 68k
@@ -9,7 +9,7 @@ Created On: 3/17/2019 9:14:04 PM
 00000000                             5  * 
 00000000                             6  * 
 00000000                             7  * Description: This disassembler reverse assembles or decompiles a given
-00000000                             8  * test program (with vailidity checking) from their machine code hex
+00000000                             8  * test program (with validity checking) from their machine code hex
 00000000                             9  * equivalents to outputting them onto a console file and a log.
 00000000                            10  *
 00000000                            11  * This disassembler will print out <MEMORY ADDRESS> <OPERAND> <EA MODE/REG>
@@ -2133,8 +2133,8 @@ Created On: 3/17/2019 9:14:04 PM
 000028E8                          2129                                                              
 000028E8                          2130  MOVEM_FIRST_VAR             DS.B    1                       ;MOVEM constant
 000028E9                          2131  MOVEM_SECOND_VAR            DS.B    1                       ;Always MOVEM_FIRST_VAR-> MOVEM_SECOND_VAR
-000028EA                          2132  MOVE_FIRST_VAR_COUNTER      DS.B    1                       ;MOVEM counter constant
-000028EB                          2133  MOVE_SECOND_VAR_COUNTER     DS.B    1                       ;MOVEM counter constant
+000028EA                          2132  MOVEM_FIRST_VAR_COUNTER     DS.B    1                       ;MOVEM counter constant
+000028EB                          2133  MOVEM_SECOND_VAR_COUNTER        DS.B    1                       ;MOVEM counter constant
 000028EC                          2134  FIRST_VAR_MOVEM             DS.B    1                       ;Refers to the first X var assuming Dx1-Dx2/Ay1-Ay2
 000028ED                          2135                                                              ;Refers to the second X var assuming Dx1-Dx2/Ay1-Ay2
 000028ED                          2136  SECOND_VAR_MOVEM            DS.B    1                       ;Refers to the first Y var assuming Dx1-Dx2/Ay1-Ay2
@@ -2782,8 +2782,8 @@ Created On: 3/17/2019 9:14:04 PM
 000030A0                          2778  
 000030A0  11FC 0001 28E8          2779  ADDRESS_TO_DATA     MOVE.B  #%001, MOVEM_FIRST_VAR          ; MOVEM_FIRST_VAR= A
 000030A6  11FC 0000 28E9          2780              MOVE.B  #%000, MOVEM_SECOND_VAR                 ; MOVEM_SECOND_VAR= D
-000030AC  11FC 0008 28EA          2781              MOVE.B  #$8, MOVE_FIRST_VAR_COUNTER             ; start from 8
-000030B2  11FC 0008 28EB          2782              MOVE.B  #$8, MOVE_SECOND_VAR_COUNTER            ; start from 8
+000030AC  11FC 0008 28EA          2781              MOVE.B  #$8, MOVEM_FIRST_VAR_COUNTER            ; start from 8
+000030B2  11FC 0008 28EB          2782              MOVE.B  #$8, MOVEM_SECOND_VAR_COUNTER           ; start from 8
 000030B8  11FC 0000 28EC          2783              MOVE.B  #0, FIRST_VAR_MOVEM
 000030BE  11FC 0000 28ED          2784              MOVE.B  #0, SECOND_VAR_MOVEM
 000030C4                          2785  
@@ -2791,8 +2791,8 @@ Created On: 3/17/2019 9:14:04 PM
 000030CA                          2787              
 000030CA  11FC 0000 28E8          2788  DATA_TO_ADDRESS     MOVE.B  #%000, MOVEM_FIRST_VAR          ; MOVEM_FIRST_VAR= D
 000030D0  11FC 0001 28E9          2789              MOVE.B  #%001, MOVEM_SECOND_VAR                 ; MOVEM_SECOND_VAR= A
-000030D6  11FC 00FF 28EA          2790              MOVE.B  #$FF, MOVE_FIRST_VAR_COUNTER            ; start from -1
-000030DC  11FC 00FF 28EB          2791              MOVE.B  #$FF, MOVE_SECOND_VAR_COUNTER           ; start from -1
+000030D6  11FC 00FF 28EA          2790              MOVE.B  #$FF, MOVEM_FIRST_VAR_COUNTER           ; start from -1
+000030DC  11FC 00FF 28EB          2791              MOVE.B  #$FF, MOVEM_SECOND_VAR_COUNTER          ; start from -1
 000030E2  11FC 0000 28EC          2792              MOVE.B  #0, FIRST_VAR_MOVEM
 000030E8  11FC 0000 28ED          2793              MOVE.B  #0, SECOND_VAR_MOVEM
 000030EE                          2794              
@@ -2802,27 +2802,27 @@ Created On: 3/17/2019 9:14:04 PM
 000030F6  3A04                    2798              MOVE.W  D4, D5
 000030F8  0245 0001               2799              ANDI.W  #$1, D5
 000030FC                          2800              
-000030FC  0C38 0007 28EA          2801              CMPI.B  #7, MOVE_FIRST_VAR_COUNTER
+000030FC  0C38 0007 28EA          2801              CMPI.B  #7, MOVEM_FIRST_VAR_COUNTER
 00003102  6C00 0010               2802              BGE     ADD_Y
 00003106  6D00 0002               2803              BLT     ADD_X
 0000310A                          2804              
-0000310A  5238 28EA               2805  ADD_X       ADDI.B  #1, MOVE_FIRST_VAR_COUNTER
+0000310A  5238 28EA               2805  ADD_X       ADDI.B  #1, MOVEM_FIRST_VAR_COUNTER
 0000310E  4EF9 00003124           2806              JMP     KEEP_GOING0
 00003114                          2807  
-00003114  5238 28EB               2808  ADD_Y       ADDI.B  #1, MOVE_SECOND_VAR_COUNTER
-00003118  11FC 0008 28EA          2809              MOVE.B  #8, MOVE_FIRST_VAR_COUNTER
+00003114  5238 28EB               2808  ADD_Y       ADDI.B  #1, MOVEM_SECOND_VAR_COUNTER
+00003118  11FC 0008 28EA          2809              MOVE.B  #8, MOVEM_FIRST_VAR_COUNTER
 0000311E  4EF9 00003124           2810              JMP     KEEP_GOING0
 00003124                          2811              
 00003124  0C45 0001               2812  KEEP_GOING0 CMPI.W  #$1, D5
 00003128  6700 0006               2813              BEQ     BIT_ON
 0000312C  6600 00AA               2814              BNE     KEEP_GOING
 00003130                          2815              
-00003130  0C38 0008 28EA          2816  BIT_ON      CMPI.B  #8, MOVE_FIRST_VAR_COUNTER
+00003130  0C38 0008 28EA          2816  BIT_ON      CMPI.B  #8, MOVEM_FIRST_VAR_COUNTER
 00003136  6600 0006               2817              BNE     ITS_X
 0000313A  6700 0036               2818              BEQ     MYBE_Y
 0000313E                          2819              
-0000313E  1638 28E8               2820  ITS_X       MOVE.B  MOVEM_FIRST_VAR, D3 * LOAD[XMOVE_FIRST_VAR_COUNTER]
-00003142  1438 28EA               2821              MOVE.B  MOVE_FIRST_VAR_COUNTER, D2
+0000313E  1638 28E8               2820  ITS_X       MOVE.B  MOVEM_FIRST_VAR, D3 * LOAD[XX COUNTER]
+00003142  1438 28EA               2821              MOVE.B  MOVEM_FIRST_VAR_COUNTER, D2
 00003146  4EB9 000034C2           2822              JSR     LOAD_EA
 0000314C  0C38 0000 28EC          2823              CMPI.B  #0, FIRST_VAR_MOVEM
 00003152  6700 0006               2824              BEQ     FST_X
@@ -2835,14 +2835,14 @@ Created On: 3/17/2019 9:14:04 PM
 0000316A  554C                    2831  SND_X       SUBA.W  #2, A4 * push back G_BUFFER pointer by 2
 0000316C  4EF9 000031D8           2832              JMP     KEEP_GOING
 00003172                          2833  
-00003172  0C38 0008 28EB          2834  MYBE_Y      CMPI.B  #8, MOVE_SECOND_VAR_COUNTER
+00003172  0C38 0008 28EB          2834  MYBE_Y      CMPI.B  #8, MOVEM_SECOND_VAR_COUNTER
 00003178  6600 0006               2835              BNE     ITS_Y
 0000317C  6700 005A               2836              BEQ     KEEP_GOING
 00003180                          2837  
 00003180  0C38 0000 28ED          2838  ITS_Y       CMPI.B  #0, SECOND_VAR_MOVEM
 00003186  6700 001E               2839              BEQ     FST_Y1
-0000318A  1638 28E9               2840  ITS_Y_BACK  MOVE.B  MOVEM_SECOND_VAR, D3 * LOAD[YMOVE_SECOND_VAR_COUNTER]
-0000318E  1438 28EB               2841              MOVE.B  MOVE_SECOND_VAR_COUNTER, D2
+0000318A  1638 28E9               2840  ITS_Y_BACK  MOVE.B  MOVEM_SECOND_VAR, D3 * LOAD[YY COUNTER]
+0000318E  1438 28EB               2841              MOVE.B  MOVEM_SECOND_VAR_COUNTER, D2
 00003192  4EB9 000034C2           2842              JSR     LOAD_EA
 00003198  0C38 0000 28ED          2843              CMPI.B  #0, SECOND_VAR_MOVEM
 0000319E  6700 0020               2844              BEQ     FST_Y2
@@ -2865,7 +2865,7 @@ Created On: 3/17/2019 9:14:04 PM
 000031D0  554C                    2861  SND_Y       SUBA.W  #2, A4 * push back G_BUFFER pointer by 2
 000031D2  4EF9 000031D8           2862              JMP     KEEP_GOING
 000031D8                          2863  
-000031D8  0C38 0008 28EB          2864  KEEP_GOING  CMPI.B  #8, MOVE_SECOND_VAR_COUNTER
+000031D8  0C38 0008 28EB          2864  KEEP_GOING  CMPI.B  #8, MOVEM_SECOND_VAR_COUNTER
 000031DE  6600 FF14               2865              BNE     GO_DATA_TO_ADDRESS
 000031E2                          2866              
 000031E2  544C                    2867              ADDA.W  #2, A4 * push G_BUFFER pointer by 2
@@ -2876,27 +2876,27 @@ Created On: 3/17/2019 9:14:04 PM
 000031E8  3A04                    2872              MOVE.W  D4, D5
 000031EA  0245 0001               2873              ANDI.W  #$1, D5
 000031EE                          2874              
-000031EE  0C38 0000 28EA          2875              CMPI.B  #0, MOVE_FIRST_VAR_COUNTER
+000031EE  0C38 0000 28EA          2875              CMPI.B  #0, MOVEM_FIRST_VAR_COUNTER
 000031F4  6E00 0006               2876              BGT     SUBTRACT_X 
 000031F8  6F00 000C               2877              BLE     SUBTRACT_Y 
 000031FC                          2878              
-000031FC  5338 28EA               2879  SUBTRACT_X  SUBI.B  #1, MOVE_FIRST_VAR_COUNTER
+000031FC  5338 28EA               2879  SUBTRACT_X  SUBI.B  #1, MOVEM_FIRST_VAR_COUNTER
 00003200  4EF9 00003216           2880              JMP     KEEP_GOING1
 00003206                          2881  
-00003206  5338 28EB               2882  SUBTRACT_Y  SUBI.B  #1, MOVE_SECOND_VAR_COUNTER
-0000320A  11FC 00FF 28EA          2883              MOVE.B  #$FF, MOVE_FIRST_VAR_COUNTER
+00003206  5338 28EB               2882  SUBTRACT_Y  SUBI.B  #1, MOVEM_SECOND_VAR_COUNTER
+0000320A  11FC 00FF 28EA          2883              MOVE.B  #$FF, MOVEM_FIRST_VAR_COUNTER
 00003210  4EF9 00003216           2884              JMP     KEEP_GOING1
 00003216                          2885              
 00003216  0C45 0001               2886  KEEP_GOING1 CMPI.W  #$1, D5
 0000321A  6700 0006               2887              BEQ     BIT_ON2
 0000321E  6600 00AA               2888              BNE     KEEP_GOING2
 00003222                          2889              
-00003222  0C38 00FF 28EA          2890  BIT_ON2     CMPI.B  #$FF, MOVE_FIRST_VAR_COUNTER
+00003222  0C38 00FF 28EA          2890  BIT_ON2     CMPI.B  #$FF, MOVEM_FIRST_VAR_COUNTER
 00003228  6600 0006               2891              BNE     ITS_X2
 0000322C  6700 0036               2892              BEQ     MYBE_Y2
 00003230                          2893              
-00003230  1638 28E8               2894  ITS_X2      MOVE.B  MOVEM_FIRST_VAR, D3 * LOAD[XMOVE_FIRST_VAR_COUNTER]
-00003234  1438 28EA               2895              MOVE.B  MOVE_FIRST_VAR_COUNTER, D2
+00003230  1638 28E8               2894  ITS_X2      MOVE.B  MOVEM_FIRST_VAR, D3 * LOAD[XX COUNTER]
+00003234  1438 28EA               2895              MOVE.B  MOVEM_FIRST_VAR_COUNTER, D2
 00003238  4EB9 000034C2           2896              JSR     LOAD_EA
 0000323E  0C38 0000 28EC          2897              CMPI.B  #0, FIRST_VAR_MOVEM
 00003244  6700 0006               2898              BEQ     FST_X2
@@ -2909,14 +2909,14 @@ Created On: 3/17/2019 9:14:04 PM
 0000325C  554C                    2905  SND_X2      SUBA.W  #2, A4 * push back G_BUFFER pointer by 2
 0000325E  4EF9 000032CA           2906              JMP     KEEP_GOING2
 00003264                          2907  
-00003264  0C38 00FF 28EB          2908  MYBE_Y2     CMPI.B  #$FF, MOVE_SECOND_VAR_COUNTER
+00003264  0C38 00FF 28EB          2908  MYBE_Y2     CMPI.B  #$FF, MOVEM_SECOND_VAR_COUNTER
 0000326A  6600 0006               2909              BNE     ITS_Y2
 0000326E  6700 005A               2910              BEQ     KEEP_GOING2
 00003272                          2911  
 00003272  0C38 0000 28ED          2912  ITS_Y2      CMPI.B  #0, SECOND_VAR_MOVEM
 00003278  6700 001E               2913              BEQ     FST_Y3
-0000327C  1638 28E9               2914  ITS_Y2_BACK MOVE.B  MOVEM_SECOND_VAR, D3 * LOAD[YMOVE_SECOND_VAR_COUNTER]
-00003280  1438 28EB               2915              MOVE.B  MOVE_SECOND_VAR_COUNTER, D2
+0000327C  1638 28E9               2914  ITS_Y2_BACK MOVE.B  MOVEM_SECOND_VAR, D3 * LOAD[YY COUNTER]
+00003280  1438 28EB               2915              MOVE.B  MOVEM_SECOND_VAR_COUNTER, D2
 00003284  4EB9 000034C2           2916              JSR     LOAD_EA
 0000328A  0C38 0000 28ED          2917              CMPI.B  #0, SECOND_VAR_MOVEM
 00003290  6700 0020               2918              BEQ     FST_Y4
@@ -2939,7 +2939,7 @@ Created On: 3/17/2019 9:14:04 PM
 000032C2  554C                    2935  SND_Y2      SUBA.W  #2, A4 * push back G_BUFFER pointer by 2
 000032C4  4EF9 000032CA           2936              JMP     KEEP_GOING2
 000032CA                          2937  
-000032CA  0C38 00FF 28EB          2938  KEEP_GOING2 CMPI.B  #$FF, MOVE_SECOND_VAR_COUNTER
+000032CA  0C38 00FF 28EB          2938  KEEP_GOING2 CMPI.B  #$FF, MOVEM_SECOND_VAR_COUNTER
 000032D0  6600 FF14               2939              BNE     GO_ADDRESS_TO_DATA   
 000032D4                          2940              
 000032D4  544C                    2941              ADDA.W  #2, A4 * push G_BUFFER pointer by 2
@@ -3330,1010 +3330,51 @@ Created On: 3/17/2019 9:14:04 PM
 000036E0                          3326  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 000036E0                          3327  
 000036E0                          3328  -------------------- end include --------------------
-000036E0                          3329      INCLUDE "Test.x68"                              ;Test program to include
-000036E0                          3330  
+000036E0                          3329      INCLUDE "MOVEM_TEST.x68"                                ;Test program to include
+000036E0                          3330      
 00009000                          3331      ORG $9000
-00009000                          3332      ;ADDQ.B      #8,$8000
-00009000                          3333      ;AND.W       $00004900,D6   ;investigate
-00009000                          3334      
-00009000  727A                    3335      MOVEQ.L     #122,D1    
-00009002                          3336  
-00009002  D282                    3337      ADD.L   D2,D1
-00009004                          3338      
-00009004  D379 00008000           3339      ADD.W   D1,$8000
-0000900A                          3340      
-0000900A  D212                    3341      ADD.B   (A2),D1
-0000900C                          3342      
-0000900C  D757                    3343      ADD.W   D3,(A7)
-0000900E                          3344  
-0000900E  DE1D                    3345      ADD.B   (A5)+,D7
-00009010                          3346  
-00009010  D99B                    3347      ADD.L   D4,(A3)+
-00009012                          3348  
-00009012  D661                    3349      ADD.W   -(A1),D3  
-00009014                          3350      
-00009014  D325                    3351      ADD.B   D1,-(A5)
-00009016                          3352     
-00009016  DFFC 00000012           3353      ADDA.L      #18,A7
-0000901C                          3354  
-0000901C  DAFC 00C7               3355      ADDA.W      #199,A5
-00009020                          3356  
-00009020  D5C1                    3357      ADDA.L      D1,A2
-00009022                          3358  
-00009022  D2C2                    3359      ADDA.W      D2,A1
-00009024                          3360  
-00009024  D4C9                    3361      ADDA.W      A1,A2
-00009026                          3362  
-00009026  DDC9                    3363      ADDA.L      A1,A6
-00009028                          3364  
-00009028  D4D1                    3365      ADDA.W      (A1),A2
-0000902A                          3366  
-0000902A  DDE1                    3367      ADDA.L      -(A1),A6
-0000902C                          3368  
-0000902C  D4D9                    3369      ADDA.W      (A1)+,A2
-0000902E                          3370  
-0000902E  D8FC 8000               3371      ADDA.W      #$8000,A4
-00009032                          3372  
-00009032  D9FC 00008000           3373      ADDA.L      #$8000,A4
-00009038                          3374  
-00009038  D4C9                    3375      ADDA.W      A1,A2
-0000903A                          3376  
-0000903A  DDC9                    3377      ADDA.L      A1,A6       
-0000903C                          3378  
-0000903C  5206                    3379      ADDQ.B      #1,D6
-0000903E                          3380  
-0000903E  5446                    3381      ADDQ.W      #2,D6
-00009040                          3382  
-00009040  5886                    3383      ADDQ.L      #4,D6    
-00009042                          3384  
-00009042  544A                    3385      ADDQ.W      #2,A2
-00009044                          3386  
-00009044  588D                    3387      ADDQ.L      #4,A5    
-00009046                          3388  
-00009046  5213                    3389      ADDQ.B      #1,(A3)
-00009048                          3390  
-00009048  545B                    3391      ADDQ.W      #2,(A3)+
-0000904A                          3392  
-0000904A  58A3                    3393      ADDQ.L      #4,-(A3)
-0000904C                          3394  
-0000904C  5678 4000               3395      ADDQ.W      #3,$4000
-00009050                          3396  
-00009050  C240                    3397      AND.W       D0,D1
-00009052                          3398  
-00009052  C200                    3399      AND.B       D0,D1
-00009054                          3400  
-00009054  C287                    3401      AND.L       D7,D1
-00009056                          3402  
-00009056  C5B8 4000               3403      AND.L       D2,$00004000
-0000905A                          3404  
-0000905A  C779 00014000           3405      AND.W       D3,$00014000
-00009060                          3406  
-00009060  C339 00011000           3407      AND.B       D1,$00011000
-00009066                          3408  
-00009066  C4B8 4000               3409      AND.L       $00004000,D2
-0000906A                          3410  
-0000906A  C238 4A00               3411      AND.B       $00004A00,D1 
-0000906E                          3412  
-0000906E  C353                    3413      AND.W       D1,(A3)
-00009070                          3414  
-00009070  CE17                    3415      AND.B      (A7),D7
-00009072                          3416  
-00009072  C363                    3417      AND.W       D1,-(A3)
-00009074                          3418  
-00009074  CEA7                    3419      AND.L      -(A7),D7
-00009076                          3420  
-00009076  C39B                    3421      AND.L      D1,(A3)+
-00009078                          3422  
-00009078  CE5F                    3423      AND.W       (A7)+,D7
-0000907A                          3424  
-0000907A  84C1                    3425      DIVU         D1,D2
-0000907C                          3426  
-0000907C  8CF8 0011               3427      DIVU         $00000011,D6
-00009080                          3428  
-00009080  80D0                    3429      DIVU         (A0),D0
-00009082                          3430  
-00009082  80E0                    3431      DIVU         -(A0),D0   
-00009084                          3432  
-00009084  80D8                    3433      DIVU         (A0)+,D0
-00009086                          3434  
-00009086  82F8 1000               3435      DIVU         $0001000,D1
-0000908A                          3436  
-0000908A  82F9 00008000           3437      DIVU         $8000,D1
-00009090                          3438  
-00009090  6000 106E               3439      BRA     $A100
-00009094                          3440  
-00009094  6000 0F93               3441      BRA     $A029
-00009098                          3442  
-00009098                          3443      *Negative 8 bit displacement
-00009098  6000 0EEC               3444      BRA     $9F86
-0000909C                          3445  
-0000909C  6000 0F56               3446      BRA     $9FF4
-000090A0                          3447  
-000090A0  6000 0F62               3448      BRA     $A004
-000090A4                          3449  
-000090A4                          3450      
-000090A4                          3451      *Positive 8 bit displacement
-000090A4  6000 0F83               3452      BRA     $A029
-000090A8                          3453  
-000090A8  6000 0FDB               3454      BRA     $A085
-000090AC                          3455  
-000090AC  6000 0F62               3456      BRA     $A010
-000090B0                          3457  
-000090B0  6000 0FDD               3458      BRA     $A08F
-000090B4                          3459     
-000090B4  E3F9 00FF0000           3460      LSL.W     $00FF0000
-000090BA                          3461  
-000090BA  E3E8 0020               3462      LSL.W     $20(a0)
-000090BE                          3463  
-000090BE  E3D8                    3464      LSL.W    (a0)+
-000090C0                          3465  
-000090C0  E3E0                    3466      LSL.W     -(a0)
-000090C2                          3467  
-000090C2                          3468      
-000090C2  E2F9 00080000           3469      LSR.W     $00080000
-000090C8                          3470  
-000090C8  E2E8 0020               3471      LSR.W     $20(a0)
-000090CC                          3472  
-000090CC  E2D8                    3473      LSR.W    (a0)+
-000090CE                          3474  
-000090CE  E2E0                    3475      LSR.W     -(a0)
-000090D0                          3476  
-000090D0  E1F9 00230000           3477      ASL.W     $230000
-000090D6                          3478  
-000090D6  E1E8 0020               3479      ASL.W     $20(a0)
-000090DA                          3480  
-000090DA  E1D8                    3481      ASL.W    (a0)+
-000090DC                          3482  
-000090DC  E1E0                    3483      ASL.W     -(a0)
-000090DE                          3484      
-000090DE  E0F9 00AA0000           3485      ASR.W     $AA0000
-000090E4                          3486  
-000090E4  E0E8 0020               3487      ASR.W     $20(a0)
-000090E8                          3488  
-000090E8  E0D8                    3489      ASR.W    (a0)+
-000090EA                          3490  
-000090EA  E0E0                    3491      ASR.W     -(a0)
-000090EC                          3492      
-000090EC  E3F8 4000               3493      LSL.W     $4000
-000090F0                          3494   
-000090F0  12BC 0013               3495      MOVE.B      #19,(A1)
-000090F4                          3496  
-000090F4  233C 0000000C           3497      MOVE.L      #12,-(A1)
-000090FA                          3498  
-000090FA  32FC 07BE               3499      MOVE.W      #1982,(A1)+
-000090FE                          3500  
-000090FE  163C 0013               3501      MOVE.B      #19,D3
-00009102                          3502  
-00009102  740C                    3503      MOVE.L      #12,D2
-00009104                          3504  
-00009104  323C 07BE               3505      MOVE.W      #1982,D1
-00009108                          3506  
-00009108  323C 19AA               3507      MOVE.W      #$19AA,D1 
-0000910C                          3508          
-0000910C  2E7C 00000012           3509      MOVEA.L      #18,A7
-00009112                          3510  
-00009112  3A7C 00C7               3511      MOVEA.W      #199,A5
-00009116                          3512  
-00009116  2441                    3513      MOVEA.L      D1,A2
-00009118                          3514  
-00009118  3242                    3515      MOVEA.W      D2,A1
-0000911A                          3516  
-0000911A  3449                    3517      MOVEA.W      A1,A2
-0000911C                          3518  
-0000911C  2C49                    3519      MOVEA.L      A1,A6
-0000911E                          3520  
-0000911E  3451                    3521      MOVEA.W      (A1),A2
-00009120                          3522  
-00009120  2C61                    3523      MOVEA.L      -(A1),A6
-00009122                          3524  
-00009122  3459                    3525      MOVEA.W      (A1)+,A2
-00009124                          3526  
-00009124  367C 0013               3527      MOVEA.W     #19,A3
-00009128                          3528  
-00009128  2A7C 00000798           3529      MOVEA.L     #1944,A5
-0000912E                          3530  
-0000912E  3449                    3531      MOVEA.W      A1,A2
-00009130                          3532  
-00009130  2C49                    3533      MOVEA.L      A1,A6
-00009132                          3534  
-00009132  48A1 007F               3535      MOVEM.W   A1-A7,-(A1)
-00009136                          3536  
-00009136  48E1 7F00               3537      MOVEM.L   D1-D7,-(A1)
-0000913A                          3538  
-0000913A  48A1 0140               3539      MOVEM.W   A1/D7,-(A1)
-0000913E                          3540  
-0000913E  48E1 0140               3541      MOVEM.L   A1/D7,-(A1)
-00009142                          3542  
-00009142  4891 FE00               3543      MOVEM.W   A1-A7,(A1)
-00009146                          3544   
-00009146  727A                    3545      MOVEQ.L     #122,D1
-00009148                          3546  
-00009148  740B                    3547      MOVEQ.L     #11,D2
-0000914A                          3548  
-0000914A  766F                    3549      MOVEQ.L     #111,D3
-0000914C                          3550  
-0000914C  7E65                    3551      MOVEQ.L     #101,D7
-0000914E                          3552  
-0000914E  740C                    3553      MOVEQ.L     #12,D2
-00009150                          3554  
-00009150  C5C1                    3555      MULS         D1,D2
-00009152                          3556  
-00009152  CDF8 0011               3557      MULS         $00000011,D6
-00009156                          3558  
-00009156  C1D1                    3559      MULS         (A1),D0
-00009158                          3560  
-00009158  C5E5                    3561      MULS         -(A5),D2   
-0000915A                          3562  
-0000915A  C3D8                    3563      MULS         (A0)+,D1
-0000915C                          3564  
-0000915C  C9F8 1000               3565      MULS         $0001000,D4
-00009160                          3566  
-00009160  C7F9 00008000           3567      MULS         $8000,D3 
-00009166                          3568  
-00009166  4600                    3569      NOT.B   D0
-00009168                          3570  
-00009168  4641                    3571      NOT.W   D1
-0000916A                          3572  
-0000916A  4682                    3573      NOT.L   D2
-0000916C                          3574  
-0000916C  4610                    3575      NOT.B   (A0)
-0000916E                          3576  
-0000916E  4660                    3577      NOT.W   -(A0)
-00009170                          3578  
-00009170  4698                    3579      NOT.L   (A0)+ 
-00009172                          3580  
-00009172  4679 00008000           3581      NOT     $8000
-00009178                          3582  
-00009178  4678 4000               3583      NOT.W   $4000
-0000917C                          3584       
-0000917C  8240                    3585      OR.W       D0,D1
-0000917E                          3586  
-0000917E  8200                    3587      OR.B       D0,D1
-00009180                          3588  
-00009180  8287                    3589      OR.L       D7,D1
-00009182                          3590  
-00009182  85B8 4000               3591      OR.L       D2,$4000
-00009186                          3592  
-00009186  8779 00014000           3593      OR.W       D3,$00014000
-0000918C                          3594  
-0000918C  8339 00011000           3595      OR.B       D1,$00011000
-00009192                          3596  
-00009192  84B8 5000               3597      OR.L       $5000,D2
-00009196                          3598  
-00009196  8C78 6900               3599      OR.W       $6900,D6
-0000919A                          3600  
-0000919A  8238 4A00               3601      OR.B       $4A00,D1 
-0000919E                          3602  
-0000919E  8353                    3603      OR.W       D1,(A3)
-000091A0                          3604  
-000091A0  8E17                    3605      OR.B      (A7),D7
-000091A2                          3606  
-000091A2  8363                    3607      OR.W       D1,-(A3)
-000091A4                          3608  
-000091A4  8EA7                    3609      OR.L      -(A7),D7
-000091A6                          3610  
-000091A6  835B                    3611      OR.W       D1,(A3)+
-000091A8                          3612  
-000091A8  8E9F                    3613      OR.L      (A7)+,D7 
-000091AA                          3614          
-000091AA  E50B                    3615      LSL.B   #2,D3
-000091AC                          3616  
-000091AC  E14A                    3617      LSL.W   #8,D2
-000091AE                          3618  
-000091AE  EF89                    3619      LSL.L   #7,D1
-000091B0                          3620  
-000091B0  E42B                    3621      LSR.B   D2,D3
-000091B2                          3622  
-000091B2  E26A                    3623      LSR.W   D1,D2
-000091B4                          3624  
-000091B4  EEA9                    3625      LSR.L   D7,D1
-000091B6                          3626  
-000091B6  E503                    3627      ASL.B   #2,D3
-000091B8                          3628  
-000091B8  E142                    3629      ASL.W   #8,D2
-000091BA                          3630  
-000091BA  EF81                    3631      ASL.L   #7,D1
-000091BC                          3632  
-000091BC  E423                    3633      ASR.B   D2,D3
-000091BE                          3634  
-000091BE  E262                    3635      ASR.W   D1,D2
-000091C0                          3636  
-000091C0  EFA1                    3637      ASL.L   D7,D1
-000091C2                          3638  
-000091C2  9282                    3639      SUB.L   D2,D1
-000091C4                          3640  
-000091C4  9379 00008000           3641      SUB.W   D1,$8000
-000091CA                          3642  
-000091CA  9212                    3643      SUB.B   (A2),D1
-000091CC                          3644  
-000091CC  9757                    3645      SUB.W   D3,(A7)
-000091CE                          3646  
-000091CE  9E1D                    3647      SUB.B   (A5)+,D7
-000091D0                          3648  
-000091D0  999B                    3649      SUB.L   D4,(A3)+
-000091D2                          3650  
-000091D2  9661                    3651      SUB.W   -(A1),D3
-000091D4                          3652  
-000091D4  9325                    3653      SUB.B   D1,-(A5)
-000091D6                          3654   
-000091D6  E3D9                    3655      LSL.W (A1)+         ;finished testing
-000091D8                          3656      
-000091D8  C3D0                    3657      MULS.W (A0),D1      ;finished testing
-000091DA                          3658      
-000091DA  9399                    3659      SUB.L D1,(A1)+      ;finished testing
-000091DC                          3660      
-000091DC  93C1                    3661      SUB.L D1,A1         ;finished testing
-000091DE                          3662      
-000091DE  9391                    3663      SUB.L D1,(A1)       ;finished testing
-000091E0                          3664      
-000091E0  93A1                    3665      SUB.L D1,-(A1)      ;finished  testing
-000091E2                          3666      
-000091E2  92C1                    3667      SUB.W D1,A1         ;finished  testing
-000091E4                          3668      
-000091E4  D5C1                    3669      ADDA.L D1,A2        ;finishtes testing
-000091E6                          3670  
-000091E6  E289                    3671      LSR.L #$1,D1        ; CHECK THIS Prints #$1,A1 instead of #$,D1    
-000091E8                          3672          
-000091E8  5301                    3673      SUBQ.B #$1,D1       ; CHECK THIS Prints #$2,D1 instead of #$1,D1
-000091EA                          3674       
-000091EA  E709                    3675      LSL.B #3,D1         ; CHECK THIS Prints #3,A1 instead of #3,D1
-000091EC                          3676      
-000091EC  5301                    3677      SUBQ.B #$1,D1       ; CHECK THIS Prints #$2,D1 instead of #$1,D1
-000091EE                          3678  
-000091EE  0881 0003               3679      BCLR.L #$3,D1       ; CHECK THIS Prints #$57,D1 instead of #$3,D1
-000091F2                          3680      
-000091F2                          3681      ;LSR.W #$1,D1        ; This doesn't show up if it's placed right after BCLR    
-000091F2                          3682      ;LSL.W #$1,D1        ; This doesn't show up if it's placed right after BCLR    
-000091F2                          3683      
-000091F2                          3684      ;ASL.B  D3,D5     
-000091F2                          3685      ;ASR.W  D3,D5
-000091F2  0041 2501               3686      ORI.W #$2501, D1
-000091F6                          3687       
-000091F6  E7BD                    3688      ROL.L  D3,D5     
-000091F8                          3689     
-000091F8  E6BD                    3690      ROR.L  D3,D5     
-000091FA  8497                    3691      OR.L (SP),D2
-000091FC                          3692      
-000091FC  8358                    3693      OR.W D1,(A0)+
-000091FE                          3694      
-000091FE  4E71                    3695      NOP
-00009200                          3696      
-00009200  4E75                    3697      RTS
-00009202                          3698      
-00009202  4E71                    3699      NOP
-00009204                          3700      
-00009204  4E75                    3701      RTS
-00009206                          3702      
-00009206  0041 2501               3703      ORI.W #$2501, D1
-0000920A                          3704      
-0000920A  5300                    3705      SUBQ.B  #1,D0
-0000920C                          3706      
-0000920C  5541                    3707      SUBQ.W  #$2, D1
-0000920E                          3708      
-0000920E  5982                    3709      SUBQ.L  #4,D2
-00009210                          3710      
-00009210  41D0                    3711      LEA     (A0),A0
-00009212                          3712      
-00009212  41D1                    3713      LEA     (A1),A0
-00009214                          3714      
-00009214  41F8 0100               3715      LEA     $0100,A0
-00009218                          3716      
-00009218  41F9 00009300           3717      LEA     $9300,A0
-0000921E                          3718      
-0000921E  41D5                    3719      LEA     (A5),A0
-00009220                          3720  
-00009220  41D7                    3721      LEA     (A7),A0
-00009222                          3722  
-00009222  4FD0                    3723      LEA     (A0),A7
-00009224                          3724  
-00009224  4FD5                    3725      LEA     (A5),A7
-00009226                          3726  
-00009226  4FD7                    3727      LEA     (A7),A7
-00009228                          3728  
-00009228  4200                    3729      CLR.B     D0
-0000922A                          3730  
-0000922A  4207                    3731      CLR.B     D7
-0000922C                          3732  
-0000922C  4240                    3733      CLR.W     D0
-0000922E                          3734  
-0000922E  4247                    3735      CLR.W     D7
-00009230                          3736  
-00009230  4280                    3737      CLR.L     D0
-00009232                          3738  
-00009232  4287                    3739      CLR.L     D7
-00009234                          3740  
-00009234  4210                    3741      CLR.B     (A0)
-00009236                          3742  
-00009236  4217                    3743      CLR.B     (A7)
-00009238                          3744  
-00009238  4250                    3745      CLR.W     (A0)
-0000923A                          3746  
-0000923A  4257                    3747      CLR.W     (A7)
-0000923C                          3748  
-0000923C  4290                    3749      CLR.L     (A0)
-0000923E                          3750  
-0000923E  4297                    3751      CLR.L     (A7)
-00009240                          3752  
-00009240  4218                    3753      CLR.B     (A0)+
-00009242                          3754  
-00009242  421F                    3755      CLR.B     (A7)+
-00009244                          3756  
-00009244  4258                    3757      CLR.W     (A0)+
-00009246                          3758  
-00009246  425F                    3759      CLR.W     (A7)+
-00009248                          3760  
-00009248  4298                    3761      CLR.L     (A0)+
-0000924A                          3762  
-0000924A  429F                    3763      CLR.L     (A7)+
-0000924C                          3764  
-0000924C  4220                    3765      CLR.B     -(A0)
-0000924E                          3766  
-0000924E  4227                    3767      CLR.B     -(A7)
-00009250                          3768  
-00009250  4260                    3769      CLR.W     -(A0)
-00009252                          3770  
-00009252  4267                    3771      CLR.W     -(A7)
-00009254                          3772  
-00009254  42A0                    3773      CLR.L     -(A0)
-00009256                          3774  
-00009256  42A7                    3775      CLR.L     -(A7)
-00009258                          3776  
-00009258  1200                    3777      MOVE.B    D0,D1
-0000925A                          3778  
-0000925A  1080                    3779      MOVE.B    D0,(A0)
-0000925C                          3780  
-0000925C  10C0                    3781      MOVE.B    D0,(A0)+
-0000925E                          3782  
-0000925E  1100                    3783      MOVE.B    D0,-(A0)
-00009260                          3784  
-00009260  1010                    3785      MOVE.B    (A0),D0
-00009262                          3786  
-00009262  1290                    3787      MOVE.B    (A0),(A1)
-00009264                          3788  
-00009264  12D0                    3789      MOVE.B    (A0),(A1)+
-00009266                          3790  
-00009266  1310                    3791      MOVE.B    (A0),-(A1)
-00009268                          3792  
-00009268  1018                    3793      MOVE.B    (A0)+,D0
-0000926A                          3794  
-0000926A  1298                    3795      MOVE.B    (A0)+,(A1)
-0000926C                          3796  
-0000926C  12D8                    3797      MOVE.B    (A0)+,(A1)+
-0000926E                          3798  
-0000926E  1318                    3799      MOVE.B    (A0)+,-(A1)
-00009270                          3800  
-00009270  1020                    3801      MOVE.B    -(A0),D0
-00009272                          3802  
-00009272  12A0                    3803      MOVE.B    -(A0),(A1)
-00009274                          3804  
-00009274  12E0                    3805      MOVE.B    -(A0),(A1)+
-00009276                          3806  
-00009276  1320                    3807      MOVE.B    -(A0),-(A1)
-00009278                          3808  
-00009278  3200                    3809      MOVE.W    D0,D1
-0000927A                          3810  
-0000927A  3080                    3811      MOVE.W    D0,(A0)
-0000927C                          3812  
-0000927C  30C0                    3813      MOVE.W    D0,(A0)+
-0000927E                          3814  
-0000927E  3100                    3815      MOVE.W    D0,-(A0)
-00009280                          3816  
-00009280  3008                    3817      MOVE.W    A0,D0
-00009282                          3818  
-00009282  3288                    3819      MOVE.W    A0,(A1)
-00009284                          3820  
-00009284  32C8                    3821      MOVE.W    A0,(A1)+
-00009286                          3822  
-00009286  3308                    3823      MOVE.W    A0,-(A1)
-00009288                          3824  
-00009288  3010                    3825      MOVE.W    (A0),D0
-0000928A                          3826  
-0000928A  3290                    3827      MOVE.W    (A0),(A1)
-0000928C                          3828  
-0000928C  32D0                    3829      MOVE.W    (A0),(A1)+
-0000928E                          3830  
-0000928E  3310                    3831      MOVE.W    (A0),-(A1)
-00009290                          3832  
-00009290  3018                    3833      MOVE.W    (A0)+,D0
-00009292                          3834  
-00009292  3298                    3835      MOVE.W    (A0)+,(A1)
-00009294                          3836  
-00009294  32D8                    3837      MOVE.W    (A0)+,(A1)+
-00009296                          3838  
-00009296  3318                    3839      MOVE.W    (A0)+,-(A1)
-00009298                          3840  
-00009298  3020                    3841      MOVE.W    -(A0),D0
-0000929A                          3842  
-0000929A  32A0                    3843      MOVE.W    -(A0),(A1)
-0000929C                          3844  
-0000929C  32E0                    3845      MOVE.W    -(A0),(A1)+
-0000929E                          3846  
-0000929E  3320                    3847      MOVE.W    -(A0),-(A1)
-000092A0                          3848  
-000092A0  2200                    3849      MOVE.L    D0,D1
-000092A2                          3850  
-000092A2  2080                    3851      MOVE.L    D0,(A0)
-000092A4                          3852  
-000092A4  20C0                    3853      MOVE.L    D0,(A0)+
-000092A6                          3854  
-000092A6  2100                    3855      MOVE.L    D0,-(A0)
-000092A8                          3856  
-000092A8  2008                    3857      MOVE.L    A0,D0
-000092AA                          3858  
-000092AA  2288                    3859      MOVE.L    A0,(A1)
-000092AC                          3860  
-000092AC  22C8                    3861      MOVE.L    A0,(A1)+
-000092AE                          3862  
-000092AE  2308                    3863      MOVE.L    A0,-(A1)
-000092B0                          3864  
-000092B0  2010                    3865      MOVE.L    (A0),D0
-000092B2                          3866  
-000092B2  2290                    3867      MOVE.L    (A0),(A1)
-000092B4                          3868  
-000092B4  22D0                    3869      MOVE.L    (A0),(A1)+
-000092B6                          3870  
-000092B6  2310                    3871      MOVE.L    (A0),-(A1)
-000092B8                          3872  
-000092B8  2018                    3873      MOVE.L    (A0)+,D0
-000092BA                          3874  
-000092BA  2298                    3875      MOVE.L    (A0)+,(A1)
-000092BC                          3876  
-000092BC  22D8                    3877      MOVE.L    (A0)+,(A1)+
-000092BE                          3878  
-000092BE  2318                    3879      MOVE.L    (A0)+,-(A1)
-000092C0                          3880  
-000092C0  2020                    3881      MOVE.L    -(A0),D0
-000092C2                          3882  
-000092C2  22A0                    3883      MOVE.L    -(A0),(A1)
-000092C4                          3884  
-000092C4  22E0                    3885      MOVE.L    -(A0),(A1)+
-000092C6                          3886  
-000092C6  2320                    3887      MOVE.L    -(A0),-(A1)
-000092C8                          3888  
-000092C8  3040                    3889      MOVEA.W    D0,A0
-000092CA                          3890  
-000092CA  3048                    3891      MOVEA.W    A0,A0
-000092CC                          3892  
-000092CC  3050                    3893      MOVEA.W    (A0),A0
-000092CE                          3894  
-000092CE  3058                    3895      MOVEA.W    (A0)+,A0
-000092D0                          3896  
-000092D0  3060                    3897      MOVEA.W    -(A0),A0
-000092D2                          3898  
-000092D2  2040                    3899      MOVEA.L    D0,A0
-000092D4                          3900  
-000092D4  2048                    3901      MOVEA.L    A0,A0
-000092D6                          3902  
-000092D6  2050                    3903      MOVEA.L    (A0),A0
-000092D8                          3904  
-000092D8  2058                    3905      MOVEA.L    (A0)+,A0
-000092DA                          3906  
-000092DA  2060                    3907      MOVEA.L    -(A0),A0  
-000092DC                          3908  
-000092DC  D401                    3909      ADD.B     D1,D2
-000092DE                          3910  
-000092DE  D311                    3911      ADD.B     D1,(A1)
-000092E0                          3912  
-000092E0  D319                    3913      ADD.B     D1,(A1)+
-000092E2                          3914  
-000092E2  D321                    3915      ADD.B     D1,-(A1)
-000092E4                          3916  
-000092E4  D211                    3917      ADD.B     (A1),D1
-000092E6                          3918  
-000092E6  D219                    3919      ADD.B     (A1)+,D1
-000092E8                          3920  
-000092E8  D221                    3921      ADD.B     -(A1),D1
-000092EA                          3922  
-000092EA  D441                    3923      ADD.W     D1,D2
-000092EC                          3924  
-000092EC  D351                    3925      ADD.W     D1,(A1)
-000092EE                          3926  
-000092EE  D359                    3927      ADD.W     D1,(A1)+
-000092F0                          3928  
-000092F0  D361                    3929      ADD.W     D1,-(A1)
-000092F2                          3930  
-000092F2  D251                    3931      ADD.W     (A1),D1
-000092F4                          3932  
-000092F4  D259                    3933      ADD.W     (A1)+,D1
-000092F6                          3934  
-000092F6  D261                    3935      ADD.W     -(A1),D1
-000092F8                          3936  
-000092F8  D481                    3937      ADD.L     D1,D2
-000092FA                          3938  
-000092FA  D391                    3939      ADD.L     D1,(A1)
-000092FC                          3940  
-000092FC  D399                    3941      ADD.L     D1,(A1)+
-000092FE                          3942  
-000092FE  D3A1                    3943      ADD.L     D1,-(A1)
-00009300                          3944  
-00009300  D291                    3945      ADD.L     (A1),D1
-00009302                          3946  
-00009302  D299                    3947      ADD.L     (A1)+,D1
-00009304                          3948  
-00009304  D2A1                    3949      ADD.L     -(A1),D1
-00009306                          3950  
-00009306  D4C1                    3951      ADDA.W        D1,A2
-00009308                          3952  
-00009308  D4D1                    3953      ADDA.W        (A1),A2
-0000930A                          3954  
-0000930A  D4D9                    3955      ADDA.W        (A1)+,A2
-0000930C                          3956  
-0000930C  D4E1                    3957      ADDA.W        -(A1),A2
-0000930E                          3958  
-0000930E  D5C1                    3959      ADDA.L        D1,A2
-00009310                          3960  
-00009310  D5D1                    3961      ADDA.L        (A1),A2
-00009312                          3962  
-00009312  D5D9                    3963      ADDA.L        (A1)+,A2
-00009314                          3964  
-00009314  D5E1                    3965      ADDA.L        -(A1),A2
-00009316                          3966     
-00009316  9401                    3967      SUB.B     D1,D2
-00009318                          3968  
-00009318  9311                    3969      SUB.B     D1,(A1)
-0000931A                          3970  
-0000931A  9319                    3971      SUB.B     D1,(A1)+
-0000931C                          3972  
-0000931C  9321                    3973      SUB.B     D1,-(A1)
-0000931E                          3974  
-0000931E  9211                    3975      SUB.B     (A1),D1
-00009320                          3976  
-00009320  9219                    3977      SUB.B     (A1)+,D1
-00009322                          3978  
-00009322  9221                    3979      SUB.B     -(A1),D1
-00009324                          3980  
-00009324  9441                    3981      SUB.W     D1,D2
-00009326                          3982  
-00009326  92C1                    3983      SUB.W     D1,A1
-00009328                          3984  
-00009328  9351                    3985      SUB.W     D1,(A1)
-0000932A                          3986  
-0000932A  9359                    3987      SUB.W     D1,(A1)+
-0000932C                          3988  
-0000932C  9361                    3989      SUB.W     D1,-(A1)
-0000932E                          3990  
-0000932E  9249                    3991      SUB.W     A1,D1
-00009330                          3992  
-00009330  9251                    3993      SUB.W     (A1),D1
-00009332                          3994  
-00009332  9259                    3995      SUB.W     (A1)+,D1
-00009334                          3996  
-00009334  9261                    3997      SUB.W     -(A1),D1
-00009336                          3998  
-00009336  9481                    3999      SUB.L     D1,D2
-00009338                          4000  
-00009338  93C1                    4001      SUB.L     D1,A1
-0000933A                          4002  
-0000933A  9391                    4003      SUB.L     D1,(A1)
-0000933C                          4004  
-0000933C  9399                    4005      SUB.L     D1,(A1)+
-0000933E                          4006  
-0000933E  93A1                    4007      SUB.L     D1,-(A1)
-00009340                          4008  
-00009340  9289                    4009      SUB.L     A1,D1
-00009342                          4010  
-00009342  9291                    4011      SUB.L     (A1),D1
-00009344                          4012  
-00009344  9299                    4013      SUB.L     (A1)+,D1
-00009346                          4014  
-00009346  92A1                    4015      SUB.L     -(A1),D1    
-00009348                          4016  
-00009348  C3C0                    4017      MULS.W    D0,D1
-0000934A                          4018  
-0000934A  C3D0                    4019      MULS.W    (A0),D1
-0000934C                          4020  
-0000934C  C3E0                    4021      MULS.W    -(A0),D1
-0000934E                          4022  
-0000934E  C3D8                    4023      MULS.W    (A0)+,D1
-00009350                          4024  
-00009350  83C0                    4025      DIVS.W    D0,D1
-00009352                          4026  
-00009352  83D0                    4027      DIVS.W    (A0),D1
-00009354                          4028  
-00009354  83E0                    4029      DIVS.W    -(A0),D1
-00009356                          4030  
-00009356  83D8                    4031      DIVS.W    (A0)+,D1
-00009358                          4032  
-00009358  C401                    4033      AND.B     D1,D2
-0000935A                          4034  
-0000935A  C311                    4035      AND.B     D1,(A1)
-0000935C                          4036  
-0000935C  C319                    4037      AND.B     D1,(A1)+
-0000935E                          4038  
-0000935E  C321                    4039      AND.B     D1,-(A1)
-00009360                          4040  
-00009360  C211                    4041      AND.B     (A1),D1
-00009362                          4042  
-00009362  C219                    4043      AND.B     (A1)+,D1
-00009364                          4044  
-00009364  C221                    4045      AND.B     -(A1),D1
-00009366                          4046  
-00009366  C441                    4047      AND.W     D1,D2
-00009368                          4048  
-00009368  C351                    4049      AND.W     D1,(A1)
-0000936A                          4050  
-0000936A  C359                    4051      AND.W     D1,(A1)+
-0000936C                          4052  
-0000936C  C361                    4053      AND.W     D1,-(A1)
-0000936E                          4054  
-0000936E  C251                    4055      AND.W     (A1),D1
-00009370                          4056  
-00009370  C259                    4057      AND.W     (A1)+,D1
-00009372                          4058  
-00009372  C261                    4059      AND.W     -(A1),D1
-00009374                          4060  
-00009374  C481                    4061      AND.L     D1,D2
-00009376                          4062  
-00009376  C391                    4063      AND.L     D1,(A1)
-00009378                          4064  
-00009378  C399                    4065      AND.L     D1,(A1)+
-0000937A                          4066  
-0000937A  C3A1                    4067      AND.L     D1,-(A1)
-0000937C                          4068  
-0000937C  C291                    4069      AND.L     (A1),D1
-0000937E                          4070  
-0000937E  C299                    4071      AND.L     (A1)+,D1
-00009380                          4072  
-00009380  C2A1                    4073      AND.L     -(A1),D1
-00009382                          4074      
-00009382  B302                    4075      EOR.B      D1,D2
-00009384                          4076      
-00009384  B511                    4077      EOR.B      D2,(A1)
-00009386                          4078  
-00009386  8401                    4079      OR.B     D1,D2
-00009388                          4080  
-00009388  8311                    4081      OR.B     D1,(A1)
-0000938A                          4082  
-0000938A  8319                    4083      OR.B     D1,(A1)+
-0000938C                          4084  
-0000938C  8321                    4085      OR.B     D1,-(A1)
-0000938E                          4086  
-0000938E  8211                    4087      OR.B     (A1),D1
-00009390                          4088  
-00009390  8219                    4089      OR.B     (A1)+,D1
-00009392                          4090  
-00009392  8221                    4091      OR.B     -(A1),D1
-00009394                          4092  
-00009394  8441                    4093      OR.W     D1,D2
-00009396                          4094  
-00009396  8351                    4095      OR.W     D1,(A1)
-00009398                          4096  
-00009398  8359                    4097      OR.W     D1,(A1)+
-0000939A                          4098  
-0000939A  8361                    4099      OR.W     D1,-(A1)
-0000939C                          4100  
-0000939C  8251                    4101      OR.W     (A1),D1
-0000939E                          4102  
-0000939E  8259                    4103      OR.W     (A1)+,D1
-000093A0                          4104  
-000093A0  8261                    4105      OR.W     -(A1),D1
-000093A2                          4106  
-000093A2  8481                    4107      OR.L     D1,D2
-000093A4                          4108  
-000093A4  8391                    4109      OR.L     D1,(A1)
-000093A6                          4110  
-000093A6  8399                    4111      OR.L     D1,(A1)+
-000093A8                          4112  
-000093A8  83A1                    4113      OR.L     D1,-(A1)
-000093AA                          4114  
-000093AA  8291                    4115      OR.L     (A1),D1
-000093AC                          4116  
-000093AC  8299                    4117      OR.L     (A1)+,D1
-000093AE                          4118  
-000093AE  82A1                    4119      OR.L     -(A1),D1
-000093B0                          4120  
-000093B0  E32A                    4121      LSL.B     D1,D2
-000093B2                          4122  
-000093B2  E36A                    4123      LSL.W     D1,D2
-000093B4                          4124  
-000093B4  E3D1                    4125      LSL.W     (A1)
-000093B6                          4126  
-000093B6  E3D9                    4127      LSL.W     (A1)+
-000093B8                          4128  
-000093B8  E3E1                    4129      LSL.W     -(A1)
-000093BA                          4130  
-000093BA  E3AA                    4131      LSL.L     D1,D2
-000093BC                          4132  
-000093BC  E22A                    4133      LSR.B     D1,D2
-000093BE                          4134  
-000093BE  E26A                    4135      LSR.W     D1,D2
-000093C0                          4136  
-000093C0  E2D1                    4137      LSR.W     (A1)
-000093C2                          4138  
-000093C2  E2D9                    4139      LSR.W     (A1)+
-000093C4                          4140  
-000093C4  E2E1                    4141      LSR.W     -(A1)
-000093C6                          4142  
-000093C6  E2AA                    4143      LSR.L     D1,D2    
-000093C8                          4144  
-000093C8  E222                    4145      ASR.B     D1,D2
-000093CA                          4146  
-000093CA  E262                    4147      ASR.W     D1,D2
-000093CC                          4148  
-000093CC  E0D1                    4149      ASR.W     (A1)
-000093CE                          4150  
-000093CE  E0D9                    4151      ASR.W     (A1)+
-000093D0                          4152  
-000093D0  E0E1                    4153      ASR.W     -(A1)
-000093D2                          4154  
-000093D2  E2A2                    4155      ASR.L     D1,D2
-000093D4                          4156  
-000093D4  E322                    4157      ASL.B     D1,D2
-000093D6                          4158  
-000093D6  E362                    4159      ASL.W     D1,D2
-000093D8                          4160  
-000093D8  E1D1                    4161      ASL.W     (A1)
-000093DA                          4162  
-000093DA  E1D9                    4163      ASL.W     (A1)+
-000093DC                          4164  
-000093DC  E1E1                    4165      ASL.W     -(A1)
-000093DE                          4166  
-000093DE  E3A2                    4167      ASL.L     D1,D2
-000093E0                          4168  
-000093E0  E33A                    4169      ROL.B     D1,D2
-000093E2                          4170  
-000093E2  E37A                    4171      ROL.W     D1,D2
-000093E4                          4172  
-000093E4  E7D1                    4173      ROL.W     (A1)
-000093E6                          4174  
-000093E6  E7D9                    4175      ROL.W     (A1)+
-000093E8                          4176  
-000093E8  E7E1                    4177      ROL.W     -(A1)
-000093EA                          4178  
-000093EA  E3BA                    4179      ROL.L     D1,D2
-000093EC                          4180  
-000093EC  E23A                    4181      ROR.B     D1,D2
-000093EE                          4182  
-000093EE  E27A                    4183      ROR.W     D1,D2
-000093F0                          4184  
-000093F0  E6D1                    4185      ROR.W     (A1)
-000093F2                          4186  
-000093F2  E6D9                    4187      ROR.W     (A1)+
-000093F4                          4188  
-000093F4  E6E1                    4189      ROR.W     -(A1)
-000093F6                          4190  
-000093F6  E2BA                    4191      ROR.L     D1,D2    
-000093F8                          4192  
-000093F8  B200                    4193      CMP.B    D0,D1
-000093FA                          4194  
-000093FA  B210                    4195      CMP.B    (A0),D1
-000093FC                          4196  
-000093FC  B220                    4197      CMP.B    -(A0),D1
-000093FE                          4198  
-000093FE  B218                    4199      CMP.B    (A0)+,D1
-00009400                          4200  
-00009400  B240                    4201      CMP.W    D0,D1
-00009402                          4202  
-00009402  B248                    4203      CMP.W    A0,D1
-00009404                          4204  
-00009404  B250                    4205      CMP.W    (A0),D1
-00009406                          4206  
-00009406  B260                    4207      CMP.W    -(A0),D1
-00009408                          4208  
-00009408  B258                    4209      CMP.W    (A0)+,D1
-0000940A                          4210  
-0000940A  B280                    4211      CMP.L    D0,D1
-0000940C                          4212  
-0000940C  B288                    4213      CMP.L    A0,D1
-0000940E                          4214  
-0000940E  B290                    4215      CMP.L    (A0),D1
-00009410                          4216  
-00009410  B2A0                    4217      CMP.L    -(A0),D1
-00009412                          4218  
-00009412  B298                    4219      CMP.L    (A0)+,D1
-00009414                          4220      
-00009414  6000 0002               4221      BRA       lss      
-00009418                          4222  
-00009418  644E                    4223  lss BCC.B     label1
-0000941A                          4224  
-0000941A  644C                    4225      BCC.B     label2
-0000941C                          4226  
-0000941C  6E4A                    4227      BGT.B     label1
-0000941E                          4228  
-0000941E  6E48                    4229      BGT.B     label2
-00009420                          4230  
-00009420  6F46                    4231      BLE.B     label1
-00009422                          4232  
-00009422  6F44                    4233      BLE.B     label2
-00009424                          4234  
-00009424  6400 0042               4235      BCC.W     label1
-00009428                          4236  
-00009428  6400 003E               4237      BCC.W     label2
-0000942C                          4238  
-0000942C  6400 003A               4239      BCC.W     label3
-00009430                          4240  
-00009430  6E00 0036               4241      BGT.W     label1
-00009434                          4242  
-00009434  6E00 0032               4243      BGT.W     label2
-00009438                          4244  
-00009438  6E00 002E               4245      BGT.W     label3
-0000943C                          4246  
-0000943C  6F00 002A               4247      BLE.W     label1
-00009440                          4248  
-00009440  6F00 0026               4249      BLE.W     label2
-00009444                          4250  
-00009444  6F00 0022               4251      BLE.W     label3
-00009448                          4252  
-00009448  4E90                    4253      JSR       (A0)
-0000944A                          4254  
-0000944A  4EB8 1234               4255      JSR       $1234
-0000944E                          4256  
-0000944E  4EB9 12345678           4257      JSR       $12345678
-00009454                          4258  
-00009454  4EB9 00009468           4259      JSR       label1
-0000945A                          4260  
-0000945A  4EB9 00009468           4261      JSR       label2
-00009460                          4262  
-00009460  4EB9 00009468           4263      JSR       label3
-00009466                          4264  
-00009466  4E71                    4265      NOP
-00009468                          4266  
-00009468                          4267  label1
-00009468                          4268  label2
-00009468                          4269  label3
-00009468                          4270  
-00009468  4E75                    4271      RTS
-0000946A                          4272      
-0000946A  48A1 007F               4273      MOVEM.W   A1-A7,-(A1)
-0000946E                          4274  
-0000946E  48E1 7F00               4275      MOVEM.L   D1-D7,-(A1)
-00009472                          4276  
-00009472  48A1 0140               4277      MOVEM.W   A1/D7,-(A1)
-00009476                          4278  
-00009476  48E1 0140               4279      MOVEM.L   A1/D7,-(A1)
-0000947A                          4280  
-0000947A  4891 FE00               4281      MOVEM.W   A1-A7,(A1)
-0000947E                          4282  
-0000947E  48D1 00FE               4283      MOVEM.L   D1-D7,(A1)
-00009482                          4284  
-00009482  4891 0280               4285      MOVEM.W   A1/D7,(A1)
-00009486                          4286  
-00009486  48D1 0280               4287      MOVEM.L   A1/D7,(A1)
-0000948A                          4288  
-0000948A  4C99 FE00               4289      MOVEM.W   (A1)+,A1-A7
-0000948E                          4290  
-0000948E  4CD9 00FE               4291      MOVEM.L   (A1)+,D1-D7
-00009492                          4292  
-00009492  4C99 0280               4293      MOVEM.W   (A1)+,A1/D7
-00009496                          4294  
-00009496  4CD9 0280               4295      MOVEM.L   (A1)+,A1/D7
-0000949A                          4296  
-0000949A  4C91 FE00               4297      MOVEM.W   (A1),A1-A7
-0000949E                          4298  
-0000949E  4CD1 00FE               4299      MOVEM.L   (A1),D1-D7
-000094A2                          4300  
-000094A2  4C91 0280               4301      MOVEM.W   (A1),A1/D7
-000094A6                          4302  
-000094A6  4CD1 0280               4303      MOVEM.L   (A1),A1/D7
-000094AA                          4304      
-000094AA                          4305      
-000094AA                          4306  
-000094AA                          4307      
-000094AA                          4308   
-000094AA                          4309  
-000094AA                          4310  
-000094AA                          4311  
-000094AA                          4312  
-000094AA                          4313  
-000094AA                          4314  
-000094AA                          4315  
-000094AA                          4316  
-000094AA                          4317  
-000094AA                          4318  
-000094AA                          4319  
-000094AA                          4320  
-000094AA                          4321  
-000094AA                          4322  
-000094AA                          4323  
-000094AA                          4324  
-000094AA                          4325  
-000094AA                          4326  
-000094AA                          4327  
-000094AA                          4328  -------------------- end include --------------------
-000094AA                          4329      
-000094AA                          4330      
-Line 4331 WARNING: Origin value is odd (Location counter set to next highest address)
-000094AA                          4331     END    START                                 ;Last line of program
+00009000  48A1 787F               3332      MOVEM.W   D1-D4/A1-A7,-(A1)
+00009004                          3333  
+00009004  48A1 7F7F               3334      MOVEM.W   A1-A7/D1-D7,-(A1)
+00009008                          3335  
+00009008  48E1 7F00               3336      MOVEM.L   D1-D7,-(A1)
+0000900C                          3337  
+0000900C  48A1 0140               3338      MOVEM.W   A1/D7,-(A1)
+00009010                          3339  
+00009010  48E1 0140               3340      MOVEM.L   A1/D7,-(A1)
+00009014                          3341  
+00009014  4891 FE00               3342      MOVEM.W   A1-A7,(A1)
+00009018                          3343  
+00009018  48D1 00FE               3344      MOVEM.L   D1-D7,(A1)
+0000901C                          3345  
+0000901C  4891 0280               3346      MOVEM.W   A1/D7,(A1)
+00009020                          3347  
+00009020  48D1 0280               3348      MOVEM.L   A1/D7,(A1)
+00009024                          3349  
+00009024  4C99 FE00               3350      MOVEM.W   (A1)+,A1-A7
+00009028                          3351  
+00009028  4CD9 00FE               3352      MOVEM.L   (A1)+,D1-D7
+0000902C                          3353  
+0000902C  4C99 0280               3354      MOVEM.W   (A1)+,A1/D7
+00009030                          3355  
+00009030  4CD9 0280               3356      MOVEM.L   (A1)+,A1/D7
+00009034                          3357  
+00009034  4C91 FE00               3358      MOVEM.W   (A1),A1-A7
+00009038                          3359  
+00009038  4CD1 00FE               3360      MOVEM.L   (A1),D1-D7
+0000903C                          3361  
+0000903C  4C91 0280               3362      MOVEM.W   (A1),A1/D7
+00009040                          3363  
+00009040  4CD1 0280               3364      MOVEM.L   (A1),A1/D7
+00009044                          3365      
+00009044                          3366  
+00009044                          3367  
+00009044                          3368  
+00009044                          3369  -------------------- end include --------------------
+00009044                          3370      
+00009044                          3371      
+Line 3372 WARNING: Origin value is odd (Location counter set to next highest address)
+00009044                          3372     END    START                                 ;Last line of program
 
 No errors detected
 1 warning generated
@@ -4642,9 +3683,6 @@ KEEP_GOING          31D8
 KEEP_GOING0         3124
 KEEP_GOING1         3216
 KEEP_GOING2         32CA
-LABEL1              9468
-LABEL2              9468
-LABEL3              9468
 LE                  36C8
 LEA                 2EF8
 LEA_BACK            2F1A
@@ -4687,7 +3725,6 @@ LOAD_PTHSIS_CLSD    3668
 LOAD_PTHSIS_OPEN    365A
 LOAD_THIS_SHIT      36AE
 LOOP                3604
-LSS                 9418
 MAIN_CONSOLE        1428
 MAIN_EA             28EE
 MAIN_LOOP           1160
@@ -4696,6 +3733,7 @@ MNEMONIC            1739
 MOVEM               2EEA
 MOVEM_BIT_SIZE_CHECK  1EA8
 MOVEM_FIRST_VAR     28E8
+MOVEM_FIRST_VAR_COUNTER  28EA
 MOVEM_PARSE         308E
 MOVEM_POST          2F64
 MOVEM_POST2         2F88
@@ -4705,10 +3743,9 @@ MOVEM_POSTW         2FCC
 MOVEM_PRE           3030
 MOVEM_PRE_B         305A
 MOVEM_SECOND_VAR    28E9
+MOVEM_SECOND_VAR_COUNTER  28EB
 MOVEON              29E8
 MOVE_AND_MOVEA_PARSE_EA  18DE
-MOVE_FIRST_VAR_COUNTER  28EA
-MOVE_SECOND_VAR_COUNTER  28EB
 MYBE_ASD_1          29B0
 MYBE_ASD_2          2A16
 MYBE_BCLR           3320

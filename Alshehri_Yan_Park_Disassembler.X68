@@ -5,7 +5,7 @@
 * 
 * 
 * Description: This disassembler reverse assembles or decompiles a given
-* test program (with vailidity checking) from their machine code hex
+* test program (with validity checking) from their machine code hex
 * equivalents to outputting them onto a console file and a log.
 *
 * This disassembler will print out <MEMORY ADDRESS> <OPERAND> <EA MODE/REG>
@@ -578,10 +578,12 @@ INVALID_ADDRES_MESSAGE DC.W 'Invalid Hex Address' ,CR,LF,0			;Invalid message pr
 
     INCLUDE "OP_Code_Routines.x68"						;OP role code to include
     INCLUDE "EA_FINAL.x68"							;EA role code to include
-    INCLUDE "Test.x68"								;Test program to include
+    INCLUDE "MOVEM_TEST.x68"								;Test program to include
     
     
    END    START									;Last line of program
+
+
 
 
 
