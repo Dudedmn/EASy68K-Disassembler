@@ -988,7 +988,11 @@ ITS_Y_BACK	MOVE.B	Y, D3 * LOAD[YY_COUNTER]
 
 FST_Y1		CMPI.B	#1, FIRST_X
 			BNE		SKIP_HERE
-			ADDA.W	#2, A4 * push G_BUFFER pointer by 2
+			;ADDA.W	#2, A4 * push G_BUFFER pointer by 2
+						
+			MOVE.B	#$20, (A4)+
+			MOVE.B	#$20, (A4)+
+
 			MOVE.B  #$2F, (A4)+ * LOAD '/'
 SKIP_HERE	JMP		ITS_Y_BACK
 
@@ -1062,7 +1066,11 @@ ITS_Y2_BACK	MOVE.B	Y, D3 * LOAD[YY_COUNTER]
 
 FST_Y3		CMPI.B	#1, FIRST_X
 			BNE		SKIP_HERE2
-			ADDA.W	#2, A4 * push G_BUFFER pointer by 2
+			;ADDA.W	#2, A4 * push G_BUFFER pointer by 2
+			
+			MOVE.B	#$20, (A4)+
+			MOVE.B	#$20, (A4)+
+			
 			MOVE.B  #$2F, (A4)+ * LOAD '/'
 SKIP_HERE2	JMP		ITS_Y2_BACK
 
