@@ -578,10 +578,11 @@ INVALID_ADDRES_MESSAGE DC.W 'Invalid Hex Address' ,CR,LF,0			;Invalid message pr
 
     INCLUDE "OP_Code_Routines.x68"						;OP role code to include
     INCLUDE "EA_FINAL.x68"							;EA role code to include
-    INCLUDE "MOVEM_TEST.x68"								;Test program to include
+    INCLUDE "TEST.x68"								;Test program to include
     
     
    END    START									;Last line of program
+
 
 
 
