@@ -1,7 +1,7 @@
 *-----------------------------------------------------------
 * Title      : OP Code routines for Disassembler
 * Written by : Daniel Yan
-* Date       : 2/28/2019, Updated 3/16/2019
+* Date       : 2/28/2019, Updated 3/17/2019
 
 * Description: Disassembler routines to identify any valid
 * OP code dependent on current supported list.
@@ -14,32 +14,24 @@ THIRD_3         DS.B    1   ;Constant for EA, 3 bits (5-3) of a 4 hex OP code
 FOURTH_3        DS.B    1   ;Constant for EA, 3 bits (2-0) of a 4 hex OP code
 
 ************************************************************************************
-* PRINTING BUFFER FUNCTION HAS BEEN FINISHED
-* STATUS: 
-* IDENTIFICATION FOR ALL OP CODES: 		DONE
-* VALIDATION TESTING FOR ALL OP CODES: 	DONE
-* PRINTING ALL OP CODES TO BUFFER: 		DONE
-* PRINTING SIZE BITS OF ALL OP CODES:   DONE
-*-----------------------------------------------------------
 *First Nibble Values (15-12)
 *Value                  Operations
-*$0                     GROUP_0: ORI,BCLR (static and dynamic),CMPI --- DONE
-*$1                     GROUP_1: MOVE.B                             --- DONE
-*$2                     GROUP_2: MOVE.L, MOVEA.L                    --- DONE
-*$3                     GROUP_3: MOVE.W, MOVEA.W                    --- DONE
-*$4                     GROUP_4: LEA,JSR,RTS,NEG,MOVEM              --- DONE
-*$5                     GROUP_5: SUBQ                               --- DONE
-*$6                     GROUP_6: Bcc(BCS,BGE,BLT,BVC), BRA          --- DONE
-*$7                     GROUP_7: INVALID_OP                         --- DONE
-*$8                     GROUP_8: DIVS, OR                           --- DONE
-*$9                     GROUP_9: SUB                                --- DONE
-*$A                     GROUP_A: INVALID_OP                         --- DONE
-*$B                     GROUP_B: EOR, CMP                           --- DONE
-*$C                     GROUP_C: MULS                               --- DONE
-*$D                     GROUP_D: ADD, ADDA                          --- DONE
-*$E                     GROUP_E: LSR, LSL, ASR, ASL, ROL, ROR       --- DONE
-*$F                     GROUP_F: INVALID_OP                         --- DONE
-
+*$0                     GROUP_0: ORI,BCLR (static and dynamic),CMPI 
+*$1                     GROUP_1: MOVE.B                             
+*$2                     GROUP_2: MOVE.L, MOVEA.L                    
+*$3                     GROUP_3: MOVE.W, MOVEA.W                    
+*$4                     GROUP_4: LEA,JSR,RTS,NEG,MOVEM              
+*$5                     GROUP_5: SUBQ                               
+*$6                     GROUP_6: Bcc(BCS,BGE,BLT,BVC), BRA          
+*$7                     GROUP_7: INVALID_OP                         
+*$8                     GROUP_8: DIVS, OR                           
+*$9                     GROUP_9: SUB                                
+*$A                     GROUP_A: INVALID_OP                         
+*$B                     GROUP_B: EOR, CMP                           
+*$C                     GROUP_C: MULS                               
+*$D                     GROUP_D: ADD, ADDA                          
+*$E                     GROUP_E: LSR, LSL, ASR, ASL, ROL, ROR       
+*$F                     GROUP_F: INVALID_OP                         
 
 * OP_JSR_Routine
 **********************************************************************************
@@ -62,123 +54,123 @@ FOURTH_3        DS.B    1   ;Constant for EA, 3 bits (2-0) of a 4 hex OP code
 
 OP_JSR_Routine:
     MOVEM.L D0-D1, -(SP)           ;Backup registers D0 and D1 by pushing it on the Stack
-    MOVE.W CUR_OP_CODE,D0
-    MOVE.B #1,IS_VALID
+    MOVE.W CUR_OP_CODE,D0		   ;Move current instruction set to D0
+    MOVE.B #1,IS_VALID			   ;Set IS_VALID bit to 1 by default
     MOVE.L #12, D1                 ;Prepare bit shift left for D1   
     LSR.L   D1,D0                  ;Shift 12 bits to only get first 4 bits for D0
 
-GROUP_0:                ;$0| ORI, BCLR (static and dynamic), CMPI                  
+GROUP_0:                		   ;$0| ORI, BCLR (static and dynamic), CMPI                  
     CMP.B   #$0,D0                 ;Compare first nibble
     BNE     GROUP_1                ;If first nibble value isn't $0, branch to next
     JSR     C_GROUP_0              ;Jump to group 0 checking if nibble value is $0
     BRA     OP_JSR_DONE            ;Finish subroutine once checking is finished
     
-GROUP_1:                ;$1| MOVE.B
+GROUP_1:                		   ;$1| MOVE.B
     CMP.B   #$1,D0                 ;Compare first nibble
     BNE     GROUP_2                ;If first nibble value isn't $1, branch to next
     JSR     C_GROUP_1              ;Jump to group 1 checking if nibble value is $1
     BRA     OP_JSR_DONE            ;Finish subroutine once checking is finished
 
-GROUP_2:                ;$2| MOVE.L, MOVEA.L
+GROUP_2:                		   ;$2| MOVE.L, MOVEA.L
     CMP.B   #$2,D0                 ;Compare first nibble
     BNE     GROUP_3                ;If first nibble value isn't $2, branch to next
     JSR     C_GROUP_2              ;Jump to group 2 checking if nibble value is $2
     BRA     OP_JSR_DONE            ;Finish subroutine once checking is finished
 
-GROUP_3:                ;$3| MOVE.W, MOVEA.W
+GROUP_3:                		   ;$3| MOVE.W, MOVEA.W
     CMP.B   #$3,D0                 ;Compare first nibble
     BNE     GROUP_4                ;If first nibble value isn't $3, branch to next
     JSR     C_GROUP_3              ;Jump to group 3 checking if nibble value is $3
     BRA     OP_JSR_DONE            ;Finish subroutine once checking is finished
 
-GROUP_4:                ;$4| LEA, JSR, RTS, NEG, MOVEM
+GROUP_4:                		   ;$4| LEA, JSR, RTS, NEG, MOVEM
     CMP.B   #$4,D0                 ;Compare first nibble
     BNE     GROUP_5                ;If first nibble value isn't $4, branch to next
     JSR     C_GROUP_4              ;Jump to group 4 checking if nibble value is $4
     BRA     OP_JSR_DONE            ;Finish subroutine once checking is finished
 
 
-GROUP_5:                ;$5| SUBQ
+GROUP_5:                		   ;$5| SUBQ
     CMP.B   #$5,D0                 ;Compare first nibble
     BNE     GROUP_6                ;If first nibble value isn't $5, branch to next
     JSR     C_GROUP_5              ;Jump to group 5 checking if nibble value is $5
     BRA     OP_JSR_DONE            ;Finish subroutine once checking is finished
 
 
-GROUP_6:                ;$6| Bcc (BCS,BGE,BLT,BVC) BRA
+GROUP_6:                		   ;$6| Bcc (BCS,BGE,BLT,BVC) BRA
     CMP.B   #$6,D0                 ;Compare first nibble
     BNE     GROUP_7                ;If first nibble value isn't $6, branch to next
     JSR     C_GROUP_6              ;Jump to group 6 checking if nibble value is $6
     BRA     OP_JSR_DONE            ;Finish subroutine once checking is finished
 
 
-GROUP_7:                ;$7| Display: DATA, $WXYZ (Unsupported)
+GROUP_7:                		   ;$7| Display: DATA, $WXYZ (Unsupported)
     CMP.B   #$7,D0                 ;Compare first nibble
     BNE     GROUP_8                ;If first nibble value isn't $7, branch to next
     JSR     C_GROUP_7              ;Jump to group 7 checking if nibble value is $7
     BRA     OP_JSR_DONE            ;Finish subroutine once checking is finished
 
 
-GROUP_8:                ;$8| DIVS, OR
+GROUP_8:                		   ;$8| DIVS, OR
     CMP.B   #$8,D0                 ;Compare first nibble
     BNE     GROUP_9                ;If first nibble value isn't $8, branch to next
     JSR     C_GROUP_8              ;Jump to group 8 checking if nibble value is $8
     BRA     OP_JSR_DONE            ;Finish subroutine once checking is finished
 
 
-GROUP_9:                ;$9| SUB
+GROUP_9:                		   ;$9| SUB
     CMP.B   #$9,D0                 ;Compare first nibble
     BNE     GROUP_A                ;If first nibble value isn't $9, branch to next
     JSR     C_GROUP_9              ;Jump to group 9 checking if nibble value is $9
     BRA     OP_JSR_DONE            ;Finish subroutine once checking is finished
 
 
-GROUP_A:                ;$A| Display: DATA, $WXYZ (Unsupported)
+GROUP_A:                		   ;$A| Display: DATA, $WXYZ (Unsupported)
     CMP.B   #$A,D0                 ;Compare first nibble
     BNE     GROUP_B                ;If first nibble value isn't $A, branch to next
     JSR     C_GROUP_A              ;Jump to group A checking if nibble value is $A
     BRA     OP_JSR_DONE            ;Finish subroutine once checking is finished
 
 
-GROUP_B:                ;$B| EOR, CMP
+GROUP_B:                		   ;$B| EOR, CMP
     CMP.B   #$B,D0                 ;Compare first nibble
     BNE     GROUP_C                ;If first nibble value isn't $B, branch to next
     JSR     C_GROUP_B              ;Jump to group B checking if nibble value is $B
     BRA     OP_JSR_DONE            ;Finish subroutine once checking is finished
 
 
-GROUP_C:                ;$C| MULS
+GROUP_C:                		   ;$C| MULS
     CMP.B   #$C,D0                 ;Compare first nibble
     BNE     GROUP_D                ;If first nibble value isn't $C, branch to next
     JSR     C_GROUP_C              ;Jump to group C checking if nibble value is $C
     BRA     OP_JSR_DONE            ;Finish subroutine once checking is finished
 
 
-GROUP_D:                 ;$D| ADD, ADDA
+GROUP_D:                		   ;$D| ADD, ADDA
     CMP.B   #$D,D0                 ;Compare first nibble
     BNE     GROUP_E                ;If first nibble value isn't $D, branch to next
     JSR     C_GROUP_D              ;Jump to group D checking if nibble value is $D
     BRA     OP_JSR_DONE            ;Finish subroutine once checking is finished
 
 
-GROUP_E:                ;$E| LSR, LSL, ASR, ASL, ROL, ROR
+GROUP_E:               			   ;$E| LSR, LSL, ASR, ASL, ROL, ROR
     CMP.B   #$E,D0                 ;Compare first nibble
     BNE     GROUP_F                ;If first nibble value isn't $E, branch to next
     JSR     C_GROUP_E              ;Jump to group E checking if nibble value is $E
     BRA     OP_JSR_DONE            ;Finish subroutine once checking is finished
 
 
-GROUP_F:                ;$F| Display: DATA, $WXYZ (Unsupported)
+GROUP_F:                		   ;$F| Display: DATA, $WXYZ (Unsupported)
     CMP.B   #$F,D0                 ;Compare first nibble
     JSR     C_GROUP_F              ;Jump to group F checking if nibble value is $F
     BRA     OP_JSR_DONE            ;Finish subroutine once checking is finished
 
 
-OP_JSR_DONE:
+OP_JSR_DONE:					   ;This subroutine is only called when identification has been finished
          MOVEM.L (SP)+,D0-D1       ;Recover register D0
-         CMP.B #1,IS_VALID
-         BEQ    main_EA             ;This runs EA's routines after OP code portion is finished
-         BNE    check_print
+         CMP.B #1,IS_VALID		   ;Checks if the IS_VALID bit is valid or not
+         BEQ    main_EA            ;This runs EA's routines after OP code portion is finished
+         BNE    check_print		   ;If not valid, skip EA routine and call IO
 **********************************************************************************    
 * FIND_2_BIT_SIZE_7_TO_6
 **********************************************************************************
@@ -264,10 +256,10 @@ FIND_1_BIT_SIZE_8:         ;Move the 1 bit size field relevant register
 * Precondition: OP code has been identified with either MOVE or MOVEA
 *
 * Postcondition: Store all relevant EA bits into associated register.
+* This particular routine is not Callee saved as it needs to change D7 and D6
 **********************************************************************************
-MOVE_AND_MOVEA_PARSE_EA:       ;Move the 3 bit dynamic register bits to proper register
-   ; MOVEM.L D0-D7/A6, -(SP)  ;Save all changed registers
-    MOVE.W CUR_OP_CODE,D0           ;Move current OP code into D0
+MOVE_AND_MOVEA_PARSE_EA:     ;Move the 3 bit dynamic register bits to proper register
+    MOVE.W CUR_OP_CODE,D0    ;Move current OP code into D0
     MOVE.W  #10,D1           ;Prepare 10 bit shift to D1
     LSL.W   D1,D0            ;Truncate to find the last 6 bits
     LSR.W   D1,D0            ;Shift back to get the proper 6 bits
@@ -279,23 +271,23 @@ MOVE_AND_MOVEA_PARSE_EA:       ;Move the 3 bit dynamic register bits to proper r
     LSL.W   D1,D0            ;Shift D0 left 13 bits to reposition current 3 bits
     LSR.W   D1,D0            ;Shift D0 right 13 bits to reposition current 3 bits
     MOVE.W  D0,D4            ;Move the 'lower' 3 bits into D7
+	
 ****MOVING_SOURCE***********
-    MOVE.W CUR_OP_CODE,D0     ;Move current OP code into D0     
-    MOVE.W  #4,D1             ;Prepare 4 bit shift to D1
-    LSL.W   D1,D0             ;Truncate to find bits 11-6
-    LSR.W   D1,D0             ;Reposition bits
-    MOVE.W  #6,D1             ;Prepare 6 bit shift to D1
-    LSR.W   D1,D0             ;Truncate the SRC Reg/Mode bits
-    MOVE.W  #3,D1             ;Prepare a 3 bit shift to D1 for DST Reg/Mode
-    MOVE.W  D0,D6             ;Copy over the current 6 bits to D6
-    LSR.W   D1,D0             ;Truncate DST Mode  
-    MOVE.W  D0,D7             ;Move DST Reg to D7
+    MOVE.W CUR_OP_CODE,D0    ;Move current OP code into D0     
+    MOVE.W  #4,D1            ;Prepare 4 bit shift to D1
+    LSL.W   D1,D0            ;Truncate to find bits 11-6
+    LSR.W   D1,D0            ;Reposition bits
+    MOVE.W  #6,D1            ;Prepare 6 bit shift to D1
+    LSR.W   D1,D0            ;Truncate the SRC Reg/Mode bits
+    MOVE.W  #3,D1            ;Prepare a 3 bit shift to D1 for DST Reg/Mode
+    MOVE.W  D0,D6            ;Copy over the current 6 bits to D6
+    LSR.W   D1,D0            ;Truncate DST Mode  
+    MOVE.W  D0,D7            ;Move DST Reg to D7
     MOVE.W  #13,D1             
-    LSL.W   D1,D6             ;Truncate 13 bits in D6
-    LSR.W   D1,D6             ;Reposition D6
-                              ;D6 now contains the DST Reg
-   ; MOVEM.L (SP)+,D0-D7/A6   ;Restore registers
-    RTS                     ;Return to stack
+    LSL.W   D1,D6            ;Truncate 13 bits in D6
+    LSR.W   D1,D6            ;Reposition D6
+                             ;D6 now contains the DST Reg
+    RTS                      ;Return to stack
 **********************************************************************************
 ********** EA Parsing ************************************************************
 *PARSE_EA_CONSTANT_BITS
@@ -315,6 +307,7 @@ MOVE_AND_MOVEA_PARSE_EA:       ;Move the 3 bit dynamic register bits to proper r
 * to the corresponding values.
 **********************************************************************************
 PARSE_EA_CONSTANT_BITS:
+	MOVEM.L D0-D1,-(SP)			;Save register to stack
     *MNEMONIC SHIFT
     MOVE.W CUR_OP_CODE,D0       ;Load in current instruction set into D0
     MOVE.W #12,D1               ;Prepare a bit shift of 12 into D1
@@ -345,14 +338,15 @@ PARSE_EA_CONSTANT_BITS:
     LSL.W D1,D0                 ;Grab the fourth 3-bit group
     LSR.W D1,D0                 ;Shift D0 back into position
     MOVE.B D0,FOURTH_3          ;Set FOURTH_3 to Do
+	MOVEM.L (SP)+,D0-D1			;Restore registers
     RTS                         ;Return to stack
 **********************************************************************************
 ********** End of EA Parsing *****************************************************
 
 *******************JMP LABELS ****************************************************
-* Labelling for group codes will be in the following format
+* Labeling for group codes will be in the following format
 
-* <JMP Labelname>
+* <JMP Label Name>
 ********************************************************************************
 * Checking List Order (If more than one value)
 * Operand1 - $<nibble value>, a-b <specifier>, c-d <specifier> ...
@@ -362,7 +356,7 @@ PARSE_EA_CONSTANT_BITS:
 * format, and a specifier will be attached such as Size, EA Mode, SRC Reg, etc
 * to clarify what a specific bit range means.
 * Checking order refers to what order the checks will be performed in. 
-* Any other code outside of the listed ones will be INVALID_OP.
+* Any other code outside of the listed supported ones will be routed toINVALID_OP.
 ********************************************************************************
 
 ********************************************************************************
@@ -381,13 +375,12 @@ PARSE_EA_CONSTANT_BITS:
 * Dynamic BCLR: $0, 11-9 Register, 8-6 %110, 5-3 EA Mode, 2-0 EA Reg
 * Static BCLR: $01, 7-6 10, 5-3 EA Mode, 2-0 EA Reg
 *
-* Registers used: D0
+* Register(s) used: D0
 *
 * Precondition: First nibble has been identified as $0
 *
 * Postcondition: Parses proper OP code with a nibble value of $0 or finds an
-* invalid OP code. After a successful parse loading for EA values will be done
-* through a subroutine.
+* invalid OP code.
 * 
 * Unsupported OP codes:
 * ORI_TO_CCR, ORI_TO_SR, ANDI_TO_CCR, ANDI_TO_SR, ANDI, SUBI, ADDI, EORI_TO_CCR
@@ -568,9 +561,16 @@ GROUP0_SUCCESS:                     ;Checks have been finished,a valid OP code h
     
 * GROUP_1                      
 ********************************************************************************
+* Description: Checks for the following OP code to be present or not.
 * Supported OP code:
 * MOVE.B: $1, 11-9 DST Reg, 8-6 DST Mode, 5-3 SRC Mode, 2-0 SRC Reg
-********************************************************************************
+*
+* Register(s) used: D0,D1
+*
+* Precondition: First nibble has been identified as $1
+*
+* Postcondition: Parses proper OP code with a nibble value of $1 or finds an
+* invalid OP code.********************************************************************************
 C_GROUP_1:
     MOVEM.L D0-D1,-(SP)             ;Save registers to stack
 
@@ -589,10 +589,17 @@ GROUP1_SUCCESS:
     RTS                             ;Return to stack
 * GROUP_2
 ********************************************************************************
+* Description: Checks for the following list of OP codes to be present or not.
 * Supported OP codes:
 * MOVEA.L: $2, 11-9 DST Reg, 8-6 %001, 5-3 SRC Mode, 2-0 SRC Reg
 * MOVE.L: $2, 11-9 DST Reg, 8-6 DST Mode, 5-3 SRC Mode, 2-0 SRC Reg
-********************************************************************************
+*
+* Register(s) used: D0,D1,D2
+*
+* Precondition: First nibble has been identified as $2
+*
+* Postcondition: Parses proper OP code with a nibble value of $2 or finds an
+* invalid OP code.********************************************************************************
 C_GROUP_2:
     MOVEM.L D0-D2,-(SP)             ;Save registers to stack
 
@@ -631,9 +638,17 @@ GROUP2_SUCCESS:
     RTS                             ;Return to stack
 * GROUP_3
 ********************************************************************************
+* Description: Checks for the following list of OP codes to be present or not.
 * Supported OP codes:
 * MOVEA.W: $3, 11-9 DST Reg, 8-6 %001, 5-3 SRC Mode, 2-0 SRC Reg
 * MOVE.W: $3, 11-9 DST Reg, 8-6 DST Mode, 5-3 SRC Mode, 2-0 SRC Reg
+*
+* Register(s) used: D0,D1,D2
+*
+* Precondition: First nibble has been identified as $3
+*
+* Postcondition: Parses proper OP code with a nibble value of $3 or finds an
+* invalid OP code.
 ********************************************************************************
 C_GROUP_3:
     MOVEM.L D0-D2,-(SP)			    ;Save registers to stack
@@ -674,6 +689,7 @@ GROUP3_SUCCESS:
 
 * GROUP_4
 ********************************************************************************
+* Description: Checks for the following list of OP codes to be present or not.
 * Supported OP codes:
 * LEA: $4, 11-9 Reg, 8-6 %111, 5-3 EA Mode, 2-0 EA Reg
 * JSR: $4E, 7-6 %10, 5-3 EA Mode, 2-0 EA Reg 
@@ -681,6 +697,14 @@ GROUP3_SUCCESS:
 * NEG: $44, 7-6 Size, 5-3 EA Mode, 2-0 EA Reg
 * MOVEM: $4, 11 %1, 10 %D, 9-7 %001, 6 S, 5-3 EA Mode, 2-0 EA Reg
 * %D = 0 , Register to Memory, 1 Memory to Register
+*
+* Register(s) used: D0
+*
+* Precondition: First nibble has been identified as $4
+*
+* Postcondition: Parses proper OP code with a nibble value of $4 or finds an
+* invalid OP code. 
+*
 * Unsupported OP codes: MOVE_FROM_SR, MOVE_TO_CCR, MOVE_TO_SR, NEGX, CLR, NOT
 * EXT, NBCD, SWAP, PEA, ILLEGAL, TAS, TST, TRAP, LINK, UNLK, MOVE_USP, RESET,
 * NOP, STOP, RTE, TRAPV, RTR, JMP, CHK
@@ -919,11 +943,18 @@ GROUP4_SUCCESS:
     RTS								;Return to stack
 * GROUP_5
 ********************************************************************************
+* Description: CHecks for the following list of OP codes to be present or not.
 * Supported OP code:
 * SUBQ: $5, 11-9 DATA, 8 %1, 7-6 Size, 5-3 EA Mode, 2-0 EA Reg
+*
+* Register(s) used: D0
+*
+* Precondition: First nibble has been identified as $5
+*
+* Postcondition: Parses proper OP code with a nibble value of $5 or finds an
+* invalid OP code. 
+*
 * Unsupported OP codes: ADDQ, Scc, DBcc
-* Validation checking:
-* Check against, ADDQ, Scc, DBcc
 ********************************************************************************
 C_GROUP_5:
     MOVEM.L D0,-(SP)         		;Save registers to stack
@@ -967,6 +998,7 @@ GROUP5_SUCCESS:
     
 * GROUP_6
 ********************************************************************************
+* Description: Checks for the following list of OP codes to be present or not.
 * Supported OP codes
 * BRA: $60, 7-0 8-Bit Displacement
 * Bcc: $6, 11-8 Condition, 7-0 8-Bit Displacement
@@ -975,304 +1007,356 @@ GROUP5_SUCCESS:
 *   BGE: %1100		
 *   BLT: %1101	
 *   BVC: %1000
-*   
-*   MOVE.W #%0110010100000000   ;BCS
-*   MOVE.W #%0110110001010101   ;BGE
-*   MVE.W #%0110110110101010    ;BLT
-*   MOVE.W #%0110100001010101   ;BVC
-* Unsupported OP code: BSR
+*
+* Register(s) used: D0,D1,D2
+*
+* Precondition: First nibble has been identified as $6
+*
+* Postcondition: Parses proper OP code with a nibble value of $6 or finds an
+* invalid OP code.
+*
+* Unsupported OP codes: BSR,BGT,BCC,BEQ,BHI,BMI,BNE,BPL
 ********************************************************************************
 C_GROUP_6:
     MOVEM.L D0,-(SP)        	;Save register to stack
 *Unsupported OP code
 CHECK_OP_BSR:
-    MOVE.W  CUR_OP_CODE,D0		;Move current instruction set to D0
-    ANDI.W  #$FF00,D0			;Mask appropriate bits
-    CMP.W   #$6100,D0			;Compare masked bits
-    BEQ     GROUP6_INVALID		;INVALID OP code found
-    BNE     CHECK_OP_BGT		;Check next OP code
+    MOVE.W  CUR_OP_CODE,D0		    ;Move current instruction set to D0
+    ANDI.W  #$FF00,D0			    ;Mask appropriate bits
+    CMP.W   #$6100,D0			    ;Compare masked bits
+    BEQ     GROUP6_INVALID		    ;INVALID OP code found
+    BNE     CHECK_OP_BGT		    ;Check next OP code
     
 CHECK_OP_BGT:
-    MOVE.W CUR_OP_CODE,D0   	;Move current instruction set into D0
-    ANDI.W #$FF00,D0			;Mask appropriate bits
-    CMP.W  #$6E00,D0 			;Compare masked bits
-    BEQ    GROUP6_INVALID       ;INVALID OP code found
-    BNE    CHECK_OP_BCC         ;Check next OP code
+    MOVE.W CUR_OP_CODE,D0   	    ;Move current instruction set into D0
+    ANDI.W #$FF00,D0			    ;Mask appropriate bits
+    CMP.W  #$6E00,D0 			    ;Compare masked bits
+    BEQ    GROUP6_INVALID           ;INVALID OP code found
+    BNE    CHECK_OP_BCC             ;Check next OP code
 
 CHECK_OP_BCC:
-    MOVE.W CUR_OP_CODE,D0   	;Move current instruction set into D0
-    ANDI.W #$FF00,D0			;Mask appropriate bits
-    CMP.W  #$6400,D0 			;Compare masked bits
-    BEQ    GROUP6_INVALID       ;INVALID OP code found
-    BNE    CHECK_OP_BEQ         ;Check next OP code 
+    MOVE.W CUR_OP_CODE,D0   	    ;Move current instruction set into D0
+    ANDI.W #$FF00,D0			    ;Mask appropriate bits
+    CMP.W  #$6400,D0 			    ;Compare masked bits
+    BEQ    GROUP6_INVALID           ;INVALID OP code found
+    BNE    CHECK_OP_BEQ             ;Check next OP code 
 
 CHECK_OP_BEQ:
-    MOVE.W CUR_OP_CODE,D0   	;Move current instruction set into D0
-    ANDI.W #$FF00,D0			;Mask appropriate bits
-    CMP.W  #$6700,D0 			;Compare masked bits
-    BEQ    GROUP6_INVALID       ;INVALID OP code found
-    BNE    CHECK_OP_BHI         ;Check next OP code
+    MOVE.W CUR_OP_CODE,D0   	    ;Move current instruction set into D0
+    ANDI.W #$FF00,D0			    ;Mask appropriate bits
+    CMP.W  #$6700,D0 			    ;Compare masked bits
+    BEQ    GROUP6_INVALID           ;INVALID OP code found
+    BNE    CHECK_OP_BHI             ;Check next OP code
 
 CHECK_OP_BHI:
-    MOVE.W CUR_OP_CODE,D0   	;Move current instruction set into D0
-    ANDI.W #$FF00,D0			;Mask appropriate bits
-    CMP.W  #$6200,D0 			;Compare masked bits
-    BEQ    GROUP6_INVALID       ;INVALID OP code found
-    BNE    CHECK_OP_BLS         ;Check next OP code
+    MOVE.W CUR_OP_CODE,D0   	    ;Move current instruction set into D0
+    ANDI.W #$FF00,D0			    ;Mask appropriate bits
+    CMP.W  #$6200,D0 			    ;Compare masked bits
+    BEQ    GROUP6_INVALID           ;INVALID OP code found
+    BNE    CHECK_OP_BLS             ;Check next OP code
 
 CHECK_OP_BLS:
-    MOVE.W CUR_OP_CODE,D0   	;Move current instruction set into D0
-    ANDI.W #$FF00,D0			;Mask appropriate bits
-    CMP.W  #$6300,D0 			;Compare masked bits
-    BEQ    GROUP6_INVALID       ;INVALID OP code found
-    BNE    CHECK_OP_BMI         ;Check next OP code
+    MOVE.W CUR_OP_CODE,D0   	    ;Move current instruction set into D0
+    ANDI.W #$FF00,D0			    ;Mask appropriate bits
+    CMP.W  #$6300,D0 			    ;Compare masked bits
+    BEQ    GROUP6_INVALID           ;INVALID OP code found
+    BNE    CHECK_OP_BMI             ;Check next OP code
 
 CHECK_OP_BMI:
-    MOVE.W CUR_OP_CODE,D0   	;Move current instruction set into D0
-    ANDI.W #$FF00,D0			;Mask appropriate bits
-    CMP.W  #$6B00,D0 			;Compare masked bits
-    BEQ    GROUP6_INVALID       ;INVALID OP code found
-    BNE    CHECK_OP_BNE         ;Check next OP code
+    MOVE.W CUR_OP_CODE,D0   	    ;Move current instruction set into D0
+    ANDI.W #$FF00,D0			    ;Mask appropriate bits
+    CMP.W  #$6B00,D0 			    ;Compare masked bits
+    BEQ    GROUP6_INVALID           ;INVALID OP code found
+    BNE    CHECK_OP_BNE             ;Check next OP code
 
 CHECK_OP_BNE:
-    MOVE.W CUR_OP_CODE,D0   	;Move current instruction set into D0
-    ANDI.W #$FF00,D0			;Mask appropriate bits
-    CMP.W  #$6600,D0 			;Compare masked bits
-    BEQ    GROUP6_INVALID       ;INVALID OP code found
-    BNE    CHECK_OP_BPL         ;Check next OP code    
+    MOVE.W CUR_OP_CODE,D0   	    ;Move current instruction set into D0
+    ANDI.W #$FF00,D0			    ;Mask appropriate bits
+    CMP.W  #$6600,D0 			    ;Compare masked bits
+    BEQ    GROUP6_INVALID           ;INVALID OP code found
+    BNE    CHECK_OP_BPL             ;Check next OP code    
 
 CHECK_OP_BPL:
-    MOVE.W CUR_OP_CODE,D0   	;Move current instruction set into D0
-    ANDI.W #$FF00,D0			;Mask appropriate bits
-    CMP.W  #$6A00,D0 			;Compare masked bits
-    BEQ    GROUP6_INVALID       ;INVALID OP code found
-    BNE    CHECK_OP_BRA         ;Check next OP code 
+    MOVE.W CUR_OP_CODE,D0   	    ;Move current instruction set into D0
+    ANDI.W #$FF00,D0			    ;Mask appropriate bits
+    CMP.W  #$6A00,D0 			    ;Compare masked bits
+    BEQ    GROUP6_INVALID           ;INVALID OP code found
+    BNE    CHECK_OP_BRA             ;Check next OP code 
 
 
 *Supported OP codes
 CHECK_OP_BRA:
-    MOVE.W  CUR_OP_CODE,D0  	;Move current instruction set into D0       
-    ANDI.W  #$FF00,D0			;Mask appropriate bits
-    CMP.W   #$6000,D0			;Compare masked bits
-    BNE     CHECK_OP_BCS		;Check next OP code
-    JSR     PRINT_OP_BRA		;Print out OP code
-    BRA     GROUP6_SUCCESS		;Finish routine
+    MOVE.W  CUR_OP_CODE,D0  	    ;Move current instruction set into D0       
+    ANDI.W  #$FF00,D0			    ;Mask appropriate bits
+    CMP.W   #$6000,D0			    ;Compare masked bits
+    BNE     CHECK_OP_BCS		    ;Check next OP code
+    JSR     PRINT_OP_BRA		    ;Print out OP code
+    BRA     GROUP6_SUCCESS		    ;Finish routine
     
 CHECK_OP_BCS:
-    MOVE.W CUR_OP_CODE,D0   	;Move current instruction set into D0
-    ANDI.W #$FF00,D0			;Mask appropriate bits
-    CMP.W  #$6500,D0 			;Compare masked bits
-    BNE    CHECK_OP_BGE			;Check next OP code
-    JSR    PRINT_OP_BCS			;Print out OP code
-    BRA    GROUP6_SUCCESS		;Finish routine
+    MOVE.W CUR_OP_CODE,D0   	    ;Move current instruction set into D0
+    ANDI.W #$FF00,D0			    ;Mask appropriate bits
+    CMP.W  #$6500,D0 			    ;Compare masked bits
+    BNE    CHECK_OP_BGE			    ;Check next OP code
+    JSR    PRINT_OP_BCS			    ;Print out OP code
+    BRA    GROUP6_SUCCESS		    ;Finish routine
 
     
 CHECK_OP_BGE:
-    MOVE.W CUR_OP_CODE,D0	   	;Move current instruction set into D0
-    ANDI.W #$FF00,D0			;Mask appropriate bits
-    CMP.W  #$6C00,D0 			;Compare masked bits
-    BNE    CHECK_OP_BLT			;Check next OP code
-    JSR    PRINT_OP_BGE			;Print out OP code
-    BRA    GROUP6_SUCCESS		;Finish routine
+    MOVE.W CUR_OP_CODE,D0	   	    ;Move current instruction set into D0
+    ANDI.W #$FF00,D0			    ;Mask appropriate bits
+    CMP.W  #$6C00,D0 			    ;Compare masked bits
+    BNE    CHECK_OP_BLT			    ;Check next OP code
+    JSR    PRINT_OP_BGE			    ;Print out OP code
+    BRA    GROUP6_SUCCESS		    ;Finish routine
     
     
 CHECK_OP_BLT:
-    MOVE.W CUR_OP_CODE,D0   	;Move current instruction set into D0
-    ANDI.W #$FF00,D0			;Mask appropriate bits
-    CMP.W  #$6D00,D0 			;Compare masked bits
-    BNE    CHECK_OP_BVC			;Check next OP code
-    JSR    PRINT_OP_BLT			;Print out OP code
-    BRA    GROUP6_SUCCESS		;Finish routine
+    MOVE.W CUR_OP_CODE,D0   	    ;Move current instruction set into D0
+    ANDI.W #$FF00,D0			    ;Mask appropriate bits
+    CMP.W  #$6D00,D0 			    ;Compare masked bits
+    BNE    CHECK_OP_BVC			    ;Check next OP code
+    JSR    PRINT_OP_BLT			    ;Print out OP code
+    BRA    GROUP6_SUCCESS		    ;Finish routine
     
 CHECK_OP_BVC:
-    MOVE.W CUR_OP_CODE,D0   	;Move current instruction set into D0
-    ANDI.W #$FF00,D0			;Mask appropriate bits
-    CMP.W  #$6800,D0 			;Compare masked bits
-    BNE    GROUP6_INVALID		;Check next OP code
-    JSR    PRINT_OP_BVC			;Print out OP code
-    BRA    GROUP6_SUCCESS		;Finish routine
+    MOVE.W CUR_OP_CODE,D0   	    ;Move current instruction set into D0
+    ANDI.W #$FF00,D0			    ;Mask appropriate bits
+    CMP.W  #$6800,D0 			    ;Compare masked bits
+    BNE    GROUP6_INVALID		    ;Check next OP code
+    JSR    PRINT_OP_BVC			    ;Print out OP code
+    BRA    GROUP6_SUCCESS		    ;Finish routine
     
 GROUP6_INVALID:
-    JSR    INVALID_OP    		;INVALID OP code found, set IS_VALID to 0
+    JSR    INVALID_OP    		    ;INVALID OP code found, set IS_VALID to 0
 GROUP6_SUCCESS:
-    MOVEM.L (SP)+,D0			;Restore registers from stack
-    RTS							;Return from stack
+    MOVEM.L (SP)+,D0			    ;Restore registers from stack
+    RTS							    ;Return from stack
     
 *GROUP_7
 ********************************************************************************
+* Description: Checks if the following OP code is present or not.
 * Currently no OP codes here are supported. MOVEQ is the only code in this group
+* Register(s) used: D0
+*
+* Precondition: First nibble has been identified as $7
+*
+* Postcondition: Identifies it's MOVEQ and sets IS_VALID to 0
+*
 * Unsupported OP code: MOVEQ
 ********************************************************************************
 C_GROUP_7:
-    MOVEM.L D0,-(SP)        	;Save register to stack
+    MOVEM.L D0,-(SP)        	    ;Save register to stack
 *Unsupported OP code
 CHECK_OP_MOVEQ
-    MOVE.W CUR_OP_CODE,D0		;Move current instruction set to D0
-    ANDI.W #$F100,D0			;Mask appropriate bits
-    CMP.W  #$7000,D0			;Compare masked bits
-    BRA    GROUP7_INVALID		;INVALID OP code found
+    MOVE.W  CUR_OP_CODE,D0		    ;Move current instruction set to D0
+    ANDI.W  #$F100,D0			    ;Mask appropriate bits
+    CMP.W   #$7000,D0			    ;Compare masked bits
+    BRA     GROUP7_INVALID		    ;INVALID OP code found
 
 GROUP7_INVALID:
-    JSR INVALID_OP				;INVALID OP code found, set IS_VALID to 0
+    JSR 	INVALID_OP				;INVALID OP code found, set IS_VALID to 0
 GROUP7_SUCCESS:    
-    MOVEM.L (SP)+,D0			;Restore registers from stack
-    RTS							;Return from stack
+    MOVEM.L (SP)+,D0			    ;Restore registers from stack
+    RTS							    ;Return from stack
 * GROUP_8
 ********************************************************************************
+* Description: Checks the following list of OP codes to be present or not.
 * Supported OP code:
 * DIVS: $8, 11-9 Reg, 8-6 %111, 5-3 EA Mode, 2-0 EA Reg
 * OR: $80, 7-6 Size, 5-3 EA Mode, 2-0 EA Register
+* Register(s) used: D0
+*
+* Precondition: First nibble has been identified as $8
+*
+* Postcondition: Parses proper OP code with a nibble value of $8 or finds an
+* invalid OP code.
+*
 * Unsupported OP codes: DIVU, SBCD
 ********************************************************************************
 C_GROUP_8:
     MOVEM.L D0,-(SP)
 *Unsupported OP codes
 CHECK_OP_DIVU:
-    MOVE.W  CUR_OP_CODE,D0   			;Move current instruction set into D0
-    ANDI.W  #$F1C0,D0					;Mask appropriate bits
-    CMP.W   #$80C0,D0					;Compare masked bits
-    BEQ     GROUP8_INVALID				;INVALID OP code found
-    BNE     CHECK_OP_SBCD 				;Check next OP code
+    MOVE.W  CUR_OP_CODE,D0   		;Move current instruction set into D0
+    ANDI.W  #$F1C0,D0				;Mask appropriate bits
+    CMP.W   #$80C0,D0				;Compare masked bits
+    BEQ     GROUP8_INVALID			;INVALID OP code found
+    BNE     CHECK_OP_SBCD 			;Check next OP code
 
 CHECK_OP_SBCD:
-    MOVE.W  CUR_OP_CODE,D0   			;Move current instruction set into D0
-    ANDI.W  #$F1F0,D0					;Mask appropriate bits
-    CMP.W   #$8100,D0					;Compare masked bits
-    BEQ     GROUP8_INVALID				;INVALID OP code found
-    BNE     CHECK_OP_DIVS				;Check next OP code
+    MOVE.W  CUR_OP_CODE,D0   		;Move current instruction set into D0
+    ANDI.W  #$F1F0,D0				;Mask appropriate bits
+    CMP.W   #$8100,D0				;Compare masked bits
+    BEQ     GROUP8_INVALID			;INVALID OP code found
+    BNE     CHECK_OP_DIVS			;Check next OP code
     
 *Supported OP codes
 CHECK_OP_DIVS:
-    MOVE.W  CUR_OP_CODE,D0   			;Move current instruction set into D0
-    ANDI.W  #$F1C0,D0					;Mask appropriate bits
-    CMP.W   #$81C0,D0					;Compare masked bits
-    BNE     CHECK_OP_OR					;Check next OP code
-    JSR     PRINT_OP_DIVS				;OP Code found
-    BRA     GROUP8_SUCCESS
-CHECK_OP_OR:              				;At this point only remaining $8 code is OR
-    JSR     FIND_2_BIT_SIZE_7_TO_6		;Finding size bit to print out
-    JSR     PRINT_OP_OR					;Print out OR
-    BRA     GROUP8_SUCCESS				;Finish routine
+    MOVE.W  CUR_OP_CODE,D0   		;Move current instruction set into D0
+    ANDI.W  #$F1C0,D0				;Mask appropriate bits
+    CMP.W   #$81C0,D0				;Compare masked bits
+    BNE     CHECK_OP_OR				;Check next OP code
+    JSR     PRINT_OP_DIVS			;OP Code found
+    BRA     GROUP8_SUCCESS			;Finish routine
+	
+CHECK_OP_OR:              			;At this point only remaining $8 code is OR
+    JSR     FIND_2_BIT_SIZE_7_TO_6	;Finding size bit to print out
+    JSR     PRINT_OP_OR				;Print out OR
+    BRA     GROUP8_SUCCESS			;Finish routine
 GROUP8_INVALID:
-     JSR     INVALID_OP					;INVALID OP code found, set IS_VALID to 0
+     JSR     INVALID_OP				;INVALID OP code found, set IS_VALID to 0
 GROUP8_SUCCESS:
-     MOVEM.L (SP)+,D0					;Restore register from stack
-     RTS								;Return to stack
+     MOVEM.L (SP)+,D0				;Restore register from stack
+     RTS							;Return to stack
      
 * GROUP_9                      
 ********************************************************************************
+* Description: Checks the if the following OP code is present or not.
 * Supported OP code:
 * SUB: $9, 11-9 Reg, 8-6 OPMODE, 5-3 EA Mode, 2-0 EA Reg
+*
+* Register(s) used: D0,D1
+*
+* Precondition: First nibble has been identified as $9
+*
+* Postcondition: Parses proper OP code with a nibble value of $9 or finds an
+* invalid OP code.
+*
 * Unsupported OP codes: SUBX, SUBA
 ********************************************************************************
 C_GROUP_9:
-    MOVEM.L D0-D1,-(SP)     			;Save the registers
+    MOVEM.L D0-D1,-(SP)     		;Save the registers
 *Unsupported OP codes
 CHECK_SIZE_BIT_FOR_SUB:
-    JSR     FIND_2_BIT_SIZE_7_TO_6      ;Find the size bits in 7-6
-    CMP.B   #%11,OP_SIZE                ;If the bits are %11, it has to be SUBA
-    BEQ     CHECK_OP_SUBA               ;If the bits equal it must be SUBA
-    BNE     CHECK_OP_SUBX               ;If the bits are not equal it could be SUBX
+    JSR     FIND_2_BIT_SIZE_7_TO_6  ;Find the size bits in 7-6
+    CMP.B   #%11,OP_SIZE            ;If the bits are %11, it has to be SUBA
+    BEQ     CHECK_OP_SUBA           ;If the bits equal it must be SUBA
+    BNE     CHECK_OP_SUBX           ;If the bits are not equal it could be SUBX
     
-CHECK_OP_SUBA:             				;Check SUBA first as it has static bits
-    MOVE.W  CUR_OP_CODE,D0    			;Move current instruction set into D0
-    ANDI.W  #$F0C0,D0					;Mask appropriate bits
-    CMP.W   #$90C0,D0					;Compare masked bits
-    BEQ     GROUP9_INVALID			    ;INVALID OP has been found
-    BNE     CHECK_OP_SUBX				;Check next OP
+CHECK_OP_SUBA:             			;Check SUBA first as it has static bits
+    MOVE.W  CUR_OP_CODE,D0    		;Move current instruction set into D0
+    ANDI.W  #$F0C0,D0				;Mask appropriate bits
+    CMP.W   #$90C0,D0				;Compare masked bits
+    BEQ     GROUP9_INVALID		    ;INVALID OP has been found
+    BNE     CHECK_OP_SUBX			;Check next OP
 
 CHECK_OP_SUBX:
-    MOVE.W  CUR_OP_CODE,D0    			;Move current instruction set into D0
-    ANDI.W  #$F130,D0					;Mask appropriate bits
-    CMP.W   #$9100,D0					;Compare masked bits
-    BRA     BIT_CHECK_SUBX				;Checking if this code is SUBX through bit shifts
+    MOVE.W  CUR_OP_CODE,D0    		;Move current instruction set into D0
+    ANDI.W  #$F130,D0				;Mask appropriate bits
+    CMP.W   #$9100,D0				;Compare masked bits
+    BRA     BIT_CHECK_SUBX			;Checking if this code is SUBX through bit shifts
     
 BIT_CHECK_SUBX:    
-    MOVE.W  CUR_OP_CODE,D0      		;Move current instruction set into D0
-    MOVE.W  #7,D1               		;Prepare a shift of 7 bits into D1
-    LSL.W   D1,D0               		;Shift left 7 bits truncate 15-9 bits
-    LSR.W   D1,D0               		;Reposition D0
-    LSR.W   #4,D0               		;Truncate 4 right most bits to
-    ANDI.W  #$FF13,D0           		;Compare remaining static bits
-    CMP.W   #$0010,D0           		;If equal to this value it's SUBX
-    BEQ     GROUP9_INVALID      		;INVALID OP code found
-    BNE     CHECK_OP_SUB        		;Not can only be SUB here
+    MOVE.W  CUR_OP_CODE,D0      	;Move current instruction set into D0
+    MOVE.W  #7,D1               	;Prepare a shift of 7 bits into D1
+    LSL.W   D1,D0               	;Shift left 7 bits truncate 15-9 bits
+    LSR.W   D1,D0               	;Reposition D0
+    LSR.W   #4,D0               	;Truncate 4 right most bits to
+    ANDI.W  #$FF13,D0           	;Compare remaining static bits
+    CMP.W   #$0010,D0           	;If equal to this value it's SUBX
+    BEQ     GROUP9_INVALID      	;INVALID OP code found
+    BNE     CHECK_OP_SUB        	;Not can only be SUB here
     
 *Supported OP code 
-CHECK_OP_SUB:                   		;At this point only remaining $9 is SUB
-    JSR     FIND_2_BIT_SIZE_7_TO_6		;Find the size bit to print out
-    JSR     PRINT_OP_SUB				;Print out SUB
-    BRA     GROUP9_SUCCESS				;Finish routine
+CHECK_OP_SUB:                   	;At this point only remaining $9 is SUB
+    JSR     FIND_2_BIT_SIZE_7_TO_6	;Find the size bit to print out
+    JSR     PRINT_OP_SUB			;Print out SUB
+    BRA     GROUP9_SUCCESS			;Finish routine
     
 GROUP9_INVALID:
-     JSR     INVALID_OP					;INVALID OP code found, set IS_VALID to 0
+     JSR     INVALID_OP				;INVALID OP code found, set IS_VALID to 0
 GROUP9_SUCCESS: 
-    MOVEM.L (SP)+,D0-D1         		;Restore registers
-    RTS                         		;Return to stack
+    MOVEM.L (SP)+,D0-D1         	;Restore registers
+    RTS                         	;Return to stack
 
 *GROUP_A
 ********************************************************************************
+* Description: One of the few groups where there are no OP codes at all.
 * Currently no OP codes here are supported. There are no current OP codes here.
+* Register(s) used: None
+*
+* Precondition: First nibble has been identified as $A
+*
+* Postcondition: Sets IS_VALID to 0 as there are no OP codes here
 ********************************************************************************
 C_GROUP_A:
-    JSR INVALID_OP						;INVALID OP code found, set IS_VALID to 0
-    RTS									;Return to stack
+    JSR INVALID_OP					;INVALID OP code found, set IS_VALID to 0
+    RTS								;Return to stack
     
 * GROUP_B                     
 ********************************************************************************
+* Description: Checks if the following list of OP codes is present or not.
 * Supported OP codes:
 * EOR: $B, 11-9 Reg, 8 %1, 8-6 OPMODE, 5-3 EA Mode, 2-0 EA Reg
 * CMP: $B, 11-9 Reg, 8 %0, 8-6 OPMODE, 5-3 EA Mode, 2-0 EA Reg
 * The specific bit difference is listed 
+*
+* Register(s) used: D0
+*
+* Precondition: First nibble has been identified as $B
+*
+* Postcondition: Parses proper OP code with a nibble value of $B or finds an
+* invalid OP code.
+*
 * Unsupported OP codes: CMPM, CMPA
 ********************************************************************************
 C_GROUP_B:
-    MOVEM.L D0,-(SP)         			;Save current registers to stack
+    MOVEM.L D0,-(SP)         		;Save current registers to stack
 *Unsupported OP codes    
 CHECK_OP_CMPM
-    MOVE.W  CUR_OP_CODE,D0    			;Move current instruction set into D0
-    ANDI.W  #$F138,D0					;Mask appropriate bits
-    CMP.W   #$B108,D0					;Compare masked bits
-    BEQ     GROUPB_INVALID				;INVALID OP found
-    BNE     CHECK_OP_CMPA				;Check next OP
+    MOVE.W  CUR_OP_CODE,D0    		;Move current instruction set into D0
+    ANDI.W  #$F138,D0				;Mask appropriate bits
+    CMP.W   #$B108,D0				;Compare masked bits
+    BEQ     GROUPB_INVALID			;INVALID OP found
+    BNE     CHECK_OP_CMPA			;Check next OP
     
 CHECK_OP_CMPA:
-    MOVE.W  CUR_OP_CODE,D0    			;Move current instruction set into D0
-    ANDI.W  #$F0C0,D0					;Mask appropriate bits
-    CMP.W   #$B0C0,D0					;Compare masked bits
-    BEQ     GROUPB_INVALID				;INVALID OP found
-    BNE     CHECK_OP_EOR				;Check next OP
+    MOVE.W  CUR_OP_CODE,D0    		;Move current instruction set into D0
+    ANDI.W  #$F0C0,D0				;Mask appropriate bits
+    CMP.W   #$B0C0,D0				;Compare masked bits
+    BEQ     GROUPB_INVALID			;INVALID OP found
+    BNE     CHECK_OP_EOR			;Check next OP
 
 *Supported OP codes    
 CHECK_OP_EOR:
-    MOVE.W  CUR_OP_CODE,D0    			;Move current instruction set into D0
-    ANDI.W  #$F100,D0					;Mask appropriate bits
-    CMP.W   #$B100,D0					;Compare masked bits
-    BNE     CHECK_OP_CMP				;Check next OP 
-    JSR     FIND_2_BIT_SIZE_7_TO_6		;Find size bit field to print out size
-    JSR     PRINT_OP_EOR				;Print out OP code
-    BRA     GROUPB_SUCCESS				;Finish routine
+    MOVE.W  CUR_OP_CODE,D0    		;Move current instruction set into D0
+    ANDI.W  #$F100,D0				;Mask appropriate bits
+    CMP.W   #$B100,D0				;Compare masked bits
+    BNE     CHECK_OP_CMP			;Check next OP 
+    JSR     FIND_2_BIT_SIZE_7_TO_6	;Find size bit field to print out size
+    JSR     PRINT_OP_EOR			;Print out OP code
+    BRA     GROUPB_SUCCESS			;Finish routine
     
 CHECK_OP_CMP:
-    MOVE.W  CUR_OP_CODE,D0    			;Move current instruction set into D0
-    ANDI.W  #$F100,D0					;Mask appropriate bits
-    CMP.W   #$B000,D0					;Compare masked bits
-    BNE     GROUPB_INVALID				;INVALID OP code found
-    JSR     FIND_2_BIT_SIZE_7_TO_6		;Find size bit field to print out size
-    JSR     PRINT_OP_CMP				;Print out OP code
-    BRA     GROUPB_SUCCESS				;Finish routine
+    MOVE.W  CUR_OP_CODE,D0    		;Move current instruction set into D0
+    ANDI.W  #$F100,D0				;Mask appropriate bits
+    CMP.W   #$B000,D0				;Compare masked bits
+    BNE     GROUPB_INVALID			;INVALID OP code found
+    JSR     FIND_2_BIT_SIZE_7_TO_6	;Find size bit field to print out size
+    JSR     PRINT_OP_CMP			;Print out OP code
+    BRA     GROUPB_SUCCESS			;Finish routine
     
 GROUPB_INVALID:
-    JSR     INVALID_OP           		;INVALID OP has been found, set IS_VALID to 0
+    JSR     INVALID_OP           	;INVALID OP has been found, set IS_VALID to 0
 GROUPB_SUCCESS:
-    MOVEM.L (SP)+,D0         			;Restore registers from stack
-    RTS                      			;Return to stack
+    MOVEM.L (SP)+,D0         		;Restore registers from stack
+    RTS                      		;Return to stack
 * GROUP_C                     
 ********************************************************************************
+* Description: Checks if the following list of OP codes is present or not.
 * Supported OP code:
 * MULS: $C, 11-8 Reg, 8-6 %111, 5-3 EA Mode, 2-0 EA Reg
 * Note: EXG OP mode has to be 01000, 01001, 10001, as such can never be 11 for
 * bits 7-6
+*
+* Register(s) used: D0,D1
+*
+* Precondition: First nibble has been identified as $C
+*
+* Postcondition: Parses proper OP code with a nibble value of $C or finds an
+* invalid OP code.
+*
 * Unsupported OP codes: MULU, ABCD, EXG, AND
 ********************************************************************************
 C_GROUP_C:
@@ -1280,60 +1364,70 @@ C_GROUP_C:
     MOVEM.L D0-D1,-(SP)
     
 CHECK_OP_MULU:
-    MOVE.W  CUR_OP_CODE,D0    ;Move current instruction set into D0
-    ANDI.W  #$F1C0,D0
-    CMP.W   #$C0C0,D0
-    BEQ     GROUPC_INVALID
-    BNE     CHECK_OP_ABCD
+    MOVE.W  CUR_OP_CODE,D0			;Move current instruction set into D0
+    ANDI.W  #$F1C0,D0				;Mask appropriate bits
+    CMP.W   #$C0C0,D0				;Compare masked bits
+    BEQ     GROUPC_INVALID			;INVALID OP code found
+    BNE     CHECK_OP_ABCD			;Check next OP code
  
 CHECK_OP_ABCD:
-    MOVE.W  CUR_OP_CODE,D0    ;Move current instruction set into D0
-    ANDI.W  #$F1F0,D0
-    CMP.W   #$C100,D0
-    BEQ     GROUPC_INVALID
-    BNE     CHECK_OP_EXG
+    MOVE.W  CUR_OP_CODE,D0			;Move current instruction set into D0
+    ANDI.W  #$F1F0,D0				;Mask appropriate bits
+    CMP.W   #$C100,D0				;Compare masked bits
+    BEQ     GROUPC_INVALID			;INVALID OP code found
+    BNE     CHECK_OP_EXG			;Check next OP code
  
 CHECK_OP_EXG:
-    BRA     BIT_CHECK_EXG       ;Always do bit check here
+    BRA     BIT_CHECK_EXG			;Always do bit check here
                         
-BIT_CHECK_EXG:                 ;Checks the OP mode bits 7-6 which cannot be 11 for EXG
-    MOVE.W  CUR_OP_CODE,D0
-    MOVE.W  #7,D1
-    LSL.W   D1,D0
-    LSR.W   D1,D0
-    LSR.W   #4,D0
-    ANDI.W  #$FF83,D0
-    CMP.W   #$0010,D0          ;Bit mask static EXG bits
-    BEQ     GROUPC_INVALID     ;If this equals, then OP must be EXG
-    BNE     CHECK_OP_MULS      ;Otherwise it's MULS
+BIT_CHECK_EXG:						;Checks the OP mode bits 7-6 which cannot be 11 for EXG
+    MOVE.W  CUR_OP_CODE,D0			;Move current instruction set into D0
+    MOVE.W  #7,D1					;Prepare a bit shift of 7 into D1
+    LSL.W   D1,D0					;Shift D0 to 7 bits
+    LSR.W   D1,D0					;Reposition D0
+    LSR.W   #4,D0					;Shift D0 4 bits right
+    ANDI.W  #$FF83,D0				;Mask appropriate bits
+    CMP.W   #$0010,D0				;Bit mask static EXG bits
+    BEQ     GROUPC_INVALID			;If this equals, then OP must be EXG
+    BNE     CHECK_OP_MULS			;Otherwise it's MULS
 *Supported OP code
 CHECK_OP_MULS:
-    MOVE.W CUR_OP_CODE,D0    ;Move current instruction set into D0
-    ANDI.W #$F1C0,D0
-    CMP.W  #$C1C0,D0
-    BNE    CHECK_OP_AND          ; OP_AND is completely dynamic outside of first nibble
-    JSR    PRINT_OP_MULS
-    BRA    GROUPC_SUCCESS
+    MOVE.W CUR_OP_CODE,D0			;Move current instruction set into D0
+    ANDI.W #$F1C0,D0				;Mask appropriate bits
+    CMP.W  #$C1C0,D0				;Compare masked bits
+    BNE    CHECK_OP_AND				;OP_AND is completely dynamic outside of first nibble
+    JSR    PRINT_OP_MULS			;Print OP code
+    BRA    GROUPC_SUCCESS			;Finish routine
+	
 *Odd completely dynamic unsupported OP code    
-CHECK_OP_AND:                 ;This would be the only possible OP code left after CHECK_OP_MULS
-    MOVE.W  CUR_OP_CODE,D0    ;Move current instruction set into D0
-    ANDI.W  #$F000,D0
-    CMP.W   #$C000,D0
-    BRA    GROUPC_INVALID    
+CHECK_OP_AND:						;This would be the only possible OP code left after CHECK_OP_MULS
+    MOVE.W  CUR_OP_CODE,D0			;Move current instruction set into D0
+    ANDI.W  #$F000,D0				;Mask appropriate bits
+    CMP.W   #$C000,D0				;Compare masked bits
+    BRA    GROUPC_INVALID    		;INVALID OP code found
     
 GROUPC_INVALID:
-    JSR     INVALID_OP
+    JSR     INVALID_OP				;Set IS_VALID to 0
     
 GROUPC_SUCCESS:
-    MOVEM.L (SP)+,D0-D1
-    RTS
+    MOVEM.L (SP)+,D0-D1				;Restore registers from stack
+    RTS								;Return to stack
     
 * GROUP_D                     
 ********************************************************************************
+* Description: Checks if the following list of OP codes is present or not.
 * Supported OP codes:
 * ADD: $D, 11-9 Reg, 8-6 OPMODE, 5-3 EA Mode, 2-0 EA Reg
 * ADDA: $D, 11- 9 Reg, 8-6 OPMODE, 7-6 %11, 5-3 EA Mode, 2-0 EA Reg
 * The specific bit difference is listed out in the OPMODE field.
+*
+* Register(s) used: D0
+*
+* Precondition: First nibble has been identified as $D
+*
+* Postcondition: Parses proper OP code with a nibble value of $D or finds an
+* invalid OP code.
+*
 * Unsupported: ADDX
 ********************************************************************************
 C_GROUP_D:
@@ -1375,6 +1469,7 @@ GROUPD_SUCCESS:
     
 * GROUP_E                     
 ********************************************************************************
+* Description: Check if the following list of OP codes is present or not.
 * Supported:
 * LSR: $E, 11-9 Count/Reg, 8 %0, 7-6 Size, 5 i/r, 4-3 %01, 2-0 Reg
 * LSL: $E, 11-9 Count/Reg, 8 %1, 7-6 Size, 5 i/r, 4-3 %01, 2-0 Reg
@@ -1389,207 +1484,226 @@ GROUPD_SUCCESS:
 * Count/Reg for ROR/ROL specifies rotate count instead of shift count.
 *
 * Split into ROT and NO_ROT groups first to make identifying easier.
+*
+* Register(s) used: D0
+*
+* Precondition: First nibble has been identified as $E
+*
+* Postcondition: Parses proper OP code with a nibble value of $E or finds an
+* invalid OP code.
+*
 * Unsupported: ROXL, ROXR
 ********************************************************************************
 C_GROUP_E:
     MOVEM.L D0,-(SP)
 *Unsupported OP codes
 CHECK_OP_ROXR_NO_ROT:
-    MOVE CUR_OP_CODE,D0    ;Move current instruction set into D0
-    ANDI.W #$FFC0,D0
-    CMP.W  #$E4C0,D0
-    BEQ    GROUPE_INVALID
-    BNE    CHECK_OP_ROXL_NO_ROT
+    MOVE CUR_OP_CODE,D0    			;Move current instruction set into D0
+    ANDI.W #$FFC0,D0				;Mask appropriate bits
+    CMP.W  #$E4C0,D0				;Compare masked bits
+    BEQ    GROUPE_INVALID			;INVALID OP code
+    BNE    CHECK_OP_ROXL_NO_ROT		;Check next OP code
 
 CHECK_OP_ROXL_NO_ROT:
-    MOVE CUR_OP_CODE,D0    ;Move current instruction set into D0
-    ANDI.W #$FFC0,D0
-    CMP.W  #$E5C0,D0
-    BEQ    GROUPE_INVALID
-    BNE    CHECK_OP_ROR_NO_ROT
+    MOVE CUR_OP_CODE,D0				;Move current instruction set into D0
+    ANDI.W #$FFC0,D0				;Mask appropriate bits
+    CMP.W  #$E5C0,D0				;Compare masked bits
+    BEQ    GROUPE_INVALID			;INVALID OP code
+    BNE    CHECK_OP_ROR_NO_ROT		;Check next OP code
 
 *Supported OP codes
 CHECK_OP_ROR_NO_ROT:
-    MOVE CUR_OP_CODE,D0    ;Move current instruction set into D0
-    ANDI.W #$FFC0,D0
-    CMP.W  #$E6C0,D0
-    BNE    CHECK_OP_ROL_NO_ROT
-    JSR    PRINT_OP_ROR
-    BRA    GROUPE_SUCCESS
+    MOVE CUR_OP_CODE,D0				;Move current instruction set into D0
+    ANDI.W #$FFC0,D0				;Mask appropriate bits
+    CMP.W  #$E6C0,D0				;Compare masked bits
+    BNE    CHECK_OP_ROL_NO_ROT		;Check next OP code
+    JSR    PRINT_OP_ROR				;Print out OP code
+    BRA    GROUPE_SUCCESS			;Finish routine
     
 CHECK_OP_ROL_NO_ROT:
-    MOVE CUR_OP_CODE,D0    ;Move current instruction set into D0
-    ANDI.W #$FFC0,D0
-    CMP.W  #$E7C0,D0
-    BNE    CHECK_OP_LSR_NO_ROT
-    JSR    PRINT_OP_ROL
-    BRA    GROUPE_SUCCESS
+    MOVE CUR_OP_CODE,D0				;Move current instruction set into D0
+    ANDI.W #$FFC0,D0				;Mask appropriate bits
+    CMP.W  #$E7C0,D0				;Compare masked bits
+    BNE    CHECK_OP_LSR_NO_ROT		;Check next OP code
+    JSR    PRINT_OP_ROL				;Print out OP code
+    BRA    GROUPE_SUCCESS			;Finish routine
  
 CHECK_OP_LSR_NO_ROT:
-    MOVE CUR_OP_CODE,D0    ;Move current instruction set into D0
-    ANDI.W #$FFC0,D0
-    CMP.W  #$E2C0,D0
-    BNE    CHECK_OP_LSL_NO_ROT
-    JSR    PRINT_OP_LSR
-    BRA    GROUPE_SUCCESS
+    MOVE CUR_OP_CODE,D0				;Move current instruction set into D0
+    ANDI.W #$FFC0,D0				;Mask appropriate bits
+    CMP.W  #$E2C0,D0				;Compare masked bits
+    BNE    CHECK_OP_LSL_NO_ROT		;Check next OP code
+    JSR    PRINT_OP_LSR				;Print out OP code
+    BRA    GROUPE_SUCCESS			;Finish routine
 
 CHECK_OP_LSL_NO_ROT:
-    MOVE CUR_OP_CODE,D0    ;Move current instruction set into D0
-    ANDI.W #$FFC0,D0
-    CMP.W  #$E3C0,D0
-    BNE    CHECK_OP_ASR_NO_ROT
-    JSR    PRINT_OP_LSL
-    BRA    GROUPE_SUCCESS
+    MOVE CUR_OP_CODE,D0				;Move current instruction set into D0
+    ANDI.W #$FFC0,D0				;Mask appropriate bits
+    CMP.W  #$E3C0,D0				;Compare masked bits
+    BNE    CHECK_OP_ASR_NO_ROT		;Check next OP code
+    JSR    PRINT_OP_LSL				;Print out OP code
+    BRA    GROUPE_SUCCESS			;Finish routine
 
 CHECK_OP_ASR_NO_ROT:
-    MOVE CUR_OP_CODE,D0    ;Move current instruction set into D0
-    ANDI.W #$FFC0,D0
-    CMP.W  #$E0C0,D0
-    BNE    CHECK_OP_ASL_NO_ROT
-    JSR    PRINT_OP_ASR
-    BRA    GROUPE_SUCCESS
+    MOVE CUR_OP_CODE,D0				;Move current instruction set into D0
+    ANDI.W #$FFC0,D0				;Mask appropriate bits
+    CMP.W  #$E0C0,D0				;Compare masked bits
+    BNE    CHECK_OP_ASL_NO_ROT		;Check next OP code
+    JSR    PRINT_OP_ASR				;Print out OP code
+    BRA    GROUPE_SUCCESS			;Finish routine
             
 CHECK_OP_ASL_NO_ROT:
-    MOVE CUR_OP_CODE,D0    ;Move current instruction set into D0
-    ANDI.W #$FFC0,D0
-    CMP.W  #$E1C0,D0
-    BNE    CHECK_OP_ROXR
-    JSR    PRINT_OP_ASL
-    BRA    GROUPE_SUCCESS
+    MOVE CUR_OP_CODE,D0				;Move current instruction set into D0
+    ANDI.W #$FFC0,D0				;Mask appropriate bits
+    CMP.W  #$E1C0,D0				;Compare masked bits
+    BNE    CHECK_OP_ROXR			;Check next OP code
+    JSR    PRINT_OP_ASL				Print out OP code
+    BRA    GROUPE_SUCCESS			;Finish routine
 
 *Unsupported OP codes
 CHECK_OP_ROXR:
-    MOVE CUR_OP_CODE,D0    ;Move current instruction set into D0
-    ANDI.W #$F118,D0
-    CMP.W  #$E010,D0
-    BEQ    GROUPE_INVALID
-    BNE    CHECK_OP_ROXL
+    MOVE CUR_OP_CODE,D0				;Move current instruction set into D0
+    ANDI.W #$F118,D0				;Mask appropriate bits
+    CMP.W  #$E010,D0				;Compare masked bits
+    BEQ    GROUPE_INVALID			;INVALID OP code found
+    BNE    CHECK_OP_ROXL			;Check next OP code
     
 CHECK_OP_ROXL:
-    MOVE CUR_OP_CODE,D0    ;Move current instruction set into D0
-    ANDI.W #$F118,D0
-    CMP.W  #$E110,D0
-    BEQ    GROUPE_INVALID
-    BNE    CHECK_OP_ROR
+    MOVE CUR_OP_CODE,D0				;Move current instruction set into D0
+    ANDI.W #$F118,D0				;Mask appropriate bits
+    CMP.W  #$E110,D0				;Compare masked bits
+    BEQ    GROUPE_INVALID			;INVALID OP code found
+    BNE    CHECK_OP_ROR				;Check next OP code
     
 *Supported OP codes
 CHECK_OP_ROR:
-    MOVE CUR_OP_CODE,D0    ;Move current instruction set into D0
-    ANDI.W #$F118,D0
-    CMP.W  #$E018,D0
-    BNE    CHECK_OP_ROL
-    JSR    FIND_2_BIT_SIZE_7_TO_6     
-    JSR    PRINT_OP_ROR
-    BRA    GROUPE_SUCCESS
+    MOVE CUR_OP_CODE,D0				;Move current instruction set into D0
+    ANDI.W #$F118,D0				;Mask appropriate bits
+    CMP.W  #$E018,D0				;Compare masked bits
+    BNE    CHECK_OP_ROL				;Check next OP code
+    JSR    FIND_2_BIT_SIZE_7_TO_6	;Parse size bits
+    JSR    PRINT_OP_ROR				;Print out OP code
+    BRA    GROUPE_SUCCESS			;Finish routine
 
 CHECK_OP_ROL:
-    MOVE CUR_OP_CODE,D0    ;Move current instruction set into D0
-    ANDI.W #$F118,D0
-    CMP.W  #$E118,D0
-    BNE    CHECK_OP_LSR
-    JSR    FIND_2_BIT_SIZE_7_TO_6     
-    JSR    PRINT_OP_ROL
-    BRA    GROUPE_SUCCESS
+    MOVE CUR_OP_CODE,D0				;Move current instruction set into D0
+    ANDI.W #$F118,D0				;Mask appropriate bits
+    CMP.W  #$E118,D0				;Compare masked bits
+    BNE    CHECK_OP_LSR				;Check next OP code
+    JSR    FIND_2_BIT_SIZE_7_TO_6	;Parse size field
+    JSR    PRINT_OP_ROL				;Print out OP code
+    BRA    GROUPE_SUCCESS			;Finish routine
     
 CHECK_OP_LSR:
-    MOVE CUR_OP_CODE,D0    ;Move current instruction set into D0
-    ANDI.W #$F118,D0
-    CMP.W  #$E008,D0
-    BNE    CHECK_OP_LSL
-    JSR    FIND_2_BIT_SIZE_7_TO_6     
-    JSR    PRINT_OP_LSR
-    BRA    GROUPE_SUCCESS
+    MOVE CUR_OP_CODE,D0				;Move current instruction set into D0
+    ANDI.W #$F118,D0				;Mask appropriate bits
+    CMP.W  #$E008,D0				;Compare masked bits
+    BNE    CHECK_OP_LSL				;Check next OP code
+    JSR    FIND_2_BIT_SIZE_7_TO_6	;Parse size field
+    JSR    PRINT_OP_LSR				;Print out OP code
+    BRA    GROUPE_SUCCESS			;Finish routine
 
 CHECK_OP_LSL:
-    MOVE CUR_OP_CODE,D0    ;Move current instruction set into D0
-    ANDI.W #$F118,D0
-    CMP.W  #$E108,D0
-    BNE    CHECK_OP_ASR
-    JSR    FIND_2_BIT_SIZE_7_TO_6     
-    JSR    PRINT_OP_LSL
-    BRA    GROUPE_SUCCESS
+    MOVE CUR_OP_CODE,D0				;Move current instruction set into D0
+    ANDI.W #$F118,D0				;Mask appropriate bits
+    CMP.W  #$E108,D0				;Compare masked bits
+    BNE    CHECK_OP_ASR				;Check next OP code
+    JSR    FIND_2_BIT_SIZE_7_TO_6	;Parse size field
+    JSR    PRINT_OP_LSL				;Print out OP code
+    BRA    GROUPE_SUCCESS			;Finish routine
 
 CHECK_OP_ASR:
-    MOVE CUR_OP_CODE,D0    ;Move current instruction set into D0
-    ANDI.W #$F118,D0
-    CMP.W  #$E000,D0
-    BNE    CHECK_OP_ASL
-    JSR    FIND_2_BIT_SIZE_7_TO_6     
-    JSR    PRINT_OP_ASR
-    BRA    GROUPE_SUCCESS
+    MOVE CUR_OP_CODE,D0				;Move current instruction set into D0
+    ANDI.W #$F118,D0				;Mask appropriate bits
+    CMP.W  #$E000,D0				;Compare masked bits
+    BNE    CHECK_OP_ASL				;Check next OP code
+    JSR    FIND_2_BIT_SIZE_7_TO_6	;Parse size field
+    JSR    PRINT_OP_ASR				;Print out OP code
+    BRA    GROUPE_SUCCESS			;Finish routine
 
 CHECK_OP_ASL:
-    MOVE CUR_OP_CODE,D0    ;Move current instruction set into D0
-    ANDI.W #$F118,D0
-    CMP.W  #$E100,D0
-    BNE    GROUPE_INVALID      ;Last possible OP code
-    JSR    FIND_2_BIT_SIZE_7_TO_6     
-    JSR    PRINT_OP_ASL
-    BRA    GROUPE_SUCCESS
+    MOVE CUR_OP_CODE,D0				;Move current instruction set into D0
+    ANDI.W #$F118,D0				;Mask appropriate bits
+    CMP.W  #$E100,D0				;Compare masked bits
+    BNE    GROUPE_INVALID			;Last possible OP code
+    JSR    FIND_2_BIT_SIZE_7_TO_6	;Parse size field
+    JSR    PRINT_OP_ASL				;Print out OP code
+    BRA    GROUPE_SUCCESS			;Finish routine
 
 GROUPE_INVALID:
-    JSR     INVALID_OP
+    JSR     INVALID_OP				;Set IS_VALID to 0
 GROUPE_SUCCESS:
-    MOVEM.L (SP)+,D0
-    RTS
+    MOVEM.L (SP)+,D0				;Restore registers from stack
+    RTS								;Return to stack
 * GROUP_F
 ********************************************************************************
+* Description: One of the few groups that have no OP codes
 * Currently no OP codes here are supported. There are no OP codes here
+*
+* Register(s) used: None
+*
+* Precondition: Identified nibble value is $F
+*
+* Postcondition: IS_VALID is set to 0 as there are no OP codes here
 ********************************************************************************
 C_GROUP_F:
-    JSR INVALID_OP
-    RTS
+    JSR 	INVALID_OP				;Set IS_VALID to 0
+    RTS								;Return to stack
     
 * INVALID_OP                     
 ********************************************************************************
-* Any value that is not covered in the above groups would be considered invalid. 
+* Description: Finds any value that is not covered in the above supported groups 
+* and considers it invalid 
 * The following values in the first nibble would also indicate that the 
 * operand codes is already invalid: $7, $A, $F.
-* For unsupported OP codes, display DATA $WXYZ   
-* THIS WILL NEED TO BE CHANGED TO DISPLAY: 1000 DATA $WXYZ IN THE FUTURE
+* For unsupported OP codes, display <MEMORY ADDRESS> DATA $<INVALID HEX>   
+*
+* Register(s) used: None
+*
+* Precondition: INVALID OP code has been found
+*
+* Postcondition: IS_VALID is set to 0
 ********************************************************************************
-INVALID_OP:  ; ONLY SETS IS_VALID TO 0
-    MOVE.B #0,IS_VALID
-    RTS
+INVALID_OP:							; ONLY SETS IS_VALID TO 0
+    MOVE.B #0,IS_VALID				;Sets IS_VALID to 0
+    RTS								;Return to stack
 
 ********************** PRINTING ROUTINES **************************************
 * Description: These routines are to print the associated op codes, by placing
 * them in the appropriate area to the buffer
 *
-* Registers used: A1 for loading, A6 for EA parsing.
+* Registers used: D0,D1,D2,D3,A0,A1
 *
 * Precondition: The relevant opcode has been identified correctly.
 *
 * Postcondition: Prints out the associated opcode to the buffer.
-
-* THIS NEEDS TO BE RETOOLED TO PRINT TO BUFFER NOT TO CONSOLE
 *******************************************************************************
 
 * Prints the loaded item into G_BUFFER
 PRINT_TO_BUFFER:
-    MOVE.L #G_BUFFER, Arg_AddStrToBuffer_Buffer
+    MOVE.L #G_BUFFER, BUFFER_POINTER
     JSR AddStrToBuffer
     RTS
     
 ****************************** GROUP 0 **************************************** 
 PRINT_OP_ORI:
-    MOVE.L #P_OP_ORI, Arg_AddStrToBuffer_String
+    MOVE.L #P_OP_ORI, STRING_BUFFER_POINTER
     JSR PRINT_TO_BUFFER
     JSR PRINT_OP_SIZE
     RTS
 PRINT_OP_CMPI:
-    MOVE.L #P_OP_CMPI, Arg_AddStrToBuffer_String
+    MOVE.L #P_OP_CMPI, STRING_BUFFER_POINTER
     JSR PRINT_TO_BUFFER
     JSR PRINT_OP_SIZE
     RTS
 PRINT_OP_STATIC_BCLR:
-    MOVE.L #P_OP_BCLR, Arg_AddStrToBuffer_String
+    MOVE.L #P_OP_BCLR, STRING_BUFFER_POINTER
     JSR PRINT_TO_BUFFER
     JSR PRINT_OP_SIZE
     RTS
 	
 PRINT_OP_DYNAMIC_BCLR:
-    MOVE.L #P_OP_BCLR, Arg_AddStrToBuffer_String
+    MOVE.L #P_OP_BCLR, STRING_BUFFER_POINTER
     JSR PRINT_TO_BUFFER
     JSR PRINT_OP_SIZE
     RTS
@@ -1597,69 +1711,69 @@ PRINT_OP_DYNAMIC_BCLR:
 
 ****************************** GROUP 1 ****************************************    
 PRINT_OP_MOVEB:
-    MOVE.L #P_OP_MOVEB, Arg_AddStrToBuffer_String
+    MOVE.L #P_OP_MOVEB, STRING_BUFFER_POINTER
     JSR PRINT_TO_BUFFER
     RTS
 ******************************* END OF GROUP 1 ********************************
     
 ****************************** GROUP 2 **************************************** 
 PRINT_OP_MOVEA_L:
-    MOVE.L #P_OP_MOVEA_L, Arg_AddStrToBuffer_String
+    MOVE.L #P_OP_MOVEA_L, STRING_BUFFER_POINTER
     JSR PRINT_TO_BUFFER
     RTS
 PRINT_OP_MOVE_L:
-    MOVE.L #P_OP_MOVE_L, Arg_AddStrToBuffer_String
+    MOVE.L #P_OP_MOVE_L, STRING_BUFFER_POINTER
     JSR PRINT_TO_BUFFER
     RTS
 ******************************* END OF GROUP 2 ********************************
     
 ****************************** GROUP 3 ****************************************    
 PRINT_OP_MOVEA_W:
-    MOVE.L #P_OP_MOVEA_W, Arg_AddStrToBuffer_String
+    MOVE.L #P_OP_MOVEA_W, STRING_BUFFER_POINTER
     JSR PRINT_TO_BUFFER
     RTS
 PRINT_OP_MOVE_W:
-    MOVE.L #P_OP_MOVE_W, Arg_AddStrToBuffer_String
+    MOVE.L #P_OP_MOVE_W, STRING_BUFFER_POINTER
     JSR PRINT_TO_BUFFER
     RTS
 ******************************* END OF GROUP 3 ********************************
 
 ****************************** GROUP 4 ****************************************
 PRINT_OP_JSR:
-    MOVE.L #P_OP_JSR, Arg_AddStrToBuffer_String
+    MOVE.L #P_OP_JSR, STRING_BUFFER_POINTER
     JSR PRINT_TO_BUFFER
     RTS
 PRINT_OP_RTS:
-    MOVE.L #P_OP_RTS, Arg_AddStrToBuffer_String
+    MOVE.L #P_OP_RTS, STRING_BUFFER_POINTER
     JSR PRINT_TO_BUFFER
     RTS
 PRINT_OP_NOP:
-    MOVE.L #P_OP_NOP, Arg_AddStrToBuffer_String
+    MOVE.L #P_OP_NOP, STRING_BUFFER_POINTER
     JSR PRINT_TO_BUFFER
     RTS
 PRINT_OP_LEA:
-    MOVE.L #P_OP_LEA, Arg_AddStrToBuffer_String
+    MOVE.L #P_OP_LEA, STRING_BUFFER_POINTER
     JSR PRINT_TO_BUFFER
     JSR PRINT_OP_SIZE
     RTS
 PRINT_OP_NEG:
-    MOVE.L #P_OP_NEG, Arg_AddStrToBuffer_String
+    MOVE.L #P_OP_NEG, STRING_BUFFER_POINTER
     JSR PRINT_TO_BUFFER
     JSR PRINT_OP_SIZE
     RTS
 PRINT_OP_MOVEM_W:
-    MOVE.L #P_OP_MOVEM_W, Arg_AddStrToBuffer_String
+    MOVE.L #P_OP_MOVEM_W, STRING_BUFFER_POINTER
     JSR PRINT_TO_BUFFER
     RTS
 PRINT_OP_MOVEM_L:
-    MOVE.L #P_OP_MOVEM_L, Arg_AddStrToBuffer_String
+    MOVE.L #P_OP_MOVEM_L, STRING_BUFFER_POINTER
     JSR PRINT_TO_BUFFER
     RTS
 ******************************* END OF GROUP 4 ********************************
     
 ****************************** GROUP 5 ****************************************
 PRINT_OP_SUBQ:
-    MOVE.L #P_OP_SUBQ, Arg_AddStrToBuffer_String
+    MOVE.L #P_OP_SUBQ, STRING_BUFFER_POINTER
     JSR PRINT_TO_BUFFER
     JSR PRINT_OP_SIZE
     RTS
@@ -1667,27 +1781,27 @@ PRINT_OP_SUBQ:
 
 ****************************** GROUP 6 ****************************************
 PRINT_OP_BCS:
-    MOVE.L #P_OP_BCS, Arg_AddStrToBuffer_String
+    MOVE.L #P_OP_BCS, STRING_BUFFER_POINTER
     JSR PRINT_TO_BUFFER
     JSR PRINT_OP_SIZE
     RTS
 PRINT_OP_BGE:
-    MOVE.L #P_OP_BGE, Arg_AddStrToBuffer_String
+    MOVE.L #P_OP_BGE, STRING_BUFFER_POINTER
     JSR PRINT_TO_BUFFER
     JSR PRINT_OP_SIZE
     RTS
 PRINT_OP_BLT:
-    MOVE.L #P_OP_BLT, Arg_AddStrToBuffer_String
+    MOVE.L #P_OP_BLT, STRING_BUFFER_POINTER
     JSR PRINT_TO_BUFFER
     JSR PRINT_OP_SIZE
     RTS
 PRINT_OP_BVC:
-    MOVE.L #P_OP_BVC, Arg_AddStrToBuffer_String
+    MOVE.L #P_OP_BVC, STRING_BUFFER_POINTER
     JSR PRINT_TO_BUFFER
     JSR PRINT_OP_SIZE
     RTS
 PRINT_OP_BRA:
-    MOVE.L #P_OP_BRA, Arg_AddStrToBuffer_String
+    MOVE.L #P_OP_BRA, STRING_BUFFER_POINTER
     JSR PRINT_TO_BUFFER
     JSR PRINT_OP_SIZE
     RTS
@@ -1699,11 +1813,11 @@ PRINT_OP_BRA:
 
 ****************************** GROUP 8 ****************************************
 PRINT_OP_DIVS:
-    MOVE.L #P_OP_DIVS, Arg_AddStrToBuffer_String
+    MOVE.L #P_OP_DIVS, STRING_BUFFER_POINTER
     JSR PRINT_TO_BUFFER
     RTS
 PRINT_OP_OR:
-    MOVE.L #P_OP_OR, Arg_AddStrToBuffer_String
+    MOVE.L #P_OP_OR, STRING_BUFFER_POINTER
     JSR PRINT_TO_BUFFER
     JSR PRINT_OP_SIZE
     RTS
@@ -1711,7 +1825,7 @@ PRINT_OP_OR:
 
 ****************************** GROUP 9 ****************************************
 PRINT_OP_SUB:
-    MOVE.L #P_OP_SUB, Arg_AddStrToBuffer_String
+    MOVE.L #P_OP_SUB, STRING_BUFFER_POINTER
     JSR PRINT_TO_BUFFER
     JSR PRINT_OP_SIZE
     RTS
@@ -1723,12 +1837,12 @@ PRINT_OP_SUB:
 
 ****************************** GROUP B ****************************************
 PRINT_OP_EOR:
-    MOVE.L #P_OP_EOR, Arg_AddStrToBuffer_String
+    MOVE.L #P_OP_EOR, STRING_BUFFER_POINTER
     JSR PRINT_TO_BUFFER
     JSR PRINT_OP_SIZE
     RTS
 PRINT_OP_CMP:
-    MOVE.L #P_OP_CMP, Arg_AddStrToBuffer_String
+    MOVE.L #P_OP_CMP, STRING_BUFFER_POINTER
     JSR PRINT_TO_BUFFER
     JSR PRINT_OP_SIZE
     RTS
@@ -1736,19 +1850,19 @@ PRINT_OP_CMP:
 
 ****************************** GROUP C ****************************************
 PRINT_OP_MULS:
-    MOVE.L #P_OP_MULS, Arg_AddStrToBuffer_String
+    MOVE.L #P_OP_MULS, STRING_BUFFER_POINTER
     JSR PRINT_TO_BUFFER
     RTS
 ******************************* END OF GROUP C ********************************
 
 ****************************** GROUP D ****************************************
 PRINT_OP_ADD:
-    MOVE.L #P_OP_ADD, Arg_AddStrToBuffer_String
+    MOVE.L #P_OP_ADD, STRING_BUFFER_POINTER
     JSR PRINT_TO_BUFFER
     JSR PRINT_OP_SIZE
     RTS
 PRINT_OP_ADDA:
-    MOVE.L #P_OP_ADDA, Arg_AddStrToBuffer_String
+    MOVE.L #P_OP_ADDA, STRING_BUFFER_POINTER
     JSR PRINT_TO_BUFFER
     JSR PRINT_OP_SIZE_ADDA
     RTS
@@ -1757,32 +1871,32 @@ PRINT_OP_ADDA:
 
 ****************************** GROUP E ****************************************
 PRINT_OP_LSL:
-    MOVE.L #P_OP_LSL, Arg_AddStrToBuffer_String
+    MOVE.L #P_OP_LSL, STRING_BUFFER_POINTER
     JSR PRINT_TO_BUFFER
     JSR PRINT_OP_SIZE
     RTS
 PRINT_OP_LSR:
-    MOVE.L #P_OP_LSR, Arg_AddStrToBuffer_String
+    MOVE.L #P_OP_LSR, STRING_BUFFER_POINTER
     JSR PRINT_TO_BUFFER
     JSR PRINT_OP_SIZE
     RTS
 PRINT_OP_ASR:
-    MOVE.L #P_OP_ASR, Arg_AddStrToBuffer_String
+    MOVE.L #P_OP_ASR, STRING_BUFFER_POINTER
     JSR PRINT_TO_BUFFER
     JSR PRINT_OP_SIZE
     RTS
 PRINT_OP_ASL:
-    MOVE.L #P_OP_ASL, Arg_AddStrToBuffer_String
+    MOVE.L #P_OP_ASL, STRING_BUFFER_POINTER
     JSR PRINT_TO_BUFFER
     JSR PRINT_OP_SIZE
     RTS
 PRINT_OP_ROL:
-    MOVE.L #P_OP_ROL, Arg_AddStrToBuffer_String
+    MOVE.L #P_OP_ROL, STRING_BUFFER_POINTER
     JSR PRINT_TO_BUFFER
     JSR PRINT_OP_SIZE
     RTS
 PRINT_OP_ROR:
-    MOVE.L #P_OP_ROR, Arg_AddStrToBuffer_String
+    MOVE.L #P_OP_ROR, STRING_BUFFER_POINTER
     JSR PRINT_TO_BUFFER
     JSR PRINT_OP_SIZE
     RTS
@@ -1794,33 +1908,33 @@ PRINT_OP_ROR:
 
 ****************************** SIZE PRINTS ************************************
 PRINT_SIZE_BYTE:
-    MOVE.L #P_SIZE_B, Arg_AddStrToBuffer_String
+    MOVE.L #P_SIZE_B, STRING_BUFFER_POINTER
     JSR PRINT_TO_BUFFER
     RTS    
 
 PRINT_SIZE_WORD:
-    MOVE.L #P_SIZE_W, Arg_AddStrToBuffer_String
+    MOVE.L #P_SIZE_W, STRING_BUFFER_POINTER
     JSR PRINT_TO_BUFFER
     RTS
     
 PRINT_SIZE_LONG:
-    MOVE.L #P_SIZE_L, Arg_AddStrToBuffer_String
+    MOVE.L #P_SIZE_L, STRING_BUFFER_POINTER
     JSR PRINT_TO_BUFFER
     RTS
 
-PRINT_OP_SIZE:                     ;Prints current OP code byte size if applicable
-    CMP.B  #%00,OP_SIZE         ;Checks for byte size
-    BEQ    PRINT_SIZE_BYTE      ;Print .B to buffer
-    CMP.B  #%01,OP_SIZE         ;Check for word size
-    BEQ    PRINT_SIZE_WORD      ;Print .W to buffer
-    CMP.B  #%10,OP_SIZE         ;Check for long size
-    BEQ    PRINT_SIZE_LONG      ;Print .L to buffer
+PRINT_OP_SIZE:						;Prints current OP code byte size if applicable
+    CMP.B  #%00,OP_SIZE				;Checks for byte size
+    BEQ    PRINT_SIZE_BYTE			;Print .B to buffer
+    CMP.B  #%01,OP_SIZE				;Check for word size
+    BEQ    PRINT_SIZE_WORD			;Print .W to buffer
+    CMP.B  #%10,OP_SIZE				;Check for long size
+    BEQ    PRINT_SIZE_LONG			;Print .L to buffer
     RTS
     
-PRINT_OP_SIZE_ADDA:                  ;Special  print for ADDA
-    CMP.B #%0,OP_SIZE
-    BEQ    PRINT_SIZE_WORD
-    BNE    PRINT_SIZE_LONG
+PRINT_OP_SIZE_ADDA:					;Special  print for ADDA
+    CMP.B #%0,OP_SIZE				;Checks if the OP_SIZE is 0
+    BEQ    PRINT_SIZE_WORD			;If it is the size is word
+    BNE    PRINT_SIZE_LONG			;If it's not the size is long
     
 ******************* END OF SIZE PRINTS ****************************************
 
@@ -1833,7 +1947,6 @@ PRINT_OP_SIZE_ADDA:                  ;Special  print for ADDA
 * <OPCODE> is any valid operand
 
 P_INVALID_OP    DC.B    '   DATA   $',0
-OP_FOUND        DC.B    'Found OP',0 ; this should be taken out later
 P_SIZE_B        DC.B    '.B ',0
 P_SIZE_W        DC.B    '.W ',0
 P_SIZE_L        DC.B    '.L ',0
@@ -1873,19 +1986,6 @@ P_OP_ASL        DC.B    '   ASL',0
 P_OP_ROR        DC.B    '   ROR',0
 P_OP_ROL        DC.B    '   ROL',0
 ***************** END OF DATA CONSTANT PRINTS ***********************************
- 
-
-
-
-
-
-
-
-
-
-
-
-
 
 *~Font name~Courier New~
 *~Font size~10~
