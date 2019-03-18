@@ -736,7 +736,7 @@ JSR_BACK    MOVE.B  THIRD_3, D3
             RTS
 
 MOVEM:
-            JSR     FUK_MOVEM
+            JSR     RUN_MOVEM
             JSR     LOAD_NEW_LINE
             RTS
     
@@ -764,8 +764,7 @@ LEA_BACK    MOVE.B  THIRD_3, D3
 
 * <EA>
 **********************************************************************************
-* Description: Helper function for MOVEM. FUK_MOVEM stands for Functional Utilization of
-* Knowledge in MOVEM
+* Description: Helper function for MOVEM.
 *
 * Registers used: D3 for SRC/DST mod, D2 for SRC/DST reg, A3 to get back from the subbranch,
 *                 D4, D5, and D6 for calculations
@@ -774,7 +773,7 @@ LEA_BACK    MOVE.B  THIRD_3, D3
 *
 * Postcondition: MOVEM decoding has been successful
 **********************************************************************************
-FUK_MOVEM:
+RUN_MOVEM:
 			CLR.L	D4
 			CLR.L	D5
 			CLR.L	D6
@@ -885,14 +884,14 @@ MOVEM_PRE_B	CMPI.B	#%000, THIRD_3
 			
 * <EA>
 **********************************************************************************
-* Description: Helper function for FUK_MOVEM. MOVEM_PARSE is responsible for loading the list (D0-D7/A0-A7)
+* Description: Helper function for RUN_MOVEM. MOVEM_PARSE is responsible for loading the list (D0-D7/A0-A7)
 *
 * Registers used: D3 for SRC/DST mod, D2 for SRC/DST reg, A3 to get back from the subbranch,
 *                 D4 for calculations.
 *
 * Precondition: FIRST_3, SECOND_3, THIRD_3, FOURTH_3
 *
-* Postcondition: FUK_MOVEM is able to decode MOVEM
+* Postcondition: RUN_MOVEM is able to decode MOVEM
 **********************************************************************************
 MOVEM_PARSE:
 			CLR.L	D4
@@ -1559,9 +1558,9 @@ LOAD_COMMA_SPACE:
     CLR.L   D0
 
     MOVE.B  COMMA, D0
-    JSR     LOAD_THIS_SHIT
+    JSR     LOAD_THIS_THING
     MOVE.B  SPACE, D0
-    JSR     LOAD_THIS_SHIT
+    JSR     LOAD_THIS_THING
     
     RTS
 
@@ -1579,7 +1578,7 @@ LOAD_D:
     CLR.L   D0
 
     MOVE.B  DATA, D0
-    JSR     LOAD_THIS_SHIT
+    JSR     LOAD_THIS_THING
     RTS
 
 * <EA>
@@ -1596,7 +1595,7 @@ LOAD_A:
     CLR.L   D0
 
     MOVE.B  ADDRESS, D0
-    JSR     LOAD_THIS_SHIT
+    JSR     LOAD_THIS_THING
     RTS
 
 * <EA>
@@ -1613,7 +1612,7 @@ LOAD_PTHSIS_OPEN:
     CLR.L   D0
 
     MOVE.B  PTHSIS_OPEN, D0
-    JSR     LOAD_THIS_SHIT
+    JSR     LOAD_THIS_THING
     RTS
 
 * <EA>
@@ -1630,7 +1629,7 @@ LOAD_PTHSIS_CLSD:
     CLR.L   D0
 
     MOVE.B  PTHSIS_CLSD, D0
-    JSR     LOAD_THIS_SHIT
+    JSR     LOAD_THIS_THING
     RTS
 
 * <EA>
@@ -1647,7 +1646,7 @@ LOAD_HEX_SIGN:
     CLR.L   D0
 
     MOVE.B  HEX_SIGN, D0
-    JSR     LOAD_THIS_SHIT
+    JSR     LOAD_THIS_THING
     RTS
 
 * <EA>
@@ -1664,7 +1663,7 @@ LOAD_IMMDTE_VALU:
     CLR.L   D0
 
     MOVE.B  IMMDTE_VALU, D0
-    JSR     LOAD_THIS_SHIT
+    JSR     LOAD_THIS_THING
     RTS
 
 * <EA>
@@ -1681,7 +1680,7 @@ LOAD_PLUS_SIGN:
     CLR.L   D0
 
     MOVE.B  PLUS_SIGN, D0
-    JSR     LOAD_THIS_SHIT
+    JSR     LOAD_THIS_THING
     RTS
 
 * <EA>
@@ -1698,7 +1697,7 @@ LOAD_MINUS_SIGN:
     CLR.L   D0
 
     MOVE.B  MINUS_SIGN, D0
-    JSR     LOAD_THIS_SHIT
+    JSR     LOAD_THIS_THING
     RTS
 **************************************************
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1708,8 +1707,7 @@ LOAD_MINUS_SIGN:
 * LOAD_THIS FUNCTIONS (LOWEST LEVEL) *************
 * <EA>
 **********************************************************************************
-* Description: Loads the hex value from D0 to G_BUFFER in ASCII. SHIT stands for        
-*               Specially-Heeded I/O Target
+* Description: Loads the hex value from D0 to G_BUFFER in ASCII.
 *
 * Registers used: D0,A4
 *
@@ -1717,7 +1715,7 @@ LOAD_MINUS_SIGN:
 *
 * Postcondition: Loads value from D0 to G_BUFFER
 **********************************************************************************
-LOAD_THIS_SHIT:
+LOAD_THIS_THING:
     MOVE.B  D0, (A4)+										;Post-increment G_BUFFER and load value into it
     RTS														;Return to stack
 
