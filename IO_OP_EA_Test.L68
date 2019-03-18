@@ -1,6 +1,6 @@
 000010A4 Starting Address
 Assembler used: EASy68K Editor/Assembler v5.16.01
-Created On: 3/17/2019 6:21:04 PM
+Created On: 3/17/2019 7:20:31 PM
 
 00000000                             1  **--------------------------------------------------------------------------
 00000000                             2  * Title      : Disassembler in Motorola 68k
@@ -1181,14 +1181,14 @@ Created On: 3/17/2019 6:21:04 PM
 00001D62                          1177      
 00001D62                          1178  CHECK_OP_SWAP:                      ; This must go before CHECK_OP PEA as first 3 nibbles can be equivalent
 00001D62  3038 10A0               1179      MOVE.W CUR_OP_CODE,D0           ;Move current instruction set into D0
-00001D66  0240 FF48               1180      ANDI.W #$FF48,D0                ;Mask relevant bits to D0
+00001D66  0240 FFF8               1180      ANDI.W #$FFF8,D0                ;Mask relevant bits to D0
 00001D6A  B07C 4840               1181      CMP.W  #$4840,D0                ;Compare the appropriate masked bits
 00001D6E  6700 0182               1182      BEQ    GROUP4_INVALID           ;INVALID OP code
 00001D72  6600 0002               1183      BNE    CHECK_OP_PEA             ;Check next OP code
 00001D76                          1184   
 00001D76                          1185  CHECK_OP_PEA:                       ;This must go after CHECK_OP_SWAP as first 3 nibbles can be equivalent
 00001D76  3038 10A0               1186      MOVE.W CUR_OP_CODE,D0           ;Move current instruction set into D0
-00001D7A  0240 FF40               1187      ANDI.W #$FF40,D0                ;Mask relevant bits to D0
+00001D7A  0240 FFC0               1187      ANDI.W #$FFC0,D0                ;Mask relevant bits to D0
 00001D7E  B07C 4840               1188      CMP.W  #$4840,D0                ;Compare the appropriate masked bits
 00001D82  6700 016E               1189      BEQ    GROUP4_INVALID           ;INVALID OP code
 00001D86  6600 0002               1190      BNE    CHECK_OP_TAS             ;Check next OP code
@@ -2102,1096 +2102,1098 @@ Created On: 3/17/2019 6:21:04 PM
 000028DC                          2098  
 000028DC                          2099  
 000028DC                          2100  
-000028DC                          2101  -------------------- end include --------------------
-000028DC                          2102      INCLUDE "EA_Integrated.x68"                         ;EA role code to include
-000028DC                          2103  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-000028DC                          2104  
+000028DC                          2101  
+000028DC                          2102  -------------------- end include --------------------
+000028DC                          2103      INCLUDE "EA_Integrated.x68"                         ;EA role code to include
+000028DC                          2104  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 000028DC                          2105  
-000028DC= 41                      2106  ADDRESS         DC.B    $41
-000028DD= 44                      2107  DATA            DC.B    $44
-000028DE                          2108  
-000028DE= 28                      2109  PTHSIS_OPEN     DC.B    $28
-000028DF= 29                      2110  PTHSIS_CLSD     DC.B    $29
-000028E0= 24                      2111  HEX_SIGN        DC.B    $24
-000028E1= 23                      2112  IMMDTE_VALU     DC.B    $23
-000028E2= 2B                      2113  PLUS_SIGN       DC.B    $2B
-000028E3= 2D                      2114  MINUS_SIGN      DC.B    $2D
-000028E4                          2115  
-000028E4= 2C                      2116  COMMA           DC.B    $2C
-000028E5= 20                      2117  SPACE           DC.B    $20
-000028E6                          2118  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-000028E6                          2119  
-000028E6                          2120  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;  
-000028E6                          2121  TRAILING_SIZE   DS.W    1 * Size of any immediate or
-000028E8                          2122                            * address values. Immediate or address
-000028E8                          2123                            * value of a BYTE is still processed as
-000028E8                          2124                            * WORD because the trailing bytes
-000028E8                          2125                            * are represented as a word regardless.
-000028E8                          2126                            * $1 = BYTE, $2 = WORD, $4 = LONG
-000028E8                          2127                            
-000028E8                          2128  X               DS.B    1
-000028E9                          2129  Y               DS.B    1 * always X -> Y
-000028EA                          2130  X_COUNTER       DS.B    1
-000028EB                          2131  Y_COUNTER       DS.B    1
-000028EC                          2132  FIRST_X         DS.B    1 * 0: it is first X
-000028ED                          2133                            * 1: it is second X
-000028ED                          2134  FIRST_Y         DS.B    1 * 0: it is first Y
-000028EE                          2135                            * 1: it is second Y
-000028EE                          2136  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-000028EE                          2137  
-000028EE                          2138  main_EA:
-000028EE  4EB8 1924               2139      JSR PARSE_EA_CONSTANT_BITS    
-000028F2                          2140  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-000028F2                          2141  
+000028DC                          2106  
+000028DC= 41                      2107  ADDRESS         DC.B    $41
+000028DD= 44                      2108  DATA            DC.B    $44
+000028DE                          2109  
+000028DE= 28                      2110  PTHSIS_OPEN     DC.B    $28
+000028DF= 29                      2111  PTHSIS_CLSD     DC.B    $29
+000028E0= 24                      2112  HEX_SIGN        DC.B    $24
+000028E1= 23                      2113  IMMDTE_VALU     DC.B    $23
+000028E2= 2B                      2114  PLUS_SIGN       DC.B    $2B
+000028E3= 2D                      2115  MINUS_SIGN      DC.B    $2D
+000028E4                          2116  
+000028E4= 2C                      2117  COMMA           DC.B    $2C
+000028E5= 20                      2118  SPACE           DC.B    $20
+000028E6                          2119  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+000028E6                          2120  
+000028E6                          2121  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;  
+000028E6                          2122  TRAILING_SIZE   DS.W    1 * Size of any immediate or
+000028E8                          2123                            * address values. Immediate or address
+000028E8                          2124                            * value of a BYTE is still processed as
+000028E8                          2125                            * WORD because the trailing bytes
+000028E8                          2126                            * are represented as a word regardless.
+000028E8                          2127                            * $1 = BYTE, $2 = WORD, $4 = LONG
+000028E8                          2128                            
+000028E8                          2129  X               DS.B    1
+000028E9                          2130  Y               DS.B    1 * always X -> Y
+000028EA                          2131  X_COUNTER       DS.B    1
+000028EB                          2132  Y_COUNTER       DS.B    1
+000028EC                          2133  FIRST_X         DS.B    1 * 0: it is first X
+000028ED                          2134                            * 1: it is second X
+000028ED                          2135  FIRST_Y         DS.B    1 * 0: it is first Y
+000028EE                          2136                            * 1: it is second Y
+000028EE                          2137  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+000028EE                          2138  
+000028EE                          2139  main_EA:
+000028EE  4EB8 1924               2140      JSR PARSE_EA_CONSTANT_BITS    
+000028F2                          2141  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 000028F2                          2142  
-000028F2                          2143  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-000028F2                          2144  
+000028F2                          2143  
+000028F2                          2144  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 000028F2                          2145  
 000028F2                          2146  
 000028F2                          2147  
 000028F2                          2148  
 000028F2                          2149  
-000028F2                          2150  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;      
-000028F2                          2151  
-000028F2  4EB9 000028FC           2152      JSR     CHECK_XXXX
-000028F8                          2153  EXT                        * Main EXT alias to finish routine
-000028F8  4EF8 11C2               2154      JMP check_print 
-000028FC                          2155  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-000028FC                          2156  
-000028FC                          2157  CHECK_XXXX:
-000028FC  0C38 0008 1739          2158      CMPI.B  #$8, MNEMONIC
-00002902  6D00 0008               2159      BLT     CHECK_0XXX
-00002906  4EF9 0000291C           2160      JMP     CHECK_1XXX
-0000290C                          2161  
-0000290C                          2162  CHECK_0XXX:
-0000290C  0C38 0004 1739          2163      CMPI.B  #$4, MNEMONIC
-00002912  6D00 004C               2164      BLT     CHECK_00XX
-00002916  4EF9 0000296E           2165      JMP     CHECK_01XX
-0000291C                          2166  
-0000291C                          2167  CHECK_1XXX:
-0000291C  0C38 0008 1739          2168      CMPI.B  #$8, MNEMONIC
-00002922  6700 0308               2169      BEQ     LOAD_1000
-00002926  0C38 0009 1739          2170      CMPI.B  #$9, MNEMONIC
-0000292C  6700 02F8               2171      BEQ     LOAD_1001
-00002930  0C38 000B 1739          2172      CMPI.B  #$B, MNEMONIC
-00002936  6700 02E8               2173      BEQ     LOAD_1011
-0000293A  0C38 000C 1739          2174      CMPI.B  #$C, MNEMONIC
-00002940  6700 02D8               2175      BEQ     LOAD_1100
-00002944  0C38 000D 1739          2176      CMPI.B  #$D, MNEMONIC
-0000294A  6700 026C               2177      BEQ     LOAD_1101
-0000294E  0C38 000E 1739          2178      CMPI.B  #$E, MNEMONIC
-00002954  6700 0038               2179      BEQ     LOAD_1110
-00002958                          2180      
-00002958  4EF9 00003478           2181      JMP     INVALID
-0000295E                          2182      
-0000295E  4E75                    2183      RTS
-00002960                          2184  
-00002960                          2185  CHECK_00XX:
-00002960  0C38 0001 1739          2186      CMPI.B  #$1, MNEMONIC
-00002966  6D00 0712               2187      BLT     LOAD_0000
-0000296A  6C00 0894               2188      BGE     LOAD_00XX
-0000296E                          2189  
-0000296E                          2190  CHECK_01XX:
-0000296E  0C38 0004 1739          2191      CMPI.B  #%0100, MNEMONIC
-00002974  6700 0458               2192      BEQ     LOAD_0100
-00002978  0C38 0005 1739          2193      CMPI.B  #%0101, MNEMONIC
-0000297E  6700 03C4               2194      BEQ     LOAD_0101
-00002982  0C38 0006 1739          2195      CMPI.B  #%0110, MNEMONIC
-00002988  6700 0124               2196      BEQ     LOAD_0110
-0000298C  4E75                    2197      RTS
-0000298E                          2198  
-0000298E                          2199  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-0000298E                          2200  
+000028F2                          2150  
+000028F2                          2151  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;      
+000028F2                          2152  
+000028F2  4EB9 000028FC           2153      JSR     CHECK_XXXX
+000028F8                          2154  EXT                        * Main EXT alias to finish routine
+000028F8  4EF8 11C2               2155      JMP check_print 
+000028FC                          2156  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+000028FC                          2157  
+000028FC                          2158  CHECK_XXXX:
+000028FC  0C38 0008 1739          2159      CMPI.B  #$8, MNEMONIC
+00002902  6D00 0008               2160      BLT     CHECK_0XXX
+00002906  4EF9 0000291C           2161      JMP     CHECK_1XXX
+0000290C                          2162  
+0000290C                          2163  CHECK_0XXX:
+0000290C  0C38 0004 1739          2164      CMPI.B  #$4, MNEMONIC
+00002912  6D00 004C               2165      BLT     CHECK_00XX
+00002916  4EF9 0000296E           2166      JMP     CHECK_01XX
+0000291C                          2167  
+0000291C                          2168  CHECK_1XXX:
+0000291C  0C38 0008 1739          2169      CMPI.B  #$8, MNEMONIC
+00002922  6700 0308               2170      BEQ     LOAD_1000
+00002926  0C38 0009 1739          2171      CMPI.B  #$9, MNEMONIC
+0000292C  6700 02F8               2172      BEQ     LOAD_1001
+00002930  0C38 000B 1739          2173      CMPI.B  #$B, MNEMONIC
+00002936  6700 02E8               2174      BEQ     LOAD_1011
+0000293A  0C38 000C 1739          2175      CMPI.B  #$C, MNEMONIC
+00002940  6700 02D8               2176      BEQ     LOAD_1100
+00002944  0C38 000D 1739          2177      CMPI.B  #$D, MNEMONIC
+0000294A  6700 026C               2178      BEQ     LOAD_1101
+0000294E  0C38 000E 1739          2179      CMPI.B  #$E, MNEMONIC
+00002954  6700 0038               2180      BEQ     LOAD_1110
+00002958                          2181      
+00002958  4EF9 00003478           2182      JMP     INVALID
+0000295E                          2183      
+0000295E  4E75                    2184      RTS
+00002960                          2185  
+00002960                          2186  CHECK_00XX:
+00002960  0C38 0001 1739          2187      CMPI.B  #$1, MNEMONIC
+00002966  6D00 0712               2188      BLT     LOAD_0000
+0000296A  6C00 0894               2189      BGE     LOAD_00XX
+0000296E                          2190  
+0000296E                          2191  CHECK_01XX:
+0000296E  0C38 0004 1739          2192      CMPI.B  #%0100, MNEMONIC
+00002974  6700 0458               2193      BEQ     LOAD_0100
+00002978  0C38 0005 1739          2194      CMPI.B  #%0101, MNEMONIC
+0000297E  6700 03C4               2195      BEQ     LOAD_0101
+00002982  0C38 0006 1739          2196      CMPI.B  #%0110, MNEMONIC
+00002988  6700 0124               2197      BEQ     LOAD_0110
+0000298C  4E75                    2198      RTS
+0000298E                          2199  
+0000298E                          2200  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 0000298E                          2201  
-0000298E                          2202  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-0000298E                          2203  
-0000298E                          2204  LOAD_1110:
-0000298E  247C 00000000           2205              MOVEA.L #0, A2
-00002994  267C 00000000           2206              MOVEA.L #0, A3
-0000299A  4285                    2207              CLR.L   D5
-0000299C                          2208      
-0000299C  1A38 173B               2209              MOVE.B  SECOND_3, D5
-000029A0  0205 0003               2210              ANDI.B  #%011, D5
-000029A4                          2211      
-000029A4  0C05 0003               2212              CMPI.B  #%11, D5
-000029A8  6700 0006               2213              BEQ     MYBE_ASd_1
-000029AC  6600 0068               2214              BNE     MYBE_ASd_2
-000029B0                          2215  
-000029B0  0C38 0000 173A          2216  MYBE_ASd_1  CMPI.B  #%000, FIRST_3
-000029B6  6700 001C               2217              BEQ     ASd_1
-000029BA  0C38 0001 173A          2218              CMPI.B  #%001, FIRST_3
-000029C0  6700 0012               2219              BEQ     ASd_1 * LSd
-000029C4  0C38 0003 173A          2220              CMPI.B  #%011, FIRST_3
-000029CA  6700 0008               2221              BEQ     ASd_1 * ROd
-000029CE  4EF9 00003478           2222              JMP     INVALID
-000029D4                          2223  
-000029D4  0C38 0007 173C          2224  ASd_1       CMPI.B  #%111, THIRD_3
-000029DA  6600 000C               2225              BNE     MOVEON  
-000029DE  0C38 0004 173D          2226              CMPI.B  #%100, FOURTH_3
-000029E4  6700 0A92               2227              BEQ     INVALID
-000029E8                          2228  
-000029E8  367C 2A00               2229  MOVEON      MOVEA.W #ASd_1_BACK, A3           
-000029EC  0C38 0000 173D          2230              CMPI.B  #%000, FOURTH_3
-000029F2  6700 091C               2231              BEQ     SIZE_W
-000029F6  0C38 0001 173D          2232              CMPI.B  #%001, FOURTH_3
-000029FC  6700 091A               2233              BEQ     SIZE_L
-00002A00                          2234  
-00002A00  1638 173C               2235  ASd_1_BACK  MOVE.B  THIRD_3, D3
-00002A04  1438 173D               2236              MOVE.B  FOURTH_3, D2
-00002A08                          2237              
-00002A08  4EB9 00003264           2238              JSR     LOAD_EA
-00002A0E  4EB9 000033C6           2239              JSR     LOAD_NEW_LINE
-00002A14  4E75                    2240              RTS
-00002A16                          2241  
-00002A16  4285                    2242  MYBE_ASd_2  CLR.L   D5
-00002A18                          2243  
-00002A18  1A38 173C               2244              MOVE.B  THIRD_3, D5
-00002A1C  0205 0003               2245              ANDI.B  #%011, D5
-00002A20  0C05 0002               2246              CMPI.B  #%10, D5
-00002A24  6600 0006               2247              BNE     ASd_2 * or LSd or ROd
-00002A28  6700 0A4E               2248              BEQ     INVALID
-00002A2C                          2249              
-00002A2C  4285                    2250  ASd_2       CLR.L   D5
-00002A2E                          2251  
-00002A2E  1A38 173C               2252              MOVE.B  THIRD_3, D5
-00002A32  0205 0004               2253              ANDI.B  #%100, D5
-00002A36  0C05 0004               2254              CMPI.B  #%100, D5
-00002A3A  6700 0048               2255              BEQ     ASd_2_REG
-00002A3E  6600 0002               2256              BNE     ASd_2_IMD
-00002A42                          2257              
-00002A42  347C 2A68               2258  ASd_2_IMD   MOVEA.W #ASd_2_IMD_B, A2
-00002A46  0C38 0000 173A          2259              CMPI.B  #%000, FIRST_3
-00002A4C  6700 0006               2260              BEQ     LOAD_8
-00002A50  6600 000C               2261              BNE     LOAD_FIRST3
-00002A54                          2262              
-00002A54  183C 0008               2263  LOAD_8      MOVE.B  #8, D4
-00002A58  4EF9 00003392           2264              JMP     LOAD_IMMDTE
-00002A5E                          2265  
-00002A5E  1838 173A               2266  LOAD_FIRST3 MOVE.B  FIRST_3, D4
-00002A62  4EF9 00003392           2267              JMP     LOAD_IMMDTE
-00002A68                          2268  
-00002A68  4EB9 000033C8           2269  ASd_2_IMD_B JSR     LOAD_COMMA_SPACE
-00002A6E                          2270  
-00002A6E  163C 0000               2271              MOVE.B  #%000, D3
-00002A72  1438 173D               2272              MOVE.B  FOURTH_3, D2
-00002A76                          2273              
-00002A76  4EB9 00003264           2274              JSR     LOAD_EA
-00002A7C  4EB9 000033C6           2275              JSR     LOAD_NEW_LINE
-00002A82  4E75                    2276              RTS
-00002A84                          2277  
-00002A84  163C 0000               2278  ASd_2_REG   MOVE.B  #%000, D3
-00002A88  1438 173A               2279              MOVE.B  FIRST_3, D2
-00002A8C                          2280              
-00002A8C  4EB9 00003264           2281              JSR     LOAD_EA
-00002A92  4EB9 000033C8           2282              JSR     LOAD_COMMA_SPACE
-00002A98                          2283              
-00002A98  163C 0000               2284              MOVE.B  #%000, D3
-00002A9C  1438 173D               2285              MOVE.B  FOURTH_3, D2
-00002AA0                          2286              
-00002AA0  4EB9 00003264           2287              JSR     LOAD_EA
-00002AA6  4EB9 000033C6           2288              JSR     LOAD_NEW_LINE
-00002AAC  4E75                    2289              RTS
-00002AAE                          2290  
+0000298E                          2202  
+0000298E                          2203  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0000298E                          2204  
+0000298E                          2205  LOAD_1110:
+0000298E  247C 00000000           2206              MOVEA.L #0, A2
+00002994  267C 00000000           2207              MOVEA.L #0, A3
+0000299A  4285                    2208              CLR.L   D5
+0000299C                          2209      
+0000299C  1A38 173B               2210              MOVE.B  SECOND_3, D5
+000029A0  0205 0003               2211              ANDI.B  #%011, D5
+000029A4                          2212      
+000029A4  0C05 0003               2213              CMPI.B  #%11, D5
+000029A8  6700 0006               2214              BEQ     MYBE_ASd_1
+000029AC  6600 0068               2215              BNE     MYBE_ASd_2
+000029B0                          2216  
+000029B0  0C38 0000 173A          2217  MYBE_ASd_1  CMPI.B  #%000, FIRST_3
+000029B6  6700 001C               2218              BEQ     ASd_1
+000029BA  0C38 0001 173A          2219              CMPI.B  #%001, FIRST_3
+000029C0  6700 0012               2220              BEQ     ASd_1 * LSd
+000029C4  0C38 0003 173A          2221              CMPI.B  #%011, FIRST_3
+000029CA  6700 0008               2222              BEQ     ASd_1 * ROd
+000029CE  4EF9 00003478           2223              JMP     INVALID
+000029D4                          2224  
+000029D4  0C38 0007 173C          2225  ASd_1       CMPI.B  #%111, THIRD_3
+000029DA  6600 000C               2226              BNE     MOVEON  
+000029DE  0C38 0004 173D          2227              CMPI.B  #%100, FOURTH_3
+000029E4  6700 0A92               2228              BEQ     INVALID
+000029E8                          2229  
+000029E8  367C 2A00               2230  MOVEON      MOVEA.W #ASd_1_BACK, A3           
+000029EC  0C38 0000 173D          2231              CMPI.B  #%000, FOURTH_3
+000029F2  6700 091C               2232              BEQ     SIZE_W
+000029F6  0C38 0001 173D          2233              CMPI.B  #%001, FOURTH_3
+000029FC  6700 091A               2234              BEQ     SIZE_L
+00002A00                          2235  
+00002A00  1638 173C               2236  ASd_1_BACK  MOVE.B  THIRD_3, D3
+00002A04  1438 173D               2237              MOVE.B  FOURTH_3, D2
+00002A08                          2238              
+00002A08  4EB9 00003264           2239              JSR     LOAD_EA
+00002A0E  4EB9 000033C6           2240              JSR     LOAD_NEW_LINE
+00002A14  4E75                    2241              RTS
+00002A16                          2242  
+00002A16  4285                    2243  MYBE_ASd_2  CLR.L   D5
+00002A18                          2244  
+00002A18  1A38 173C               2245              MOVE.B  THIRD_3, D5
+00002A1C  0205 0003               2246              ANDI.B  #%011, D5
+00002A20  0C05 0002               2247              CMPI.B  #%10, D5
+00002A24  6600 0006               2248              BNE     ASd_2 * or LSd or ROd
+00002A28  6700 0A4E               2249              BEQ     INVALID
+00002A2C                          2250              
+00002A2C  4285                    2251  ASd_2       CLR.L   D5
+00002A2E                          2252  
+00002A2E  1A38 173C               2253              MOVE.B  THIRD_3, D5
+00002A32  0205 0004               2254              ANDI.B  #%100, D5
+00002A36  0C05 0004               2255              CMPI.B  #%100, D5
+00002A3A  6700 0048               2256              BEQ     ASd_2_REG
+00002A3E  6600 0002               2257              BNE     ASd_2_IMD
+00002A42                          2258              
+00002A42  347C 2A68               2259  ASd_2_IMD   MOVEA.W #ASd_2_IMD_B, A2
+00002A46  0C38 0000 173A          2260              CMPI.B  #%000, FIRST_3
+00002A4C  6700 0006               2261              BEQ     LOAD_8
+00002A50  6600 000C               2262              BNE     LOAD_FIRST3
+00002A54                          2263              
+00002A54  183C 0008               2264  LOAD_8      MOVE.B  #8, D4
+00002A58  4EF9 00003392           2265              JMP     LOAD_IMMDTE
+00002A5E                          2266  
+00002A5E  1838 173A               2267  LOAD_FIRST3 MOVE.B  FIRST_3, D4
+00002A62  4EF9 00003392           2268              JMP     LOAD_IMMDTE
+00002A68                          2269  
+00002A68  4EB9 000033C8           2270  ASd_2_IMD_B JSR     LOAD_COMMA_SPACE
+00002A6E                          2271  
+00002A6E  163C 0000               2272              MOVE.B  #%000, D3
+00002A72  1438 173D               2273              MOVE.B  FOURTH_3, D2
+00002A76                          2274              
+00002A76  4EB9 00003264           2275              JSR     LOAD_EA
+00002A7C  4EB9 000033C6           2276              JSR     LOAD_NEW_LINE
+00002A82  4E75                    2277              RTS
+00002A84                          2278  
+00002A84  163C 0000               2279  ASd_2_REG   MOVE.B  #%000, D3
+00002A88  1438 173A               2280              MOVE.B  FIRST_3, D2
+00002A8C                          2281              
+00002A8C  4EB9 00003264           2282              JSR     LOAD_EA
+00002A92  4EB9 000033C8           2283              JSR     LOAD_COMMA_SPACE
+00002A98                          2284              
+00002A98  163C 0000               2285              MOVE.B  #%000, D3
+00002A9C  1438 173D               2286              MOVE.B  FOURTH_3, D2
+00002AA0                          2287              
+00002AA0  4EB9 00003264           2288              JSR     LOAD_EA
+00002AA6  4EB9 000033C6           2289              JSR     LOAD_NEW_LINE
+00002AAC  4E75                    2290              RTS
 00002AAE                          2291  
 00002AAE                          2292  
-00002AAE                          2293  LOAD_0110:
-00002AAE  247C 00000000           2294              MOVEA.L #0, A2
-00002AB4  267C 00000000           2295              MOVEA.L #0, A3
-00002ABA  4285                    2296              CLR.L   D5
-00002ABC  4286                    2297              CLR.L   D6
-00002ABE  4284                    2298              CLR.L   D4
-00002AC0                          2299  
-00002AC0  0C38 0000 173A          2300              CMPI.B  #%000, FIRST_3
-00002AC6  6700 0006               2301              BEQ     MYBE_BRA
-00002ACA  6600 0010               2302              BNE     NOT_BRA
-00002ACE  0C38 0004 173B          2303  MYBE_BRA    CMPI.B  #%100, SECOND_3
-00002AD4  6D00 003A               2304              BLT     BRA
-00002AD8  6C00 0002               2305              BGE     NOT_BRA
-00002ADC                          2306              
-00002ADC  1A38 173A               2307  NOT_BRA     MOVE.B  FIRST_3, D5
-00002AE0  E305                    2308              ASL.B   #1, D5
-00002AE2  1C38 173B               2309              MOVE.B  SECOND_3, D6
-00002AE6  E406                    2310              ASR.B   #2, D6
-00002AE8  DA06                    2311              ADD.B   D6, D5
-00002AEA                          2312              
-00002AEA  0C05 0005               2313              CMPI.B  #%0101, D5
-00002AEE  6700 0020               2314              BEQ     BRA * CS
-00002AF2  0C05 0008               2315              CMPI.B  #%1000, D5
-00002AF6  6700 0018               2316              BEQ     BRA * VC
-00002AFA  0C05 000C               2317              CMPI.B  #%1100, D5
-00002AFE  6700 0010               2318              BEQ     BRA * GE
-00002B02  0C05 000D               2319              CMPI.B  #%1101, D5
-00002B06  6700 0008               2320              BEQ     BRA * LT
-00002B0A                          2321              
-00002B0A  4EF9 00003478           2322              JMP     INVALID
-00002B10                          2323              
+00002AAE                          2293  
+00002AAE                          2294  LOAD_0110:
+00002AAE  247C 00000000           2295              MOVEA.L #0, A2
+00002AB4  267C 00000000           2296              MOVEA.L #0, A3
+00002ABA  4285                    2297              CLR.L   D5
+00002ABC  4286                    2298              CLR.L   D6
+00002ABE  4284                    2299              CLR.L   D4
+00002AC0                          2300  
+00002AC0  0C38 0000 173A          2301              CMPI.B  #%000, FIRST_3
+00002AC6  6700 0006               2302              BEQ     MYBE_BRA
+00002ACA  6600 0010               2303              BNE     NOT_BRA
+00002ACE  0C38 0004 173B          2304  MYBE_BRA    CMPI.B  #%100, SECOND_3
+00002AD4  6D00 003A               2305              BLT     BRA
+00002AD8  6C00 0002               2306              BGE     NOT_BRA
+00002ADC                          2307              
+00002ADC  1A38 173A               2308  NOT_BRA     MOVE.B  FIRST_3, D5
+00002AE0  E305                    2309              ASL.B   #1, D5
+00002AE2  1C38 173B               2310              MOVE.B  SECOND_3, D6
+00002AE6  E406                    2311              ASR.B   #2, D6
+00002AE8  DA06                    2312              ADD.B   D6, D5
+00002AEA                          2313              
+00002AEA  0C05 0005               2314              CMPI.B  #%0101, D5
+00002AEE  6700 0020               2315              BEQ     BRA * CS
+00002AF2  0C05 0008               2316              CMPI.B  #%1000, D5
+00002AF6  6700 0018               2317              BEQ     BRA * VC
+00002AFA  0C05 000C               2318              CMPI.B  #%1100, D5
+00002AFE  6700 0010               2319              BEQ     BRA * GE
+00002B02  0C05 000D               2320              CMPI.B  #%1101, D5
+00002B06  6700 0008               2321              BEQ     BRA * LT
+00002B0A                          2322              
+00002B0A  4EF9 00003478           2323              JMP     INVALID
 00002B10                          2324              
-00002B10  4285                    2325  BRA         CLR.L   D5
-00002B12  4286                    2326              CLR.L   D6
-00002B14                          2327  
-00002B14  3A0D                    2328              MOVE.W  A5, D5 * D5 has $1002 (Starting + MNEMONICS)
-00002B16  3C38 10A0               2329              MOVE.W  CUR_OP_CODE, D6
-00002B1A  0246 00FF               2330              ANDI.W  #$00FF, D6 * D6 now has $E
-00002B1E  0C06 0000               2331              CMPI.B  #$00, D6
-00002B22  6700 0052               2332              BEQ     BRA_WORD * word. there is 4 hex trailing bits (word)
-00002B26                          2333  
-00002B26  0C06 00FF               2334              CMPI.B  #$FF, D6
-00002B2A  6700 0010               2335              BEQ     BRA_BYTE
-00002B2E  0C06 00FE               2336              CMPI.B  #$FE, D6
-00002B32  6700 0008               2337              BEQ     BRA_BYTE
-00002B36                          2338  
-00002B36  4EF9 00003478           2339              JMP     INVALID
-00002B3C                          2340              
-00002B3C  0C06 00FE               2341  BRA_BYTE    CMPI.B  #$FE, D6
-00002B40  6700 0010               2342              BEQ     DOWN_ZERO
-00002B44  0C06 00FF               2343              CMPI.B  #$FF, D6
-00002B48  6700 0010               2344              BEQ     DOWN_ONE
-00002B4C                          2345              
-00002B4C  4EF9 00003478           2346              JMP     INVALID
-00002B52                          2347              
-00002B52  5505                    2348  DOWN_ZERO   SUBI.B  #$2, D5 * D5 has $1000 (Starting)
-00002B54  4EF9 00002B62           2349              JMP     BRA_BYTE2
-00002B5A                          2350              
-00002B5A  5305                    2351  DOWN_ONE    SUBI.B  #$1, D5 * D5 has $1001 (Starting + 1)
-00002B5C  4EF9 00002B62           2352              JMP     BRA_BYTE2
-00002B62                          2353              
-00002B62  347C 2B6E               2354  BRA_BYTE2   MOVE.W  #BRA_BYTE3, A2
-00002B66  3805                    2355              MOVE.W  D5, D4
-00002B68  4EF9 0000336E           2356              JMP     LOAD_ABS_SHORT
-00002B6E  4EB9 000033C6           2357  BRA_BYTE3   JSR     LOAD_NEW_LINE
-00002B74  4E75                    2358              RTS
-00002B76                          2359  
-00002B76  381D                    2360  BRA_WORD    MOVE.W  (A5)+, D4 * D4 now has $000E
-00002B78                          2361  
-00002B78  0C84 00008000           2362              CMPI.L  #$8000, D4
-00002B7E  6C00 001A               2363              BGE     NEG_WORD
-00002B82  6D00 0002               2364              BLT     POS_WORD
-00002B86                          2365              
-00002B86  347C 2B92               2366  POS_WORD    MOVE.W  #BRA_WORD_BK, A2
-00002B8A  D845                    2367              ADD.W   D5, D4 * D4 now has $100E
-00002B8C  4EF9 0000336E           2368              JMP     LOAD_ABS_SHORT
-00002B92  4EB9 000033C6           2369  BRA_WORD_BK JSR     LOAD_NEW_LINE
-00002B98  4E75                    2370              RTS
-00002B9A                          2371  
-00002B9A  347C 2BB0               2372  NEG_WORD    MOVE.W  #BRA_WRD_BK2, A2
-00002B9E  4444                    2373              NEG     D4
-00002BA0                          2374              
-00002BA0  B885                    2375              CMP.L   D5, D4 * $4002 vs DISPLACEMENT
-00002BA2  6E00 08D4               2376              BGT     INVALID
-00002BA6                          2377              
-00002BA6  9A44                    2378              SUB.W   D4, D5 * D5 now has $1000 - 2cmp'ed $000E
-00002BA8  3805                    2379              MOVE.W  D5, D4
-00002BAA  4EF9 0000336E           2380              JMP     LOAD_ABS_SHORT
-00002BB0  4EB9 000033C6           2381  BRA_WRD_BK2 JSR     LOAD_NEW_LINE
-00002BB6  4E75                    2382              RTS
-00002BB8                          2383  
+00002B10                          2325              
+00002B10  4285                    2326  BRA         CLR.L   D5
+00002B12  4286                    2327              CLR.L   D6
+00002B14                          2328  
+00002B14  3A0D                    2329              MOVE.W  A5, D5 * D5 has $1002 (Starting + MNEMONICS)
+00002B16  3C38 10A0               2330              MOVE.W  CUR_OP_CODE, D6
+00002B1A  0246 00FF               2331              ANDI.W  #$00FF, D6 * D6 now has $E
+00002B1E  0C06 0000               2332              CMPI.B  #$00, D6
+00002B22  6700 0052               2333              BEQ     BRA_WORD * word. there is 4 hex trailing bits (word)
+00002B26                          2334  
+00002B26  0C06 00FF               2335              CMPI.B  #$FF, D6
+00002B2A  6700 0010               2336              BEQ     BRA_BYTE
+00002B2E  0C06 00FE               2337              CMPI.B  #$FE, D6
+00002B32  6700 0008               2338              BEQ     BRA_BYTE
+00002B36                          2339  
+00002B36  4EF9 00003478           2340              JMP     INVALID
+00002B3C                          2341              
+00002B3C  0C06 00FE               2342  BRA_BYTE    CMPI.B  #$FE, D6
+00002B40  6700 0010               2343              BEQ     DOWN_ZERO
+00002B44  0C06 00FF               2344              CMPI.B  #$FF, D6
+00002B48  6700 0010               2345              BEQ     DOWN_ONE
+00002B4C                          2346              
+00002B4C  4EF9 00003478           2347              JMP     INVALID
+00002B52                          2348              
+00002B52  5505                    2349  DOWN_ZERO   SUBI.B  #$2, D5 * D5 has $1000 (Starting)
+00002B54  4EF9 00002B62           2350              JMP     BRA_BYTE2
+00002B5A                          2351              
+00002B5A  5305                    2352  DOWN_ONE    SUBI.B  #$1, D5 * D5 has $1001 (Starting + 1)
+00002B5C  4EF9 00002B62           2353              JMP     BRA_BYTE2
+00002B62                          2354              
+00002B62  347C 2B6E               2355  BRA_BYTE2   MOVE.W  #BRA_BYTE3, A2
+00002B66  3805                    2356              MOVE.W  D5, D4
+00002B68  4EF9 0000336E           2357              JMP     LOAD_ABS_SHORT
+00002B6E  4EB9 000033C6           2358  BRA_BYTE3   JSR     LOAD_NEW_LINE
+00002B74  4E75                    2359              RTS
+00002B76                          2360  
+00002B76  381D                    2361  BRA_WORD    MOVE.W  (A5)+, D4 * D4 now has $000E
+00002B78                          2362  
+00002B78  0C84 00008000           2363              CMPI.L  #$8000, D4
+00002B7E  6C00 001A               2364              BGE     NEG_WORD
+00002B82  6D00 0002               2365              BLT     POS_WORD
+00002B86                          2366              
+00002B86  347C 2B92               2367  POS_WORD    MOVE.W  #BRA_WORD_BK, A2
+00002B8A  D845                    2368              ADD.W   D5, D4 * D4 now has $100E
+00002B8C  4EF9 0000336E           2369              JMP     LOAD_ABS_SHORT
+00002B92  4EB9 000033C6           2370  BRA_WORD_BK JSR     LOAD_NEW_LINE
+00002B98  4E75                    2371              RTS
+00002B9A                          2372  
+00002B9A  347C 2BB0               2373  NEG_WORD    MOVE.W  #BRA_WRD_BK2, A2
+00002B9E  4444                    2374              NEG     D4
+00002BA0                          2375              
+00002BA0  B885                    2376              CMP.L   D5, D4 * $4002 vs DISPLACEMENT
+00002BA2  6E00 08D4               2377              BGT     INVALID
+00002BA6                          2378              
+00002BA6  9A44                    2379              SUB.W   D4, D5 * D5 now has $1000 - 2cmp'ed $000E
+00002BA8  3805                    2380              MOVE.W  D5, D4
+00002BAA  4EF9 0000336E           2381              JMP     LOAD_ABS_SHORT
+00002BB0  4EB9 000033C6           2382  BRA_WRD_BK2 JSR     LOAD_NEW_LINE
+00002BB6  4E75                    2383              RTS
 00002BB8                          2384  
 00002BB8                          2385  
-00002BB8                          2386  LOAD_1101:
-00002BB8  0C38 0003 173B          2387              CMPI.B  #%011, SECOND_3
-00002BBE  6700 0012               2388              BEQ     ADDA
-00002BC2  0C38 0007 173B          2389              CMPI.B  #%111, SECOND_3
-00002BC8  6700 0008               2390              BEQ     ADDA
-00002BCC                          2391              
-00002BCC  4EF9 00002C2C           2392              JMP     LOAD_1000
-00002BD2                          2393              
-00002BD2  367C 2BF0               2394  ADDA        MOVEA.W #ADDA_BACK, A3
-00002BD6  4281                    2395              CLR.L   D1
-00002BD8  1238 173B               2396              MOVE.B  SECOND_3, D1
-00002BDC  0201 0004               2397              ANDI.B  #%100, D1
-00002BE0                          2398              
-00002BE0  0C01 0000               2399              CMPI.B  #%000, D1
-00002BE4  6700 072A               2400              BEQ     SIZE_W
-00002BE8  0C01 0004               2401              CMPI.B  #%100, D1
-00002BEC  6700 072A               2402              BEQ     SIZE_L
-00002BF0                          2403              
-00002BF0  1638 173C               2404  ADDA_BACK   MOVE.B  THIRD_3, D3
-00002BF4  1438 173D               2405              MOVE.B  FOURTH_3, D2
-00002BF8                          2406  
-00002BF8  4EB9 00003264           2407              JSR     LOAD_EA
-00002BFE  4EB9 000033C8           2408              JSR     LOAD_COMMA_SPACE
-00002C04                          2409              
-00002C04  163C 0001               2410              MOVE.B  #%001, D3
-00002C08  1438 173A               2411              MOVE.B  FIRST_3, D2
-00002C0C                          2412              
-00002C0C  4EB9 00003264           2413              JSR     LOAD_EA
-00002C12  4EB9 000033C6           2414              JSR     LOAD_NEW_LINE
-00002C18  4E75                    2415              RTS
-00002C1A                          2416  
-00002C1A                          2417  LOAD_1100:
-00002C1A  4EF9 00002C2C           2418      JMP     LOAD_1000
-00002C20                          2419      
-00002C20                          2420  LOAD_1011:
-00002C20  4EF9 00002C2C           2421      JMP     LOAD_1000
-00002C26                          2422  
+00002BB8                          2386  
+00002BB8                          2387  LOAD_1101:
+00002BB8  0C38 0003 173B          2388              CMPI.B  #%011, SECOND_3
+00002BBE  6700 0012               2389              BEQ     ADDA
+00002BC2  0C38 0007 173B          2390              CMPI.B  #%111, SECOND_3
+00002BC8  6700 0008               2391              BEQ     ADDA
+00002BCC                          2392              
+00002BCC  4EF9 00002C2C           2393              JMP     LOAD_1000
+00002BD2                          2394              
+00002BD2  367C 2BF0               2395  ADDA        MOVEA.W #ADDA_BACK, A3
+00002BD6  4281                    2396              CLR.L   D1
+00002BD8  1238 173B               2397              MOVE.B  SECOND_3, D1
+00002BDC  0201 0004               2398              ANDI.B  #%100, D1
+00002BE0                          2399              
+00002BE0  0C01 0000               2400              CMPI.B  #%000, D1
+00002BE4  6700 072A               2401              BEQ     SIZE_W
+00002BE8  0C01 0004               2402              CMPI.B  #%100, D1
+00002BEC  6700 072A               2403              BEQ     SIZE_L
+00002BF0                          2404              
+00002BF0  1638 173C               2405  ADDA_BACK   MOVE.B  THIRD_3, D3
+00002BF4  1438 173D               2406              MOVE.B  FOURTH_3, D2
+00002BF8                          2407  
+00002BF8  4EB9 00003264           2408              JSR     LOAD_EA
+00002BFE  4EB9 000033C8           2409              JSR     LOAD_COMMA_SPACE
+00002C04                          2410              
+00002C04  163C 0001               2411              MOVE.B  #%001, D3
+00002C08  1438 173A               2412              MOVE.B  FIRST_3, D2
+00002C0C                          2413              
+00002C0C  4EB9 00003264           2414              JSR     LOAD_EA
+00002C12  4EB9 000033C6           2415              JSR     LOAD_NEW_LINE
+00002C18  4E75                    2416              RTS
+00002C1A                          2417  
+00002C1A                          2418  LOAD_1100:
+00002C1A  4EF9 00002C2C           2419      JMP     LOAD_1000
+00002C20                          2420      
+00002C20                          2421  LOAD_1011:
+00002C20  4EF9 00002C2C           2422      JMP     LOAD_1000
 00002C26                          2423  
-00002C26                          2424  LOAD_1001:
-00002C26  4EF9 00002C2C           2425      JMP     LOAD_1000
-00002C2C                          2426  
+00002C26                          2424  
+00002C26                          2425  LOAD_1001:
+00002C26  4EF9 00002C2C           2426      JMP     LOAD_1000
 00002C2C                          2427  
-00002C2C                          2428  LOAD_1000:
-00002C2C  4283                    2429              CLR.L   D3
-00002C2E  4282                    2430              CLR.L   D2
-00002C30  267C 00000000           2431              MOVEA.L #0, A3
-00002C36                          2432              
-00002C36  0C38 0007 173B          2433              CMPI.B  #%111, SECOND_3
-00002C3C  6700 00BA               2434              BEQ     DIVS
-00002C40                          2435              
-00002C40  0C38 0003 173B          2436              CMPI.B  #%011, SECOND_3
-00002C46  6700 0830               2437              BEQ     INVALID
-00002C4A                          2438              
-00002C4A  0C38 0004 173B          2439              CMPI.B  #%100, SECOND_3
-00002C50  6D00 0006               2440              BLT     DIR_0 * direction bit 0
-00002C54  6C00 0052               2441              BGE     DIR_1 * direction bit 1
-00002C58                          2442              
-00002C58  4281                    2443  DIR_0       CLR.L   D1
-00002C5A  1238 173B               2444              MOVE.B  SECOND_3, D1
-00002C5E  0201 0003               2445              ANDI.B  #%011, D1
-00002C62                          2446      
-00002C62  367C 2C7E               2447              MOVEA.W #OR_BACK, A3
-00002C66  0C01 0000               2448              CMPI.B  #%00, D1
-00002C6A  6700 069C               2449              BEQ     SIZE_B
-00002C6E  0C01 0001               2450              CMPI.B  #%01, D1
-00002C72  6700 069C               2451              BEQ     SIZE_W
-00002C76  0C01 0002               2452              CMPI.B  #%10, D1
-00002C7A  6700 069C               2453              BEQ     SIZE_L
-00002C7E                          2454              
-00002C7E  1638 173C               2455  OR_BACK     MOVE.B  THIRD_3, D3
-00002C82  1438 173D               2456              MOVE.B  FOURTH_3, D2
-00002C86                          2457  
-00002C86  4EB9 00003264           2458              JSR     LOAD_EA
-00002C8C  4EB9 000033C8           2459              JSR     LOAD_COMMA_SPACE
-00002C92                          2460              
-00002C92  163C 0000               2461              MOVE.B  #%000, D3
-00002C96  1438 173A               2462              MOVE.B  FIRST_3, D2
-00002C9A                          2463              
-00002C9A  4EB9 00003264           2464              JSR     LOAD_EA
-00002CA0  4EB9 000033C6           2465              JSR     LOAD_NEW_LINE
-00002CA6  4E75                    2466              RTS
-00002CA8                          2467              
-00002CA8  163C 0000               2468  DIR_1       MOVE.B  #%000, D3
-00002CAC  1438 173A               2469              MOVE.B  FIRST_3, D2
-00002CB0                          2470              
-00002CB0  4EB9 00003264           2471              JSR     LOAD_EA
-00002CB6  4EB9 000033C8           2472              JSR     LOAD_COMMA_SPACE
-00002CBC                          2473              
-00002CBC  4281                    2474              CLR.L   D1
-00002CBE  1238 173B               2475              MOVE.B  SECOND_3, D1
-00002CC2  0201 0003               2476              ANDI.B  #%011, D1
-00002CC6                          2477      
-00002CC6  367C 2CE2               2478              MOVEA.W #OR_BACK2, A3
-00002CCA  0C01 0000               2479              CMPI.B  #%00, D1
-00002CCE  6700 0638               2480              BEQ     SIZE_B
-00002CD2  0C01 0001               2481              CMPI.B  #%01, D1
-00002CD6  6700 0638               2482              BEQ     SIZE_W
-00002CDA  0C01 0002               2483              CMPI.B  #%10, D1
-00002CDE  6700 0638               2484              BEQ     SIZE_L
-00002CE2                          2485              
-00002CE2  1638 173C               2486  OR_BACK2    MOVE.B  THIRD_3, D3
-00002CE6  1438 173D               2487              MOVE.B  FOURTH_3, D2
-00002CEA                          2488  
-00002CEA  4EB9 00003264           2489              JSR     LOAD_EA
-00002CF0  4EB9 000033C6           2490              JSR     LOAD_NEW_LINE
-00002CF6  4E75                    2491              RTS    
-00002CF8                          2492              
-00002CF8  367C 2D1A               2493  DIVS        MOVEA.W #DIVS_BACK, A3
-00002CFC  0C38 0000 173D          2494              CMPI.B  #%000, FOURTH_3
-00002D02  6700 060C               2495              BEQ     SIZE_W
-00002D06  0C38 0001 173D          2496              CMPI.B  #%001, FOURTH_3
-00002D0C  6700 076A               2497              BEQ     INVALID
-00002D10  0C38 0004 173D          2498              CMPI.B  #%100, FOURTH_3
-00002D16  6700 05F8               2499              BEQ     SIZE_W
-00002D1A                          2500              
-00002D1A  1638 173C               2501  DIVS_BACK   MOVE.B  THIRD_3, D3
-00002D1E  1438 173D               2502              MOVE.B  FOURTH_3, D2
-00002D22                          2503  
-00002D22  4EB9 00003264           2504              JSR     LOAD_EA
-00002D28  4EB9 000033C8           2505              JSR     LOAD_COMMA_SPACE
-00002D2E                          2506  
-00002D2E  163C 0000               2507              MOVE.B  #%000, D3
-00002D32  1438 173A               2508              MOVE.B  FIRST_3, D2
-00002D36                          2509  
-00002D36  4EB9 00003264           2510              JSR     LOAD_EA
-00002D3C  4EB9 000033C6           2511              JSR     LOAD_NEW_LINE
-00002D42  4E75                    2512              RTS
-00002D44                          2513  
+00002C2C                          2428  
+00002C2C                          2429  LOAD_1000:
+00002C2C  4283                    2430              CLR.L   D3
+00002C2E  4282                    2431              CLR.L   D2
+00002C30  267C 00000000           2432              MOVEA.L #0, A3
+00002C36                          2433              
+00002C36  0C38 0007 173B          2434              CMPI.B  #%111, SECOND_3
+00002C3C  6700 00BA               2435              BEQ     DIVS
+00002C40                          2436              
+00002C40  0C38 0003 173B          2437              CMPI.B  #%011, SECOND_3
+00002C46  6700 0830               2438              BEQ     INVALID
+00002C4A                          2439              
+00002C4A  0C38 0004 173B          2440              CMPI.B  #%100, SECOND_3
+00002C50  6D00 0006               2441              BLT     DIR_0 * direction bit 0
+00002C54  6C00 0052               2442              BGE     DIR_1 * direction bit 1
+00002C58                          2443              
+00002C58  4281                    2444  DIR_0       CLR.L   D1
+00002C5A  1238 173B               2445              MOVE.B  SECOND_3, D1
+00002C5E  0201 0003               2446              ANDI.B  #%011, D1
+00002C62                          2447      
+00002C62  367C 2C7E               2448              MOVEA.W #OR_BACK, A3
+00002C66  0C01 0000               2449              CMPI.B  #%00, D1
+00002C6A  6700 069C               2450              BEQ     SIZE_B
+00002C6E  0C01 0001               2451              CMPI.B  #%01, D1
+00002C72  6700 069C               2452              BEQ     SIZE_W
+00002C76  0C01 0002               2453              CMPI.B  #%10, D1
+00002C7A  6700 069C               2454              BEQ     SIZE_L
+00002C7E                          2455              
+00002C7E  1638 173C               2456  OR_BACK     MOVE.B  THIRD_3, D3
+00002C82  1438 173D               2457              MOVE.B  FOURTH_3, D2
+00002C86                          2458  
+00002C86  4EB9 00003264           2459              JSR     LOAD_EA
+00002C8C  4EB9 000033C8           2460              JSR     LOAD_COMMA_SPACE
+00002C92                          2461              
+00002C92  163C 0000               2462              MOVE.B  #%000, D3
+00002C96  1438 173A               2463              MOVE.B  FIRST_3, D2
+00002C9A                          2464              
+00002C9A  4EB9 00003264           2465              JSR     LOAD_EA
+00002CA0  4EB9 000033C6           2466              JSR     LOAD_NEW_LINE
+00002CA6  4E75                    2467              RTS
+00002CA8                          2468              
+00002CA8  163C 0000               2469  DIR_1       MOVE.B  #%000, D3
+00002CAC  1438 173A               2470              MOVE.B  FIRST_3, D2
+00002CB0                          2471              
+00002CB0  4EB9 00003264           2472              JSR     LOAD_EA
+00002CB6  4EB9 000033C8           2473              JSR     LOAD_COMMA_SPACE
+00002CBC                          2474              
+00002CBC  4281                    2475              CLR.L   D1
+00002CBE  1238 173B               2476              MOVE.B  SECOND_3, D1
+00002CC2  0201 0003               2477              ANDI.B  #%011, D1
+00002CC6                          2478      
+00002CC6  367C 2CE2               2479              MOVEA.W #OR_BACK2, A3
+00002CCA  0C01 0000               2480              CMPI.B  #%00, D1
+00002CCE  6700 0638               2481              BEQ     SIZE_B
+00002CD2  0C01 0001               2482              CMPI.B  #%01, D1
+00002CD6  6700 0638               2483              BEQ     SIZE_W
+00002CDA  0C01 0002               2484              CMPI.B  #%10, D1
+00002CDE  6700 0638               2485              BEQ     SIZE_L
+00002CE2                          2486              
+00002CE2  1638 173C               2487  OR_BACK2    MOVE.B  THIRD_3, D3
+00002CE6  1438 173D               2488              MOVE.B  FOURTH_3, D2
+00002CEA                          2489  
+00002CEA  4EB9 00003264           2490              JSR     LOAD_EA
+00002CF0  4EB9 000033C6           2491              JSR     LOAD_NEW_LINE
+00002CF6  4E75                    2492              RTS    
+00002CF8                          2493              
+00002CF8  367C 2D1A               2494  DIVS        MOVEA.W #DIVS_BACK, A3
+00002CFC  0C38 0000 173D          2495              CMPI.B  #%000, FOURTH_3
+00002D02  6700 060C               2496              BEQ     SIZE_W
+00002D06  0C38 0001 173D          2497              CMPI.B  #%001, FOURTH_3
+00002D0C  6700 076A               2498              BEQ     INVALID
+00002D10  0C38 0004 173D          2499              CMPI.B  #%100, FOURTH_3
+00002D16  6700 05F8               2500              BEQ     SIZE_W
+00002D1A                          2501              
+00002D1A  1638 173C               2502  DIVS_BACK   MOVE.B  THIRD_3, D3
+00002D1E  1438 173D               2503              MOVE.B  FOURTH_3, D2
+00002D22                          2504  
+00002D22  4EB9 00003264           2505              JSR     LOAD_EA
+00002D28  4EB9 000033C8           2506              JSR     LOAD_COMMA_SPACE
+00002D2E                          2507  
+00002D2E  163C 0000               2508              MOVE.B  #%000, D3
+00002D32  1438 173A               2509              MOVE.B  FIRST_3, D2
+00002D36                          2510  
+00002D36  4EB9 00003264           2511              JSR     LOAD_EA
+00002D3C  4EB9 000033C6           2512              JSR     LOAD_NEW_LINE
+00002D42  4E75                    2513              RTS
 00002D44                          2514  
-00002D44                          2515  LOAD_0101:
-00002D44  4283                    2516              CLR.L   D3
-00002D46  4282                    2517              CLR.L   D2
-00002D48  267C 00000000           2518              MOVEA.L #0, A3
-00002D4E                          2519  
-00002D4E  0C38 0007 173A          2520              CMPI.B  #%111, FIRST_3
-00002D54  6F00 0008               2521              BLE     MYBE_SUBQ1
-00002D58  4EF9 00003478           2522              JMP     INVALID
-00002D5E                          2523              
-00002D5E  0C38 0003 173B          2524  MYBE_SUBQ1  CMPI.B  #%011, SECOND_3
-00002D64  6E00 0008               2525              BGT     MYBE_SUBQ2
-00002D68  4EF9 00003478           2526              JMP     INVALID
-00002D6E                          2527  
-00002D6E  0C38 0007 173B          2528  MYBE_SUBQ2  CMPI.B  #%111, SECOND_3
-00002D74  6D00 0008               2529              BLT     SUBQ
-00002D78  4EF9 00003478           2530              JMP     INVALID
-00002D7E                          2531  
-00002D7E  5238 173A               2532  SUBQ        ADDI.B  #%1, FIRST_3
-00002D82  1838 173A               2533              MOVE.B  FIRST_3, D4
-00002D86                          2534              
-00002D86  347C 2D90               2535              MOVEA.W #SUBQ_SAVED, A2
-00002D8A  4EF9 00003392           2536              JMP     LOAD_IMMDTE
-00002D90                          2537              
-00002D90  4EB9 000033C8           2538  SUBQ_SAVED  JSR     LOAD_COMMA_SPACE
-00002D96                          2539  
-00002D96  367C 2DB8               2540              MOVEA.W #SUBQ_BACK, A3
-00002D9A  0C38 0004 173B          2541              CMPI.B  #%100, SECOND_3
-00002DA0  6700 0566               2542              BEQ     SIZE_B
-00002DA4  0C38 0005 173B          2543              CMPI.B  #%101, SECOND_3
-00002DAA  6700 0564               2544              BEQ     SIZE_W
-00002DAE  0C38 0006 173B          2545              CMPI.B  #%110, SECOND_3
-00002DB4  6700 0562               2546              BEQ     SIZE_L
-00002DB8                          2547              
-00002DB8  1638 173C               2548  SUBQ_BACK   MOVE.B  THIRD_3, D3
-00002DBC  1438 173D               2549              MOVE.B  FOURTH_3, D2
-00002DC0                          2550  
-00002DC0  4EB9 00003264           2551              JSR     LOAD_EA
-00002DC6  4EB9 000033C6           2552              JSR     LOAD_NEW_LINE
-00002DCC  4E75                    2553              RTS
-00002DCE                          2554  
-00002DCE                          2555  LOAD_0100:
-00002DCE  4283                    2556              CLR.L   D3
-00002DD0  4282                    2557              CLR.L   D2
-00002DD2  267C 00000000           2558              MOVEA.L #0, A3
-00002DD8                          2559  
-00002DD8  0C38 0002 173A          2560              CMPI.B  #%010, FIRST_3
-00002DDE  6700 0006               2561              BEQ     MYBE_NEG
-00002DE2  6600 000C               2562              BNE     NOT_NEG
-00002DE6  0C38 0003 173B          2563  MYBE_NEG    CMPI.B  #%011, SECOND_3
-00002DEC  6D00 008E               2564              BLT     NEG
-00002DF0                          2565  
-00002DF0  0C38 0007 173A          2566  NOT_NEG     CMPI.B  #%111, FIRST_3
-00002DF6  6700 0006               2567              BEQ     MYBE_RTS1
-00002DFA  6600 0032               2568              BNE     NOT_RTS
-00002DFE  0C38 0001 173B          2569  MYBE_RTS1   CMPI.B  #%001, SECOND_3
-00002E04  6700 0006               2570              BEQ     MYBE_RTS2
-00002E08  6600 0024               2571              BNE     NOT_RTS
-00002E0C  0C38 0006 173C          2572  MYBE_RTS2   CMPI.B  #%110, THIRD_3
-00002E12  6700 0006               2573              BEQ     MYBE_RTS3
-00002E16  6600 0016               2574              BNE     NOT_RTS
-00002E1A  0C38 0005 173D          2575  MYBE_RTS3   CMPI.B  #%101, FOURTH_3
-00002E20  6700 0092               2576              BEQ     RTS
-00002E24  0C38 0001 173D          2577              CMPI.B  #%001, FOURTH_3 
-00002E2A  6700 0088               2578              BEQ     RTS * It's actually NOP but it's the same shit in EA perspective
-00002E2E                          2579              
-00002E2E  0C38 0007 173A          2580  NOT_RTS     CMPI.B  #%111, FIRST_3
-00002E34  6700 0006               2581              BEQ     MYBE_JSR
-00002E38  6600 000C               2582              BNE     NOT_JSR
-00002E3C  0C38 0002 173B          2583  MYBE_JSR    CMPI.B  #%010, SECOND_3
-00002E42  6700 0078               2584              BEQ     JSR
-00002E46                          2585  
-00002E46  4286                    2586  NOT_JSR     CLR.L   D6
-00002E48  1C38 173A               2587              MOVE.B  FIRST_3, D6
-00002E4C  0206 0005               2588              ANDI.B  #%101, D6 * Making %1X0 -> %100
-00002E50  0C06 0004               2589              CMPI.B  #%100, D6
-00002E54  6700 0006               2590              BEQ     MYBE_MOVEM
-00002E58  6600 0012               2591              BNE     NOT_MOVEM
-00002E5C                          2592              
-00002E5C  1C38 173B               2593  MYBE_MOVEM  MOVE.B  SECOND_3, D6
-00002E60  0206 0006               2594              ANDI.B  #%110, D6
-00002E64  0C06 0002               2595              CMPI.B  #%010, D6
-00002E68  6700 0080               2596              BEQ     MOVEM
-00002E6C                          2597              
-00002E6C  0C38 0007 173B          2598  NOT_MOVEM   CMPI.B  #%111, SECOND_3
-00002E72  6700 0084               2599              BEQ     LEA
-00002E76                          2600              
-00002E76  4EF9 00003478           2601              JMP     INVALID
-00002E7C                          2602  
-00002E7C                          2603  NEG:
-00002E7C  367C 2E9E               2604              MOVEA.W #NEG_BACK, A3
-00002E80  0C38 0000 173B          2605              CMPI.B  #%000, SECOND_3
-00002E86  6700 0480               2606              BEQ     SIZE_B
-00002E8A  0C38 0001 173B          2607              CMPI.B  #%001, SECOND_3
-00002E90  6700 047E               2608              BEQ     SIZE_W
-00002E94  0C38 0002 173B          2609              CMPI.B  #%010, SECOND_3
-00002E9A  6700 047C               2610              BEQ     SIZE_L
-00002E9E                          2611              
-00002E9E  1638 173C               2612  NEG_BACK    MOVE.B  THIRD_3, D3
-00002EA2  1438 173D               2613              MOVE.B  FOURTH_3, D2
-00002EA6                          2614  
-00002EA6  4EB9 00003264           2615              JSR     LOAD_EA
-00002EAC  4EB9 000033C6           2616              JSR     LOAD_NEW_LINE
-00002EB2  4E75                    2617              RTS
-00002EB4                          2618              
-00002EB4                          2619  RTS:
-00002EB4  4EB9 000033C6           2620              JSR     LOAD_NEW_LINE
-00002EBA  4E75                    2621              RTS
-00002EBC                          2622  
-00002EBC                          2623  JSR:
-00002EBC  367C 2ED4               2624              MOVEA.W #JSR_BACK, A3
-00002EC0  0C38 0000 173D          2625              CMPI.B  #%000, FOURTH_3
-00002EC6  6700 0448               2626              BEQ     SIZE_W
-00002ECA  0C38 0001 173D          2627              CMPI.B  #%001, FOURTH_3
-00002ED0  6700 0446               2628              BEQ     SIZE_L
-00002ED4                          2629              
-00002ED4  1638 173C               2630  JSR_BACK    MOVE.B  THIRD_3, D3
-00002ED8  1438 173D               2631              MOVE.B  FOURTH_3, D2
-00002EDC                          2632              
-00002EDC  4EB9 00003264           2633              JSR     LOAD_EA
-00002EE2  4EB9 000033C6           2634              JSR     LOAD_NEW_LINE
-00002EE8  4E75                    2635              RTS
-00002EEA                          2636  
-00002EEA                          2637  MOVEM:
-00002EEA  4EB9 00002F44           2638              JSR     FUK_MOVEM
-00002EF0  4EB9 000033C6           2639              JSR     LOAD_NEW_LINE
-00002EF6  4E75                    2640              RTS
-00002EF8                          2641      
-00002EF8                          2642  LEA:
-00002EF8  367C 2F1A               2643              MOVEA.W #LEA_BACK, A3
-00002EFC  0C38 0000 173D          2644              CMPI.B  #%000, FOURTH_3
-00002F02  6700 040C               2645              BEQ     SIZE_W
-00002F06  0C38 0001 173D          2646              CMPI.B  #%001, FOURTH_3
-00002F0C  6700 040A               2647              BEQ     SIZE_L
-00002F10  0C38 0004 173D          2648              CMPI.B  #%100, FOURTH_3
-00002F16  6700 0560               2649              BEQ     INVALID 
-00002F1A                          2650              
-00002F1A  1638 173C               2651  LEA_BACK    MOVE.B  THIRD_3, D3
-00002F1E  1438 173D               2652              MOVE.B  FOURTH_3, D2
-00002F22                          2653              
-00002F22  4EB9 00003264           2654              JSR     LOAD_EA
-00002F28  4EB9 000033C8           2655              JSR     LOAD_COMMA_SPACE
-00002F2E                          2656              
-00002F2E  163C 0001               2657              MOVE.B  #%001, D3
-00002F32  1438 173A               2658              MOVE.B  FIRST_3, D2
-00002F36                          2659              
-00002F36  4EB9 00003264           2660              JSR     LOAD_EA
-00002F3C  4EB9 000033C6           2661              JSR     LOAD_NEW_LINE
-00002F42  4E75                    2662              RTS 
-00002F44                          2663  
-00002F44                          2664  FUK_MOVEM:  * Functional Utilization of Knowledge in MOVEM
-00002F44  4EB9 00002F4C           2665              JSR     MOVEM_PARSE
-00002F4A  4E75                    2666              RTS
-00002F4C                          2667  
-00002F4C                          2668  MOVEM_PARSE:
-00002F4C  381D                    2669              MOVE.W  (A5)+, D4 * D4 has $00FF
-00002F4E                          2670              
-00002F4E  11FC 00FF 28EA          2671              MOVE.B  #$FF, X_COUNTER * start from -1
-00002F54  11FC 00FF 28EB          2672              MOVE.B  #$FF, Y_COUNTER * start from -1
-00002F5A  11FC 0000 28EC          2673              MOVE.B  #0, FIRST_X
-00002F60  11FC 0000 28ED          2674              MOVE.B  #0, FIRST_Y
-00002F66                          2675              
-00002F66  0C38 0004 173C          2676              CMPI.B  #%100, THIRD_3
-00002F6C  6600 0006               2677              BNE     A_TO_D
-00002F70  6700 0014               2678              BEQ     D_TO_A
-00002F74                          2679  
-00002F74  11FC 0001 28E8          2680  A_TO_D      MOVE.B  #%001, X * X = A
-00002F7A  11FC 0000 28E9          2681              MOVE.B  #%000, Y * Y = D
-00002F80  4EF9 00002F98           2682              JMP     NEXT_STEP
-00002F86                          2683              
-00002F86  11FC 0000 28E8          2684  D_TO_A      MOVE.B  #%000, X * X = D
-00002F8C  11FC 0001 28E9          2685              MOVE.B  #%001, Y * Y = A
-00002F92  4EF9 00002F98           2686              JMP     NEXT_STEP
-00002F98                          2687  
-00002F98  E35C                    2688  NEXT_STEP   ROL.W   #1, D4
-00002F9A  3A04                    2689              MOVE.W  D4, D5
-00002F9C  0245 0001               2690              ANDI.W  #$1, D5
-00002FA0                          2691              
-00002FA0  0C38 0007 28EA          2692              CMPI.B  #7, X_COUNTER
-00002FA6  6C00 0010               2693              BGE     ADD_Y
-00002FAA  6D00 0002               2694              BLT     ADD_X
-00002FAE                          2695              
-00002FAE  5238 28EA               2696  ADD_X       ADDI.B  #1, X_COUNTER
-00002FB2  4EF9 00002FC8           2697              JMP     KEEP_GOING0
-00002FB8                          2698  
-00002FB8  5238 28EB               2699  ADD_Y       ADDI.B  #1, Y_COUNTER
-00002FBC  11FC 0008 28EA          2700              MOVE.B  #8, X_COUNTER
-00002FC2  4EF9 00002FC8           2701              JMP     KEEP_GOING0
-00002FC8                          2702              
-00002FC8  0C45 0001               2703  KEEP_GOING0 CMPI.W  #$1, D5
-00002FCC  6700 0006               2704              BEQ     BIT_ON
-00002FD0  6600 009A               2705              BNE     KEEP_GOING
-00002FD4                          2706              
-00002FD4  0C38 0008 28EA          2707  BIT_ON      CMPI.B  #8, X_COUNTER
-00002FDA  6600 0006               2708              BNE     ITS_X
-00002FDE  6700 0036               2709              BEQ     MYBE_Y
-00002FE2                          2710              
-00002FE2  1638 28E8               2711  ITS_X       MOVE.B  X, D3 * LOAD[XX_COUNTER]
-00002FE6  1438 28EA               2712              MOVE.B  X_COUNTER, D2
-00002FEA  4EB9 00003264           2713              JSR     LOAD_EA
-00002FF0  0C38 0000 28EC          2714              CMPI.B  #0, FIRST_X
-00002FF6  6700 0006               2715              BEQ     FST_X
-00002FFA  6600 0012               2716              BNE     SND_X
-00002FFE                          2717  
-00002FFE  18FC 002D               2718  FST_X       MOVE.B  #$2D, (A4)+ * LOAD '-'
-00003002  11FC 0001 28EC          2719              MOVE.B  #1, FIRST_X * FIRST_X = 1
-00003008  4EF9 0000306C           2720              JMP     KEEP_GOING
-0000300E                          2721              
-0000300E  554C                    2722  SND_X       SUBA.W  #2, A4 * push back G_BUFFER pointer by 2
-00003010  4EF9 0000306C           2723              JMP     KEEP_GOING
-00003016                          2724  
-00003016  0C38 0008 28EB          2725  MYBE_Y      CMPI.B  #8, Y_COUNTER
-0000301C  6600 0006               2726              BNE     ITS_Y
-00003020  6700 004A               2727              BEQ     KEEP_GOING
-00003024                          2728  
-00003024  0C38 0000 28ED          2729  ITS_Y       CMPI.B  #0, FIRST_Y
-0000302A  6700 001E               2730              BEQ     FST_Y1
-0000302E  1638 28E9               2731  ITS_Y_BACK  MOVE.B  Y, D3 * LOAD[YY_COUNTER]
-00003032  1438 28EB               2732              MOVE.B  Y_COUNTER, D2
-00003036  4EB9 00003264           2733              JSR     LOAD_EA
-0000303C  0C38 0000 28ED          2734              CMPI.B  #0, FIRST_Y
-00003042  6700 0010               2735              BEQ     FST_Y2
-00003046  6600 001C               2736              BNE     SND_Y
-0000304A                          2737  
-0000304A  544C                    2738  FST_Y1      ADDA.W  #2, A4 * push G_BUFFER pointer by 2
-0000304C  18FC 002F               2739              MOVE.B  #$2F, (A4)+ * LOAD '/'
-00003050  4EF8 302E               2740              JMP     ITS_Y_BACK
-00003054                          2741  
-00003054  18FC 002D               2742  FST_Y2      MOVE.B  #$2D, (A4)+ * LOAD '-'
-00003058  11FC 0001 28ED          2743              MOVE.B  #1, FIRST_Y * FIRST_Y = 1
-0000305E  4EF9 0000306C           2744              JMP     KEEP_GOING
-00003064                          2745  
-00003064  554C                    2746  SND_Y       SUBA.W  #2, A4 * push back G_BUFFER pointer by 2
-00003066  4EF9 0000306C           2747              JMP     KEEP_GOING
-0000306C                          2748  
-0000306C  0C38 0008 28EB          2749  KEEP_GOING  CMPI.B  #8, Y_COUNTER
-00003072  6600 FF24               2750              BNE     NEXT_STEP
-00003076                          2751              
-00003076  544C                    2752              ADDA.W  #2, A4 * push G_BUFFER pointer by 2
-00003078  4E75                    2753              RTS
-0000307A                          2754  
-0000307A                          2755  LOAD_0000:
-0000307A  4283                    2756              CLR.L   D3
-0000307C  4282                    2757              CLR.L   D2
-0000307E  267C 00000000           2758              MOVEA.L #0, A3
-00003084                          2759  
-00003084  0C38 0000 173A          2760              CMPI.B  #%000, FIRST_3
-0000308A  6700 0006               2761              BEQ     MYBE_ORI
-0000308E  6600 000C               2762              BNE     NOT_ORI
-00003092  0C38 0003 173B          2763  MYBE_ORI    CMPI.B  #%011, SECOND_3
-00003098  6D00 0042               2764              BLT     ORI_CMPI            
-0000309C                          2765  
-0000309C  0C38 0006 173A          2766  NOT_ORI     CMPI.B  #%110, FIRST_3
-000030A2  6700 0006               2767              BEQ     MYBE_CMPI
-000030A6  6600 000C               2768              BNE     NOT_CMPI
-000030AA  0C38 0003 173B          2769  MYBE_CMPI   CMPI.B  #%011, SECOND_3
-000030B0  6D00 002A               2770              BLT     ORI_CMPI
-000030B4                          2771              
-000030B4  0C38 0004 173A          2772  NOT_CMPI    CMPI.B  #%100, FIRST_3
-000030BA  6700 0006               2773              BEQ     MYBE_BCLR
-000030BE  6600 000C               2774              BNE     NOT_BCLR
-000030C2  0C38 0002 173B          2775  MYBE_BCLR   CMPI.B  #%010, SECOND_3
-000030C8  6700 0080               2776              BEQ     BCLR
-000030CC                          2777  
-000030CC  0C38 0006 173B          2778  NOT_BCLR    CMPI.B  #%110, SECOND_3
-000030D2  6700 00E0               2779              BEQ     DYNMC_BCLR
-000030D6                          2780              
-000030D6  4EF9 00003478           2781              JMP     INVALID
-000030DC                          2782              
-000030DC  367C 30FE               2783  ORI_CMPI    MOVEA.W #BACK, A3
-000030E0  0C38 0000 173B          2784              CMPI.B  #%000, SECOND_3
-000030E6  6700 0220               2785              BEQ     SIZE_B
-000030EA  0C38 0001 173B          2786              CMPI.B  #%001, SECOND_3
-000030F0  6700 021E               2787              BEQ     SIZE_W
-000030F4  0C38 0002 173B          2788              CMPI.B  #%010, SECOND_3
-000030FA  6700 021C               2789              BEQ     SIZE_L
-000030FE                          2790  
-000030FE  163C 0007               2791  BACK        MOVE.B  #%111, D3
-00003102  143C 0004               2792              MOVE.B  #%100, D2
-00003106                          2793              
-00003106  4EB9 00003264           2794              JSR     LOAD_EA
-0000310C  4EB9 000033C8           2795              JSR     LOAD_COMMA_SPACE
-00003112                          2796              
-00003112  367C 3134               2797              MOVEA.W #BACK2, A3   
-00003116  0C38 0000 173D          2798              CMPI.B  #%000, FOURTH_3
-0000311C  6700 01F2               2799              BEQ     SIZE_W
-00003120  0C38 0001 173D          2800              CMPI.B  #%001, FOURTH_3
-00003126  6700 01F0               2801              BEQ     SIZE_L
-0000312A  0C38 0004 173D          2802              CMPI.B  #%100, FOURTH_3 
-00003130  6700 0346               2803              BEQ     INVALID 
-00003134                          2804  
-00003134  1638 173C               2805  BACK2       MOVE.B  THIRD_3, D3
-00003138  1438 173D               2806              MOVE.B  FOURTH_3, D2
-0000313C                          2807          
-0000313C  4EB9 00003264           2808              JSR     LOAD_EA
-00003142  4EB9 000033C6           2809              JSR     LOAD_NEW_LINE
-00003148  4E75                    2810              RTS
-0000314A                          2811  
-0000314A  4285                    2812  BCLR        CLR.L   D5
-0000314C  4284                    2813              CLR.L   D4
-0000314E  247C 00000000           2814              MOVEA.L #0, A2
-00003154                          2815  
-00003154  3A0E                    2816              MOVE.W  A6, D5
-00003156  9A4D                    2817              SUB.W   A5, D5
-00003158  0C45 0002               2818              CMPI.W  #$2, D5
-0000315C  6D00 031A               2819              BLT     INVALID
-00003160                          2820  
-00003160  381D                    2821              MOVE.W  (A5)+, D4
-00003162  4284                    2822              CLR.L   D4
-00003164  381D                    2823              MOVE.W  (A5)+, D4
-00003166  0244 00FF               2824              ANDI.W  #$00FF, D4
-0000316A  247C 00003176           2825              MOVEA.L #BACK4, A2
-00003170  4EF9 00003392           2826              JMP     LOAD_IMMDTE
-00003176                          2827              
-00003176  4EB9 000033C8           2828  BACK4       JSR     LOAD_COMMA_SPACE
-0000317C                          2829              
-0000317C  367C 319E               2830              MOVEA.W #BACK3, A3
-00003180  0C38 0000 173D          2831              CMPI.B  #%000, FOURTH_3
-00003186  6700 0188               2832              BEQ     SIZE_W
-0000318A  0C38 0001 173D          2833              CMPI.B  #%001, FOURTH_3
-00003190  6700 0186               2834              BEQ     SIZE_L
-00003194  0C38 0004 173D          2835              CMPI.B  #%100, FOURTH_3 
-0000319A  6700 02DC               2836              BEQ     INVALID 
-0000319E                          2837  
-0000319E  1638 173C               2838  BACK3       MOVE.B  THIRD_3, D3
-000031A2  1438 173D               2839              MOVE.B  FOURTH_3, D2
-000031A6                          2840  
-000031A6  4EB9 00003264           2841              JSR     LOAD_EA
-000031AC  4EB9 000033C6           2842              JSR     LOAD_NEW_LINE
-000031B2                          2843  
-000031B2  4E75                    2844              RTS
-000031B4                          2845  
-000031B4  163C 0000               2846  DYNMC_BCLR  MOVE.B  #%000, D3
-000031B8  1438 173A               2847              MOVE.B  FIRST_3, D2
-000031BC                          2848              
-000031BC  4EB9 00003264           2849              JSR     LOAD_EA
-000031C2  4EB9 000033C8           2850              JSR     LOAD_COMMA_SPACE
-000031C8                          2851  
-000031C8  367C 31EA               2852              MOVEA.W #BACK5, A3
-000031CC  0C38 0000 173D          2853              CMPI.B  #%000, FOURTH_3
-000031D2  6700 013C               2854              BEQ     SIZE_W
-000031D6  0C38 0001 173D          2855              CMPI.B  #%001, FOURTH_3
-000031DC  6700 013A               2856              BEQ     SIZE_L
-000031E0  0C38 0004 173D          2857              CMPI.B  #%100, FOURTH_3 
-000031E6  6700 0290               2858              BEQ     INVALID 
-000031EA                          2859              
-000031EA  1638 173C               2860  BACK5       MOVE.B  THIRD_3, D3
-000031EE  1438 173D               2861              MOVE.B  FOURTH_3, D2
-000031F2                          2862              
-000031F2  4EB9 00003264           2863              JSR     LOAD_EA
-000031F8  4EB9 000033C6           2864              JSR     LOAD_NEW_LINE
-000031FE                          2865              
-000031FE  4E75                    2866              RTS
-00003200                          2867  
-00003200                          2868  LOAD_00XX:
-00003200  4283                    2869          CLR.L   D3
-00003202  4282                    2870          CLR.L   D2
-00003204  267C 00000000           2871          MOVEA.L #0, A3
-0000320A                          2872          
-0000320A  367C 3222               2873          MOVEA.W #GOO, A3
-0000320E  0C38 0003 1739          2874          CMPI.B  #%0011, MNEMONIC
-00003214  6700 00FA               2875          BEQ     SIZE_W
-00003218  0C38 0002 1739          2876          CMPI.B  #%0010, MNEMONIC
-0000321E  6700 00F8               2877          BEQ     SIZE_L
-00003222                          2878  
-00003222  1638 173C               2879  GOO     MOVE.B  THIRD_3, D3
-00003226  1438 173D               2880          MOVE.B  FOURTH_3, D2
-0000322A                          2881      
-0000322A  4EB9 00003264           2882          JSR     LOAD_EA
-00003230  4EB9 000033C8           2883          JSR     LOAD_COMMA_SPACE
-00003236                          2884      
-00003236  367C 324E               2885          MOVEA.W #GOO2, A3
-0000323A  0C38 0000 173A          2886          CMPI.B  #%000, FIRST_3
-00003240  6700 00CE               2887          BEQ     SIZE_W
-00003244  0C38 0001 173A          2888          CMPI.B  #%001, FIRST_3
-0000324A  6700 00CC               2889          BEQ     SIZE_L
-0000324E                          2890      
-0000324E  1638 173B               2891  GOO2    MOVE.B  SECOND_3, D3
-00003252  1438 173A               2892          MOVE.B  FIRST_3, D2
-00003256                          2893              
-00003256  4EB9 00003264           2894          JSR     LOAD_EA
-0000325C  4EB9 000033C6           2895          JSR     LOAD_NEW_LINE
-00003262                          2896      
-00003262  4E75                    2897          RTS
-00003264                          2898  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-00003264                          2899  
+00002D44                          2515  
+00002D44                          2516  LOAD_0101:
+00002D44  4283                    2517              CLR.L   D3
+00002D46  4282                    2518              CLR.L   D2
+00002D48  267C 00000000           2519              MOVEA.L #0, A3
+00002D4E                          2520  
+00002D4E  0C38 0007 173A          2521              CMPI.B  #%111, FIRST_3
+00002D54  6F00 0008               2522              BLE     MYBE_SUBQ1
+00002D58  4EF9 00003478           2523              JMP     INVALID
+00002D5E                          2524              
+00002D5E  0C38 0003 173B          2525  MYBE_SUBQ1  CMPI.B  #%011, SECOND_3
+00002D64  6E00 0008               2526              BGT     MYBE_SUBQ2
+00002D68  4EF9 00003478           2527              JMP     INVALID
+00002D6E                          2528  
+00002D6E  0C38 0007 173B          2529  MYBE_SUBQ2  CMPI.B  #%111, SECOND_3
+00002D74  6D00 0008               2530              BLT     SUBQ
+00002D78  4EF9 00003478           2531              JMP     INVALID
+00002D7E                          2532  
+00002D7E  5238 173A               2533  SUBQ        ADDI.B  #%1, FIRST_3
+00002D82  1838 173A               2534              MOVE.B  FIRST_3, D4
+00002D86                          2535              
+00002D86  347C 2D90               2536              MOVEA.W #SUBQ_SAVED, A2
+00002D8A  4EF9 00003392           2537              JMP     LOAD_IMMDTE
+00002D90                          2538              
+00002D90  4EB9 000033C8           2539  SUBQ_SAVED  JSR     LOAD_COMMA_SPACE
+00002D96                          2540  
+00002D96  367C 2DB8               2541              MOVEA.W #SUBQ_BACK, A3
+00002D9A  0C38 0004 173B          2542              CMPI.B  #%100, SECOND_3
+00002DA0  6700 0566               2543              BEQ     SIZE_B
+00002DA4  0C38 0005 173B          2544              CMPI.B  #%101, SECOND_3
+00002DAA  6700 0564               2545              BEQ     SIZE_W
+00002DAE  0C38 0006 173B          2546              CMPI.B  #%110, SECOND_3
+00002DB4  6700 0562               2547              BEQ     SIZE_L
+00002DB8                          2548              
+00002DB8  1638 173C               2549  SUBQ_BACK   MOVE.B  THIRD_3, D3
+00002DBC  1438 173D               2550              MOVE.B  FOURTH_3, D2
+00002DC0                          2551  
+00002DC0  4EB9 00003264           2552              JSR     LOAD_EA
+00002DC6  4EB9 000033C6           2553              JSR     LOAD_NEW_LINE
+00002DCC  4E75                    2554              RTS
+00002DCE                          2555  
+00002DCE                          2556  LOAD_0100:
+00002DCE  4283                    2557              CLR.L   D3
+00002DD0  4282                    2558              CLR.L   D2
+00002DD2  267C 00000000           2559              MOVEA.L #0, A3
+00002DD8                          2560  
+00002DD8  0C38 0002 173A          2561              CMPI.B  #%010, FIRST_3
+00002DDE  6700 0006               2562              BEQ     MYBE_NEG
+00002DE2  6600 000C               2563              BNE     NOT_NEG
+00002DE6  0C38 0003 173B          2564  MYBE_NEG    CMPI.B  #%011, SECOND_3
+00002DEC  6D00 008E               2565              BLT     NEG
+00002DF0                          2566  
+00002DF0  0C38 0007 173A          2567  NOT_NEG     CMPI.B  #%111, FIRST_3
+00002DF6  6700 0006               2568              BEQ     MYBE_RTS1
+00002DFA  6600 0032               2569              BNE     NOT_RTS
+00002DFE  0C38 0001 173B          2570  MYBE_RTS1   CMPI.B  #%001, SECOND_3
+00002E04  6700 0006               2571              BEQ     MYBE_RTS2
+00002E08  6600 0024               2572              BNE     NOT_RTS
+00002E0C  0C38 0006 173C          2573  MYBE_RTS2   CMPI.B  #%110, THIRD_3
+00002E12  6700 0006               2574              BEQ     MYBE_RTS3
+00002E16  6600 0016               2575              BNE     NOT_RTS
+00002E1A  0C38 0005 173D          2576  MYBE_RTS3   CMPI.B  #%101, FOURTH_3
+00002E20  6700 0092               2577              BEQ     RTS
+00002E24  0C38 0001 173D          2578              CMPI.B  #%001, FOURTH_3 
+00002E2A  6700 0088               2579              BEQ     RTS * It's actually NOP but it's the same shit in EA perspective
+00002E2E                          2580              
+00002E2E  0C38 0007 173A          2581  NOT_RTS     CMPI.B  #%111, FIRST_3
+00002E34  6700 0006               2582              BEQ     MYBE_JSR
+00002E38  6600 000C               2583              BNE     NOT_JSR
+00002E3C  0C38 0002 173B          2584  MYBE_JSR    CMPI.B  #%010, SECOND_3
+00002E42  6700 0078               2585              BEQ     JSR
+00002E46                          2586  
+00002E46  4286                    2587  NOT_JSR     CLR.L   D6
+00002E48  1C38 173A               2588              MOVE.B  FIRST_3, D6
+00002E4C  0206 0005               2589              ANDI.B  #%101, D6 * Making %1X0 -> %100
+00002E50  0C06 0004               2590              CMPI.B  #%100, D6
+00002E54  6700 0006               2591              BEQ     MYBE_MOVEM
+00002E58  6600 0012               2592              BNE     NOT_MOVEM
+00002E5C                          2593              
+00002E5C  1C38 173B               2594  MYBE_MOVEM  MOVE.B  SECOND_3, D6
+00002E60  0206 0006               2595              ANDI.B  #%110, D6
+00002E64  0C06 0002               2596              CMPI.B  #%010, D6
+00002E68  6700 0080               2597              BEQ     MOVEM
+00002E6C                          2598              
+00002E6C  0C38 0007 173B          2599  NOT_MOVEM   CMPI.B  #%111, SECOND_3
+00002E72  6700 0084               2600              BEQ     LEA
+00002E76                          2601              
+00002E76  4EF9 00003478           2602              JMP     INVALID
+00002E7C                          2603  
+00002E7C                          2604  NEG:
+00002E7C  367C 2E9E               2605              MOVEA.W #NEG_BACK, A3
+00002E80  0C38 0000 173B          2606              CMPI.B  #%000, SECOND_3
+00002E86  6700 0480               2607              BEQ     SIZE_B
+00002E8A  0C38 0001 173B          2608              CMPI.B  #%001, SECOND_3
+00002E90  6700 047E               2609              BEQ     SIZE_W
+00002E94  0C38 0002 173B          2610              CMPI.B  #%010, SECOND_3
+00002E9A  6700 047C               2611              BEQ     SIZE_L
+00002E9E                          2612              
+00002E9E  1638 173C               2613  NEG_BACK    MOVE.B  THIRD_3, D3
+00002EA2  1438 173D               2614              MOVE.B  FOURTH_3, D2
+00002EA6                          2615  
+00002EA6  4EB9 00003264           2616              JSR     LOAD_EA
+00002EAC  4EB9 000033C6           2617              JSR     LOAD_NEW_LINE
+00002EB2  4E75                    2618              RTS
+00002EB4                          2619              
+00002EB4                          2620  RTS:
+00002EB4  4EB9 000033C6           2621              JSR     LOAD_NEW_LINE
+00002EBA  4E75                    2622              RTS
+00002EBC                          2623  
+00002EBC                          2624  JSR:
+00002EBC  367C 2ED4               2625              MOVEA.W #JSR_BACK, A3
+00002EC0  0C38 0000 173D          2626              CMPI.B  #%000, FOURTH_3
+00002EC6  6700 0448               2627              BEQ     SIZE_W
+00002ECA  0C38 0001 173D          2628              CMPI.B  #%001, FOURTH_3
+00002ED0  6700 0446               2629              BEQ     SIZE_L
+00002ED4                          2630              
+00002ED4  1638 173C               2631  JSR_BACK    MOVE.B  THIRD_3, D3
+00002ED8  1438 173D               2632              MOVE.B  FOURTH_3, D2
+00002EDC                          2633              
+00002EDC  4EB9 00003264           2634              JSR     LOAD_EA
+00002EE2  4EB9 000033C6           2635              JSR     LOAD_NEW_LINE
+00002EE8  4E75                    2636              RTS
+00002EEA                          2637  
+00002EEA                          2638  MOVEM:
+00002EEA  4EB9 00002F44           2639              JSR     FUK_MOVEM
+00002EF0  4EB9 000033C6           2640              JSR     LOAD_NEW_LINE
+00002EF6  4E75                    2641              RTS
+00002EF8                          2642      
+00002EF8                          2643  LEA:
+00002EF8  367C 2F1A               2644              MOVEA.W #LEA_BACK, A3
+00002EFC  0C38 0000 173D          2645              CMPI.B  #%000, FOURTH_3
+00002F02  6700 040C               2646              BEQ     SIZE_W
+00002F06  0C38 0001 173D          2647              CMPI.B  #%001, FOURTH_3
+00002F0C  6700 040A               2648              BEQ     SIZE_L
+00002F10  0C38 0004 173D          2649              CMPI.B  #%100, FOURTH_3
+00002F16  6700 0560               2650              BEQ     INVALID 
+00002F1A                          2651              
+00002F1A  1638 173C               2652  LEA_BACK    MOVE.B  THIRD_3, D3
+00002F1E  1438 173D               2653              MOVE.B  FOURTH_3, D2
+00002F22                          2654              
+00002F22  4EB9 00003264           2655              JSR     LOAD_EA
+00002F28  4EB9 000033C8           2656              JSR     LOAD_COMMA_SPACE
+00002F2E                          2657              
+00002F2E  163C 0001               2658              MOVE.B  #%001, D3
+00002F32  1438 173A               2659              MOVE.B  FIRST_3, D2
+00002F36                          2660              
+00002F36  4EB9 00003264           2661              JSR     LOAD_EA
+00002F3C  4EB9 000033C6           2662              JSR     LOAD_NEW_LINE
+00002F42  4E75                    2663              RTS 
+00002F44                          2664  
+00002F44                          2665  FUK_MOVEM:  * Functional Utilization of Knowledge in MOVEM
+00002F44  4EB9 00002F4C           2666              JSR     MOVEM_PARSE
+00002F4A  4E75                    2667              RTS
+00002F4C                          2668  
+00002F4C                          2669  MOVEM_PARSE:
+00002F4C  381D                    2670              MOVE.W  (A5)+, D4 * D4 has $00FF
+00002F4E                          2671              
+00002F4E  11FC 00FF 28EA          2672              MOVE.B  #$FF, X_COUNTER * start from -1
+00002F54  11FC 00FF 28EB          2673              MOVE.B  #$FF, Y_COUNTER * start from -1
+00002F5A  11FC 0000 28EC          2674              MOVE.B  #0, FIRST_X
+00002F60  11FC 0000 28ED          2675              MOVE.B  #0, FIRST_Y
+00002F66                          2676              
+00002F66  0C38 0004 173C          2677              CMPI.B  #%100, THIRD_3
+00002F6C  6600 0006               2678              BNE     A_TO_D
+00002F70  6700 0014               2679              BEQ     D_TO_A
+00002F74                          2680  
+00002F74  11FC 0001 28E8          2681  A_TO_D      MOVE.B  #%001, X * X = A
+00002F7A  11FC 0000 28E9          2682              MOVE.B  #%000, Y * Y = D
+00002F80  4EF9 00002F98           2683              JMP     NEXT_STEP
+00002F86                          2684              
+00002F86  11FC 0000 28E8          2685  D_TO_A      MOVE.B  #%000, X * X = D
+00002F8C  11FC 0001 28E9          2686              MOVE.B  #%001, Y * Y = A
+00002F92  4EF9 00002F98           2687              JMP     NEXT_STEP
+00002F98                          2688  
+00002F98  E35C                    2689  NEXT_STEP   ROL.W   #1, D4
+00002F9A  3A04                    2690              MOVE.W  D4, D5
+00002F9C  0245 0001               2691              ANDI.W  #$1, D5
+00002FA0                          2692              
+00002FA0  0C38 0007 28EA          2693              CMPI.B  #7, X_COUNTER
+00002FA6  6C00 0010               2694              BGE     ADD_Y
+00002FAA  6D00 0002               2695              BLT     ADD_X
+00002FAE                          2696              
+00002FAE  5238 28EA               2697  ADD_X       ADDI.B  #1, X_COUNTER
+00002FB2  4EF9 00002FC8           2698              JMP     KEEP_GOING0
+00002FB8                          2699  
+00002FB8  5238 28EB               2700  ADD_Y       ADDI.B  #1, Y_COUNTER
+00002FBC  11FC 0008 28EA          2701              MOVE.B  #8, X_COUNTER
+00002FC2  4EF9 00002FC8           2702              JMP     KEEP_GOING0
+00002FC8                          2703              
+00002FC8  0C45 0001               2704  KEEP_GOING0 CMPI.W  #$1, D5
+00002FCC  6700 0006               2705              BEQ     BIT_ON
+00002FD0  6600 009A               2706              BNE     KEEP_GOING
+00002FD4                          2707              
+00002FD4  0C38 0008 28EA          2708  BIT_ON      CMPI.B  #8, X_COUNTER
+00002FDA  6600 0006               2709              BNE     ITS_X
+00002FDE  6700 0036               2710              BEQ     MYBE_Y
+00002FE2                          2711              
+00002FE2  1638 28E8               2712  ITS_X       MOVE.B  X, D3 * LOAD[XX_COUNTER]
+00002FE6  1438 28EA               2713              MOVE.B  X_COUNTER, D2
+00002FEA  4EB9 00003264           2714              JSR     LOAD_EA
+00002FF0  0C38 0000 28EC          2715              CMPI.B  #0, FIRST_X
+00002FF6  6700 0006               2716              BEQ     FST_X
+00002FFA  6600 0012               2717              BNE     SND_X
+00002FFE                          2718  
+00002FFE  18FC 002D               2719  FST_X       MOVE.B  #$2D, (A4)+ * LOAD '-'
+00003002  11FC 0001 28EC          2720              MOVE.B  #1, FIRST_X * FIRST_X = 1
+00003008  4EF9 0000306C           2721              JMP     KEEP_GOING
+0000300E                          2722              
+0000300E  554C                    2723  SND_X       SUBA.W  #2, A4 * push back G_BUFFER pointer by 2
+00003010  4EF9 0000306C           2724              JMP     KEEP_GOING
+00003016                          2725  
+00003016  0C38 0008 28EB          2726  MYBE_Y      CMPI.B  #8, Y_COUNTER
+0000301C  6600 0006               2727              BNE     ITS_Y
+00003020  6700 004A               2728              BEQ     KEEP_GOING
+00003024                          2729  
+00003024  0C38 0000 28ED          2730  ITS_Y       CMPI.B  #0, FIRST_Y
+0000302A  6700 001E               2731              BEQ     FST_Y1
+0000302E  1638 28E9               2732  ITS_Y_BACK  MOVE.B  Y, D3 * LOAD[YY_COUNTER]
+00003032  1438 28EB               2733              MOVE.B  Y_COUNTER, D2
+00003036  4EB9 00003264           2734              JSR     LOAD_EA
+0000303C  0C38 0000 28ED          2735              CMPI.B  #0, FIRST_Y
+00003042  6700 0010               2736              BEQ     FST_Y2
+00003046  6600 001C               2737              BNE     SND_Y
+0000304A                          2738  
+0000304A  544C                    2739  FST_Y1      ADDA.W  #2, A4 * push G_BUFFER pointer by 2
+0000304C  18FC 002F               2740              MOVE.B  #$2F, (A4)+ * LOAD '/'
+00003050  4EF8 302E               2741              JMP     ITS_Y_BACK
+00003054                          2742  
+00003054  18FC 002D               2743  FST_Y2      MOVE.B  #$2D, (A4)+ * LOAD '-'
+00003058  11FC 0001 28ED          2744              MOVE.B  #1, FIRST_Y * FIRST_Y = 1
+0000305E  4EF9 0000306C           2745              JMP     KEEP_GOING
+00003064                          2746  
+00003064  554C                    2747  SND_Y       SUBA.W  #2, A4 * push back G_BUFFER pointer by 2
+00003066  4EF9 0000306C           2748              JMP     KEEP_GOING
+0000306C                          2749  
+0000306C  0C38 0008 28EB          2750  KEEP_GOING  CMPI.B  #8, Y_COUNTER
+00003072  6600 FF24               2751              BNE     NEXT_STEP
+00003076                          2752              
+00003076  544C                    2753              ADDA.W  #2, A4 * push G_BUFFER pointer by 2
+00003078  4E75                    2754              RTS
+0000307A                          2755  
+0000307A                          2756  LOAD_0000:
+0000307A  4283                    2757              CLR.L   D3
+0000307C  4282                    2758              CLR.L   D2
+0000307E  267C 00000000           2759              MOVEA.L #0, A3
+00003084                          2760  
+00003084  0C38 0000 173A          2761              CMPI.B  #%000, FIRST_3
+0000308A  6700 0006               2762              BEQ     MYBE_ORI
+0000308E  6600 000C               2763              BNE     NOT_ORI
+00003092  0C38 0003 173B          2764  MYBE_ORI    CMPI.B  #%011, SECOND_3
+00003098  6D00 0042               2765              BLT     ORI_CMPI            
+0000309C                          2766  
+0000309C  0C38 0006 173A          2767  NOT_ORI     CMPI.B  #%110, FIRST_3
+000030A2  6700 0006               2768              BEQ     MYBE_CMPI
+000030A6  6600 000C               2769              BNE     NOT_CMPI
+000030AA  0C38 0003 173B          2770  MYBE_CMPI   CMPI.B  #%011, SECOND_3
+000030B0  6D00 002A               2771              BLT     ORI_CMPI
+000030B4                          2772              
+000030B4  0C38 0004 173A          2773  NOT_CMPI    CMPI.B  #%100, FIRST_3
+000030BA  6700 0006               2774              BEQ     MYBE_BCLR
+000030BE  6600 000C               2775              BNE     NOT_BCLR
+000030C2  0C38 0002 173B          2776  MYBE_BCLR   CMPI.B  #%010, SECOND_3
+000030C8  6700 0080               2777              BEQ     BCLR
+000030CC                          2778  
+000030CC  0C38 0006 173B          2779  NOT_BCLR    CMPI.B  #%110, SECOND_3
+000030D2  6700 00E0               2780              BEQ     DYNMC_BCLR
+000030D6                          2781              
+000030D6  4EF9 00003478           2782              JMP     INVALID
+000030DC                          2783              
+000030DC  367C 30FE               2784  ORI_CMPI    MOVEA.W #BACK, A3
+000030E0  0C38 0000 173B          2785              CMPI.B  #%000, SECOND_3
+000030E6  6700 0220               2786              BEQ     SIZE_B
+000030EA  0C38 0001 173B          2787              CMPI.B  #%001, SECOND_3
+000030F0  6700 021E               2788              BEQ     SIZE_W
+000030F4  0C38 0002 173B          2789              CMPI.B  #%010, SECOND_3
+000030FA  6700 021C               2790              BEQ     SIZE_L
+000030FE                          2791  
+000030FE  163C 0007               2792  BACK        MOVE.B  #%111, D3
+00003102  143C 0004               2793              MOVE.B  #%100, D2
+00003106                          2794              
+00003106  4EB9 00003264           2795              JSR     LOAD_EA
+0000310C  4EB9 000033C8           2796              JSR     LOAD_COMMA_SPACE
+00003112                          2797              
+00003112  367C 3134               2798              MOVEA.W #BACK2, A3   
+00003116  0C38 0000 173D          2799              CMPI.B  #%000, FOURTH_3
+0000311C  6700 01F2               2800              BEQ     SIZE_W
+00003120  0C38 0001 173D          2801              CMPI.B  #%001, FOURTH_3
+00003126  6700 01F0               2802              BEQ     SIZE_L
+0000312A  0C38 0004 173D          2803              CMPI.B  #%100, FOURTH_3 
+00003130  6700 0346               2804              BEQ     INVALID 
+00003134                          2805  
+00003134  1638 173C               2806  BACK2       MOVE.B  THIRD_3, D3
+00003138  1438 173D               2807              MOVE.B  FOURTH_3, D2
+0000313C                          2808          
+0000313C  4EB9 00003264           2809              JSR     LOAD_EA
+00003142  4EB9 000033C6           2810              JSR     LOAD_NEW_LINE
+00003148  4E75                    2811              RTS
+0000314A                          2812  
+0000314A  4285                    2813  BCLR        CLR.L   D5
+0000314C  4284                    2814              CLR.L   D4
+0000314E  247C 00000000           2815              MOVEA.L #0, A2
+00003154                          2816  
+00003154  3A0E                    2817              MOVE.W  A6, D5
+00003156  9A4D                    2818              SUB.W   A5, D5
+00003158  0C45 0002               2819              CMPI.W  #$2, D5
+0000315C  6D00 031A               2820              BLT     INVALID
+00003160                          2821  
+00003160  381D                    2822              MOVE.W  (A5)+, D4
+00003162  4284                    2823              CLR.L   D4
+00003164  381D                    2824              MOVE.W  (A5)+, D4
+00003166  0244 00FF               2825              ANDI.W  #$00FF, D4
+0000316A  247C 00003176           2826              MOVEA.L #BACK4, A2
+00003170  4EF9 00003392           2827              JMP     LOAD_IMMDTE
+00003176                          2828              
+00003176  4EB9 000033C8           2829  BACK4       JSR     LOAD_COMMA_SPACE
+0000317C                          2830              
+0000317C  367C 319E               2831              MOVEA.W #BACK3, A3
+00003180  0C38 0000 173D          2832              CMPI.B  #%000, FOURTH_3
+00003186  6700 0188               2833              BEQ     SIZE_W
+0000318A  0C38 0001 173D          2834              CMPI.B  #%001, FOURTH_3
+00003190  6700 0186               2835              BEQ     SIZE_L
+00003194  0C38 0004 173D          2836              CMPI.B  #%100, FOURTH_3 
+0000319A  6700 02DC               2837              BEQ     INVALID 
+0000319E                          2838  
+0000319E  1638 173C               2839  BACK3       MOVE.B  THIRD_3, D3
+000031A2  1438 173D               2840              MOVE.B  FOURTH_3, D2
+000031A6                          2841  
+000031A6  4EB9 00003264           2842              JSR     LOAD_EA
+000031AC  4EB9 000033C6           2843              JSR     LOAD_NEW_LINE
+000031B2                          2844  
+000031B2  4E75                    2845              RTS
+000031B4                          2846  
+000031B4  163C 0000               2847  DYNMC_BCLR  MOVE.B  #%000, D3
+000031B8  1438 173A               2848              MOVE.B  FIRST_3, D2
+000031BC                          2849              
+000031BC  4EB9 00003264           2850              JSR     LOAD_EA
+000031C2  4EB9 000033C8           2851              JSR     LOAD_COMMA_SPACE
+000031C8                          2852  
+000031C8  367C 31EA               2853              MOVEA.W #BACK5, A3
+000031CC  0C38 0000 173D          2854              CMPI.B  #%000, FOURTH_3
+000031D2  6700 013C               2855              BEQ     SIZE_W
+000031D6  0C38 0001 173D          2856              CMPI.B  #%001, FOURTH_3
+000031DC  6700 013A               2857              BEQ     SIZE_L
+000031E0  0C38 0004 173D          2858              CMPI.B  #%100, FOURTH_3 
+000031E6  6700 0290               2859              BEQ     INVALID 
+000031EA                          2860              
+000031EA  1638 173C               2861  BACK5       MOVE.B  THIRD_3, D3
+000031EE  1438 173D               2862              MOVE.B  FOURTH_3, D2
+000031F2                          2863              
+000031F2  4EB9 00003264           2864              JSR     LOAD_EA
+000031F8  4EB9 000033C6           2865              JSR     LOAD_NEW_LINE
+000031FE                          2866              
+000031FE  4E75                    2867              RTS
+00003200                          2868  
+00003200                          2869  LOAD_00XX:
+00003200  4283                    2870          CLR.L   D3
+00003202  4282                    2871          CLR.L   D2
+00003204  267C 00000000           2872          MOVEA.L #0, A3
+0000320A                          2873          
+0000320A  367C 3222               2874          MOVEA.W #GOO, A3
+0000320E  0C38 0003 1739          2875          CMPI.B  #%0011, MNEMONIC
+00003214  6700 00FA               2876          BEQ     SIZE_W
+00003218  0C38 0002 1739          2877          CMPI.B  #%0010, MNEMONIC
+0000321E  6700 00F8               2878          BEQ     SIZE_L
+00003222                          2879  
+00003222  1638 173C               2880  GOO     MOVE.B  THIRD_3, D3
+00003226  1438 173D               2881          MOVE.B  FOURTH_3, D2
+0000322A                          2882      
+0000322A  4EB9 00003264           2883          JSR     LOAD_EA
+00003230  4EB9 000033C8           2884          JSR     LOAD_COMMA_SPACE
+00003236                          2885      
+00003236  367C 324E               2886          MOVEA.W #GOO2, A3
+0000323A  0C38 0000 173A          2887          CMPI.B  #%000, FIRST_3
+00003240  6700 00CE               2888          BEQ     SIZE_W
+00003244  0C38 0001 173A          2889          CMPI.B  #%001, FIRST_3
+0000324A  6700 00CC               2890          BEQ     SIZE_L
+0000324E                          2891      
+0000324E  1638 173B               2892  GOO2    MOVE.B  SECOND_3, D3
+00003252  1438 173A               2893          MOVE.B  FIRST_3, D2
+00003256                          2894              
+00003256  4EB9 00003264           2895          JSR     LOAD_EA
+0000325C  4EB9 000033C6           2896          JSR     LOAD_NEW_LINE
+00003262                          2897      
+00003262  4E75                    2898          RTS
+00003264                          2899  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 00003264                          2900  
-00003264                          2901  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-00003264                          2902  
-00003264                          2903  LOAD_EA:
-00003264  347C 3274               2904          MOVEA.W #SAVED, A2 * remember to come back!
-00003268                          2905  
-00003268  0C43 0007               2906          CMPI    #%111, D3
-0000326C  6D00 0008               2907          BLT     LOAD_LT_111
-00003270  6C00 0032               2908          BGE     LOAD_GE_111
-00003274                          2909      
-00003274  4E75                    2910  SAVED   RTS
-00003276                          2911  
-00003276                          2912  LOAD_LT_111:
-00003276  0C43 0000               2913      CMPI    #%000, D3 * e.g. D3
-0000327A  6700 00A4               2914      BEQ     LOAD_DATA_REGISTER
-0000327E  0C43 0001               2915      CMPI    #%001, D3 * e.g. A3
-00003282  6700 00AE               2916      BEQ     LOAD_ADDR_REGISTER
-00003286  0C43 0002               2917      CMPI    #%010, D3 * e.g. (A3)
-0000328A  6700 00B8               2918      BEQ     LOAD_ADDRESS
-0000328E  0C43 0003               2919      CMPI    #%011, D3 * e.g. (A3)+
-00003292  6700 00C2               2920      BEQ     LOAD_ADDRESS_W_POST_INC
-00003296  0C43 0004               2921      CMPI    #%100, D3 * e.g. -(A3)
-0000329A  6700 00C6               2922      BEQ     LOAD_ADDRESS_W_PRE_DEC
-0000329E                          2923      
-0000329E  4EF9 00003478           2924      JMP     INVALID
-000032A4                          2925      
-000032A4                          2926  LOAD_GE_111:
-000032A4  4285                    2927              CLR.L   D5
-000032A6  4284                    2928              CLR.L   D4
-000032A8                          2929  
-000032A8  3A0E                    2930              MOVE.W  A6, D5
-000032AA  9A4D                    2931              SUB.W   A5, D5
-000032AC  BA78 28E6               2932              CMP.W   TRAILING_SIZE, D5
-000032B0  6D00 01C6               2933              BLT     INVALID
-000032B4                          2934  
-000032B4  0C78 0001 28E6          2935              CMPI.W  #$1, TRAILING_SIZE
-000032BA  6700 0016               2936              BEQ     CHUMP_BYTE
-000032BE  0C78 0002 28E6          2937              CMPI.W  #$2, TRAILING_SIZE
-000032C4  6700 0014               2938              BEQ     CHUMP_WORD
-000032C8  0C78 0004 28E6          2939              CMPI.W  #$4, TRAILING_SIZE
-000032CE  6700 0012               2940              BEQ     CHUMP_LONG
-000032D2                          2941  
-000032D2  381D                    2942  CHUMP_BYTE  MOVE.W  (A5)+, D4 * Minimum 4 hex (e.g. MOVE.B #1, $2 = XXXX 0001 0002)
-000032D4  4EF9 000032EA           2943              JMP     GO
-000032DA                          2944  
-000032DA  381D                    2945  CHUMP_WORD  MOVE.W  (A5)+, D4
-000032DC  4EF9 000032EA           2946              JMP     GO
-000032E2                          2947              
-000032E2  281D                    2948  CHUMP_LONG  MOVE.L  (A5)+, D4
-000032E4  4EF9 000032EA           2949              JMP     GO
-000032EA                          2950  
-000032EA  0C42 0000               2951  GO          CMPI    #%000, D2
-000032EE  6700 007E               2952              BEQ     LOAD_ABS_SHORT
-000032F2  0C42 0001               2953              CMPI    #%001, D2
-000032F6  6700 0088               2954              BEQ     LOAD_ABS_LONG
-000032FA  0C42 0004               2955              CMPI    #%100, D2
-000032FE  6700 0092               2956              BEQ     LOAD_IMMDTE
-00003302                          2957      
-00003302  4EF9 00003478           2958              JMP     INVALID
-00003308                          2959  TRAILING_HELPER:            
-00003308  31FC 0002 28E6          2960  SIZE_B  MOVE.W  #$2, TRAILING_SIZE
-0000330E  4ED3                    2961          JMP     (A3)
-00003310                          2962  
-00003310  31FC 0002 28E6          2963  SIZE_W  MOVE.W  #$2, TRAILING_SIZE
-00003316  4ED3                    2964          JMP     (A3)
-00003318                          2965          
-00003318  31FC 0004 28E6          2966  SIZE_L  MOVE.W  #$4, TRAILING_SIZE
-0000331E  4ED3                    2967          JMP     (A3)
-00003320                          2968  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-00003320                          2969  
+00003264                          2901  
+00003264                          2902  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+00003264                          2903  
+00003264                          2904  LOAD_EA:
+00003264  347C 3274               2905          MOVEA.W #SAVED, A2 * remember to come back!
+00003268                          2906  
+00003268  0C43 0007               2907          CMPI    #%111, D3
+0000326C  6D00 0008               2908          BLT     LOAD_LT_111
+00003270  6C00 0032               2909          BGE     LOAD_GE_111
+00003274                          2910      
+00003274  4E75                    2911  SAVED   RTS
+00003276                          2912  
+00003276                          2913  LOAD_LT_111:
+00003276  0C43 0000               2914      CMPI    #%000, D3 * e.g. D3
+0000327A  6700 00A4               2915      BEQ     LOAD_DATA_REGISTER
+0000327E  0C43 0001               2916      CMPI    #%001, D3 * e.g. A3
+00003282  6700 00AE               2917      BEQ     LOAD_ADDR_REGISTER
+00003286  0C43 0002               2918      CMPI    #%010, D3 * e.g. (A3)
+0000328A  6700 00B8               2919      BEQ     LOAD_ADDRESS
+0000328E  0C43 0003               2920      CMPI    #%011, D3 * e.g. (A3)+
+00003292  6700 00C2               2921      BEQ     LOAD_ADDRESS_W_POST_INC
+00003296  0C43 0004               2922      CMPI    #%100, D3 * e.g. -(A3)
+0000329A  6700 00C6               2923      BEQ     LOAD_ADDRESS_W_PRE_DEC
+0000329E                          2924      
+0000329E  4EF9 00003478           2925      JMP     INVALID
+000032A4                          2926      
+000032A4                          2927  LOAD_GE_111:
+000032A4  4285                    2928              CLR.L   D5
+000032A6  4284                    2929              CLR.L   D4
+000032A8                          2930  
+000032A8  3A0E                    2931              MOVE.W  A6, D5
+000032AA  9A4D                    2932              SUB.W   A5, D5
+000032AC  BA78 28E6               2933              CMP.W   TRAILING_SIZE, D5
+000032B0  6D00 01C6               2934              BLT     INVALID
+000032B4                          2935  
+000032B4  0C78 0001 28E6          2936              CMPI.W  #$1, TRAILING_SIZE
+000032BA  6700 0016               2937              BEQ     CHUMP_BYTE
+000032BE  0C78 0002 28E6          2938              CMPI.W  #$2, TRAILING_SIZE
+000032C4  6700 0014               2939              BEQ     CHUMP_WORD
+000032C8  0C78 0004 28E6          2940              CMPI.W  #$4, TRAILING_SIZE
+000032CE  6700 0012               2941              BEQ     CHUMP_LONG
+000032D2                          2942  
+000032D2  381D                    2943  CHUMP_BYTE  MOVE.W  (A5)+, D4 * Minimum 4 hex (e.g. MOVE.B #1, $2 = XXXX 0001 0002)
+000032D4  4EF9 000032EA           2944              JMP     GO
+000032DA                          2945  
+000032DA  381D                    2946  CHUMP_WORD  MOVE.W  (A5)+, D4
+000032DC  4EF9 000032EA           2947              JMP     GO
+000032E2                          2948              
+000032E2  281D                    2949  CHUMP_LONG  MOVE.L  (A5)+, D4
+000032E4  4EF9 000032EA           2950              JMP     GO
+000032EA                          2951  
+000032EA  0C42 0000               2952  GO          CMPI    #%000, D2
+000032EE  6700 007E               2953              BEQ     LOAD_ABS_SHORT
+000032F2  0C42 0001               2954              CMPI    #%001, D2
+000032F6  6700 0088               2955              BEQ     LOAD_ABS_LONG
+000032FA  0C42 0004               2956              CMPI    #%100, D2
+000032FE  6700 0092               2957              BEQ     LOAD_IMMDTE
+00003302                          2958      
+00003302  4EF9 00003478           2959              JMP     INVALID
+00003308                          2960  TRAILING_HELPER:            
+00003308  31FC 0002 28E6          2961  SIZE_B  MOVE.W  #$2, TRAILING_SIZE
+0000330E  4ED3                    2962          JMP     (A3)
+00003310                          2963  
+00003310  31FC 0002 28E6          2964  SIZE_W  MOVE.W  #$2, TRAILING_SIZE
+00003316  4ED3                    2965          JMP     (A3)
+00003318                          2966          
+00003318  31FC 0004 28E6          2967  SIZE_L  MOVE.W  #$4, TRAILING_SIZE
+0000331E  4ED3                    2968          JMP     (A3)
+00003320                          2969  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 00003320                          2970  
-00003320                          2971  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-00003320                          2972  
-00003320                          2973  LOAD_DATA_REGISTER:
-00003320  4280                    2974      CLR.L   D0
-00003322                          2975      
-00003322  4EB9 000033E0           2976      JSR     LOAD_D
-00003328  1002                    2977      MOVE.B  D2, D0
-0000332A  4EB9 00003454           2978      JSR     LOAD_NUM
-00003330  4ED2                    2979      JMP     (A2)
-00003332                          2980  
-00003332                          2981  LOAD_ADDR_REGISTER:
-00003332  4280                    2982      CLR.L   D0
-00003334                          2983  
-00003334  4EB9 000033EE           2984      JSR     LOAD_A
-0000333A  1002                    2985      MOVE.B  D2, D0
-0000333C  4EB9 00003454           2986      JSR     LOAD_NUM
-00003342  4ED2                    2987      JMP     (A2)
-00003344                          2988  
-00003344                          2989  LOAD_ADDRESS:
-00003344  4EB9 000033FC           2990      JSR     LOAD_PTHSIS_OPEN
-0000334A  4EB8 3332               2991      JSR     LOAD_ADDR_REGISTER
-0000334E  4EB9 0000340A           2992      JSR     LOAD_PTHSIS_CLSD
-00003354  4ED2                    2993      JMP     (A2)
-00003356                          2994  
-00003356                          2995  LOAD_ADDRESS_W_POST_INC:
-00003356  4EB8 3344               2996      JSR     LOAD_ADDRESS
-0000335A  4EB9 00003434           2997      JSR     LOAD_PLUS_SIGN
-00003360  4ED2                    2998      JMP     (A2)
-00003362                          2999  
-00003362                          3000  LOAD_ADDRESS_W_PRE_DEC:
-00003362  4EB9 00003442           3001      JSR     LOAD_MINUS_SIGN
-00003368  4EB8 3344               3002      JSR     LOAD_ADDRESS
-0000336C  4ED2                    3003      JMP     (A2)
-0000336E                          3004  
-0000336E                          3005  LOAD_ABS_SHORT:
-0000336E  4280                    3006      CLR.L   D0
-00003370                          3007  
-00003370  4EB9 00003418           3008      JSR     LOAD_HEX_SIGN
-00003376  3004                    3009      MOVE.W  D4, D0
-00003378  4EB9 0000339C           3010      JSR     LOAD_BYTES
-0000337E  4ED2                    3011      JMP     (A2)
-00003380                          3012  
-00003380                          3013  LOAD_ABS_LONG:
-00003380  4280                    3014      CLR.L   D0
-00003382                          3015  
-00003382  4EB9 00003418           3016      JSR     LOAD_HEX_SIGN
-00003388  2004                    3017      MOVE.L  D4, D0
-0000338A  4EB9 0000339C           3018      JSR     LOAD_BYTES
-00003390  4ED2                    3019      JMP     (A2)
-00003392                          3020  
-00003392                          3021  LOAD_IMMDTE:
-00003392  4EB9 00003426           3022      JSR     LOAD_IMMDTE_VALU
-00003398  4EF8 3380               3023      JMP     LOAD_ABS_LONG
-0000339C                          3024  
-0000339C                          3025  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-0000339C                          3026  
-0000339C                          3027  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-0000339C                          3028  
-0000339C                          3029  LOAD_BYTES:
-0000339C  4285                    3030          CLR.L   D5
-0000339E  4281                    3031          CLR.L   D1
-000033A0                          3032  
-000033A0  2200                    3033          MOVE.L  D0, D1
-000033A2  1A3C 0008               3034          MOVE.B  #8, D5
-000033A6  0C45 0000               3035  LOOP    CMPI    #0, D5
-000033AA  6E00 0004               3036          BGT     ROTATE
-000033AE  4E75                    3037          RTS
-000033B0                          3038      
-000033B0  E999                    3039  ROTATE  ROL.L   #$04, D1
-000033B2  1001                    3040          MOVE.B  D1, D0
-000033B4  0280 0000000F           3041          ANDI.L  #$0000000F, D0
-000033BA  4EB9 00003454           3042          JSR     LOAD_NUM
-000033C0  5345                    3043          SUBI    #1, D5
-000033C2  4EF8 33A6               3044          JMP     LOOP        
-000033C6                          3045  
-000033C6                          3046  LOAD_NEW_LINE:
-000033C6                          3047      ;CLR.L   D0
-000033C6                          3048  
-000033C6                          3049      ;MOVE.B  CR, D0
-000033C6                          3050      ;JSR     LOAD_THIS_SHIT
-000033C6                          3051      ;MOVE.B  LF, D0
-000033C6                          3052      ;JSR     LOAD_THIS_SHIT
-000033C6  4E75                    3053      RTS
-000033C8                          3054  
-000033C8                          3055  LOAD_COMMA_SPACE:
-000033C8  4280                    3056      CLR.L   D0
-000033CA                          3057  
-000033CA  1038 28E4               3058      MOVE.B  COMMA, D0
-000033CE  4EB9 00003450           3059      JSR     LOAD_THIS_SHIT
-000033D4  1038 28E5               3060      MOVE.B  SPACE, D0
-000033D8  4EB9 00003450           3061      JSR     LOAD_THIS_SHIT
-000033DE                          3062      
-000033DE  4E75                    3063      RTS
-000033E0                          3064  
-000033E0                          3065  LOAD_D:
-000033E0  4280                    3066      CLR.L   D0
-000033E2                          3067  
-000033E2  1038 28DD               3068      MOVE.B  DATA, D0
-000033E6  4EB9 00003450           3069      JSR     LOAD_THIS_SHIT
-000033EC  4E75                    3070      RTS
-000033EE                          3071  
-000033EE                          3072  LOAD_A:
-000033EE  4280                    3073      CLR.L   D0
-000033F0                          3074  
-000033F0  1038 28DC               3075      MOVE.B  ADDRESS, D0
-000033F4  4EB9 00003450           3076      JSR     LOAD_THIS_SHIT
-000033FA  4E75                    3077      RTS
-000033FC                          3078  
-000033FC                          3079  LOAD_PTHSIS_OPEN:
-000033FC  4280                    3080      CLR.L   D0
-000033FE                          3081  
-000033FE  1038 28DE               3082      MOVE.B  PTHSIS_OPEN, D0
-00003402  4EB9 00003450           3083      JSR     LOAD_THIS_SHIT
-00003408  4E75                    3084      RTS
-0000340A                          3085  
-0000340A                          3086  LOAD_PTHSIS_CLSD:
-0000340A  4280                    3087      CLR.L   D0
-0000340C                          3088  
-0000340C  1038 28DF               3089      MOVE.B  PTHSIS_CLSD, D0
-00003410  4EB9 00003450           3090      JSR     LOAD_THIS_SHIT
-00003416  4E75                    3091      RTS
-00003418                          3092  
-00003418                          3093  LOAD_HEX_SIGN:
-00003418  4280                    3094      CLR.L   D0
-0000341A                          3095  
-0000341A  1038 28E0               3096      MOVE.B  HEX_SIGN, D0
-0000341E  4EB9 00003450           3097      JSR     LOAD_THIS_SHIT
-00003424  4E75                    3098      RTS
-00003426                          3099  
-00003426                          3100  LOAD_IMMDTE_VALU:
-00003426  4280                    3101      CLR.L   D0
-00003428                          3102  
-00003428  1038 28E1               3103      MOVE.B  IMMDTE_VALU, D0
-0000342C  4EB9 00003450           3104      JSR     LOAD_THIS_SHIT
-00003432  4E75                    3105      RTS
-00003434                          3106  
-00003434                          3107  LOAD_PLUS_SIGN:
-00003434  4280                    3108      CLR.L   D0
-00003436                          3109  
-00003436  1038 28E2               3110      MOVE.B  PLUS_SIGN, D0
-0000343A  4EB9 00003450           3111      JSR     LOAD_THIS_SHIT
-00003440  4E75                    3112      RTS
-00003442                          3113  
-00003442                          3114  LOAD_MINUS_SIGN:
-00003442  4280                    3115      CLR.L   D0
-00003444                          3116  
-00003444  1038 28E3               3117      MOVE.B  MINUS_SIGN, D0
-00003448  4EB9 00003450           3118      JSR     LOAD_THIS_SHIT
-0000344E  4E75                    3119      RTS
-00003450                          3120  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-00003450                          3121  
+00003320                          2971  
+00003320                          2972  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+00003320                          2973  
+00003320                          2974  LOAD_DATA_REGISTER:
+00003320  4280                    2975      CLR.L   D0
+00003322                          2976      
+00003322  4EB9 000033E0           2977      JSR     LOAD_D
+00003328  1002                    2978      MOVE.B  D2, D0
+0000332A  4EB9 00003454           2979      JSR     LOAD_NUM
+00003330  4ED2                    2980      JMP     (A2)
+00003332                          2981  
+00003332                          2982  LOAD_ADDR_REGISTER:
+00003332  4280                    2983      CLR.L   D0
+00003334                          2984  
+00003334  4EB9 000033EE           2985      JSR     LOAD_A
+0000333A  1002                    2986      MOVE.B  D2, D0
+0000333C  4EB9 00003454           2987      JSR     LOAD_NUM
+00003342  4ED2                    2988      JMP     (A2)
+00003344                          2989  
+00003344                          2990  LOAD_ADDRESS:
+00003344  4EB9 000033FC           2991      JSR     LOAD_PTHSIS_OPEN
+0000334A  4EB8 3332               2992      JSR     LOAD_ADDR_REGISTER
+0000334E  4EB9 0000340A           2993      JSR     LOAD_PTHSIS_CLSD
+00003354  4ED2                    2994      JMP     (A2)
+00003356                          2995  
+00003356                          2996  LOAD_ADDRESS_W_POST_INC:
+00003356  4EB8 3344               2997      JSR     LOAD_ADDRESS
+0000335A  4EB9 00003434           2998      JSR     LOAD_PLUS_SIGN
+00003360  4ED2                    2999      JMP     (A2)
+00003362                          3000  
+00003362                          3001  LOAD_ADDRESS_W_PRE_DEC:
+00003362  4EB9 00003442           3002      JSR     LOAD_MINUS_SIGN
+00003368  4EB8 3344               3003      JSR     LOAD_ADDRESS
+0000336C  4ED2                    3004      JMP     (A2)
+0000336E                          3005  
+0000336E                          3006  LOAD_ABS_SHORT:
+0000336E  4280                    3007      CLR.L   D0
+00003370                          3008  
+00003370  4EB9 00003418           3009      JSR     LOAD_HEX_SIGN
+00003376  3004                    3010      MOVE.W  D4, D0
+00003378  4EB9 0000339C           3011      JSR     LOAD_BYTES
+0000337E  4ED2                    3012      JMP     (A2)
+00003380                          3013  
+00003380                          3014  LOAD_ABS_LONG:
+00003380  4280                    3015      CLR.L   D0
+00003382                          3016  
+00003382  4EB9 00003418           3017      JSR     LOAD_HEX_SIGN
+00003388  2004                    3018      MOVE.L  D4, D0
+0000338A  4EB9 0000339C           3019      JSR     LOAD_BYTES
+00003390  4ED2                    3020      JMP     (A2)
+00003392                          3021  
+00003392                          3022  LOAD_IMMDTE:
+00003392  4EB9 00003426           3023      JSR     LOAD_IMMDTE_VALU
+00003398  4EF8 3380               3024      JMP     LOAD_ABS_LONG
+0000339C                          3025  
+0000339C                          3026  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0000339C                          3027  
+0000339C                          3028  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0000339C                          3029  
+0000339C                          3030  LOAD_BYTES:
+0000339C  4285                    3031          CLR.L   D5
+0000339E  4281                    3032          CLR.L   D1
+000033A0                          3033  
+000033A0  2200                    3034          MOVE.L  D0, D1
+000033A2  1A3C 0008               3035          MOVE.B  #8, D5
+000033A6  0C45 0000               3036  LOOP    CMPI    #0, D5
+000033AA  6E00 0004               3037          BGT     ROTATE
+000033AE  4E75                    3038          RTS
+000033B0                          3039      
+000033B0  E999                    3040  ROTATE  ROL.L   #$04, D1
+000033B2  1001                    3041          MOVE.B  D1, D0
+000033B4  0280 0000000F           3042          ANDI.L  #$0000000F, D0
+000033BA  4EB9 00003454           3043          JSR     LOAD_NUM
+000033C0  5345                    3044          SUBI    #1, D5
+000033C2  4EF8 33A6               3045          JMP     LOOP        
+000033C6                          3046  
+000033C6                          3047  LOAD_NEW_LINE:
+000033C6                          3048      ;CLR.L   D0
+000033C6                          3049  
+000033C6                          3050      ;MOVE.B  CR, D0
+000033C6                          3051      ;JSR     LOAD_THIS_SHIT
+000033C6                          3052      ;MOVE.B  LF, D0
+000033C6                          3053      ;JSR     LOAD_THIS_SHIT
+000033C6  4E75                    3054      RTS
+000033C8                          3055  
+000033C8                          3056  LOAD_COMMA_SPACE:
+000033C8  4280                    3057      CLR.L   D0
+000033CA                          3058  
+000033CA  1038 28E4               3059      MOVE.B  COMMA, D0
+000033CE  4EB9 00003450           3060      JSR     LOAD_THIS_SHIT
+000033D4  1038 28E5               3061      MOVE.B  SPACE, D0
+000033D8  4EB9 00003450           3062      JSR     LOAD_THIS_SHIT
+000033DE                          3063      
+000033DE  4E75                    3064      RTS
+000033E0                          3065  
+000033E0                          3066  LOAD_D:
+000033E0  4280                    3067      CLR.L   D0
+000033E2                          3068  
+000033E2  1038 28DD               3069      MOVE.B  DATA, D0
+000033E6  4EB9 00003450           3070      JSR     LOAD_THIS_SHIT
+000033EC  4E75                    3071      RTS
+000033EE                          3072  
+000033EE                          3073  LOAD_A:
+000033EE  4280                    3074      CLR.L   D0
+000033F0                          3075  
+000033F0  1038 28DC               3076      MOVE.B  ADDRESS, D0
+000033F4  4EB9 00003450           3077      JSR     LOAD_THIS_SHIT
+000033FA  4E75                    3078      RTS
+000033FC                          3079  
+000033FC                          3080  LOAD_PTHSIS_OPEN:
+000033FC  4280                    3081      CLR.L   D0
+000033FE                          3082  
+000033FE  1038 28DE               3083      MOVE.B  PTHSIS_OPEN, D0
+00003402  4EB9 00003450           3084      JSR     LOAD_THIS_SHIT
+00003408  4E75                    3085      RTS
+0000340A                          3086  
+0000340A                          3087  LOAD_PTHSIS_CLSD:
+0000340A  4280                    3088      CLR.L   D0
+0000340C                          3089  
+0000340C  1038 28DF               3090      MOVE.B  PTHSIS_CLSD, D0
+00003410  4EB9 00003450           3091      JSR     LOAD_THIS_SHIT
+00003416  4E75                    3092      RTS
+00003418                          3093  
+00003418                          3094  LOAD_HEX_SIGN:
+00003418  4280                    3095      CLR.L   D0
+0000341A                          3096  
+0000341A  1038 28E0               3097      MOVE.B  HEX_SIGN, D0
+0000341E  4EB9 00003450           3098      JSR     LOAD_THIS_SHIT
+00003424  4E75                    3099      RTS
+00003426                          3100  
+00003426                          3101  LOAD_IMMDTE_VALU:
+00003426  4280                    3102      CLR.L   D0
+00003428                          3103  
+00003428  1038 28E1               3104      MOVE.B  IMMDTE_VALU, D0
+0000342C  4EB9 00003450           3105      JSR     LOAD_THIS_SHIT
+00003432  4E75                    3106      RTS
+00003434                          3107  
+00003434                          3108  LOAD_PLUS_SIGN:
+00003434  4280                    3109      CLR.L   D0
+00003436                          3110  
+00003436  1038 28E2               3111      MOVE.B  PLUS_SIGN, D0
+0000343A  4EB9 00003450           3112      JSR     LOAD_THIS_SHIT
+00003440  4E75                    3113      RTS
+00003442                          3114  
+00003442                          3115  LOAD_MINUS_SIGN:
+00003442  4280                    3116      CLR.L   D0
+00003444                          3117  
+00003444  1038 28E3               3118      MOVE.B  MINUS_SIGN, D0
+00003448  4EB9 00003450           3119      JSR     LOAD_THIS_SHIT
+0000344E  4E75                    3120      RTS
+00003450                          3121  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 00003450                          3122  
-00003450                          3123  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-00003450                          3124  LOAD_THIS_SHIT:
-00003450  18C0                    3125      MOVE.B  D0, (A4)+
-00003452  4E75                    3126      RTS
-00003454                          3127  
-00003454                          3128  LOAD_NUM:
-00003454  0C00 0009               3129      CMPI.B  #$9, D0
-00003458  6E00 0006               3130      BGT     GT
-0000345C  6F00 000C               3131      BLE     LE
-00003460                          3132      
-00003460  0600 0037               3133  GT  ADDI.B  #$37, D0 * A~F
-00003464  4EF9 00003474           3134      JMP     END
-0000346A  0600 0030               3135  LE  ADDI.B  #$30, D0 * 0~9
-0000346E  4EF9 00003474           3136      JMP     END
-00003474                          3137  
-00003474  18C0                    3138  END MOVE.B  D0, (A4)+
-00003476  4E75                    3139      RTS
-00003478                          3140  
-00003478                          3141  INVALID:
-00003478  11FC 0000 10A2          3142              MOVE.B  #%0, IS_VALID
-0000347E  4EF8 28F8               3143              JMP     EXT
-00003482                          3144  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-00003482                          3145  
+00003450                          3123  
+00003450                          3124  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+00003450                          3125  LOAD_THIS_SHIT:
+00003450  18C0                    3126      MOVE.B  D0, (A4)+
+00003452  4E75                    3127      RTS
+00003454                          3128  
+00003454                          3129  LOAD_NUM:
+00003454  0C00 0009               3130      CMPI.B  #$9, D0
+00003458  6E00 0006               3131      BGT     GT
+0000345C  6F00 000C               3132      BLE     LE
+00003460                          3133      
+00003460  0600 0037               3134  GT  ADDI.B  #$37, D0 * A~F
+00003464  4EF9 00003474           3135      JMP     END
+0000346A  0600 0030               3136  LE  ADDI.B  #$30, D0 * 0~9
+0000346E  4EF9 00003474           3137      JMP     END
+00003474                          3138  
+00003474  18C0                    3139  END MOVE.B  D0, (A4)+
+00003476  4E75                    3140      RTS
+00003478                          3141  
+00003478                          3142  INVALID:
+00003478  11FC 0000 10A2          3143              MOVE.B  #%0, IS_VALID
+0000347E  4EF8 28F8               3144              JMP     EXT
+00003482                          3145  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 00003482                          3146  
 00003482                          3147  
 00003482                          3148  
 00003482                          3149  
-00003482                          3150  -------------------- end include --------------------
-00003482                          3151      INCLUDE "MOVEM_TEST.x68"                                ;Test program to include
-00003482                          3152      
-00009000                          3153      ORG $9000
-00009000  48A1 007F               3154      MOVEM.W   A1-A7,-(A1)
-00009004                          3155  
-00009004  48E1 7F00               3156      MOVEM.L   D1-D7,-(A1)
-00009008                          3157  
-00009008  48A1 0140               3158      MOVEM.W   A1/D7,-(A1)
-0000900C                          3159  
-0000900C  48E1 0140               3160      MOVEM.L   A1/D7,-(A1)
-00009010                          3161  
-00009010  4891 FE00               3162      MOVEM.W   A1-A7,(A1)
-00009014                          3163  
-00009014  48D1 00FE               3164      MOVEM.L   D1-D7,(A1)
-00009018                          3165  
-00009018  4891 0280               3166      MOVEM.W   A1/D7,(A1)
-0000901C                          3167  
-0000901C  48D1 0280               3168      MOVEM.L   A1/D7,(A1)
-00009020                          3169  
-00009020  4C99 FE00               3170      MOVEM.W   (A1)+,A1-A7
-00009024                          3171  
-00009024  4CD9 00FE               3172      MOVEM.L   (A1)+,D1-D7
-00009028                          3173  
-00009028  4C99 0280               3174      MOVEM.W   (A1)+,A1/D7
-0000902C                          3175  
-0000902C  4CD9 0280               3176      MOVEM.L   (A1)+,A1/D7
-00009030                          3177  
-00009030  4C91 FE00               3178      MOVEM.W   (A1),A1-A7
-00009034                          3179  
-00009034  4CD1 00FE               3180      MOVEM.L   (A1),D1-D7
-00009038                          3181  
-00009038  4C91 0280               3182      MOVEM.W   (A1),A1/D7
-0000903C                          3183  
-0000903C  4CD1 0280               3184      MOVEM.L   (A1),A1/D7
-00009040                          3185      
-00009040                          3186  -------------------- end include --------------------
-00009040                          3187      
-00009040                          3188      
-Line 3189 WARNING: Origin value is odd (Location counter set to next highest address)
-00009040                          3189     END    START                                 ;Last line of program
+00003482                          3150  
+00003482                          3151  -------------------- end include --------------------
+00003482                          3152      INCLUDE "MOVEM_TEST.x68"                                ;Test program to include
+00003482                          3153      
+00009000                          3154      ORG $9000
+00009000                          3155      ;MOVEM.W   D1-D4/A1-A7,-(A1)
+00009000                          3156  
+00009000  48E1 7F00               3157      MOVEM.L   D1-D7,-(A1)
+00009004                          3158  
+00009004  48A1 0140               3159      MOVEM.W   A1/D7,-(A1)
+00009008                          3160  
+00009008  48E1 0140               3161      MOVEM.L   A1/D7,-(A1)
+0000900C                          3162  
+0000900C  4891 FE00               3163      MOVEM.W   A1-A7,(A1)
+00009010                          3164  
+00009010  48D1 00FE               3165      MOVEM.L   D1-D7,(A1)
+00009014                          3166  
+00009014  4891 0280               3167      MOVEM.W   A1/D7,(A1)
+00009018                          3168  
+00009018  48D1 0280               3169      MOVEM.L   A1/D7,(A1)
+0000901C                          3170  
+0000901C  4C99 FE00               3171      MOVEM.W   (A1)+,A1-A7
+00009020                          3172  
+00009020  4CD9 00FE               3173      MOVEM.L   (A1)+,D1-D7
+00009024                          3174  
+00009024  4C99 0280               3175      MOVEM.W   (A1)+,A1/D7
+00009028                          3176  
+00009028  4CD9 0280               3177      MOVEM.L   (A1)+,A1/D7
+0000902C                          3178  
+0000902C  4C91 FE00               3179      MOVEM.W   (A1),A1-A7
+00009030                          3180  
+00009030  4CD1 00FE               3181      MOVEM.L   (A1),D1-D7
+00009034                          3182  
+00009034  4C91 0280               3183      MOVEM.W   (A1),A1/D7
+00009038                          3184  
+00009038  4CD1 0280               3185      MOVEM.L   (A1),A1/D7
+0000903C                          3186      
+0000903C                          3187  
+0000903C                          3188  -------------------- end include --------------------
+0000903C                          3189      
+0000903C                          3190      
+Line 3191 WARNING: Origin value is odd (Location counter set to next highest address)
+0000903C                          3191     END    START                                 ;Last line of program
 
 No errors detected
 1 warning generated

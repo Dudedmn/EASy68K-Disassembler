@@ -819,14 +819,14 @@ CHECK_OP_NBCD:
     
 CHECK_OP_SWAP:                  	; This must go before CHECK_OP PEA as first 3 nibbles can be equivalent
     MOVE.W CUR_OP_CODE,D0       	;Move current instruction set into D0
-    ANDI.W #$FF48,D0				;Mask relevant bits to D0
+    ANDI.W #$FFF8,D0				;Mask relevant bits to D0
     CMP.W  #$4840,D0				;Compare the appropriate masked bits
     BEQ    GROUP4_INVALID			;INVALID OP code
     BNE    CHECK_OP_PEA				;Check next OP code
  
 CHECK_OP_PEA:               		;This must go after CHECK_OP_SWAP as first 3 nibbles can be equivalent
     MOVE.W CUR_OP_CODE,D0    		;Move current instruction set into D0
-    ANDI.W #$FF40,D0				;Mask relevant bits to D0
+    ANDI.W #$FFC0,D0				;Mask relevant bits to D0
     CMP.W  #$4840,D0				;Compare the appropriate masked bits
     BEQ    GROUP4_INVALID			;INVALID OP code
     BNE    CHECK_OP_TAS				;Check next OP code
@@ -2002,6 +2002,7 @@ P_OP_ASL        DC.B    '   ASL',0
 P_OP_ROR        DC.B    '   ROR',0
 P_OP_ROL        DC.B    '   ROL',0
 ***************** END OF DATA CONSTANT PRINTS ***********************************
+
 
 
 
