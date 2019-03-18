@@ -1,4 +1,3 @@
-    ORG    $1000
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 * MESSAGE VARIABLES ******************************
 
@@ -17,8 +16,6 @@ MINUS_SIGN      DC.B    $2D
 COMMA           DC.B    $2C
 SPACE           DC.B    $20
 
-CR              DC.B    $D
-LF              DC.B    $A
 **************************************************
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -39,47 +36,7 @@ FIRST_X			DS.B	1 * 0: it is first X
 						  * 1: it is second X
 FIRST_Y			DS.B	1 * 0: it is first Y
 						  * 1: it is second Y
-**************************************************
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-* BUFFER SHARED WITH DANIEL. ERASE THIS FOR INTEGRATION 
-* DANIEL'S CODE MUST HAVE THESE VARIABLES
-MNEMONIC        DS.B    1 * First four BITS of any instruction
- 
-FIRST_3         DS.B    1 * First, second, third, and fourth bundles of three bits each
-SECOND_3        DS.B    1
-THIRD_3         DS.B    1
-FOURTH_3        DS.B    1
-
-CUR_OP_CODE     DS.W    1 * Used for Daniel's code
-
-START_ADDRESS   EQU     $4000 * Used to parse through the entire instruction
-END_ADDRESS     EQU     $5000   
-
-G_BUFFER        DS.B    80 * Used to load ASCII-converted EA ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-IS_VALID        DS.B    1 * EA-bit validity flag
-                          * $0 = invalid, $1 = valid
-**************************************************
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
- 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;  
-* TESTING PORTION. ERASE THIS ********************
-
-START:
-    MOVE.W  #$4CB9, CUR_OP_CODE
-    MOVE.B  #%0100, MNEMONIC
-    MOVE.B  #%110, FIRST_3
-    MOVE.B  #%010, SECOND_3
-    MOVE.B  #%011, THIRD_3
-    MOVE.B  #%000, FOURTH_3
-    
-    MOVE.W  #START_ADDRESS, D0
-    ADDI.B  #2, D0
-    MOVEA.L D0, A5
-    
-    LEA     G_BUFFER, A4
 **************************************************
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -95,16 +52,21 @@ START:
 * CUR_OP_CODE, MNEMONIC, FIRST_3, etc should have values already.
 
 
+**************************************************
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+* EXECUTION **************************************
+main_EA:
+    JSR PARSE_EA_CONSTANT_BITS    
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;      
 * ESSENTIAL EXECUTION PORTION. DO NOT ERASE ******
 
     JSR     CHECK_XXXX
-EXT JMP     ANY_FUNCTION_AFTER_EA * This EXT alias is critical for NOT loading error
-
-ANY_FUNCTION_AFTER_EA:
-    SIMHALT
+EXT                        * Main EXT alias to finish routine
+    JMP check_print 
 **************************************************
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -838,11 +800,11 @@ MOVEM_POST2	MOVE.B	THIRD_3, D3
 			JSR		MOVEM_PARSE
             RTS
 
-MOVEM_POST3	* see if new displacement doesnt exceed END_ADDRESS
+MOVEM_POST3	* see if new displacement doesn't exceed END_ADDRESS
 			CLR.L	D6
 			MOVE.W	A5, D6
 			ADDI.B	#2, D6
-			CMP.W	#END_ADDRESS, D6
+			CMP.W	A6, D6
 			BGT		INVALID
 			
 			* push A5 pointer +2
@@ -853,11 +815,11 @@ MOVEM_POST3	* see if new displacement doesnt exceed END_ADDRESS
 			BEQ		MOVEM_POSTL
 			JMP		INVALID
 			
-MOVEM_POSTW * see if new displacement doesnt exceed END_ADDRESS
+MOVEM_POSTW * see if new displacement doesn't exceed END_ADDRESS
 			CLR.L	D6
 			MOVE.W	A5, D6
 			ADDI.B	#2, D6
-			CMP.W	#END_ADDRESS, D6
+			CMP.W	A6, D6
 			BGT		INVALID
 			
 			* munch 2
@@ -874,11 +836,11 @@ MOVEM_POSTW * see if new displacement doesnt exceed END_ADDRESS
 			ADDA.W	#2, A5
 			RTS
 
-MOVEM_POSTL * see if new displacement doesnt exceed END_ADDRESS
+MOVEM_POSTL * see if new displacement doesn't exceed END_ADDRESS
 			CLR.L	D6
 			MOVE.W	A5, D6
 			ADDI.B	#2, D6
-			CMP.W	#END_ADDRESS, D6
+			CMP.W	A6, D6
 			BGT		INVALID			
 			
 			* munch 4
@@ -1188,7 +1150,7 @@ BCLR        CLR.L   D5
             CLR.L   D4
             MOVEA.L #0, A2
 
-            MOVE.W  #END_ADDRESS, D5
+            MOVE.W  A6, D5
             SUB.W   A5, D5
             CMPI.W  #$2, D5
             BLT     INVALID
@@ -1348,7 +1310,7 @@ LOAD_GE_111:
             CLR.L   D5
             CLR.L   D4
 
-            MOVE.W  #END_ADDRESS, D5
+            MOVE.W  A6, D5
             SUB.W   A5, D5
             CMP.W   TRAILING_SIZE, D5
             BLT     INVALID
@@ -1804,7 +1766,6 @@ INVALID:
 **************************************************
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-    END    START
 
 
 

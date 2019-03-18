@@ -577,7 +577,7 @@ fileID			DS.L    1               					;Variable for File ID
 INVALID_ADDRES_MESSAGE DC.W 'Invalid Hex Address' ,CR,LF,0			;Invalid message print
 
     INCLUDE "OP_Code_Routines.x68"						;OP role code to include
-    INCLUDE "EA_Integrated.x68"							;EA role code to include
+    INCLUDE "EA_FINAL.x68"							;EA role code to include
     INCLUDE "Test.x68"								;Test program to include
     
     
