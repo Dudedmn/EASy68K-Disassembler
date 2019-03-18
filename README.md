@@ -1,7 +1,7 @@
 # EASy68K-Disassembler
 EASy68K-Disassembler made for CSS 422
 This disassembles or reverse compiles a given set of code. So we take input commands as a test file (say MOVEA.W A5,A6) and disassemble it to machine code then print it out.
-# Team REEEE
+# Team REEE
 ## Members
 + Daniel Yan
 + Fahad Alshehri
@@ -10,7 +10,6 @@ This disassembles or reverse compiles a given set of code. So we take input comm
 - [X] Make a meetup schedule
 - [X] Define roles for each person
 - [X] Start to learn Assembly 68k
-
 # Week 2
 - [X] Print out NOP and RTS based on binary value inputs
 - [X] Start EA skeleton for addressing modes
@@ -20,36 +19,33 @@ This disassembles or reverse compiles a given set of code. So we take input comm
 # Week 3
 - [X] Finish EA addressing modes for all basic supported EA modes
 - Big overhaul in terms of tasks
-
 # Week 4
-
 ALL
-- [ ] Flowcharting structuring, WIP
 - [X] Things to avoid for Disassembler Project
-- [ ] Pass whole Disassembler as a test case, WIP
-
+- [X] Pass whole Disassembler as a test case, WIP
 IO
-- [ ] Documentation for Disassembler
+- [X] Documentation for Disassembler
 - [x] Passing instruction to OP
 - [x] Printing overall instruction
-- [ ] Test demo program for all supported commands (has most but not all)
+- [X] Test demo program for all supported commands
 - [X] Validation testing for I/O
 - [X] Adhere to commenting format
-- [ ] Flowchart for major routines
-
+- [X] Flowchart for major routines
+- [ ] Ported all Gdoc documentation to Word
 OP Code
 - [X] Finish identification for all OP codes (supported and unsupported)
 - [X] Load messages into buffer successfully
-- [ ] Finish up comments for all lines and methods, WIP up to $E
+- [X] Finish up comments for all lines and methods, WIP up to $E
 - [X] Validation testing for ALL OP codes
 - [X] Finished current integration tests
 - [X] Flowchart for major routines
-
+- [X] Finished documentation for role
 EA
 - [x] Finish Trailing Bits
 - [X] Use OP code parsings successfully
 - [x] Adhere to commenting format
-- [ ] Flowchart for major routines
+- [X] Flowchart for major routines
+- [ ] Finished MOVEM
 
 Commenting Format
 ```

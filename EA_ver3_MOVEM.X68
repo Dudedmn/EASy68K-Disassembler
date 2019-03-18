@@ -68,11 +68,11 @@ IS_VALID        DS.B    1 * EA-bit validity flag
 * TESTING PORTION. ERASE THIS ********************
 
 START:
-    MOVE.W  #$4CB9, CUR_OP_CODE
+    MOVE.W  #$48A0, CUR_OP_CODE
     MOVE.B  #%0100, MNEMONIC
-    MOVE.B  #%110, FIRST_3
+    MOVE.B  #%100, FIRST_3
     MOVE.B  #%010, SECOND_3
-    MOVE.B  #%011, THIRD_3
+    MOVE.B  #%100, THIRD_3
     MOVE.B  #%000, FOURTH_3
     
     MOVE.W  #START_ADDRESS, D0
@@ -800,143 +800,30 @@ LEA_BACK    MOVE.B  THIRD_3, D3
             RTS 
 
 FUK_MOVEM:  * Functional Utilization of Knowledge in MOVEM
-			CLR.L	D4
-			CLR.L	D5
-			CLR.L	D6
-			MOVEA.L	#0, A3
-			
-			MOVE.B	FIRST_3, D6
-			ANDI.B	#%010, D6
-			CMPI.B	#%010, D6
-			BEQ		MOVEM_POST
-			BNE		MOVEM_PRE
-
-MOVEM_POST	CMPI.B	#%011, THIRD_3
-			BEQ		MOVEM_POST2
-			CMPI.B	#%010, THIRD_3
-			BEQ		MOVEM_POST2
-			CMPI.B	#%111, THIRD_3
-			BEQ		MOVEM_POST3
-			JMP		INVALID
-
-MOVEM_POST2	MOVE.B	THIRD_3, D3
-			MOVE.B	FOURTH_3, D2
-			JSR		LOAD_EA
-			JSR		LOAD_COMMA_SPACE
-
-			JSR		MOVEM_PARSE
+            JSR		MOVEM_PARSE
             RTS
 
-MOVEM_POST3	* see if new displacement doesnt exceed END_ADDRESS
-			CLR.L	D6
-			MOVE.W	A5, D6
-			ADDI.B	#2, D6
-			CMP.W	#END_ADDRESS, D6
-			BGT		INVALID
-			
-			* push A5 pointer +2
-			ADDA.W	#2, A5
-			CMPI.B	#%000, FOURTH_3
-			BEQ		MOVEM_POSTW
-			CMPI.B	#%001, FOURTH_3
-			BEQ		MOVEM_POSTL
-			JMP		INVALID
-			
-MOVEM_POSTW * see if new displacement doesnt exceed END_ADDRESS
-			CLR.L	D6
-			MOVE.W	A5, D6
-			ADDI.B	#2, D6
-			CMP.W	#END_ADDRESS, D6
-			BGT		INVALID
-			
-			* munch 2
-			MOVE.W  #$2, TRAILING_SIZE
-			MOVE.B	THIRD_3, D3
-			MOVE.B	FOURTH_3, D2
-			JSR		LOAD_EA
-			JSR		LOAD_COMMA_SPACE
-			
-			* push back -4
-			SUBA.W	#4, A5
-			JSR		MOVEM_PARSE
-			* push 2
-			ADDA.W	#2, A5
-			RTS
-
-MOVEM_POSTL * see if new displacement doesnt exceed END_ADDRESS
-			CLR.L	D6
-			MOVE.W	A5, D6
-			ADDI.B	#2, D6
-			CMP.W	#END_ADDRESS, D6
-			BGT		INVALID			
-			
-			* munch 4
-			MOVE.W  #$4, TRAILING_SIZE
-			MOVE.B	THIRD_3, D3
-			MOVE.B	FOURTH_3, D2
-			JSR		LOAD_EA
-			JSR		LOAD_COMMA_SPACE
-
-			* push back -6
-			SUBA.W	#6, A5
-			JSR		MOVEM_PARSE
-			* push 4
-			ADDA.W	#4, A5
-			RTS
-
-MOVEM_PRE	JSR		MOVEM_PARSE
-			JSR		LOAD_COMMA_SPACE
-
-			MOVEA.W #MOVEM_PRE_B, A3
-            CMPI.B  #%000, FOURTH_3
-            BEQ     SIZE_W
-            CMPI.B  #%001, FOURTH_3
-            BEQ     SIZE_L
-            JMP     INVALID
-			
-MOVEM_PRE_B	CMPI.B	#%000, THIRD_3
-			BEQ		INVALID
-			CMPI.B	#%011, THIRD_3
-			BEQ		INVALID
-			CMPI.B	#%001, THIRD_3
-			BEQ		INVALID
-			
-			MOVE.B	THIRD_3, D3
-			MOVE.B	FOURTH_3, D2
-			
-			JSR		LOAD_EA
-			JSR		LOAD_NEW_LINE
-			RTS
-			
 MOVEM_PARSE:
-			CLR.L	D4
 			MOVE.W	(A5)+, D4 * D4 has $00FF
-						
+			
+			MOVE.B	#$FF, X_COUNTER * start from -1
+			MOVE.B	#$FF, Y_COUNTER * start from -1
+			MOVE.B	#0, FIRST_X
+			MOVE.B	#0, FIRST_Y
+			
 			CMPI.B	#%100, THIRD_3
 			BNE		A_TO_D
 			BEQ		D_TO_A
 
 A_TO_D		MOVE.B	#%001, X * X = A
 			MOVE.B	#%000, Y * Y = D
-			MOVE.B	#$8, X_COUNTER * start from 8
-			MOVE.B	#$8, Y_COUNTER * start from 8
-			MOVE.B	#0, FIRST_X
-			MOVE.B	#0, FIRST_Y
-
-			JMP		GO_A_TO_D
+			JMP		NEXT_STEP
 			
 D_TO_A		MOVE.B	#%000, X * X = D
 			MOVE.B	#%001, Y * Y = A
-			MOVE.B	#$FF, X_COUNTER * start from -1
-			MOVE.B	#$FF, Y_COUNTER * start from -1
-			MOVE.B	#0, FIRST_X
-			MOVE.B	#0, FIRST_Y
-			
-			JMP		GO_D_TO_A
+			JMP		NEXT_STEP
 
-***vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv***
-***111111111 MOVEM D->A 111111111***
-GO_D_TO_A	ROL.W	#1, D4
+NEXT_STEP	ROL.W	#1, D4
 			MOVE.W	D4, D5
 			ANDI.W	#$1, D5
 			
@@ -986,11 +873,9 @@ ITS_Y_BACK	MOVE.B	Y, D3 * LOAD[YY_COUNTER]
 			BEQ		FST_Y2
 			BNE		SND_Y
 
-FST_Y1		CMPI.B	#1, FIRST_X
-			BNE		SKIP_HERE
-			ADDA.W	#2, A4 * push G_BUFFER pointer by 2
+FST_Y1		ADDA.W	#2, A4 * push G_BUFFER pointer by 2
 			MOVE.B  #$2F, (A4)+ * LOAD '/'
-SKIP_HERE	JMP		ITS_Y_BACK
+			JMP		ITS_Y_BACK
 
 FST_Y2		MOVE.B  #$2D, (A4)+ * LOAD '-'
 			MOVE.B	#1, FIRST_Y * FIRST_Y = 1
@@ -1000,88 +885,10 @@ SND_Y		SUBA.W	#2, A4 * push back G_BUFFER pointer by 2
 			JMP		KEEP_GOING
 
 KEEP_GOING	CMPI.B	#8, Y_COUNTER
-			BNE		GO_D_TO_A
+			BNE		NEXT_STEP
 			
 			ADDA.W	#2, A4 * push G_BUFFER pointer by 2
 			RTS
-***111111111 MOVEM D->A 111111111***
-***^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^***
-
-
-***vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv***
-***111111111 MOVEM A->D 111111111***
-GO_A_TO_D	ROL.W	#1, D4
-			MOVE.W	D4, D5
-			ANDI.W	#$1, D5
-			
-			CMPI.B	#0, X_COUNTER
-			BGT     SUBTRACT_X  
-			BLE 	SUBTRACT_Y  
-			
-SUBTRACT_X	SUBI.B	#1, X_COUNTER
-			JMP		KEEP_GOING1
-
-SUBTRACT_Y	SUBI.B	#1, Y_COUNTER
-            MOVE.B  #$FF, X_COUNTER
-			JMP		KEEP_GOING1
-			
-KEEP_GOING1	CMPI.W	#$1, D5
-			BEQ		BIT_ON2
-			BNE		KEEP_GOING2
-			
-BIT_ON2		CMPI.B	#$FF, X_COUNTER
-			BNE		ITS_X2
-			BEQ		MYBE_Y2
-			
-ITS_X2		MOVE.B	X, D3 * LOAD[XX_COUNTER]
-			MOVE.B	X_COUNTER, D2
-			JSR		LOAD_EA
-			CMPI.B	#0, FIRST_X
-			BEQ		FST_X2
-			BNE		SND_X2
-
-FST_X2		MOVE.B  #$2D, (A4)+ * LOAD '-'
-			MOVE.B	#1, FIRST_X * FIRST_X = 1
-			JMP		KEEP_GOING2
-			
-SND_X2		SUBA.W	#2, A4 * push back G_BUFFER pointer by 2
-			JMP		KEEP_GOING2
-
-MYBE_Y2		CMPI.B	#$FF, Y_COUNTER
-			BNE		ITS_Y2
-			BEQ		KEEP_GOING2
-
-ITS_Y2		CMPI.B	#0, FIRST_Y
-			BEQ		FST_Y3
-ITS_Y2_BACK	MOVE.B	Y, D3 * LOAD[YY_COUNTER]
-			MOVE.B	Y_COUNTER, D2
-			JSR		LOAD_EA
-			CMPI.B	#0, FIRST_Y
-			BEQ		FST_Y4
-			BNE		SND_Y2
-
-FST_Y3		CMPI.B	#1, FIRST_X
-			BNE		SKIP_HERE2
-			ADDA.W	#2, A4 * push G_BUFFER pointer by 2
-			MOVE.B  #$2F, (A4)+ * LOAD '/'
-SKIP_HERE2	JMP		ITS_Y2_BACK
-
-FST_Y4		MOVE.B  #$2D, (A4)+ * LOAD '-'
-			MOVE.B	#1, FIRST_Y * FIRST_Y = 1
-			JMP		KEEP_GOING2
-
-SND_Y2		SUBA.W	#2, A4 * push back G_BUFFER pointer by 2
-			JMP		KEEP_GOING2
-
-KEEP_GOING2	CMPI.B	#$FF, Y_COUNTER
-			BNE		GO_A_TO_D   
-			
-			ADDA.W	#2, A4 * push G_BUFFER pointer by 2
-			RTS
-***111111111 MOVEM A->D 111111111***
-***^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^***
-
-
 
 * <EA>
 **********************************************************************************
