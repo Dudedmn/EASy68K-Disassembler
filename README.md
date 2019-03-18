@@ -22,7 +22,6 @@ This disassembles or reverse compiles a given set of code. So we take input comm
 # Week 4
 ALL
 - [X] Things to avoid for Disassembler Project
-- [X] Pass whole Disassembler as a test case, WIP
 IO
 - [X] Documentation for Disassembler
 - [x] Passing instruction to OP
@@ -45,7 +44,7 @@ EA
 - [X] Use OP code parsings successfully
 - [x] Adhere to commenting format
 - [X] Flowchart for major routines
-- [ ] Finished MOVEM
+- [x] Finished MOVEM - best as possible
 
 Commenting Format
 ```
