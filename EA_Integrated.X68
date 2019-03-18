@@ -26,15 +26,25 @@ TRAILING_SIZE   DS.W    1 * Size of any immediate or
                           * WORD because the trailing bytes
                           * are represented as a word regardless.
                           * $1 = BYTE, $2 = WORD, $4 = LONG
+						  
+X				DS.B	1
+Y				DS.B	1 * always X -> Y
+X_COUNTER		DS.B	1
+Y_COUNTER		DS.B	1
+FIRST_X			DS.B	1 * 0: it is first X
+						  * 1: it is second X
+FIRST_Y			DS.B	1 * 0: it is first Y
+						  * 1: it is second Y
 **************************************************
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
- 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;  
-* TESTING PORTION. ERASE THIS ********************
 
 * EXECUTION **************************************
 main_EA:
     JSR PARSE_EA_CONSTANT_BITS    
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+**************************************************
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
@@ -47,6 +57,9 @@ main_EA:
 * ALL variables should have the same name with daniel's
 *
 * CUR_OP_CODE, MNEMONIC, FIRST_3, etc should have values already.
+
+
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;      
 * ESSENTIAL EXECUTION PORTION. DO NOT ERASE ******
@@ -722,6 +735,7 @@ JSR_BACK    MOVE.B  THIRD_3, D3
             RTS
 
 MOVEM:
+            JSR     FUK_MOVEM
             JSR     LOAD_NEW_LINE
             RTS
     
@@ -745,7 +759,98 @@ LEA_BACK    MOVE.B  THIRD_3, D3
             
             JSR     LOAD_EA
             JSR     LOAD_NEW_LINE
+            RTS 
+
+FUK_MOVEM:  * Functional Utilization of Knowledge in MOVEM
+            JSR		MOVEM_PARSE
             RTS
+
+MOVEM_PARSE:
+			MOVE.W	(A5)+, D4 * D4 has $00FF
+			
+			MOVE.B	#$FF, X_COUNTER * start from -1
+			MOVE.B	#$FF, Y_COUNTER * start from -1
+			MOVE.B	#0, FIRST_X
+			MOVE.B	#0, FIRST_Y
+			
+			CMPI.B	#%100, THIRD_3
+			BNE		A_TO_D
+			BEQ		D_TO_A
+
+A_TO_D		MOVE.B	#%001, X * X = A
+			MOVE.B	#%000, Y * Y = D
+			JMP		NEXT_STEP
+			
+D_TO_A		MOVE.B	#%000, X * X = D
+			MOVE.B	#%001, Y * Y = A
+			JMP		NEXT_STEP
+
+NEXT_STEP	ROL.W	#1, D4
+			MOVE.W	D4, D5
+			ANDI.W	#$1, D5
+			
+			CMPI.B	#7, X_COUNTER
+			BGE		ADD_Y
+			BLT		ADD_X
+			
+ADD_X		ADDI.B	#1, X_COUNTER
+			JMP		KEEP_GOING0
+
+ADD_Y		ADDI.B	#1, Y_COUNTER
+            MOVE.B  #8, X_COUNTER
+			JMP		KEEP_GOING0
+			
+KEEP_GOING0	CMPI.W	#$1, D5
+			BEQ		BIT_ON
+			BNE		KEEP_GOING
+			
+BIT_ON		CMPI.B	#8, X_COUNTER
+			BNE		ITS_X
+			BEQ		MYBE_Y
+			
+ITS_X		MOVE.B	X, D3 * LOAD[XX_COUNTER]
+			MOVE.B	X_COUNTER, D2
+			JSR		LOAD_EA
+			CMPI.B	#0, FIRST_X
+			BEQ		FST_X
+			BNE		SND_X
+
+FST_X		MOVE.B  #$2D, (A4)+ * LOAD '-'
+			MOVE.B	#1, FIRST_X * FIRST_X = 1
+			JMP		KEEP_GOING
+			
+SND_X		SUBA.W	#2, A4 * push back G_BUFFER pointer by 2
+			JMP		KEEP_GOING
+
+MYBE_Y		CMPI.B	#8, Y_COUNTER
+			BNE		ITS_Y
+			BEQ		KEEP_GOING
+
+ITS_Y		CMPI.B	#0, FIRST_Y
+			BEQ		FST_Y1
+ITS_Y_BACK	MOVE.B	Y, D3 * LOAD[YY_COUNTER]
+			MOVE.B	Y_COUNTER, D2
+			JSR		LOAD_EA
+			CMPI.B	#0, FIRST_Y
+			BEQ		FST_Y2
+			BNE		SND_Y
+
+FST_Y1		ADDA.W	#2, A4 * push G_BUFFER pointer by 2
+			MOVE.B  #$2F, (A4)+ * LOAD '/'
+			JMP		ITS_Y_BACK
+
+FST_Y2		MOVE.B  #$2D, (A4)+ * LOAD '-'
+			MOVE.B	#1, FIRST_Y * FIRST_Y = 1
+			JMP		KEEP_GOING
+
+SND_Y		SUBA.W	#2, A4 * push back G_BUFFER pointer by 2
+			JMP		KEEP_GOING
+
+KEEP_GOING	CMPI.B	#8, Y_COUNTER
+			BNE		NEXT_STEP
+			
+			ADDA.W	#2, A4 * push G_BUFFER pointer by 2
+			RTS
 
 * <EA>
 **********************************************************************************
@@ -1212,7 +1317,13 @@ ROTATE  ROL.L   #$04, D1
 *
 * Postcondition: X
 **********************************************************************************
-LOAD_NEW_LINE:          ;Depreciated method due to IO
+LOAD_NEW_LINE:
+    ;CLR.L   D0
+
+    ;MOVE.B  CR, D0
+    ;JSR     LOAD_THIS_SHIT
+    ;MOVE.B  LF, D0
+    ;JSR     LOAD_THIS_SHIT
     RTS
 
 * <EA>
@@ -1378,7 +1489,8 @@ LOAD_MINUS_SIGN:
 * LOAD_THIS FUNCTIONS (LOWEST LEVEL) *************
 * <EA>
 **********************************************************************************
-* Description: Loads the hex value from D0 to G_BUFFER in ASCII
+* Description: Loads the hex value from D0 to G_BUFFER in ASCII. SHIT stands for        
+*               Specially-Heeded I/O Target
 *
 * Registers used: X
 *
@@ -1430,10 +1542,6 @@ INVALID:
             JMP     EXT
 **************************************************
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-
-
-
 
 
 

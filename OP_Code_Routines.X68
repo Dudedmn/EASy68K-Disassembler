@@ -795,7 +795,7 @@ CHECK_OP_NOT:
     
 CHECK_OP_EXT:
     MOVE.W CUR_OP_CODE,D0    		;Move current instruction set into D0
-    ANDI.W #$FF88,D0				;Mask relevant bits to D0
+    ANDI.W #$FFB8,D0				;Mask relevant bits to D0
     CMP.W  #$4880,D0				;Compare the appropriate masked bits
     BEQ    GROUP4_INVALID			;INVALID OP code BIT_CHECK_EXT
     BNE    CHECK_OP_NBCD			;Check next OP code
@@ -808,7 +808,7 @@ BIT_CHECK_EXT:
     LSR.W  #3,D0					;Shift D0 3 bits
     CMP.W  %000,D0					;Check the specific bits needed to differentiate EXT
     BEQ    GROUP4_INVALID  			;This means that this OP code is EXT
-    BNE    CHECK_OP_MOVEM   	    ;This is the only other possibility 
+    BNE    MOVEM_BIT_SIZE_CHECK  	;This is the only other possibility 
     
 CHECK_OP_NBCD:
     MOVE.W CUR_OP_CODE,D0    		;Move current instruction set into D0
@@ -922,22 +922,38 @@ CHECK_OP_NEG:
     MOVE.W CUR_OP_CODE,D0   		;Move current instruction set into D0
     ANDI.W #$FF00,D0				;Mask appropriate bits
     CMP.W  #$4400,D0				;Compare masked bits
-    BNE    CHECK_OP_MOVEM			;Check next OP code
-    JSR     FIND_2_BIT_SIZE_7_TO_6	;Find size field
+    BNE    MOVEM_BIT_SIZE_CHECK		;Check next OP code
+    JSR    FIND_2_BIT_SIZE_7_TO_6	;Find size field
     JSR    PRINT_OP_NEG				;Print out OP code
     BRA    GROUP4_SUCCESS           ;Finish routine
     
-CHECK_OP_MOVEM:
+MOVEM_BIT_SIZE_CHECK:
+    MOVE.W CUR_OP_CODE,D0           ;Move current instruction set into D0
+    JSR    FIND_1_BIT_SIZE_6        ;Parse size for bit 6
+    CMP.B  #%0,OP_SIZE              ;Check size bit
+    BEQ    CHECK_OP_MOVEM_W         ;If 0 it's a word
+    BNE    CHECK_OP_MOVEM_L         ;If 1 it's a long
+
+*Special checking for MOVEM sizes
+CHECK_OP_MOVEM_W:
     MOVE.W CUR_OP_CODE,D0   		;Move current instruction set into D0
     ANDI.W #$FB80,D0				;Mask appropriate bits
     CMP.W  #$4880,D0				;Compare masked bits
-    BNE    INVALID_OP       		;If no code is found, it is invalid
-    JSR    PRINT_OP_MOVEM_W			;Print out OP code
-    BRA    GROUP4_SUCCESS			;Finish routine
+    BNE    GROUP4_INVALID           ;INVALID OP code is found
+    JSR    PRINT_OP_MOVEM_W         ;PRINT OP code
+    BRA    GROUP4_SUCCESS           ;Finish routine
+    
+CHECK_OP_MOVEM_L:
+    MOVE.W CUR_OP_CODE,D0   		;Move current instruction set into D0
+    ANDI.W #$FB80,D0				;Mask appropriate bits
+    CMP.W  #$4880,D0				;Compare masked bits
+    BNE    GROUP4_INVALID           ;INVALID OP code is found
+    JSR    PRINT_OP_MOVEM_L         ;Print OP code
+    BRA    GROUP4_SUCCESS           ;Finish routine    
     
 GROUP4_INVALID:
     JSR INVALID_OP					;INVALID op code has been found, set IS_VALID to 0
-    JMP GROUP4_SUCCESS 
+
 GROUP4_SUCCESS:
     MOVEM.L (SP)+,D0 				;Restore saved registers
     RTS								;Return to stack
@@ -1986,6 +2002,10 @@ P_OP_ASL        DC.B    '   ASL',0
 P_OP_ROR        DC.B    '   ROR',0
 P_OP_ROL        DC.B    '   ROL',0
 ***************** END OF DATA CONSTANT PRINTS ***********************************
+
+
+
+
 
 *~Font name~Courier New~
 *~Font size~10~
