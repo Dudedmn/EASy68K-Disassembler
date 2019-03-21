@@ -30,7 +30,7 @@ IO
 - [X] Validation testing for I/O
 - [X] Adhere to commenting format
 - [X] Flowchart for major routines
-- [ ] Ported all Gdoc documentation to Word
+- [X] Ported all Gdoc documentation to Word
 OP Code
 - [X] Finish identification for all OP codes (supported and unsupported)
 - [X] Load messages into buffer successfully
