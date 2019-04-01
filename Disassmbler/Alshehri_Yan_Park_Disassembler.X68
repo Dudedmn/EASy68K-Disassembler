@@ -63,10 +63,12 @@ START:						;Start of the program
     MOVE.L D7, A5					;Loop counter prep
     
 *End Address is in A6
-    ADDA.L #2, A1					;Add #2 to A1
+    ADDA.L #1, A1					;Add #2 to A1
     JSR AsciiToHex					;Convert ASCII to Hex
     MOVE.L D7, A6					;Loop counter prep
     
+    
+             
 VALIDATE_START_ADDRESS				;Validates starting address
     MOVE.L A5, D0					;Move stating address to D0
 *----------------------------------------------------------------------------------
@@ -85,7 +87,7 @@ VALIDATE_POSITIVE_ADDRESS
     MOVE.L A5, D0					;Move starting address to D0
     ANDI.L #$80000000, D0  			;Checking if the start address address is positive
     CMP.L #0, D0					;Compare 0 to D0
-    BEQ VALIDATE_EVEN				;Check if the address is even
+    BEQ VALIDATE_END_POS				;Check if the end address is positive
     
     LEA INVALID_ADDRES_MESSAGE, A1	       ;Load INVALID message to A1
     JSR TrapTask13                             ;Use Nash's Console Output
@@ -95,30 +97,47 @@ VALIDATE_END_POS
     MOVE.L A6, D0					;Move ending address to D0
     ANDI.L #$80000000, D0			       ;Checking if the end address address is positive
     CMP.L #0, D0					;Compare address to 0
-    BEQ VALIDATE_EVEN				;Check if the end address is even
+    BEQ VALIDATE_START_EVEN		       ;Check if the end address is even
     
     LEA INVALID_ADDRES_MESSAGE, A1	       ;Load INVALID message to A1
     JSR TrapTask13                             ;Use Nash's Console Output      
     BRA DONE						;Finish routine
     
-VALIDATE_EVEN
+VALIDATE_START_EVEN
     MOVE.L A5, D0					;MOVE STARTING ADDRESS TO D0
     ANDI.L #$00000001,D0			       ;Bitmask 1 a single bit to D0
     CMP.L #0, D0					;Check if even
-    BEQ MAIN_LOOP					;Go to the main loop if even
+    BEQ VALIDATE_END_EVEN   		      ;Go to the VALIDATE_ADDRESS_RANGE if even
 *Handle odd addresses
     LEA INVALID_ADDRES_MESSAGE, A1	       ;Load INVALID message to A1
     JSR TrapTask13                             ;Use Nash's Console Output
     BRA DONE						;Finish routine
+
+VALIDATE_END_EVEN
+    MOVE.L A6, D0					;MOVE STARTING ADDRESS TO D0
+    ANDI.L #$00000001,D0			       ;Bitmask 1 a single bit to D0
+    CMP.L #0, D0					;Check if even
+    BEQ VALIDATE_ADDRESS_RANGE		      ;Go to the VALIDATE_ADDRESS_RANGE if even
+*Handle odd addresses
+    LEA INVALID_ADDRES_MESSAGE, A1	       ;Load INVALID message to A1
+    JSR TrapTask13                             ;Use Nash's Console Output
+    BRA DONE						;Finish routine
+
+VALIDATE_ADDRESS_RANGE
+   CMP.L A6,A5
+   BLE MAIN_LOOP 
+   LEA INVALID_ADDRES_MESSAGE, A1	             ;Load INVALID message to A1
+   JSR TrapTask13                              ;Use Nash's Console Output
+   BRA DONE						;Finish routine
             
 
 
 *Comments are shifted if variable names get too long
 MAIN_LOOP									;Main loop to run each instruction
 	     LEA G_BUFFER,A4        					;Point G_BUFFER to A4
-    
+            
             CMPA.L A5, A6							;Compare Starting to ending address
-            BLT DONE							;If it's less then stop the loop
+            BLE DONE							;If it's less then stop the loop
             
 *Clear both buffers 
             MOVE.L #G_BUFFER, CLEAR_BUFFER_POINTER      		;Point the clear pointer to G_BUFFER
@@ -578,10 +597,12 @@ INVALID_ADDRES_MESSAGE DC.W 'Invalid Hex Address' ,CR,LF,0			;Invalid message pr
 
     INCLUDE "OP_Code_Routines.x68"						;OP role code to include
     INCLUDE "EA_FINAL.x68"							;EA role code to include
-    INCLUDE "TEST.x68"								;Test program to include
+    INCLUDE "MOVEM_TEST.x68"								;Test program to include
     
     
    END    START									;Last line of program
+
+
 
 
 
