@@ -1,52 +1,33 @@
 # EASy68K-Disassembler
 EASy68K-Disassembler made for CSS 422
-This disassembles or reverse compiles a given set of code. So we take input commands as a test file (say MOVEA.W A5,A6) and disassemble it to machine code then print it out.
+This disassembles or reverse compiles a given set of machine code to Assembly Machine Code (ASM).    
+To do so, we take input commands from a test file (such as *MOVEA.W A5,A6*) which is input through our disassmbler as raw hex value equivalents through predefined Motorola 68K Handbook opcodes and disassembled into the respective command.
+
+An example would be given an input of *NOP* from teh testing value, the inputted hex equivalent value in memory would be *$4E71*, which is viewable within the memory view of the EASy68K simulator. After it's inputted, the value is then read by our disassembler to then output into a console window and log file as the command *NOP*.
+
+As such our disassembler follows the following steps:
+1. Validate testing file
+2. Read input from test file
+3. Validate input from test file, mark input as bad if invalid
+4. If valid, translate hex equivalent value in memory to ASCII equivalent values
+5. Output good or bad value to console window and log file
+
+For more thorough steps please refer to our documentation files.
 # Team REEE
 ## Members
-+ Daniel Yan
-+ Fahad Alshehri
-+ Denny Park
-# Week 1 
-- [X] Make a meetup schedule
-- [X] Define roles for each person
-- [X] Start to learn Assembly 68k
-# Week 2
-- [X] Print out NOP and RTS based on binary value inputs
-- [X] Start EA skeleton for addressing modes
-- [X] Start I/O systems for conversions in display and File I/O
-- [X] Finish JMP Table for support operands
-- [X] Finish Subroutines for parsing bits in operands which needs masking or shifting
-# Week 3
-- [X] Finish EA addressing modes for all basic supported EA modes
-- Big overhaul in terms of tasks
-# Week 4
-ALL
-- [X] Things to avoid for Disassembler Project
-IO
-- [X] Documentation for Disassembler
-- [x] Passing instruction to OP
-- [x] Printing overall instruction
-- [X] Test demo program for all supported commands
-- [X] Validation testing for I/O
-- [X] Adhere to commenting format
-- [X] Flowchart for major routines
-- [X] Ported all Gdoc documentation to Word
-OP Code
-- [X] Finish identification for all OP codes (supported and unsupported)
-- [X] Load messages into buffer successfully
-- [X] Finish up comments for all lines and methods, WIP up to $E
-- [X] Validation testing for ALL OP codes
-- [X] Finished current integration tests
-- [X] Flowchart for major routines
-- [X] Finished documentation for role
-EA
-- [x] Finish Trailing Bits
-- [X] Use OP code parsings successfully
-- [x] Adhere to commenting format
-- [X] Flowchart for major routines
-- [x] Finished MOVEM - best as possible
++ Daniel Yan &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- OP role
++ Fahad Alshehri - IO role
++ Denny Park &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- EA role
 
-Commenting Format
+# Tools Used
++ **EASy68K Simulator**
++ **Visual Studio Code**
+
+# References
++ **GoldenCrystal 68K opcodes**
++ **Motorola 68K Handbook**
+
+# Commenting Format
 ```
 * <YOUR_ROUTINE_NAME_HERE>
 **********************************************************************************
@@ -61,7 +42,7 @@ Commenting Format
 
 Comments for every line ; Like this
 ```
-Global Constants and Registers
+# Global Constants and Registers
 ```
 Constants:
 CUR_OP_CODE - refers to current 16 bit instruction set
@@ -82,7 +63,7 @@ A5: Starting Address
 A6: Ending Address
 A4: G_BUFFER
 ```
-Display Tasks
+# Display Tasks
 ```
 All loads are done to G_BUFFER
 <ADDRESS> <OPERAND> <EA> 
@@ -100,19 +81,4 @@ For a BAD operand, the following will be printed to the B_BUFFER
 <ADDRESS> DATA $<HEX VALUE>
 Example:
 1000 DATA $FFFF
-```
-
-
-File Header commenting format
-```
-*--------------------------------------------------------------------------
-* Title      : Disassembler Skeleton 
-* Written by : You, and you should change all default comments
-* Date       : 3/9/2019 
-* TEAM REEE Denny, Daniel, Fahad
-* 
-* Description: This code contains a method for you to use
-* with your Disassembler project IO, and a short demo of 
-* how to call this method in the body of the "START" code.
-*
 ```
